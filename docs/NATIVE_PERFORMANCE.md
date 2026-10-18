@@ -30,6 +30,7 @@ Measurements:
 | Square roots through the estimate alone | n/a | `sqrtss`, 13 cycles, exact | M |
 | `NO_INLINE` (Petari's matching hint) | 499 functions forced out of line, `TUtil::sqrt` and `clamp` among them | the compiler decides | D |
 | `sqrtf` and other math calls | math-errno on: compare, branch and library call on the error path | `-fno-math-errno`; the game never reads `errno` | D (assembly) |
+| Disabling interrupts (`OSDisableInterrupts`) | n/a | delivers work pending since the last enable first, as the console would have taken it: the same one load and test, 1.47-1.60 ns per disable/restore pair (was 1.46-1.54) | M |
 | Function-local statics (22 functions) | thread-safe first-use check: the TLS index, the thread's TLS block and the init epoch, three dependent loads and a compare per call | `-fno-threadsafe-statics`: one guard-byte test. All game C++ runs on the simulation thread; the host-thread entry points are C without such statics. No TLS read remains and the `.tls` section is gone | M (disassembly) |
 
 The decrementer is late by the host timer's granularity when nothing reads the clock:
