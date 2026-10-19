@@ -65,6 +65,26 @@ Reconstruction on RTX through the user's Streamline 2.14.1, `sl_dlss_d.h`), R4 l
 (owner sign-off on the look), R5 cost. With Petari as the core, the game's own light and material calls become
 direct inputs: sun and point lights from the actor code, materials per model instead of per texture hash.
 
+## Native rebuild (2026-10-19)
+
+Inputs now come from the game: lights from their owners (d93f4a0), the stage (1b637a3), object names (964e4f7).
+
+Measured on a still Good Egg view (internal 2x, linear luminance mean): game 0.385, ray tracing 0.226 (41% darker:
+the art model), reference 0.386. The reference is not independent: it multiplies the game's lit picture by traced
+light and normalises exposure to the scene's geometric mean.
+
+Light units: the game lights a surface as material x (ambient + light colour x N.L), so its area light's ambient is
+the sky's radiance and its key light's colour the sun's irradiance over pi. Traced with those, a scene without
+shadows or bounces equals the game's own per-pixel lighting; occlusion, shadows, bounces and emitters are what
+tracing adds. Order:
+1. The game's area light (LightDirector's default AreaLightInfo, the planet light: ambient, key and fill lights)
+   reaches the tracer natively.
+2. Reference: each pixel's own albedo (texture x vertex colour, linear) and emission times its traced light, in the
+   game's light units; no exposure normalisation. This is the ground truth of the bench.
+3. Real-time: the same estimator at one path per pixel (sun and emitter sampling, textured bounce hits), temporal
+   and spatial denoising, composite of radiance instead of a lighting ratio.
+4. Reflections and water on the same hit shading; materials by the models' own names; emitters by class.
+
 Licences checked from each repository's LICENSE (2026-10-17): NVIDIA NRD, RTXDI, RTXGI are under the "NVIDIA RTX
 SDKs LICENSE" (not usable in GPL-3.0 source); Streamline headers MIT; AMD Capsaicin (GI-1.0) MIT; NVIDIA FLIP BSD-3.
 ReSTIR patent status not verified.
