@@ -17,15 +17,32 @@ Every pass of the ray tracer, classed by where its data comes from and whether i
 | Point lights | Native positions/colours (LightPointCtrl, requesters); **Art** falloff windowed to 0 at a reach | Inverse square, no reach limit |
 | Emitters | **Screen**: bright picture pixels (SurfaceEmitCS), glow sprites' added light (GlowEmitCS); **Art** power in "Luma" units, caps 0.2 / 0.5, size curve; temporal memory with fade rates and identity matching | Every emissive draw's triangles as area lights, radiance from its TEV output, flux pi L A; importance-sampled with shadow rays (ReSTIR DI) |
 | Bounce light | Native under physical (physical_hit: TEV albedo x sun with shadow ray + sky + emission); **Screen** in the art model (previous picture) | Multi-bounce radiance cache |
-| Exposure | Physical camera: white facing the player's up at full light | Done; HDR shoulder per channel (composite film_light) to review |
+| Light units | Native: the stage's ambient and key as the game sets them, linear (white 1); sky = ambient, sun = full - ambient | Done (was each channel divided by the full light: every stage white and day-bright) |
+| Exposure | Physical camera: white facing the player's up at the stage's full light | Done; HDR shoulder per channel (composite film_light) to review |
 
 ## Baked light (rows 37, 38)
 
 Measured (Beach Bowl dump): 81% of triangles unlit with light in vertex colours or registers; the main map program
 `clamp(lerp(C1, C0, v) x 2)` then `(A + colour x texture) x 2` makes fully lit sand 4 C0 x texture, clipped by the
-game itself. Today: unlit vertex colour keeps its hue (full light). Target: each program's neutral level (where it
-shows its texture 1:1), solved per draw by a CPU copy of the TEV evaluator; lit draws with vertex colours; per-actor
-light boosts (LightDirector actor lights, point-light requests) removed under physical light.
+game itself.
+
+- Vertex colours and channel light: each program's neutral level (where it shows its texture 1:1), solved per draw by
+  a CPU copy of the TEV evaluator (rt_tev_eval.cpp); unlit vertex colours keep their hue at that level, lit channels
+  are lit at it. Done (raster and hits).
+- Light painted into textures (bevels, groove shadows, metal sheen): `rt_delight.hlsl`. Retinex with chromaticity as
+  the reflectance cue (Land & McCann 1971; Funt, Drew & Brockington 1992; Grosse et al. 2009) and a bilateral base
+  layer (Durand & Dorsey 2002): a texel's level is the mean log luminance around it (Gaussian, 12% of the texture)
+  weighted by likeness in chromaticity (0.05) and log luminance (0.8); its shading is its log luminance less that
+  level. One R8_SNORM map per texture-pack key with mips, made on the GPU the first scene a traced draw shows the
+  texture as its material (about 125 maps, 3.4 MB on Good Egg), under the draw's own addressing.
+  GBufferCS samples it at the hit's coordinates with a ray-cone level (Akenine-Moller et al. 2021). The composite
+  divides the pixel's colour by exp(shading). The shading as height bends the normal the per-pixel sun uses (surface
+  gradient, Mikkelsen 2020); the height saturates at +-0.35 log units and the slope at 20 degrees, since painted light
+  says little of shape. Hits divide their texel likewise.
+  Not de-lit: water, clear crystal and glass, sky, effects, light sources, and table rows marked `painted` (skin by
+  default: eyes, mouths, brows). Limit: brightness changes at one chromaticity (wood grain, outlines) count as
+  shading and become shallow relief. GALAXY_RT_DELIGHT=0 off, GALAXY_RT_DELIGHT_RELIEF (texels per log unit, 2).
+- Per-actor light boosts (LightDirector actor lights, point-light requests) under physical light: open.
 
 ## Lighting passes (rt_lighting.hlsl)
 
