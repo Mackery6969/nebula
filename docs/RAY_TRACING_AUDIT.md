@@ -12,13 +12,13 @@ Every pass of the ray tracer, classed by where its data comes from and whether i
 | Primary surface | Native: camera ray matched to the raster depth, Hanika 2021 terminator lift | Done |
 | Hit material | Native: the draw's TEV program at the hit (rt_tev.hlsli), two texture slots per triangle from the game's own texture generators | Indirect stages; reflections still texture x colour (rt_reflections.hlsl hit_shade) |
 | Alpha test | Native: the draw's TEV alpha and alpha compare (was screen: card rule, GetDimensions on a root descriptor read 0) | Done (row 43) |
-| Sun | Native: the stage's key light, the real disc (0.533 deg); optionally fitted to the baked light (GALAXY_RT_FIT_LIGHT=1, below) | Per-area lights |
+| Sun | Native: the sun the game shows, else the stage table's, else the key light, the real disc (0.533 deg); optionally fitted to the baked light (GALAXY_RT_FIT_LIGHT=1, below). The Comet Observatory (rt-suns `core`): no sun, its star core (below). The game's off-screen shadow casters sweep along this sun (host service `traced_sun`, API 13) | Per-area lights |
 | Sky | Native: the game's sky lists traced (SkyProbeCS), level = the stage's ambient | Mirror-sharp sky in reflections |
 | Point lights | Native positions/colours (LightPointCtrl, requesters); physical: the game's own falloff h^2 / (h^2 + d^2) (inverse square past h), no reach window | Sphere emitters of their objects' size |
-| Emitters | Physical: the table's light sources (lava, Lumas, ? blocks, star bits) are area lights of their own triangles: radiance their TEV output (linear), power pi L A (two-sided twice); 2/4/8 candidates by power, one kept by resampled importance (Talbot 2005, Bitterli et al. 2020), one shadow ray (emitter_light). Glow sprites: still **Screen**/**Art** (GlowEmitCS) | Glows as luminous quads; spatiotemporal reuse (ReSTIR) |
+| Emitters | Physical: the table's light sources (lava, Lumas, ? blocks, star bits) are area lights of their own triangles: radiance their TEV output (linear) times the table's radiance past 1, power pi L A (two-sided twice); 2/4/8 candidates by power, one kept by resampled importance (Talbot 2005, Bitterli et al. 2020), one shadow ray (emitter_light). A table row with a `cone` is a beam: radiance L cos^n from the face's normal, n halving it at the cone's half angle, power 2 pi L A / (n + 1) (Captain Toad's headlamp, 32 degrees: n = 4). The table's light sources the game draws as additive glows (the Observatory's star lights and walkway lamps, countdown plates, launch stars) are area lights the same way (GlowEmitterCS): their triangles in world space after the scene's emitters, radiance the table's colour times its radiance, two-sided, sampled from the next frame (glows draw after the trace); the art glow lights skip them. Radiance hierarchy (relative to a white surface under the stage's full light): electric lamp glass 40, LED lens 100, warning lamp 20, flame 4, Luma 2 (s1). Clipped light sources stay drawn while the ball of their light's reach meets the view (host service `light_reach`, API 13: r sqrt(4096 L), where L (r/d)^2 falls under one sRGB level) | Spatiotemporal reuse (ReSTIR); glow emitters' texture coverage |
 | Bounce light | Native under physical (physical_hit: TEV albedo x sun with shadow ray + sky + emission); **Screen** in the art model (previous picture) | Multi-bounce radiance cache |
 | Light units | Native: the stage's ambient and key as the game sets them, linear (white 1); sky = ambient, sun = full - ambient | Done (was each channel divided by the full light: every stage white and day-bright) |
-| Exposure | Physical camera set for the game's white light: a white surface facing the player's up shows white, the sun at no less than 30 degrees (sunny-16). A stage lit brighter (GX's doubled light) is exposed down to it; a dimmer one keeps half its dimness in log luminance (partial adaptation, brightness about the square root of luminance: Stevens 1957) | HDR shoulder per channel (composite film_light) to review |
+| Exposure | Physical camera set for the game's white light: a white surface facing the player's up shows white, the sun at no less than 30 degrees (sunny-16). A stage lit brighter (GX's doubled light) is exposed down to it; a dimmer one keeps half its dimness in log luminance (partial adaptation, brightness about the square root of luminance: Stevens 1957). Eye adaptation (s1): the surfaces' light (the lighting's result over this exposure, one sample in 8 x 8) in log2 eases a factor (E / 0.2)^-1/2 within [1, 4] (a sunlit view averages 0.21, Good Egg) over about a second (vision adapts partly, Stevens 1957): a scene darker than a sunlit day brightens, at most two stops; day stages keep the stage's exposure | HDR shoulder per channel (composite film_light) to review |
 | Stage light | Every galaxy measured reports the default planet light (ambient 0.251, white key at 700000, 700000, 700000); the art's light is baked into vertex colours. Fitted instead (BakedFitCS, fit_baked_light): per visible de-baked sample the baked light (TEV output with the baked vertex colours over the output at the neutral light, grey texture, linear) against its world normal, least squares over nine spherical harmonics (Ramamoorthi & Hanrahan 2001; inverse lighting, Marschner & Greenberg 1997), accumulated over about three seconds, reset with the stage; the sun the first band (Sloan 2008), the sky the rest. Off by default: faithful to the baked light, it set the sun near overhead with a strong fill and looked flat (user, sweep4/5 Good Egg: "muted, no lighting at all"); the key's low sun gives the shape. Colours stay the key's and the stage ambient's (coloured registers bias the measured hue; the traced sky's colour is a backdrop's). A fitted sun below the player's horizon (light baked from local lamps onto undersides: the Observatory) leaves the game's light | Per-area fits; lit models in the fit |
 | Sky light | Image-based: the backdrop is drawn as it shows, so its picture is the radiance it sends, in its colours and over its directions (SkyProbeCS map, SH9 irradiance). The stage's ambient says how much a surface open to the sky gets: what the backdrop sends short of it fills from every direction in the ambient's colour; a brighter backdrop is taken down to it (physical_sky_own, physical_sky_fill). A dark space backdrop lights little (raised to the ambient, Good Egg's deep blue tinted its stone lavender); a glowing one lights in its own colour (Melty Molten's lava horizon: grey under the ambient's colour alone, red as liked in expo1) | Done |
 
@@ -83,8 +83,15 @@ game itself.
 
 ## Reflections (rt_reflections.hlsl), post (rt_post.hlsl)
 
-Not yet audited line by line. Known: on-screen hits take the previous picture's colour (Screen); off-screen hits the
-art model's hit_shade; flashes on Battlerock metal.
+Off-screen hits under physical light (high quality's textured hits; physical_hit_light): lit as the lighting lights
+the scene, from the lighting's own buffers as raw views in the frame's descriptor heap (the reflection root signature
+was at 61 of 64 words): the draw's TEV program the albedo (a table light source its radiance), the sun behind a shadow
+ray, the traced sky's spherical harmonics, the game's point lights at their own falloff, and the emitting triangles
+(scene and glow) by resampled importance with one shadow ray; at the camera's exposure, display-encoded up to white as
+the composite shows it. On-screen hits under physical light: the frame's colour lit in linear light by the lighting
+there (srgb(lin(c) m)), as the composite lights it (colour x m in display encoding read shade darker and light
+brighter than the picture). Was: the art model's flat night level, so the Fountain dome's gold arch mirrored dark olive
+tiles behind the camera. Known: flashes on Battlerock metal (row 20).
 Painted reflections: a TEV stage whose texture coordinates the normals generate is an environment map, the game's
 painted reflection (RtTevStage.pad[0], header bit 7). With traced reflections on, GBufferCS evaluates the pixel's
 material with and without those stages and the composite keeps the share without them (pixel record x bits 24-31); the
@@ -118,6 +125,15 @@ half its tint; user chose between b16 all-lava and b18 all-haze; b20, 1e80448). 
 draws, 11,456 triangles); every emitter's light reaches a point through a shadow ray against the whole scene, Mario
 included, so a light beside him lights his near side and casts his shadow away from it.
 
+The Comet Observatory (rt-suns `core`): night in space, lit by its star core and its lamps. The game's key there is the
+default planet light (700000, 700000, 700000, the same in every galaxy); traced as a sun it threw daylight shadows (the
+telescope ring's long soft shadow across the Fountain dome, user 2026-10-19). The key keeps the table's `strength`
+share (0.1) as moonlight in the table's colour; the star core is a sphere light of its fitted ball (radius 599 units
+at six Grand Stars) and the table's radiance 70: a sphere of radius R and radiance L lights a surface facing it at
+distance d with L (R / d)^2 of white, the game's falloff h^2 / (h^2 + d^2) with h = R. 70 gives 0.9 of the key at the
+spawn ring 4,700 units away (measured), about 0.35 at the domes 7,500 away, which their lamps light. The camera stays
+exposed for the stage's full light.
+
 ## Test hooks
 
 GALAXY_TEST_GRAND_STARS=n sets Grand Stars 1-n and starts the stage again (04a7e3c): the Observatory's domes take their
@@ -125,18 +141,22 @@ state from the save as the scene is built (AstroMapObjFunction::isAlreadyRevival
 without lamp posts and furnishings, a state play never reaches. GALAXY_TEST_EVENTS actors@frame lists live actors
 (model, position) for GALAXY_TEST_TELEPORT.
 
+## Fixed 2026-10-19 (s1; pictures D:/NebulaWork/rt-images/20261019-s1)
+
+- Space Junk's Amps (Birikyu, BigBirikyu) were black discs: their body textures were table light sources; under physical
+  light a light source shows only its own colour, and with its painted reflection taken from metal the Amp's colour was
+  black. Their bodies are dark metal (`metal+skip`), their light the electric glow and sparks (sj_b22.png).
+- The Observatory's tile and marble rows are `painted` (bevels and grout kept).
+- Off-screen reflection hits are lit physically (above); clipped light sources stay drawn while their light reaches the
+  view; the caster sweep follows the traced sun.
+- The Observatory's domes were turned (the Fountain's water came out of its wall, the Terrace's arch, star lights and
+  lamp posts invisible but solid): a native port bug, not the ray tracer. Degrees converted to 16-bit binary angles
+  saturated at 180 under clang's -fno-strict-float-cast-overflow where the Wii wraps; 205 such conversions now go through
+  32 bits (docs/NATIVE_PORT.md, native/tools/narrow_float_audit.py; domes_b22_b23.png against v1.0.1's v1seq2.png).
+  Also MR::setAllAnimFrameAtEnd set the colour animation's frame for a visibility animation (decompilation slip).
+
 ## Open defects (2026-10-19 night, pictures D:/NebulaWork/rt-images/20261019-evening)
 
-- Space Junk electric balls (Birikyu, BigBirikyu: table emitters) render as black discs with a gold corona
-  (sj_disc.png, b20 teleport to the blue-star capsules).
-- Observatory Fountain dome: tile bevels flattened by the texture de-light (fountain.png): mark the Observatory's
-  tile and marble rows `painted` (bulefortile, yellowfortile, squeartilemip, tilehouse*, mablewall*, marbletile*,
-  Corrido, Tile_00, FloorDairi). Its gold arch reads dark olive against the game's gold: reflection hits by night lack
-  the lamps' and core's light (hit shading has no emitter term).
-- Clipped emitters: an off-screen Luma, star bit or lamp is not drawn, so it lights nothing. Plan: a host service
-  (light reach by model name from the table's emitter rows, API 13) and ClippingActorInfo keeping an emitter drawn
-  while the ball of its light's reach meets the view frustum; the caster sweep follows the traced sun (host service
-  with the tracer's world sun) instead of the key light.
 - Characters in shade read dark at night (Observatory interiors, Freezeflame, Buoy Base).
 - Battlerock rock loses its texture detail against the game (bs_top.png).
 - Finish (post) lifts dark scene geometry x1.3-1.47 with reflections on even with every effect zeroed.
