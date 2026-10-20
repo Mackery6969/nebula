@@ -93,10 +93,12 @@ GALAXY_RT_PAINTED_REFLECTION=1 keeps them. Metal only (the draw's class): crysta
 theirs as their look (Gold Leaf's star outline, an environment map alone, went black). A metal never counts as an
 emitter in the reflection pass (a bright metal is bright by what it reflects), and its rays that leave the scene see
 at least its own environment map, the probe the game made for it (Space Junk's chrome mirrored black space).
-Metal is never too rough to mirror its surroundings: roughness at most 0.58 (the table's 32 metals at 0.78 reflected
-nothing past the 0.65 cut-off). Clear crystal, gems and glass: a diamond's F0 (n 2.42: 0.17) and the physical split
-colour x (1 - F) + reflection x F (was F0 0.45 at cover 0.8: Melty Molten's and Freezeflame's crystals showed mostly
-their dark surroundings).
+Metal is never too rough to mirror its surroundings: roughness at most 0.35 (the table's 32 metals at 0.78 reflected
+nothing past the 0.65 cut-off; at 0.58 a faint blur, user: still matte). Clear crystal, gems and glass: F0 0.35 with the
+physical split colour x (1 - F) + reflection x F; their rays that leave the scene keep their painted look, so a strong
+mirror never shows a dark one of empty space (at 0.17 Space Junk's glass spheres read matte). A light's glint reaches
+white on clear glass and crystal only, 0.35 elsewhere (the global cap at 1 whitened Space Junk's metal panels and
+Battlerock's rock tips, b15; gone in b16, f60c20a).
 Falling water (the table's `waterfall`: Honeyhive's and Beach Bowl's falls): a turbulent sheet, its own foam and
 streaks lit, sun glints, no mirror image (as glass Honeyhive's showed 80 % of its dark surroundings).
 Water (row 41): the game's own waves bend the reflected ray (water_wave): the wave map GX moves the water's texture by
@@ -104,6 +106,40 @@ Water (row 41): the game's own waves bend the reflected ray (water_wave): the wa
 range two standard deviations of the sea's slope at a light breeze (Cox & Munk 1954, sigma 0.17 at 5 m/s), turned by
 the indirect matrix onto the water texture's axes. Water without a wave map keeps the procedural waves. Target: hits shaded as physical_hit (TEV albedo + sun + sky + emitters), Fresnel-weighted over the game's own
 surface colour, normals from the game's own wave and normal maps.
+
+## Sun and sky (physical)
+
+The traced sun comes from the sun the game shows (BrightSun, else the stage table's direction), not the key light's
+position (Dusty Dune's shadows followed the key while its sun shone from the top left). A stage the sun table marks
+`none` (Melty Molten) has no sun: its `strength` share of the key light comes from the sky, in the table's colour,
+spread as the CIE standard overcast sky (zenith three times the horizon; physical_overcast); the camera stays exposed
+for the stage's own light, so a dimmer haze leaves the lava brighter (Melty: strength 0.25, the game's golden sky at
+half its tint; user chose between b16 all-lava and b18 all-haze; b20, 1e80448). Lava is a table area light (Melty: 46
+draws, 11,456 triangles); every emitter's light reaches a point through a shadow ray against the whole scene, Mario
+included, so a light beside him lights his near side and casts his shadow away from it.
+
+## Test hooks
+
+GALAXY_TEST_GRAND_STARS=n sets Grand Stars 1-n and starts the stage again (04a7e3c): the Observatory's domes take their
+state from the save as the scene is built (AstroMapObjFunction::isAlreadyRevival); set after that they stayed shells
+without lamp posts and furnishings, a state play never reaches. GALAXY_TEST_EVENTS actors@frame lists live actors
+(model, position) for GALAXY_TEST_TELEPORT.
+
+## Open defects (2026-10-19 night, pictures D:/NebulaWork/rt-images/20261019-evening)
+
+- Space Junk electric balls (Birikyu, BigBirikyu: table emitters) render as black discs with a gold corona
+  (sj_disc.png, b20 teleport to the blue-star capsules).
+- Observatory Fountain dome: tile bevels flattened by the texture de-light (fountain.png): mark the Observatory's
+  tile and marble rows `painted` (bulefortile, yellowfortile, squeartilemip, tilehouse*, mablewall*, marbletile*,
+  Corrido, Tile_00, FloorDairi). Its gold arch reads dark olive against the game's gold: reflection hits by night lack
+  the lamps' and core's light (hit shading has no emitter term).
+- Clipped emitters: an off-screen Luma, star bit or lamp is not drawn, so it lights nothing. Plan: a host service
+  (light reach by model name from the table's emitter rows, API 13) and ClippingActorInfo keeping an emitter drawn
+  while the ball of its light's reach meets the view frustum; the caster sweep follows the traced sun (host service
+  with the tracer's world sun) instead of the key light.
+- Characters in shade read dark at night (Observatory interiors, Freezeflame, Buoy Base).
+- Battlerock rock loses its texture detail against the game (bs_top.png).
+- Finish (post) lifts dark scene geometry x1.3-1.47 with reflections on even with every effect zeroed.
 
 ## Emitters by region
 
