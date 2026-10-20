@@ -43,7 +43,8 @@ game itself.
   says little of shape. Hits divide their texel likewise.
   Not de-lit: water, clear crystal and glass, sky, effects, light sources, and table rows marked `painted` (skin by
   default: eyes, mouths, brows). Limit: brightness changes at one chromaticity (wood grain, outlines) count as
-  shading and become shallow relief. GALAXY_RT_DELIGHT=0 off, GALAXY_RT_DELIGHT_RELIEF (texels per log unit, 2).
+  shading and become shallow relief. GALAXY_RT_DELIGHT=0 off, GALAXY_RT_DELIGHT_RELIEF (texels per log unit, 1; 2 made
+  grass and every texture too rough, user).
 - Lit models: their channel at its neutral light keeps the hue of the game's ambient + lights; their vertex colours
   are their material (the game lights them) and stay as painted.
 - Vertex colours hold baked light only on the terrain (ClippedMapParts, Planet, PlanetLow, Environment,
@@ -88,8 +89,10 @@ Painted reflections: a TEV stage whose texture coordinates the normals generate 
 painted reflection (RtTevStage.pad[0], header bit 7). With traced reflections on, GBufferCS evaluates the pixel's
 material with and without those stages and the composite keeps the share without them (pixel record x bits 24-31); the
 traced reflection replaces them at full strength (GX metal class strength 1, was 0.5 over the painted one).
-GALAXY_RT_PAINTED_REFLECTION=1 keeps them. In a dark place this is darker than the game: Space Junk's chrome mirrors
-black space where the game paints a studio.
+GALAXY_RT_PAINTED_REFLECTION=1 keeps them. Metal only (the draw's class): crystal, glass, glossy and unlit surfaces keep
+theirs as their look (Gold Leaf's star outline, an environment map alone, went black). A metal never counts as an
+emitter in the reflection pass (a bright metal is bright by what it reflects), and its rays that leave the scene see
+at least its own environment map, the probe the game made for it (Space Junk's chrome mirrored black space).
 Metal is never too rough to mirror its surroundings: roughness at most 0.58 (the table's 32 metals at 0.78 reflected
 nothing past the 0.65 cut-off). Clear crystal, gems and glass: a diamond's F0 (n 2.42: 0.17) and the physical split
 colour x (1 - F) + reflection x F (was F0 0.45 at cover 0.8: Melty Molten's and Freezeflame's crystals showed mostly
