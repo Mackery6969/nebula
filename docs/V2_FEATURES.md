@@ -32,7 +32,7 @@ Some may already be in `v2-features` under rebased commits; check with `git cher
 | wt-lowend | 20 | Low-end performance: no cursor calls in the input poll, resident vertices in video memory, Match Output at screen pixels, display-list validation by published writes, disc pages released, profiler fixes; the last commit (68d0fcf) is unverified WIP (newest-XFB present, event waits) |
 | pr-23-refined | 4 | Wine/Proton: NAND named-stream layout chosen from the volume; Windows unchanged |
 | pr-23 | 2 | The contributor's PR #23 as submitted |
-| texture-packs | 9 | Texture packs (chosen folder, atomic dumps, preload report) |
+| texture-packs | 9 | Texture packs on v1 (ported to v2's GPU-neutral cache in v2-features) |
 | checklist, checklist-d, checklist-h | 14, 12, 21 | 1.0 checklist work: interpolation boxes, controllers, material-table tests |
 | wt-controllers | 5 | Controller docs, PlayStation hints, scan timers |
 | wt-audio | 3 | Late AI completions held for the game's audio frame |
