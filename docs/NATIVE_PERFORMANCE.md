@@ -12,6 +12,22 @@ Measurements:
 - Older and low-power CPUs forward stores and divide more slowly, so the ratios below are lower bounds there (H).
 - Reproduce with `native/bench/hotpath_bench.c` and the `perf:` lines of `native/sdk/os/tests/run_tests.sh`.
 
+## The start
+
+Launch to the title screen (`boot:` lines, a start with no shader cache; stand-in: the 2-CU iGPU and two
+cores with SMT of the machine above, `GALAXY_GPU_PREFERENCE=low GALAXY_TEST_CPU_AFFINITY=F`):
+
+| | before | after | evidence |
+|---|---|---|---|
+| Stand-in | 2.86 s: Streamline 1.08 s loaded for a GPU that cannot run DLSS, the game's black frames before the title 1.08 s | 0.80 s | M |
+| RTX 5090 | 3.37 s | 2.35 s (Streamline 0.78 s, beside the device's creation now, and 0.92 s handing it the device) | M |
+
+- Streamline loads only for an NVIDIA RTX GPU, beside the device's creation.
+- Before its first 3D scene the game shows nothing and its loads advance one step a retrace while each frame takes
+  well under a millisecond (a profile of those frames: 94 % idle, waiting for the next retrace): until then retraces
+  come every 2 ms and one frame a display period is shown. 65 frames take 0.29 s instead of 1.08 s; the title and its
+  music start alike (the music 0.46 s after the title scene against 0.50 s).
+
 ## Fixed
 
 | path | before | after | evidence |
