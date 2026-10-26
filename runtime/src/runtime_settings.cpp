@@ -103,6 +103,13 @@ RuntimeSettings sanitize_settings(RuntimeSettings settings) {
         settings.coop.port = kCoopDefaultPort;
     }
     settings.coop.max_players = std::clamp(settings.coop.max_players, 2u, kCoopMaxPlayersLimit);
+    if (settings.coop.player_interaction > CoopPlayerInteraction::FriendlyFire) {
+        settings.coop.player_interaction = CoopPlayerInteraction::Solid;
+    }
+    settings.coop.knockback_strength = std::min(settings.coop.knockback_strength, 255u);
+    if (settings.coop.pvp_mode > CoopPvpMode::Revamped) {
+        settings.coop.pvp_mode = CoopPvpMode::Classic;
+    }
     settings.coop.player_name = sanitize_coop_text(settings.coop.player_name);
     settings.coop.password = sanitize_coop_text(settings.coop.password);
     return settings;
@@ -211,8 +218,23 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
         settings.coop.player_name = value;
     } else if (std::strcmp(key, "coop_password") == 0) {
         settings.coop.password = value;
-    } else if (std::strcmp(key, "coop_player_damage") == 0) {
-        settings.coop.player_damage = value[0] != '0';
+    } else if (std::strcmp(key, "coop_player_interaction") == 0) {
+        for (const CoopPlayerInteraction interaction :
+             {CoopPlayerInteraction::NonSolid, CoopPlayerInteraction::Solid, CoopPlayerInteraction::FriendlyFire}) {
+            if (_stricmp(value, coop_player_interaction_key(interaction)) == 0) {
+                settings.coop.player_interaction = interaction;
+            }
+        }
+    } else if (std::strcmp(key, "coop_knockback_strength") == 0) {
+        char* end = nullptr;
+        const unsigned long strength = std::strtoul(value, &end, 10);
+        if (end != value && *end == '\0' && strength <= 255u) {
+            settings.coop.knockback_strength = static_cast<unsigned>(strength);
+        }
+    } else if (std::strcmp(key, "coop_pvp_mode") == 0) {
+        for (const CoopPvpMode mode : {CoopPvpMode::Classic, CoopPvpMode::Revamped}) {
+            if (_stricmp(value, coop_pvp_mode_key(mode)) == 0) settings.coop.pvp_mode = mode;
+        }
     }
 }
 
@@ -531,7 +553,16 @@ bool save_runtime_settings_to_file() {
         }
         if (!settings.coop.player_name.empty()) contents << "coop_player_name=" << settings.coop.player_name << '\n';
         if (!settings.coop.password.empty()) contents << "coop_password=" << settings.coop.password << '\n';
-        if (settings.coop.player_damage) contents << "coop_player_damage=1\n";
+        if (settings.coop.player_interaction != defaults.player_interaction) {
+            contents << "coop_player_interaction=" << coop_player_interaction_key(settings.coop.player_interaction)
+                     << '\n';
+        }
+        if (settings.coop.knockback_strength != defaults.knockback_strength) {
+            contents << "coop_knockback_strength=" << settings.coop.knockback_strength << '\n';
+        }
+        if (settings.coop.pvp_mode != defaults.pvp_mode) {
+            contents << "coop_pvp_mode=" << coop_pvp_mode_key(settings.coop.pvp_mode) << '\n';
+        }
         contents << input::format_controls_settings(input::get_controls_config());
         if (!contents) {
             return false;
@@ -579,6 +610,19 @@ bool parse_coop_endpoint(std::string_view text, std::string& host, std::uint16_t
     host.assign(name);
     port = number;
     return true;
+}
+
+const char* coop_player_interaction_key(CoopPlayerInteraction interaction) noexcept {
+    switch (interaction) {
+    case CoopPlayerInteraction::NonSolid: return "nonsolid";
+    case CoopPlayerInteraction::FriendlyFire: return "friendly_fire";
+    case CoopPlayerInteraction::Solid: break;
+    }
+    return "solid";
+}
+
+const char* coop_pvp_mode_key(CoopPvpMode mode) noexcept {
+    return mode == CoopPvpMode::Revamped ? "revamped" : "classic";
 }
 
 const char* runtime_input_mode_name(RuntimeInputMode mode) {

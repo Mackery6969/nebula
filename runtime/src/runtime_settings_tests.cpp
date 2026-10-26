@@ -619,11 +619,14 @@ int main() {
     // Co-op: the keys load, sanitize, round-trip, and stay out of a file that keeps the defaults.
     write_text(settings_path,
                "coop_port=9000\ncoop_max_players=40\ncoop_player_name=  Mario\x01 Bros  \ncoop_password=pw\n"
-               "coop_player_damage=1\n");
+               "coop_player_interaction=Friendly_Fire\ncoop_knockback_strength=60\ncoop_pvp_mode=revamped\n");
     galaxy::load_runtime_settings_from_file();
     const galaxy::RuntimeCoopSettings coop = galaxy::get_runtime_settings().coop;
     passed &= expect(coop.port == 9000u && coop.max_players == 8u && coop.player_name == "Mario Bros" &&
-                         coop.password == "pw" && coop.player_damage,
+                         coop.password == "pw" &&
+                         coop.player_interaction == galaxy::CoopPlayerInteraction::FriendlyFire &&
+                         coop.knockback_strength == galaxy::kCoopKnockbackTooMuch &&
+                         coop.pvp_mode == galaxy::CoopPvpMode::Revamped,
                      "co-op keys load; an out-of-range count and control characters are dropped");
     passed &= expect(galaxy::save_runtime_settings_to_file(), "co-op settings save");
     galaxy::load_runtime_settings_from_file();
@@ -634,6 +637,10 @@ int main() {
     passed &= expect(galaxy::save_runtime_settings_to_file() &&
                          read_text(settings_path).find("coop_") == std::string::npos,
                      "default co-op settings write no coop_ keys");
+    write_text(settings_path, "coop_player_interaction=sticky\ncoop_knockback_strength=256\ncoop_pvp_mode=new\n");
+    galaxy::load_runtime_settings_from_file();
+    passed &= expect(galaxy::get_runtime_settings().coop == galaxy::RuntimeCoopSettings{},
+                     "unknown player interaction, knockback and PvP values keep the defaults");
 
     const auto endpoint = [](std::string_view text, const char* host, unsigned port) {
         std::string parsed_host;

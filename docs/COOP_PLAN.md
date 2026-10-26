@@ -47,10 +47,11 @@ Games are self-hosted. There is no lobby server, relay or account system run by 
   headless Nebula: the game module running with no window, renderer or audio output, and no local Mario (or a hidden
   one). That's a real but separate project after Phase 2. The protocol is designed so the authority doesn't have to be
   a player, so a dedicated server can slot in later without changing clients.
-- **Server settings.** Port, maximum players, player name, password and player-to-player damage are the `coop_*` keys
-  in `runtime_settings.ini` (`coop_port`, default 7777; `coop_max_players`, 2-16, default 8; `coop_player_name`;
-  `coop_password`; `coop_player_damage`), so a dedicated server can be configured without a menu. They're written only
-  once they differ from the defaults. The session uses the host's save, as in sm64coopdx.
+- **Server settings.** The `coop_*` keys in `runtime_settings.ini`, so a dedicated server can be configured without a
+  menu: `coop_port` (default 7777), `coop_max_players` (2-16, default 8), `coop_player_name`, `coop_password`, and the
+  [player collision](#player-collisions) options `coop_player_interaction`, `coop_knockback_strength` and
+  `coop_pvp_mode`. They're written only once they differ from the defaults. The host's collision options and save are
+  the session's, as in sm64coopdx.
 
 ## Instances: one per galaxy and mission
 
@@ -82,6 +83,32 @@ plays whatever animation the network names, at the position, rotation and gravit
 packets. It has no physics or state machine of its own. Later phases give it collision with the local Mario and with
 enemies.
 
+## Player collisions
+
+The same handler and options as sm64coopdx (`interact_player` / `interact_player_pvp` in its `src/game/interaction.c`).
+The host's choice is the session's and is sent to each player as they join, as sm64coopdx's `packet_join` does.
+
+| Option (`runtime_settings.ini`) | Choices | Default |
+|---|---|---|
+| Player Interaction (`coop_player_interaction`) | `nonsolid`: players pass through each other. `solid`: they push apart, bounce on each other's heads and knock one another back with attacks, with no damage. `friendly_fire`: solid, and attacks cost health too | `solid` |
+| Knockback Strength (`coop_knockback_strength`) | 0-255; the menu offers Weak 10, Normal 25, Too much 60 | 25 |
+| PvP Mode (`coop_pvp_mode`) | `classic` or `revamped`: the rules for which attack beats which, and how far each one throws | `classic` |
+
+The rules carried over, with SMG's equivalents:
+
+- **No contact** in a player's first 60 frames in an instance, or while either player is intangible (Boo Mario,
+  Rainbow Mario passing through, a demo or a star get) or not drawn.
+- **Solid.** Overlapping players push apart. One landing on another's head bounces off, and the one below is
+  squashed for a few frames (sm64coopdx's `bounceSquishTimer`), with no damage.
+- **Attacks (solid and friendly fire).** A spin, a stomp, a ground pound, a punch or a Fire Mario fireball that reaches
+  another player knocks them back by the knockback strength times the attack's scale (sm64coopdx's `scaler`), facing
+  away from the attacker. Plain jumps, falls and ledge grabs aren't attacks, and a player already being knocked back
+  can't be hit again until it ends. Only friendly fire costs the victim health. Revamped changes the scales and which
+  attacks win, for example a ground pound beats a slide.
+- **Who decides.** The attacker's client detects the hit against the victim's lag-compensated position (sm64coopdx's
+  `lag_compensation.c`) and sends it. The victim's client applies the knockback and damage to its own Mario, so each
+  player's Mario is only ever moved by its own game.
+
 ## Shared world state
 
 Each instance's owner is authoritative for that instance, and the session host for the save. Rough order of what to
@@ -102,7 +129,8 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 0: groundwork (no networking)
 
-- [x] The `coop_*` settings keys (`runtime/src/runtime_settings.cpp`, with `parse_coop_endpoint` for addresses) and
+- [x] The `coop_*` settings keys, the player collision options among them (`runtime/src/runtime_settings.cpp`, with
+      `parse_coop_endpoint` for addresses), and
       the windowed hosts' `--host <port>` / `--join <address[:port]>` options. Both are checked, then the game starts
       alone with a `[coop]` log line until Phase 1.
 - [x] Co-Star removed: the native WPAD layer takes channel 0 only.
@@ -128,6 +156,8 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Instances: each client reports its stage and scenario, sees only players in its own instance, and a player
       entering an occupied instance gets its state from the instance owner.
 - [ ] Collectibles and save flags sync, with the host authoritative.
+- [ ] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
+      with lag compensation. The options are already read from `runtime_settings.ini`.
 - [ ] Remote players stomp, spin and touch objects. Hits are sent as events to the client that owns the object.
 
 ### Phase 3: shared enemies and objects

@@ -46,18 +46,34 @@ inline constexpr unsigned kCoopMaxPlayersLimit = 16u;
 // The longest player name and password, in bytes (printable ASCII; longer values are cut).
 inline constexpr std::size_t kCoopTextLimit = 32u;
 
+// How players touch one another, sm64coopdx's options (docs/COOP_PLAN.md, "Player collisions"). Non-solid: they pass
+// through. Solid: they push apart, bounce off each other's heads and knock one another back with attacks, with no
+// damage. Friendly fire: the same, and attacks cost health.
+enum class CoopPlayerInteraction : std::uint8_t { NonSolid, Solid, FriendlyFire };
+// Friendly fire's rules: sm64coopdx's original ones, or its revamped ones (which attacks beat which, the knockback
+// each gives).
+enum class CoopPvpMode : std::uint8_t { Classic, Revamped };
+// Knockback strength, 0 to 255; the menu's choices are weak, normal and too much (sm64coopdx's values).
+inline constexpr unsigned kCoopKnockbackWeak = 10u, kCoopKnockbackNormal = 25u, kCoopKnockbackTooMuch = 60u;
+
 struct RuntimeCoopSettings {
     std::uint16_t port = kCoopDefaultPort;
     unsigned max_players = 8u;  // 2 to kCoopMaxPlayersLimit, the host included
     std::string player_name;    // empty: the save file's name
     std::string password;       // a host's: joining needs it; a joiner's: sent to the host. Empty: none
-    bool player_damage = false; // players knock back and hurt one another
+    // The host's are the session's: they reach every player as they join.
+    CoopPlayerInteraction player_interaction = CoopPlayerInteraction::Solid;
+    unsigned knockback_strength = kCoopKnockbackNormal;
+    CoopPvpMode pvp_mode = CoopPvpMode::Classic;
 
     friend bool operator==(const RuntimeCoopSettings&, const RuntimeCoopSettings&) = default;
 };
 
 // A co-op address, "host:port", "host" (the default port) or "[ipv6]:port". False when malformed.
 [[nodiscard]] bool parse_coop_endpoint(std::string_view text, std::string& host, std::uint16_t& port);
+// "nonsolid", "solid" or "friendly_fire"; "classic" or "revamped" (runtime_settings.ini).
+[[nodiscard]] const char* coop_player_interaction_key(CoopPlayerInteraction interaction) noexcept;
+[[nodiscard]] const char* coop_pvp_mode_key(CoopPvpMode mode) noexcept;
 
 struct RuntimeSettings {
     RuntimeInputMode input_mode = RuntimeInputMode::Auto;
