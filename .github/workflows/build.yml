@@ -37,7 +37,7 @@ jobs:
     name: Disc import tool (Rust)
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/Checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build
@@ -62,7 +62,7 @@ jobs:
       # sccache keeps compiled objects in the GitHub Actions cache.
       SCCACHE_GHA_ENABLED: "true"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/Checkout@v7
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -92,7 +92,7 @@ jobs:
     name: Game module
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/Checkout@v7
       - name: Clang version
         run: '& "C:\Program Files\LLVM\bin\clang.exe" --version'
       - name: Build
@@ -102,7 +102,7 @@ jobs:
     name: Native SDK tests
     runs-on: windows-2025
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/Checkout@v7
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64

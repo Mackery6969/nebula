@@ -22,6 +22,11 @@ const NebulaHostServices* nebula_host(void);
 
 enum { kChannels = WPAD_MAX_CONTROLLERS, kReportBytes = 22, kQueue = 32, kDeferred = 32 };
 
+/* The channels the host may connect: one Wii Remote, the player's own. Channels 1-3 never connect, so Co-Star (a
+   second player's star pointer on WPAD_CHAN1) is removed: online co-op (docs/COOP_PLAN.md) gives every player their
+   own Mario on their own PC instead. The game still probes all four channels and finds no controller on the others. */
+enum { kHostChannels = 1 };
+
 typedef struct {
     u8 bytes[kReportBytes];
     BOOL pointerExact;
@@ -76,7 +81,7 @@ static BOOL sInitialized;
 
 /* The host's entry points, called from any thread. */
 NEBULA_GAME_API void nebula_game_wpad_connect(uint32_t chan, int connected, const NebulaWiimoteConnection* connection) {
-    if (chan >= kChannels) {
+    if (chan >= kHostChannels) {
         return;
     }
     Channel* c = &sChannels[chan];
@@ -94,7 +99,7 @@ NEBULA_GAME_API void nebula_game_wpad_connect(uint32_t chan, int connected, cons
 
 NEBULA_GAME_API void nebula_game_wpad_report(uint32_t chan, const uint8_t* report, size_t size,
                                              const NebulaWpadPointer* pointer) {
-    if (chan >= kChannels || size == 0) {
+    if (chan >= kHostChannels || size == 0) {
         return;
     }
     Channel* c = &sChannels[chan];
@@ -113,7 +118,7 @@ NEBULA_GAME_API void nebula_game_wpad_report(uint32_t chan, const uint8_t* repor
 }
 
 NEBULA_GAME_API void nebula_game_wpad_shake(uint32_t chan, uint32_t held) {
-    if (chan >= kChannels) {
+    if (chan >= kHostChannels) {
         return;
     }
     Channel* c = &sChannels[chan];
@@ -126,7 +131,7 @@ NEBULA_GAME_API void nebula_game_wpad_shake(uint32_t chan, uint32_t held) {
 }
 
 NEBULA_GAME_API void nebula_game_wpad_battery(uint32_t chan, uint32_t level) {
-    if (chan >= kChannels) {
+    if (chan >= kHostChannels) {
         return;
     }
     atomic_store(&sChannels[chan].pendingBattery, (level > 4u ? 4u : level) + 1u);
