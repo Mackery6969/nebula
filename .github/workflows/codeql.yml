@@ -1,3 +1,5 @@
+name: "CodeQL Advanced"
+
 # CodeQL code scanning of Nebula's own code.
 #
 # Replaces GitHub's default setup so the scan can skip code Nebula does not own: the Petari
@@ -7,7 +9,6 @@
 #
 # Default setup must be turned off (Settings > Code security > CodeQL analysis) for GitHub to
 # accept this workflow's results.
-name: CodeQL
 
 on:
   push:
