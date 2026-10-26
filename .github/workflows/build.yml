@@ -1,0 +1,82 @@
+# Compiles every part of Nebula and runs its tests on each push and pull request (docs/BUILDING.md).
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    name: Disc import tool (Rust)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build
+        run: cargo build --release --locked -p nebula-import
+      - name: Test
+        run: cargo test --locked -p nebula-import
+
+  host:
+    name: Host (${{ matrix.renderer }})
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - renderer: Direct3D 12
+            vulkan: OFF
+          - renderer: Vulkan
+            vulkan: ON
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Configure
+        run: cmake -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Release -DNEBULA_VULKAN=${{ matrix.vulkan }}
+      - name: Build
+        run: cmake --build build/host
+      - name: Test
+        run: ctest --test-dir build/host --output-on-failure
+
+  game:
+    name: Game module
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clang version
+        run: '& "C:\Program Files\LLVM\bin\clang.exe" --version'
+      - name: Build
+        run: .\native\build.ps1 -Petari native\petari -Build build\game
+
+  sdk-tests:
+    name: Native SDK tests
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Build and run
+        shell: bash
+        run: |
+          export PATH="/c/Program Files/LLVM/bin:$PATH"
+          sh native/sdk/os/tests/run_tests.sh native/petari build/sdk-tests clang
+
+  audit:
+    name: Repository audit
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit
+        run: .\tools\audit_repo.ps1
