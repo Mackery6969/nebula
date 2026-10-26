@@ -730,7 +730,7 @@ unsigned runtime_draft_changes(RuntimeSettings* live) {
     const RuntimeSettings& d = s_runtime_draft;
     const RuntimeSettings& b = s_runtime_base;
     // A setting added to RuntimeSettings is drafted here too: these bindings stop compiling until it is.
-    [[maybe_unused]] const auto& [mode, audio, text_speed, language, discord_status, button_icons] = d;
+    [[maybe_unused]] const auto& [mode, audio, text_speed, language, discord_status, button_icons, coop] = d;
     [[maybe_unused]] const auto& [master, music, sfx, voice, ambience, cutscene, wiimote_speaker] = d.audio;
     RuntimeSettings scratch{};
     RuntimeSettings& out = live != nullptr ? *live : scratch;
@@ -752,6 +752,7 @@ unsigned runtime_draft_changes(RuntimeSettings* live) {
     take(d.language, b.language, out.language);
     take(d.discord_status, b.discord_status, out.discord_status);
     take(d.button_icons, b.button_icons, out.button_icons);
+    take(d.coop, b.coop, out.coop);  // no menu rows yet: the draft keeps what it took
     return changes;
 }
 
