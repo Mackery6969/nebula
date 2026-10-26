@@ -54,6 +54,9 @@
 #include "Game/Util/DemoUtil.hpp"
 #include "Game/Util/DrawUtil.hpp"
 #include "Game/Util/EventUtil.hpp"
+#include "Game/Player/MarioActor.hpp"
+#include "Game/Player/MarioAnimator.hpp"
+#include "Game/Player/MarioHolder.hpp"
 #include "Game/Util/FileUtil.hpp"
 #include "Game/Util/JMapIdInfo.hpp"
 #include "Game/Util/LightUtil.hpp"
@@ -210,6 +213,39 @@ namespace {
         const wchar_t* pStar = scenario > 0 ? MR::getScenarioNameOnCurrentLanguage(pStage, scenario) : nullptr;
         __NebulaPresence(reinterpret_cast< const u16* >(pGalaxy), reinterpret_cast< const u16* >(pStar), MR::getPowerStarNum());
     }
+
+    // Online co-op (__NebulaCoopPlayer): the local player each scene frame, the instance it plays in and what other
+    // players' copies of it draw. Nothing while the scene has no player (its first frames).
+    void reportCoopPlayer() {
+        if (!MR::isExistSceneObj(SceneObj_MarioHolder)) {
+            return;
+        }
+        const MarioActor* pActor = MR::getMarioHolder()->getMarioActor();
+        if (pActor == nullptr || pActor->mMarioAnim == nullptr) {
+            return;
+        }
+        NebulaCoopPlayer player = {};
+        snprintf(player.stage, sizeof(player.stage), "%s", MR::getCurrentStageName());
+        player.scenario = MR::getCurrentScenarioNo();
+        const auto copy = [](f32* pOut, const TVec3f& rVec) {
+            pOut[0] = rVec.x;
+            pOut[1] = rVec.y;
+            pOut[2] = rVec.z;
+        };
+        copy(player.position, pActor->mPosition);
+        copy(player.rotation, pActor->mRotation);
+        copy(player.gravity, pActor->getGravityVec());
+        if (const TVec3f* pVelocity = MR::getPlayerVelocity()) {
+            copy(player.velocity, *pVelocity);
+        }
+        const char* pAnimation = MR::getPlayerCurrentBckName();
+        snprintf(player.animation, sizeof(player.animation), "%s", pAnimation != nullptr ? pAnimation : "");
+        player.animation_frame = pActor->mMarioAnim->getFrame();
+        player.health = pActor->mHealth;
+        player.mode = pActor->mPlayerMode;
+        player.flags = (MR::isPlayerLuigi() ? NEBULA_COOP_PLAYER_LUIGI : 0u) | (MR::isPlayerDead() ? NEBULA_COOP_PLAYER_DEAD : 0u);
+        __NebulaCoopPlayer(&player);
+    }
 };  // namespace
 #endif
 
@@ -234,6 +270,7 @@ void GameScene::update() {
     mPauseCtrl->updateNerve();
     updateNerve();
 #ifdef TARGET_PC
+    reportCoopPlayer();
     NebulaAchievements::update();
     if (sTestBoard && MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementBoard != nullptr) {
         sTestBoard = false;

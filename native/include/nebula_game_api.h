@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 31u
+#define NEBULA_GAME_API_VERSION 32u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -134,6 +134,27 @@ typedef struct NebulaDisplay {
     float canvas_width;    /* the NW4R layout canvas (608 at 16:9 and narrower) */
     float vertical_fit;    /* the layouts' height scale under 16:9 (1 at 16:9 and wider) */
 } NebulaDisplay;
+
+/* The local player as online co-op sends it (coop_player, docs/COOP_PLAN.md): the instance it plays in (the stage and
+   the scenario) and what other players' copies of it draw. Vectors are in the stage's world. */
+typedef struct NebulaCoopPlayer {
+    char stage[48];        /* MR::getCurrentStageName */
+    int32_t scenario;      /* MR::getCurrentScenarioNo: 0 where no star was chosen (the Comet Observatory) */
+    float position[3];
+    float rotation[3];     /* LiveActor::mRotation, degrees */
+    float gravity[3];      /* unit length, towards the ground */
+    float velocity[3];     /* world units per frame */
+    char animation[32];    /* the playing animation's name (Mario::getCurrentBckName), "" when none */
+    float animation_frame; /* MarioAnimator::getFrame */
+    uint32_t health;       /* MarioActor::mHealth */
+    uint32_t mode;         /* MarioActor::mPlayerMode: the power-up form (Bee, Boo, Fire, Ice, Spring, Rainbow...) */
+    uint32_t flags;        /* NEBULA_COOP_PLAYER_* */
+} NebulaCoopPlayer;
+
+enum {
+    NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
+    NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
+};
 
 /* Nebula options the game follows (option). */
 enum {
@@ -513,6 +534,9 @@ typedef struct NebulaHostServices {
     void (*curved_surface)(void* user, uint32_t array_address, const void* array, uint32_t array_bytes,
                            const float* positions, uint32_t position_count, const float* normals, uint32_t normal_count,
                            const uint16_t* corners, uint32_t triangle_count);
+    /* Online co-op: the local player, once per game scene frame while the scene has one (GameScene::update). Called
+       on the simulation thread; `player` is valid during the call only. */
+    void (*coop_player)(void* user, const NebulaCoopPlayer* player);
 } NebulaHostServices;
 
 enum {

@@ -15,7 +15,7 @@ of shipped features.
 | Input | Each Nebula instance drives one Wii Remote, channel 0 (`native/host/host_main.cpp`, `gModule.wpad_report(0, ...)`) | Nothing to change: every player controls the local Mario on their own PC with their own controls |
 | Co-Star | Removed. The native WPAD layer (`native/sdk/wpad/wpad_native.c`) ignores the host on channels 1-3, so a second player's star pointer never connects | The game's 2P code (pointer assists, 2P jumps, `Manual2P`, 2P guidance) stays in Petari but can't run. Online co-op replaces it |
 | Simulation | The game's threads run on one host thread under the SDK's scheduler (`docs/ARCHITECTURE.md`) | Same-frame state is easy to read and write from one place; a network tick fits next to `nebula_game_vi_retrace` |
-| Host/game boundary | Plain C interface, `native/include/nebula_game_api.h` (version 31) | Netcode lives in the host; the game module gets a small set of new `nebula_game_*` / `NebulaHostServices` entries |
+| Host/game boundary | Plain C interface, `native/include/nebula_game_api.h` (version 32, which added `coop_player`) | Netcode lives in the host; the game module gets a small set of new `nebula_game_*` / `NebulaHostServices` entries |
 | Networking | None | Sockets, the protocol, the lobby and the UI are all new |
 
 ## Approach: state sync with remote player actors (sm64coopdx's model)
@@ -137,9 +137,11 @@ Each phase ships on its own and leaves the game playable.
 - [x] `native/tools/coop_inventory.py` lists every single-player assumption (`MR::getPlayer*`, `MR::isPlayer*`,
       near-player checks, `MarioAccess`, `MarioActor*`, the demo actor) by subsystem and kind; `--sites [kind]` lists
       each one, so later phases can tick them off. Today: 1,453 sites, 428 of them in `Game/Enemy`.
-- [ ] Add game API entry points (bumping `NEBULA_GAME_API_VERSION`): read the local player's snapshot (position,
-      rotation, gravity, animation name and frame, action/nerve, health) once per frame, and spawn, move or remove
-      remote player actors.
+- [x] The local player's snapshot, once per game scene frame: `NebulaCoopPlayer` through the `coop_player` host
+      service (API version 32), filled in `GameScene::update` with the instance (stage and scenario), position,
+      rotation, gravity, velocity, animation name and frame, health, power-up form, Luigi and a miss in progress. The
+      host keeps the latest one for the netcode and logs each change of instance (`[coop] instance ...`).
+- [ ] Remote player actors: spawn, move and remove copies of other players from their snapshots.
 
 ### Phase 1: ghosts
 

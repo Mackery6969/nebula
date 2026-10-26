@@ -1537,6 +1537,32 @@ void svc_game_stage(void*, const char* name) {
     }
 }
 
+// Online co-op (docs/COOP_PLAN.md): the local player as the game last reported it (coop_player), for the netcode to
+// send; a change of instance (stage or scenario) is logged.
+std::mutex gCoopLock;
+NebulaCoopPlayer gCoopLocal{};
+bool gCoopLocalValid = false;
+
+void svc_coop_player(void*, const NebulaCoopPlayer* player) {
+    if (player == nullptr) {
+        return;
+    }
+    NebulaCoopPlayer copy = *player;
+    copy.stage[sizeof(copy.stage) - 1] = '\0';
+    copy.animation[sizeof(copy.animation) - 1] = '\0';
+    bool moved = false;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        moved = !gCoopLocalValid || std::strcmp(gCoopLocal.stage, copy.stage) != 0 ||
+                gCoopLocal.scenario != copy.scenario;
+        gCoopLocal = copy;
+        gCoopLocalValid = true;
+    }
+    if (moved) {
+        std::fprintf(stderr, "[coop] instance %s, scenario %d\n", copy.stage, static_cast<int>(copy.scenario));
+    }
+}
+
 void svc_object_name(void*, uint32_t id, const char* name) {
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::gx::note_object_name(id, name);
@@ -3522,6 +3548,7 @@ int main(int argc, char** argv) {
     services.object_name = svc_object_name;
     services.light_reach = svc_light_reach;
     services.traced_sun = svc_traced_sun;
+    services.coop_player = svc_coop_player;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

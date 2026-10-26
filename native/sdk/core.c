@@ -95,6 +95,10 @@ void __NebulaPresence(const u16* galaxy, const u16* star, s32 power_stars) {
     sHost->presence(sHost->user, galaxy, star, power_stars);
 }
 
+void __NebulaCoopPlayer(const struct NebulaCoopPlayer* player) {
+    sHost->coop_player(sHost->user, player);
+}
+
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity) {
     return sHost->achievement(sHost->user, id, name, capacity);
 }
