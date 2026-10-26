@@ -3314,7 +3314,8 @@ int main(int argc, char** argv) {
             if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port)) {
                 die("--host takes a port, 1 to 65535");
             }
-            std::fprintf(stderr, "[coop] online co-op isn't available yet: not hosting on port %u\n", port);
+            std::fprintf(stderr, "[coop] online co-op isn't available yet: not hosting on port %u\n",
+                         static_cast<unsigned>(port));
         } else if (key == "--join") {
             std::string address;
             std::uint16_t port = 0u;
@@ -3322,7 +3323,7 @@ int main(int argc, char** argv) {
                 die("--join takes an address, address:port or [IPv6]:port");
             }
             std::fprintf(stderr, "[coop] online co-op isn't available yet: not joining %s port %u\n", address.c_str(),
-                         port);
+                         static_cast<unsigned>(port));
 #endif
         } else {
             die("unknown option %s", key.c_str());

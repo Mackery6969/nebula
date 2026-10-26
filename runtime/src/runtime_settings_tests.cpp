@@ -622,7 +622,8 @@ int main() {
                "coop_player_interaction=Friendly_Fire\ncoop_knockback_strength=60\ncoop_pvp_mode=revamped\n");
     galaxy::load_runtime_settings_from_file();
     const galaxy::RuntimeCoopSettings coop = galaxy::get_runtime_settings().coop;
-    passed &= expect(coop.port == 9000u && coop.max_players == 8u && coop.player_name == "Mario Bros" &&
+    passed &= expect(static_cast<unsigned>(coop.port) == 9000u && coop.max_players == 8u &&
+                         coop.player_name == "Mario Bros" &&
                          coop.password == "pw" &&
                          coop.player_interaction == galaxy::CoopPlayerInteraction::FriendlyFire &&
                          coop.knockback_strength == galaxy::kCoopKnockbackTooMuch &&
@@ -646,7 +647,7 @@ int main() {
         std::string parsed_host;
         std::uint16_t parsed_port = 0u;
         const bool ok = galaxy::parse_coop_endpoint(text, parsed_host, parsed_port);
-        return host == nullptr ? !ok : ok && parsed_host == host && parsed_port == port;
+        return host == nullptr ? !ok : ok && parsed_host == host && static_cast<unsigned>(parsed_port) == port;
     };
     passed &= expect(endpoint("192.168.1.5:7000", "192.168.1.5", 7000u) &&
                          endpoint(" my-pc.tail1234.ts.net ", "my-pc.tail1234.ts.net", galaxy::kCoopDefaultPort) &&
