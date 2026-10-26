@@ -39,13 +39,31 @@ jobs:
             vulkan: OFF
           - renderer: Vulkan
             vulkan: ON
+    env:
+      # sccache keeps compiled objects in the GitHub Actions cache.
+      SCCACHE_GHA_ENABLED: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+      # The libraries CMake builds at configure time (zlib, xz, libarchive, the FidelityFX SDK) and the downloaded
+      # Vulkan sources: each is skipped when its files are already in the build tree.
+      - name: Cache configure-time dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/host/archive-deps
+            build/host/fidelityfx.built
+            build/host/_deps
+          key: host-deps-${{ matrix.vulkan }}-${{ hashFiles('cmake/**', 'third_party/archive/**') }}
+      - uses: mozilla-actions/sccache-action@v0.0.9
       - name: Configure
-        run: cmake -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Release -DNEBULA_VULKAN=${{ matrix.vulkan }}
+        # Without cross-file optimization: the link of every test against the renderer library otherwise takes
+        # minutes. Release builds keep it (NEBULA_HOST_IPO defaults to ON).
+        run: >-
+          cmake -S . -B build/host -G Ninja -DCMAKE_BUILD_TYPE=Release -DNEBULA_VULKAN=${{ matrix.vulkan }}
+          -DNEBULA_HOST_IPO=OFF -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
       - name: Build
         run: cmake --build build/host
       - name: Test
