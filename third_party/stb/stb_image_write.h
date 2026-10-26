@@ -1133,6 +1133,8 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
    unsigned char *out,*o, *filt, *zlib;
    signed char *line_buffer;
    int j,zlen;
+   size_t line_bytes = (size_t) x;
+   line_bytes *= n;
 
    if (stride_bytes == 0)
       stride_bytes = x * n;
@@ -1170,7 +1172,7 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
       }
       // when we get here, filter_type contains the filter type, and line_buffer contains the data
       filt[j*(x*n+1)] = (unsigned char) filter_type;
-      STBIW_MEMMOVE(filt+j*(x*n+1)+1, line_buffer, (size_t)x*n);
+      STBIW_MEMMOVE(filt+j*(x*n+1)+1, line_buffer, line_bytes);
    }
    STBIW_FREE(line_buffer);
    zlib = stbi_zlib_compress(filt, y*( x*n+1), &zlen, stbi_write_png_compression_level);
