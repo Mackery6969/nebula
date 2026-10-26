@@ -588,7 +588,8 @@ NEBULA_GAME_API uint32_t nebula_game_audio_channel_owner(uint32_t channel, uint3
    (the host's retrace). */
 NEBULA_GAME_API uint32_t nebula_game_mii_prepare(uint8_t* record);
 NEBULA_GAME_API uint32_t nebula_game_mii_install(uint32_t slot, const uint8_t* record);
-/* A Wii Remote connected (with its calibration) or disconnected. */
+/* A Wii Remote connected (with its calibration) or disconnected. The nebula_game_wpad_* calls take channel 0 only (the
+   player's remote); other channels are ignored, which removes Co-Star (docs/COOP_PLAN.md). */
 NEBULA_GAME_API void nebula_game_wpad_connect(uint32_t chan, int connected, const NebulaWiimoteConnection* connection);
 /* A Wii Remote input report, from its id (0x30, 0x31, 0x33 or 0x37 as the data format asks), extension bytes decrypted;
    one per report the remote sends (100 per second). `pointer`: the exact position its IR dots stand for, or NULL (a
