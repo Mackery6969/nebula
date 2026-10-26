@@ -28,7 +28,8 @@ jobs:
 
   host:
     name: Host (${{ matrix.renderer }})
-    runs-on: windows-2025
+    # cmake/fidelityfx.cmake builds the FidelityFX SDK with the Visual Studio 2022 generator.
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:

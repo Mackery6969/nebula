@@ -357,7 +357,7 @@ fn data_root(input: &Path) -> Result<PathBuf> {
 }
 
 fn sha1_hex(bytes: &[u8]) -> String {
-    format!("{:x}", Sha1::digest(bytes))
+    Sha1::digest(bytes).iter().map(|b| format!("{b:02x}")).collect()
 }
 
 fn read_u32_be(data: &[u8], offset: usize) -> Result<u32> {
