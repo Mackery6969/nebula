@@ -76,6 +76,38 @@ don't. The Comet Observatory (and the other hub/demo stages) is an instance too,
 - **Zones.** A galaxy's zones are loaded into the same scene, so the whole galaxy is one instance, with no
   sub-instance per zone or planet.
 
+## Main menu
+
+The title screen and the file select go. In their place is a co-op main menu like sm64coopdx's (its
+`djui_panel_main.c`, `djui_panel_host.c`, `djui_panel_join_direct.c`), over the file select's space backdrop.
+
+- **Where.** The `FileSelect` stage stays for its backdrop and music, but its `FileSelector` skips the title
+  (`exeTitle`) and the six file bubbles and shows the menu instead. Boot goes from the logos straight to it.
+- **How it's drawn.** With Nebula's settings menu machinery: pages and rows kept by the host
+  (`NebulaSettingsView`), drawn by the game in its own windows and font (`NebulaSettingsMenu`). The main menu is a new
+  set of pages. Text rows (address, name, password) are new: typed on a keyboard, or picked letter by letter on a
+  controller.
+- **Pages:**
+
+  | Page | Rows |
+  |---|---|
+  | Main | The game's logo, then Host, Join, Player, Options, Quit; Nebula's version in a corner |
+  | Host | Save file (the six, each with its Power Stars and an Erase button), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, then Host |
+  | Join | Address (`host[:port]`), password, then Join; the last address is remembered. No public or private lobbies: there's no relay |
+  | Player | Name, character (Mario or Luigi) |
+  | Options | Nebula's settings pages as they are today |
+  | Quit | "Quit to desktop?" yes or no |
+
+- **Starting.** Host loads the chosen save through the file select's own path (`FileSelector::exeDemo`:
+  `GameSequenceFunction::startGameDataLoadSequence`, the user name) and opens the session. With nobody joining
+  it's single player, as in sm64coopdx. Join needs Phase 1: a joining player plays the host's save, sent at join
+  (sm64coopdx's `packet_save_file`), so their own saves stay untouched.
+- **Dropped with the file select:** copying files and Mii icons for files. Erasing moves to the Host page.
+
+Order: first the menu shell (Main, Host with a save file, Options, Quit) replacing the title and file select, so the
+game plays as before through it; then text rows, the Player page and the Host page's server rows; then Join with
+Phase 1.
+
 ## Remote players
 
 A `RemotePlayer` is a `LiveActor` that loads Mario's or Luigi's model and animations (`MarioAnimator`'s resources) and
@@ -142,6 +174,12 @@ Each phase ships on its own and leaves the game playable.
       rotation, gravity, velocity, animation name and frame, health, power-up form, Luigi and a miss in progress. The
       host keeps the latest one for the netcode and logs each change of instance (`[coop] instance ...`).
 - [ ] Remote player actors: spawn, move and remove copies of other players from their snapshots.
+
+### Phase 0.5: main menu
+
+- [ ] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host (a save file),
+      Options, Quit, over the file select's space backdrop.
+- [ ] Text rows; the Player page; the Host page's server rows.
 
 ### Phase 1: ghosts
 
