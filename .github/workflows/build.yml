@@ -28,7 +28,9 @@ jobs:
 
   host:
     name: Host (${{ matrix.renderer }})
-    runs-on: windows-2025
+    # Visual Studio 2022's MSVC: with 2026's (MSVC 19.51, windows-2025) the frame interpolation and interp GPU
+    # tests fail every palette check, which no other compiler reproduces.
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
