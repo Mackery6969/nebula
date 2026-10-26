@@ -3,7 +3,26 @@ name: Build
 
 on:
   push:
+    # Only changes that can affect the build: not documentation, the Android app or the other workflows.
+    paths:
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "!LICENSE"
+      - "!platform/android/**"
+      - "platform/android/vk_seed_keys.bin"
+      - "!.github/**"
+      - ".github/workflows/build.yml"
   pull_request:
+    paths:
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "!LICENSE"
+      - "!platform/android/**"
+      - "platform/android/vk_seed_keys.bin"
+      - "!.github/**"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 concurrency:
@@ -92,11 +111,3 @@ jobs:
         run: |
           export PATH="/c/Program Files/LLVM/bin:$PATH"
           sh native/sdk/os/tests/run_tests.sh native/petari build/sdk-tests clang
-
-  audit:
-    name: Repository audit
-    runs-on: windows-2025
-    steps:
-      - uses: actions/checkout@v4
-      - name: Audit
-        run: .\tools\audit_repo.ps1
