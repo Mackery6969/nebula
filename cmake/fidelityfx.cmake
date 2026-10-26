@@ -21,9 +21,20 @@ set(nebula_ffx_stamp "${CMAKE_BINARY_DIR}/fidelityfx.built")
 if(NOT EXISTS "${nebula_ffx_stamp}")
     message(STATUS "Building the FidelityFX SDK's FSR 3 upscaler")
     set(build "${CMAKE_BINARY_DIR}/fidelityfx-build")
-    # The SDK's projects are Visual Studio ones (its shader permutations are custom build steps).
+    # The SDK's projects are Visual Studio ones (its shader permutations are custom build steps), made with the Visual
+    # Studio this build's compiler comes from: 2026 for MSVC 19.50 and later (GitHub's windows-2025 runners), else
+    # 2022. The instance is that installation when the compiler's path names it, so the SDK builds with the same tools.
+    if(MSVC_VERSION GREATER_EQUAL 1950)
+        set(generator "Visual Studio 18 2026")
+    else()
+        set(generator "Visual Studio 17 2022")
+    endif()
+    set(instance)
+    if(CMAKE_CXX_COMPILER MATCHES "^(.*)/VC/Tools/MSVC/")
+        set(instance "-DCMAKE_GENERATOR_INSTANCE=${CMAKE_MATCH_1}")
+    endif()
     execute_process(
-        COMMAND "${CMAKE_COMMAND}" -S "${nebula_ffx_sdk}" -B "${build}" -G "Visual Studio 17 2022" -A x64
+        COMMAND "${CMAKE_COMMAND}" -S "${nebula_ffx_sdk}" -B "${build}" -G "${generator}" -A x64 ${instance}
                 -DFFX_API_BACKEND=DX12_X64 -DFFX_FSR3UPSCALER=ON -DFFX_AUTO_COMPILE_SHADERS=ON
         RESULT_VARIABLE result OUTPUT_QUIET ERROR_VARIABLE errors)
     if(NOT result EQUAL 0)
