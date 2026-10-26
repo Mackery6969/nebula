@@ -1,9 +1,9 @@
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+// Kotlin is built into the Android Gradle plugin from 9.0, which refuses org.jetbrains.kotlin.android.
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
