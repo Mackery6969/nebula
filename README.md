@@ -1,3 +1,7 @@
+# Nebula Co-Op
+
+A co-op mod for Nebula, the native Windows port of Super Mario Galaxy. It allows two players to play together online, with many features and improvements to enhance the co-op experience.
+
 # Nebula
 
 Nebula runs **Super Mario Galaxy** natively on Windows. The game is built as native code from the

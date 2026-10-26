@@ -39,7 +39,7 @@ jobs:
       matrix:
         language: [actions, c-cpp, csharp, java-kotlin, python, rust]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/Checkout@v7
       - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
