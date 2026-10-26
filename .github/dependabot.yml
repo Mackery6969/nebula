@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Rust workspace (crates/nebula-import)
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      cargo-minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  # Android app: Gradle plugins, libraries and the Gradle wrapper
+  - package-ecosystem: "gradle"
+    directory: "/platform/android"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-and-patch:
+        update-types: ["minor", "patch"]
