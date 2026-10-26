@@ -215,6 +215,7 @@ STBIWDEF void stbi_flip_vertically_on_write(int flip_boolean);
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #if defined(STBIW_MALLOC) && defined(STBIW_FREE) && (defined(STBIW_REALLOC) || defined(STBIW_REALLOC_SIZED))
 // ok
@@ -1132,17 +1133,27 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
    unsigned char sig[8] = { 137,80,78,71,13,10,26,10 };
    unsigned char *out,*o, *filt, *zlib;
    signed char *line_buffer;
+   int line_bytes;
+   size_t row_bytes, filter_bytes;
    int j,zlen;
 
+   if (x <= 0 || y <= 0 || n <= 0 || n > 4 || x > (INT_MAX - 1) / n)
+      return 0;
+   line_bytes = x * n;
+   row_bytes = (size_t) line_bytes + 1;
+   if ((size_t) y > (size_t) INT_MAX / row_bytes)
+      return 0;
+   filter_bytes = row_bytes * (size_t) y;
+
    if (stride_bytes == 0)
-      stride_bytes = x * n;
+      stride_bytes = line_bytes;
 
    if (force_filter >= 5) {
       force_filter = -1;
    }
 
-   filt = (unsigned char *) STBIW_MALLOC((x*n+1) * y); if (!filt) return 0;
-   line_buffer = (signed char *) STBIW_MALLOC(x * n); if (!line_buffer) { STBIW_FREE(filt); return 0; }
+   filt = (unsigned char *) STBIW_MALLOC(filter_bytes); if (!filt) return 0;
+   line_buffer = (signed char *) STBIW_MALLOC(line_bytes); if (!line_buffer) { STBIW_FREE(filt); return 0; }
    for (j=0; j < y; ++j) {
       int filter_type;
       if (force_filter > -1) {
@@ -1155,7 +1166,7 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
 
             // Estimate the entropy of the line using this filter; the less, the better.
             est = 0;
-            for (i = 0; i < x*n; ++i) {
+            for (i = 0; i < line_bytes; ++i) {
                est += abs((signed char) line_buffer[i]);
             }
             if (est < best_filter_val) {
@@ -1169,11 +1180,11 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
          }
       }
       // when we get here, filter_type contains the filter type, and line_buffer contains the data
-      filt[j*(x*n+1)] = (unsigned char) filter_type;
-      STBIW_MEMMOVE(filt+j*(x*n+1)+1, line_buffer, x*n);
+      filt[(size_t) j * row_bytes] = (unsigned char) filter_type;
+      STBIW_MEMMOVE(filt+(size_t) j * row_bytes+1, line_buffer, line_bytes);
    }
    STBIW_FREE(line_buffer);
-   zlib = stbi_zlib_compress(filt, y*( x*n+1), &zlen, stbi_write_png_compression_level);
+   zlib = stbi_zlib_compress(filt, (int) filter_bytes, &zlen, stbi_write_png_compression_level);
    STBIW_FREE(filt);
    if (!zlib) return 0;
 
