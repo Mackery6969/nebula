@@ -616,6 +616,40 @@ int main() {
                          galaxy::get_runtime_settings().language == GameLanguage::French,
                      "a change while playing is saved but the session keeps its language");
 
+    // Co-op: the keys load, sanitize, round-trip, and stay out of a file that keeps the defaults.
+    write_text(settings_path,
+               "coop_port=9000\ncoop_max_players=40\ncoop_player_name=  Mario\x01 Bros  \ncoop_password=pw\n"
+               "coop_player_damage=1\n");
+    galaxy::load_runtime_settings_from_file();
+    const galaxy::RuntimeCoopSettings coop = galaxy::get_runtime_settings().coop;
+    passed &= expect(coop.port == 9000u && coop.max_players == 8u && coop.player_name == "Mario Bros" &&
+                         coop.password == "pw" && coop.player_damage,
+                     "co-op keys load; an out-of-range count and control characters are dropped");
+    passed &= expect(galaxy::save_runtime_settings_to_file(), "co-op settings save");
+    galaxy::load_runtime_settings_from_file();
+    passed &= expect(galaxy::get_runtime_settings().coop == coop, "co-op settings round-trip");
+    galaxy::RuntimeSettings no_coop = galaxy::get_runtime_settings();
+    no_coop.coop = {};
+    galaxy::set_runtime_settings(no_coop);
+    passed &= expect(galaxy::save_runtime_settings_to_file() &&
+                         read_text(settings_path).find("coop_") == std::string::npos,
+                     "default co-op settings write no coop_ keys");
+
+    const auto endpoint = [](std::string_view text, const char* host, unsigned port) {
+        std::string parsed_host;
+        std::uint16_t parsed_port = 0u;
+        const bool ok = galaxy::parse_coop_endpoint(text, parsed_host, parsed_port);
+        return host == nullptr ? !ok : ok && parsed_host == host && parsed_port == port;
+    };
+    passed &= expect(endpoint("192.168.1.5:7000", "192.168.1.5", 7000u) &&
+                         endpoint(" my-pc.tail1234.ts.net ", "my-pc.tail1234.ts.net", galaxy::kCoopDefaultPort) &&
+                         endpoint("[::1]:9000", "::1", 9000u) && endpoint("fe80::1", "fe80::1", galaxy::kCoopDefaultPort),
+                     "co-op addresses parse with and without a port");
+    passed &= expect(endpoint("host:0", nullptr, 0u) && endpoint("host:70000", nullptr, 0u) &&
+                         endpoint("host:12a", nullptr, 0u) && endpoint(":7777", nullptr, 0u) &&
+                         endpoint("", nullptr, 0u) && endpoint("[::1", nullptr, 0u),
+                     "malformed co-op addresses are refused");
+
     std::filesystem::remove_all(root);
 
     if (!passed) {

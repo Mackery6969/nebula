@@ -1,10 +1,11 @@
-// Player settings in runtime_settings.ini: input mode, audio gains, text speed, language, Discord status.
+// Player settings in runtime_settings.ini: input mode, audio gains, text speed, language, Discord status, online co-op.
 #pragma once
 
 #include <filesystem>
 #include <cstdint>
 #include <span>
 #include <string>
+#include <string_view>
 
 namespace galaxy {
 
@@ -38,6 +39,26 @@ enum class ButtonIcons : std::uint8_t { Auto, Wii, Xbox, Nintendo, PlayStation }
 // The three languages of the USA disc, as the Wii's SC language codes SCGetLanguage returns.
 enum class GameLanguage : std::uint8_t { English = 1, French = 3, Spanish = 4 };
 
+// Online co-op (docs/COOP_PLAN.md), not playable yet: the coop_* keys, written only when they differ from these
+// defaults. The port is the UDP port a host listens on and a join without one connects to.
+inline constexpr std::uint16_t kCoopDefaultPort = 7777u;
+inline constexpr unsigned kCoopMaxPlayersLimit = 16u;
+// The longest player name and password, in bytes (printable ASCII; longer values are cut).
+inline constexpr std::size_t kCoopTextLimit = 32u;
+
+struct RuntimeCoopSettings {
+    std::uint16_t port = kCoopDefaultPort;
+    unsigned max_players = 8u;  // 2 to kCoopMaxPlayersLimit, the host included
+    std::string player_name;    // empty: the save file's name
+    std::string password;       // a host's: joining needs it; a joiner's: sent to the host. Empty: none
+    bool player_damage = false; // players knock back and hurt one another
+
+    friend bool operator==(const RuntimeCoopSettings&, const RuntimeCoopSettings&) = default;
+};
+
+// A co-op address, "host:port", "host" (the default port) or "[ipv6]:port". False when malformed.
+[[nodiscard]] bool parse_coop_endpoint(std::string_view text, std::string& host, std::uint16_t& port);
+
 struct RuntimeSettings {
     RuntimeInputMode input_mode = RuntimeInputMode::Auto;
     RuntimeAudioSettings audio{};
@@ -48,6 +69,7 @@ struct RuntimeSettings {
     // Discord shows what the player is doing (galaxy, star, Power Stars) while Discord runs.
     bool discord_status = true;
     ButtonIcons button_icons = ButtonIcons::Auto;
+    RuntimeCoopSettings coop{};
 
     friend bool operator==(const RuntimeSettings&, const RuntimeSettings&) = default;
 };

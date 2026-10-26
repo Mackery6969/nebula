@@ -36,8 +36,10 @@ We use the same model, for these reasons:
 Games are self-hosted. There is no lobby server, relay or account system run by the project.
 
 - **Listen server (first).** One player chooses Host in Nebula, which opens a UDP port (configurable, default to be
-  picked). The other players choose Join and enter `address:port`. The hosting player's game is the authoritative
-  world (see below). This is how sm64coopdx's direct connections work, without its CoopNet relay.
+  picked). The other players choose Join and enter `address:port`. The host runs the session (who's in, the
+  save); each instance's world is settled by a player inside it (see
+  [Instances](#instances-one-per-galaxy-and-mission)). This is how sm64coopdx's direct connections work, without its
+  CoopNet relay.
 - **Reaching the host.** The host forwards the UDP port on their router, or the group uses a VPN overlay such as
   Tailscale, ZeroTier or Radmin VPN and joins by its address. The docs explain both; Nebula itself does no NAT
   traversal.
@@ -45,9 +47,33 @@ Games are self-hosted. There is no lobby server, relay or account system run by 
   headless Nebula: the game module running with no window, renderer or audio output, and no local Mario (or a hidden
   one). That's a real but separate project after Phase 2. The protocol is designed so the authority doesn't have to be
   a player, so a dedicated server can slot in later without changing clients.
-- **Server settings.** Port, maximum players, password, player-to-player knockback/damage on or off, and whose save
-  is used (the host's, as in sm64coopdx). They live in a `[coop]` section of the settings file so a dedicated server
-  can be configured without a menu.
+- **Server settings.** Port, maximum players, player name, password and player-to-player damage are the `coop_*` keys
+  in `runtime_settings.ini` (`coop_port`, default 7777; `coop_max_players`, 2-16, default 8; `coop_player_name`;
+  `coop_password`; `coop_player_damage`), so a dedicated server can be configured without a menu. They're written only
+  once they differ from the defaults. The session uses the host's save, as in sm64coopdx.
+
+## Instances: one per galaxy and mission
+
+As in sm64coopdx, players only share a world when they're in the same place *and* on the same mission. An instance is
+keyed by the stage name and the scenario (`MR::getCurrentStageName()`, `MR::getCurrentScenarioNo()`): two players in
+Good Egg Galaxy on "Dino Piranha" share an instance; one on "Dino Piranha" and one on "A Snack of Cosmic Proportions"
+don't. The Comet Observatory (and the other hub/demo stages) is an instance too, keyed the same way.
+
+- **Visibility.** A client draws remote players, and receives their snapshots, only for its own instance. Players in
+  other instances don't appear, can't be touched and don't touch anything. They still show in the player list with
+  the galaxy and star they're on.
+- **Instance owner.** Within an instance, the connected player with the lowest player index who's in it settles
+  shared object state (sm64coopdx's `get_network_player_smallest_global()`). When that player leaves, the next lowest
+  takes over. The session host owns only the session (joins, kicks, the save) and isn't the world authority
+  everywhere.
+- **Joining an instance.** A player who enters an instance others are already in asks the owner for its current
+  state (objects killed, coins and star bits taken, switches pressed) before their local copy runs, like
+  sm64coopdx's `packet_level_area_request` / `packet_level_area_inform`. An empty instance starts fresh from the stage
+  files.
+- **Free movement.** Nobody is pulled along to another galaxy. Each player picks galaxies and stars from their own
+  dome and star select, and leaves an instance by finishing, dying out or exiting.
+- **Zones.** A galaxy's zones are loaded into the same scene, so the whole galaxy is one instance, with no
+  sub-instance per zone or planet.
 
 ## Remote players
 
@@ -58,10 +84,11 @@ enemies.
 
 ## Shared world state
 
-The host is authoritative. Rough order of what to sync, from cheapest to hardest:
+Each instance's owner is authoritative for that instance, and the session host for the save. Rough order of what to
+sync, from cheapest to hardest:
 
-1. Stage and scenario changes. Everyone follows the host's galaxy and star. This is sm64coopdx's
-   `packet_change_level`.
+1. Which instance each player is in, sent on every scene change. This is sm64coopdx's `currLevelNum` /
+   `currActNum` on each network player.
 2. Collected stars, Grand Stars, star bits, coins, 1-Ups and save flags (`GameDataFunction`). Comparable to
    `packet_collect_*` and `packet_save_set_flag`.
 3. Object deaths and state, through a sync-object registry keyed by placement ID (`JMapInfo` link IDs), like
@@ -75,11 +102,13 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 0: groundwork (no networking)
 
-- [ ] Add the `[coop]` settings section and `--host [port]` / `--join address:port` command-line options, hidden
-      until the feature is real.
-- [ ] Add an inventory script (in the style of `native/tools/*.py`) that lists every single-player assumption
-      (`MR::getPlayer*`, `isPlayer`, `MarioAccess`, `getPlayerDemoActor`) by subsystem, so later phases can tick
-      them off.
+- [x] The `coop_*` settings keys (`runtime/src/runtime_settings.cpp`, with `parse_coop_endpoint` for addresses) and
+      the windowed hosts' `--host <port>` / `--join <address[:port]>` options. Both are checked, then the game starts
+      alone with a `[coop]` log line until Phase 1.
+- [x] Co-Star removed: the native WPAD layer takes channel 0 only.
+- [x] `native/tools/coop_inventory.py` lists every single-player assumption (`MR::getPlayer*`, `MR::isPlayer*`,
+      near-player checks, `MarioAccess`, `MarioActor*`, the demo actor) by subsystem and kind; `--sites [kind]` lists
+      each one, so later phases can tick them off. Today: 1,453 sites, 428 of them in `Game/Enemy`.
 - [ ] Add game API entry points (bumping `NEBULA_GAME_API_VERSION`): read the local player's snapshot (position,
       rotation, gravity, animation name and frame, action/nerve, health) once per frame, and spawn, move or remove
       remote player actors.
@@ -96,7 +125,8 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 2: same world
 
-- [ ] The host's stage and scenario changes pull everyone along.
+- [ ] Instances: each client reports its stage and scenario, sees only players in its own instance, and a player
+      entering an occupied instance gets its state from the instance owner.
 - [ ] Collectibles and save flags sync, with the host authoritative.
 - [ ] Remote players stomp, spin and touch objects. Hits are sent as events to the client that owns the object.
 

@@ -37,6 +37,41 @@ RuntimeSettings s_settings{};
 std::uint64_t s_input_mode_generation = 1u;
 std::shared_mutex s_settings_lock;
 
+// Printable ASCII only, with no surrounding spaces, at most kCoopTextLimit bytes: the file stays one line per key and
+// the game's font draws every character.
+std::string sanitize_coop_text(std::string_view text) {
+    std::string out;
+    for (const char ch : text) {
+        if (ch >= 0x20 && ch < 0x7F && out.size() < kCoopTextLimit) {
+            out.push_back(ch);
+        }
+    }
+    const std::size_t begin = out.find_first_not_of(' ');
+    if (begin == std::string::npos) {
+        return {};
+    }
+    return out.substr(begin, out.find_last_not_of(' ') - begin + 1u);
+}
+
+// A port, 1 to 65535, in decimal digits only.
+bool parse_port(std::string_view text, std::uint16_t& port) {
+    if (text.empty() || text.size() > 5u) {
+        return false;
+    }
+    unsigned value = 0u;
+    for (const char ch : text) {
+        if (ch < '0' || ch > '9') {
+            return false;
+        }
+        value = value * 10u + static_cast<unsigned>(ch - '0');
+    }
+    if (value == 0u || value > 65535u) {
+        return false;
+    }
+    port = static_cast<std::uint16_t>(value);
+    return true;
+}
+
 RuntimeSettings sanitize_settings(RuntimeSettings settings) {
     switch (settings.input_mode) {
     case RuntimeInputMode::Auto:
@@ -64,6 +99,12 @@ RuntimeSettings sanitize_settings(RuntimeSettings settings) {
     if (settings.language != GameLanguage::French && settings.language != GameLanguage::Spanish) {
         settings.language = GameLanguage::English;
     }
+    if (settings.coop.port == 0u) {
+        settings.coop.port = kCoopDefaultPort;
+    }
+    settings.coop.max_players = std::clamp(settings.coop.max_players, 2u, kCoopMaxPlayersLimit);
+    settings.coop.player_name = sanitize_coop_text(settings.coop.player_name);
+    settings.coop.password = sanitize_coop_text(settings.coop.password);
     return settings;
 }
 
@@ -157,6 +198,21 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
         for (const GameLanguage language : {GameLanguage::English, GameLanguage::French, GameLanguage::Spanish}) {
             if (_stricmp(value, game_language_key(language)) == 0) settings.language = language;
         }
+    } else if (std::strcmp(key, "coop_port") == 0) {
+        std::uint16_t port = 0u;
+        if (parse_port(value, port)) settings.coop.port = port;
+    } else if (std::strcmp(key, "coop_max_players") == 0) {
+        char* end = nullptr;
+        const unsigned long count = std::strtoul(value, &end, 10);
+        if (end != value && *end == '\0' && count <= kCoopMaxPlayersLimit) {
+            settings.coop.max_players = static_cast<unsigned>(count);
+        }
+    } else if (std::strcmp(key, "coop_player_name") == 0) {
+        settings.coop.player_name = value;
+    } else if (std::strcmp(key, "coop_password") == 0) {
+        settings.coop.password = value;
+    } else if (std::strcmp(key, "coop_player_damage") == 0) {
+        settings.coop.player_damage = value[0] != '0';
     }
 }
 
@@ -466,8 +522,17 @@ bool save_runtime_settings_to_file() {
                  << "text_speed=" << settings.text_speed << '\n'
                  << "language=" << game_language_key(settings.language) << '\n'
                  << "discord_status=" << (settings.discord_status ? 1 : 0) << '\n'
-                 << "button_icons=" << button_icons_key(settings.button_icons) << '\n'
-                 << input::format_controls_settings(input::get_controls_config());
+                 << "button_icons=" << button_icons_key(settings.button_icons) << '\n';
+        // Co-op isn't playable yet: its keys appear once someone sets them.
+        const RuntimeCoopSettings defaults{};
+        if (settings.coop.port != defaults.port) contents << "coop_port=" << settings.coop.port << '\n';
+        if (settings.coop.max_players != defaults.max_players) {
+            contents << "coop_max_players=" << settings.coop.max_players << '\n';
+        }
+        if (!settings.coop.player_name.empty()) contents << "coop_player_name=" << settings.coop.player_name << '\n';
+        if (!settings.coop.password.empty()) contents << "coop_password=" << settings.coop.password << '\n';
+        if (settings.coop.player_damage) contents << "coop_player_damage=1\n";
+        contents << input::format_controls_settings(input::get_controls_config());
         if (!contents) {
             return false;
         }
@@ -479,6 +544,41 @@ bool save_runtime_settings_to_file() {
     } catch (...) {
         return false;
     }
+}
+
+bool parse_coop_endpoint(std::string_view text, std::string& host, std::uint16_t& port) {
+    text = trim(text);
+    std::string_view name;
+    std::uint16_t number = kCoopDefaultPort;
+    if (!text.empty() && text.front() == '[') {
+        const std::size_t close = text.find(']');
+        if (close == std::string_view::npos) {
+            return false;
+        }
+        name = text.substr(1u, close - 1u);
+        const std::string_view rest = text.substr(close + 1u);
+        if (!rest.empty() && (rest.front() != ':' || !parse_port(rest.substr(1u), number))) {
+            return false;
+        }
+    } else {
+        const std::size_t colon = text.rfind(':');
+        if (colon != std::string_view::npos && text.find(':') != colon) {
+            name = text;  // a bare IPv6 address: the default port
+        } else if (colon != std::string_view::npos) {
+            name = text.substr(0u, colon);
+            if (!parse_port(text.substr(colon + 1u), number)) {
+                return false;
+            }
+        } else {
+            name = text;
+        }
+    }
+    if (name.empty() || name.find_first_of(" \t[]/") != std::string_view::npos) {
+        return false;
+    }
+    host.assign(name);
+    port = number;
+    return true;
 }
 
 const char* runtime_input_mode_name(RuntimeInputMode mode) {

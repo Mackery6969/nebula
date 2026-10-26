@@ -8,6 +8,7 @@
 //     input; on Android SDL's activity calls SDL_main.
 //
 //   <host> --pak <game.pak> --nand <dir> [--module <smg_game.dll>] [--seconds N]
+//   Windowed hosts also take --host <port> or --join <address[:port]> (online co-op, not playable yet).
 #if defined(_WIN32)
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -3305,6 +3306,24 @@ int main(int argc, char** argv) {
             module = argv[i + 1];
         } else if (key == "--seconds") {
             seconds = std::atof(argv[i + 1]);
+#if defined(NEBULA_HOST_RENDERER)
+        } else if (key == "--host") {
+            // Online co-op (docs/COOP_PLAN.md), not playable yet: the options are checked, then the game starts alone.
+            std::string ignored;
+            std::uint16_t port = 0u;
+            if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port)) {
+                die("--host takes a port, 1 to 65535");
+            }
+            std::fprintf(stderr, "[coop] online co-op isn't available yet: not hosting on port %u\n", port);
+        } else if (key == "--join") {
+            std::string address;
+            std::uint16_t port = 0u;
+            if (!galaxy::parse_coop_endpoint(argv[i + 1], address, port)) {
+                die("--join takes an address, address:port or [IPv6]:port");
+            }
+            std::fprintf(stderr, "[coop] online co-op isn't available yet: not joining %s port %u\n", address.c_str(),
+                         port);
+#endif
         } else {
             die("unknown option %s", key.c_str());
         }
