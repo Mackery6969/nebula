@@ -1,0 +1,53 @@
+name: "CodeQL Advanced"
+
+# CodeQL code scanning of Nebula's own code.
+#
+# Replaces GitHub's default setup so the scan can skip code Nebula does not own: the Petari
+# decompilation (native/petari, which mirrors the original game's code) and the unmodified
+# libraries in third_party (THIRD-PARTY-NOTICES.md). Every language is extracted without a
+# build (build-mode none), which is what lets paths-ignore apply to C/C++ as well.
+#
+# Default setup must be turned off (Settings > Code security > CodeQL analysis) for GitHub to
+# accept this workflow's results.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, c-cpp, csharp, java-kotlin, python, rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          config: |
+            paths-ignore:
+              - native/petari
+              - third_party
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
