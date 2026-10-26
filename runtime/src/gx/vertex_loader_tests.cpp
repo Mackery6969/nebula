@@ -432,9 +432,8 @@ bool indexed_primitive_rebases_to_batch_vertex_base(
             "could not map index upload ring")) {
         return false;
     }
-    const auto* indices = reinterpret_cast<const std::uint16_t*>(
-        static_cast<const std::byte*>(mapped) +
-        second.first_index * sizeof(std::uint16_t));
+    const auto* indices =
+        static_cast<const std::uint16_t*>(mapped) + second.first_index;
     const std::uint16_t expected[] = {4, 5, 6, 4, 6, 7};
     bool ok = true;
     ok = expect(first.index_count == 6, "first quad index count changed") && ok;
