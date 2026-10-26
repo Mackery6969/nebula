@@ -2544,6 +2544,8 @@ void wpad_thread() {
         next = Clock::now() + period;
         log_line("[wiimote]", on ? "in use" : "keyboard, mouse and controllers in use");
     };
+#else
+    [[maybe_unused]] constexpr bool real = false;  // no real Wii Remote on this host
 #endif
     for (;;) {
 #if defined(NEBULA_REAL_WIIMOTE)

@@ -142,7 +142,7 @@ jobs:
         # The program finds libSDL3 and the game module beside it.
         run: |
           mkdir -p dist
-          cp build/host/main dist/NebulaNative
+          cp build/host/nebula dist/NebulaNative
           cp -L build/host/SDL3/libSDL3.so.0 build/game/libsmg_game.so target/release/nebula-import dist/
           patchelf --set-rpath '$ORIGIN' dist/NebulaNative
           cp LICENSE THIRD-PARTY-NOTICES.md docs/TEST_BUILDS.md dist/

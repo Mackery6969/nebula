@@ -7,6 +7,11 @@ project(NebulaSDL LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# The host's SIMD kernels (galaxy/simd128.h) use SSSE3 on x86-64: MSVC allows it without a flag and Android's x86_64
+# ABI includes it, but desktop Linux's default x86-64 target has only SSE2.
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$" AND NOT ANDROID)
+    add_compile_options($<$<COMPILE_LANGUAGE:C,CXX>:-mssse3>)
+endif()
 
 get_filename_component(nebula_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(NEBULA_DEPS "D:/NebulaWork/deps" CACHE PATH "Folder of the dependency checkouts")
@@ -109,6 +114,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/frame_cadence_diagnostics.cpp
     ${rt}/runtime_settings.cpp
     ${rt}/achievements.cpp
+    ${rt}/stats.cpp
     ${rt}/input_bindings.cpp
     ${rt}/host_pointer_events.cpp
     ${rt}/native_input.cpp

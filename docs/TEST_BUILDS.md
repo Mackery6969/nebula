@@ -30,7 +30,8 @@ artifact under **Artifacts**. You need to be signed in to GitHub.
    ```
 
    `saves` is created if it's missing and holds the save files. On Linux the folder must also hold `libSDL3.so.0` and
-   `libsmg_game.so` (they're found next to the program), and you need a Vulkan driver.
+   `libsmg_game.so` (they're found next to the program), and you need a Vulkan driver. Nebula's in-game settings menu
+   (F1) is Windows-only for now: on Linux, settings come from `runtime_settings.ini` and `config.ini`.
 
 Online co-op lines in the log start with `[coop]`. `--host <port>` and `--join <address[:port]>` are accepted but don't
 connect to anything yet (docs/COOP_PLAN.md).

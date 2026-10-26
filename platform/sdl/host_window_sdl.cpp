@@ -793,6 +793,16 @@ VkSurfaceKHR create_vulkan_surface(VkInstance instance, NativeWindow window) {
 
 namespace galaxy::gx {
 
+// Nebula's in-game settings menu is the Windows window's (host_window_win32.cpp): here it stays closed and the 2D layer
+// keeps the HUD's scale. The Android launcher has its own settings.
+NativeSettingsView native_settings_view() {
+    return {};
+}
+
+void native_settings_input(NativeSettingsInput, int) {}
+
+void request_sharp_2d(bool) noexcept {}
+
 void set_native_settings_content_root(const std::string& utf8_path) {
     host_window::native_settings_content_root = utf8_path;
 }
