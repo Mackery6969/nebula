@@ -13,6 +13,8 @@ std::atomic<std::uint64_t> g_travel{0u};  // stage + 1 in the low 32 bits, star 
 std::atomic<bool> g_grand_stars{false};
 std::atomic<bool> g_leave_game{false};
 std::atomic<bool> g_coop_in_game{false};
+std::mutex g_room_mutex;
+CoopRoomStatus g_room;
 std::atomic<bool> g_text_entry{false};
 std::mutex g_text_mutex;
 std::vector<char32_t> g_text;  // typed, not taken yet
@@ -51,6 +53,16 @@ bool take_grand_stars() noexcept {
 
 void request_leave_game() noexcept {
     g_leave_game.store(true, std::memory_order_release);
+}
+
+void set_coop_room_status(const CoopRoomStatus& status) {
+    const std::lock_guard<std::mutex> lock(g_room_mutex);
+    g_room = status;
+}
+
+CoopRoomStatus coop_room_status() {
+    const std::lock_guard<std::mutex> lock(g_room_mutex);
+    return g_room;
 }
 
 void set_coop_in_game(bool in_game) noexcept {

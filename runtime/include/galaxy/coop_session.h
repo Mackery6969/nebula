@@ -1,0 +1,158 @@
+// Online co-op's session (docs/COOP_PLAN.md, "Hosting"): the room as the game sees it, over a transport
+// (galaxy/net/transport.h). Host opens it on a port; Join connects to address:port, asks the host to let this player
+// in and gets the room (its settings, the host's save and who is playing); Leave game leaves it, or closes it for
+// everyone when the host leaves. As in sm64coopdx, the host is player 0 and the others get the lowest free number.
+//
+// A session runs on a thread of its own (the network keeps going while the game loads or a menu is open). Everything
+// here may be called from any thread; what happened (a player joined, the join refused, the room closed) waits in
+// take_events() for the game's thread. Later features (snapshots, chat, mods) send their own messages with send() and
+// receive them with on_message().
+#pragma once
+
+#include "galaxy/net/transport.h"
+#include "galaxy/runtime_settings.h"
+
+#include <atomic>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <span>
+#include <string>
+#include <thread>
+#include <vector>
+
+namespace galaxy::coop {
+
+// The session's own protocol (its messages, below the transport's): a different one refuses the join.
+inline constexpr std::uint16_t kSessionProtocol = 2u;
+// The first message type a feature may use with send() and on_message(); below are the session's.
+inline constexpr std::uint8_t kFirstFeatureMessage = 32u;
+// The host's save, sent at a join: this many bytes at most.
+inline constexpr std::size_t kMaxSaveBytes = 8u << 20;
+
+struct SessionPlayer {
+    net::PeerId id = net::kNoPeer;
+    unsigned index = 0u;  // 0 the host, then 1, 2... as they joined
+    std::string name;
+    CoopCharacter character = CoopCharacter::Mario;
+    bool host = false;
+    bool local = false;
+    // Where they play (set_place): the stage's name and its scenario; empty until they reach one.
+    std::string stage;
+    int scenario = 0;
+    // The round trip to them (to the host, for a joiner's view of the others), 0 for this player or when unknown.
+    unsigned ping_ms = 0u;
+};
+
+// A file of the save the room plays (its folder's GameData.bin...), by name.
+struct SaveFile {
+    std::string name;
+    std::vector<std::uint8_t> bytes;
+};
+
+// The host's save as a joiner plays it: the user file to play and the folder's files.
+struct RoomSave {
+    unsigned file = 1u;
+    std::vector<SaveFile> files;
+};
+
+enum class SessionState : std::uint8_t {
+    Idle,
+    Hosting,
+    Connecting,  // reaching the host's lobby, then waiting for it to let this player in
+    Joined,
+};
+
+struct SessionEvent {
+    enum class Kind : std::uint8_t {
+        Hosting,       // the room is open (text: the port)
+        Joined,        // the host let this player in: take_room_save() holds the save
+        JoinFailed,    // the join didn't work (text: why)
+        Closed,        // the room ended for this player (text: why; empty when the player left)
+        PlayerJoined,  // name: who
+        PlayerLeft,    // name: who; text: why when they stopped answering
+        RoomChanged,   // the host changed the room's settings (room())
+    };
+    Kind kind = Kind::Hosting;
+    std::string name;
+    std::string text;
+};
+
+struct HostConfig {
+    std::uint16_t port = kCoopDefaultPort;  // 0: any (tests)
+    RuntimeCoopSettings room;               // the room's settings, the password and max players among them
+    std::string game_version;               // joiners with another are refused
+    std::string name;
+    CoopCharacter character = CoopCharacter::Mario;
+    // The save to send each joiner, read as they join (on the session's thread).
+    std::function<RoomSave()> save;
+};
+
+struct JoinConfig {
+    std::string address;
+    std::uint16_t port = kCoopDefaultPort;
+    std::string password;
+    std::string game_version;
+    std::string name;
+    CoopCharacter character = CoopCharacter::Mario;
+};
+
+class Session {
+public:
+    using Handler = std::function<void(const SessionPlayer& from, std::span<const std::uint8_t> data)>;
+
+    // `transport`: none for the direct one (galaxy/net/direct_transport.h).
+    explicit Session(std::unique_ptr<net::Transport> transport = {});
+    ~Session();
+    Session(const Session&) = delete;
+    Session& operator=(const Session&) = delete;
+
+    // Opens the room. False when the port can't be opened (taken, no network).
+    bool host(HostConfig config);
+    // Starts joining; how it went comes as an event (Joined or JoinFailed). False when it can't start at all.
+    bool join(JoinConfig config);
+    // Leaves, or closes the room as its host. Nothing happens when there is no session.
+    void leave();
+
+    [[nodiscard]] SessionState state() const;
+    [[nodiscard]] bool active() const { return state() != SessionState::Idle; }
+    [[nodiscard]] bool is_host() const;
+    // Everyone in the room, by number (this player marked local).
+    [[nodiscard]] std::vector<SessionPlayer> players() const;
+    // The room's settings: the host's (as a joiner got them).
+    [[nodiscard]] RuntimeCoopSettings room() const;
+    // The port a host listens on.
+    [[nodiscard]] std::uint16_t port() const;
+    // The host changes the room's settings for everyone.
+    void set_room(const RuntimeCoopSettings& room);
+    // Where this player plays (the player list's galaxy and star), told to everyone as it changes. Kept while there
+    // is no room too: a room opened or joined later starts with it.
+    void set_place(const std::string& stage, int scenario);
+
+    [[nodiscard]] std::vector<SessionEvent> take_events();
+    // Once, after Joined: the host's save.
+    [[nodiscard]] std::optional<RoomSave> take_room_save();
+
+    // A feature's message (`type` from kFirstFeatureMessage), to a player or net::kEveryone. False when not in a room
+    // or too long for the channel (its type byte counts).
+    bool send(std::uint8_t type, net::Channel channel, std::span<const std::uint8_t> data,
+              net::PeerId to = net::kEveryone);
+    // What runs (on the session's thread) when a feature's message comes. Set before hosting or joining.
+    void on_message(std::uint8_t type, Handler handler);
+
+private:
+    struct State;
+
+    void run();
+    void start_thread();
+    void stop_thread();
+
+    std::unique_ptr<State> state_;
+    mutable std::recursive_mutex lock_;
+    std::thread thread_;
+    std::atomic<bool> running_{false};
+};
+
+}  // namespace galaxy::coop

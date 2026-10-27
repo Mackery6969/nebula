@@ -19,6 +19,7 @@
 #include "galaxy/atomic_file.h"
 #include "galaxy/coop_menu.h"
 #include "galaxy/coop_saves.h"
+#include "galaxy/coop_session.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -87,6 +88,7 @@ inline int64_t perf_hint_retrace() noexcept { return 0; }
 #include <limits>
 #include <mutex>
 #include <optional>
+#include <utility>
 #include <ctime>
 #include <span>
 #include <string>
@@ -1780,6 +1782,234 @@ unsigned gCoopSaveFile = 1u;  // the user file the played save plays
 // The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): the Player page's, as Host left the menu.
 std::atomic<bool> gCoopLuigi{false};
 
+// Online play (galaxy/coop_session.h): the room this player hosts or joined. Host opens it as its save starts; Join
+// connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
+galaxy::coop::Session gCoopSession;
+void keep_coop_settings();
+// The game as online play compares it: a player with another is refused (the disc and mods are checked later).
+const std::string kCoopGameVersion = "nebula-api-" + std::to_string(NEBULA_GAME_API_VERSION);
+// Why the room ended, shown on the main menu as it opens again.
+std::mutex gCoopNoticeLock;
+std::string gCoopNotice;
+// The command line's --host <port> or --join <address>: done once, as the main menu first opens.
+enum class CoopAutoStart { None, Host, Join };
+CoopAutoStart gCoopAutoStart = CoopAutoStart::None;
+std::uint16_t gCoopAutoPort = 0u;
+std::string gCoopAutoAddress;
+
+void set_coop_notice(std::string text) {
+    const std::lock_guard<std::mutex> lock(gCoopNoticeLock);
+    gCoopNotice = std::move(text);
+}
+
+std::string take_coop_notice() {
+    const std::lock_guard<std::mutex> lock(gCoopNoticeLock);
+    return std::exchange(gCoopNotice, {});
+}
+
+// The host's save as a joiner gets it: the played save folder's files (the game's GameData.bin and the rest), read
+// as they join, and the user file it plays.
+galaxy::coop::RoomSave coop_room_save() {
+    galaxy::coop::RoomSave save;
+    save.file = gCoopSaveFile;
+    fs::path folder;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        folder = gCoopSaveFolder;
+    }
+    std::error_code error;
+    if (folder.empty() || !fs::is_directory(folder, error)) return save;
+    std::size_t total = 0u;
+    for (const fs::directory_entry& entry : fs::directory_iterator(folder, error)) {
+        if (!entry.is_regular_file(error)) continue;
+        const std::string name = entry.path().filename().string();
+        // Nebula's own files stay the host's.
+        if (name == "save.ini" || name == "achievements.ini") continue;
+        std::ifstream in(entry.path(), std::ios::binary);
+        std::vector<std::uint8_t> bytes((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        total += bytes.size();
+        if (total > galaxy::coop::kMaxSaveBytes) break;
+        save.files.push_back({name, std::move(bytes)});
+    }
+    return save;
+}
+
+// The host's save into this player's folder for it (coop_joined/ under the NAND root, emptied first), for the game
+// to play. False when it can't be written.
+bool write_joined_save(const galaxy::coop::RoomSave& save, fs::path& folder) {
+    folder = gNandRoot / "coop_joined";
+    std::error_code error;
+    fs::remove_all(folder, error);
+    fs::create_directories(folder, error);
+    if (error) return false;
+    for (const galaxy::coop::SaveFile& file : save.files) {
+        // A plain file name: nothing that leaves the folder.
+        const fs::path name = fs::path(file.name).filename();
+        if (name.empty() || name != fs::path(file.name) || name == "." || name == "..") continue;
+        std::ofstream out(folder / name, std::ios::binary);
+        out.write(reinterpret_cast<const char*>(file.bytes.data()), static_cast<std::streamsize>(file.bytes.size()));
+        if (!out) return false;
+    }
+    return true;
+}
+
+// The player's name as the room shows it: the Player page's, else the save's.
+std::string coop_player_name(const std::string& fallback) {
+    const std::string& name = gCoopMenu.room().player_name;
+    return name.empty() ? (fallback.empty() ? std::string("PLAYER") : fallback) : name;
+}
+
+// The Online page's view of the room (how many play, the host's settings for a joiner).
+void note_coop_room() {
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::gx::CoopRoomStatus status;
+    status.players = static_cast<unsigned>(std::max<std::size_t>(gCoopSession.players().size(), 1u));
+    status.joined = gCoopSession.state() == galaxy::coop::SessionState::Joined;
+    if (status.joined) status.room = gCoopSession.room();
+    galaxy::gx::set_coop_room_status(status);
+#endif
+}
+
+// Where this player plays (the player list's galaxy and star), as the game last reported it: the session tells the
+// others when it changes. Nowhere once back at the main menu.
+void note_coop_place() {
+    std::string stage;
+    int scenario = 0;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        if (gCoopLocalValid) {
+            stage = gCoopLocal.stage;
+            scenario = gCoopLocal.scenario;
+        }
+    }
+    gCoopSession.set_place(stage, scenario);
+}
+
+// What happened in the room since the last call, on the game's thread: logged, and a room that ended while playing
+// takes the player back to the main menu. The host's room settings (the Online page's) reach the others.
+void pump_coop_session() {
+    note_coop_place();
+    if (!gCoopSession.active()) return;
+#if defined(NEBULA_HOST_RENDERER)
+    if (gCoopSession.is_host()) gCoopSession.set_room(galaxy::get_runtime_settings().coop);
+#endif
+    using Kind = galaxy::coop::SessionEvent::Kind;
+    bool changed = false;
+    for (const galaxy::coop::SessionEvent& event : gCoopSession.take_events()) {
+        switch (event.kind) {
+        case Kind::PlayerJoined:
+            std::fprintf(stderr, "[coop] %s joined\n", event.name.c_str());
+            changed = true;
+            break;
+        case Kind::PlayerLeft:
+            std::fprintf(stderr, "[coop] %s left%s%s\n", event.name.c_str(), event.text.empty() ? "" : ": ",
+                         event.text.c_str());
+            changed = true;
+            break;
+        case Kind::RoomChanged: changed = true; break;
+        case Kind::Closed:
+            std::fprintf(stderr, "[coop] the room ended: %s\n", event.text.empty() ? "left" : event.text.c_str());
+            if (!event.text.empty()) {
+                set_coop_notice(event.text);
+#if defined(NEBULA_HOST_RENDERER)
+                if (galaxy::gx::coop_in_game()) galaxy::gx::request_leave_game();
+#endif
+            }
+            changed = true;
+            break;
+        default: break;
+        }
+    }
+    if (changed) note_coop_room();
+}
+
+// Host: the room opens on the Host page's port as the save starts. False (and why on the menu) when it can't.
+bool open_coop_room(const galaxy::coop::SaveInfo& save) {
+    galaxy::coop::HostConfig config;
+    config.room = gCoopMenu.room();
+    config.port = config.room.port;
+    config.game_version = kCoopGameVersion;
+    config.name = coop_player_name(save.name);
+    config.character = config.room.character;
+    config.save = coop_room_save;
+    if (!gCoopSession.host(std::move(config))) {
+        std::fprintf(stderr, "[coop] the room could not open on port %u\n", static_cast<unsigned>(gCoopMenu.room().port));
+        gCoopMenu.set_message("PORT " + std::to_string(gCoopMenu.room().port) +
+                              " COULD NOT BE OPENED: ANOTHER PROGRAM HAS IT. PICK ANOTHER PORT");
+        return false;
+    }
+    (void)gCoopSession.take_events();
+    std::fprintf(stderr, "[coop] room open on UDP port %u\n", static_cast<unsigned>(gCoopSession.port()));
+    note_coop_room();
+    return true;
+}
+
+// Join: connects to the Join page's address. How it goes comes to poll_coop_join.
+void start_coop_join() {
+    keep_coop_settings();
+    const galaxy::RuntimeCoopSettings& room = gCoopMenu.room();
+    galaxy::coop::JoinConfig config;
+    if (!galaxy::parse_coop_endpoint(room.join_address, config.address, config.port)) {
+        gCoopMenu.set_message("THAT ISN'T AN ADDRESS: HOST, HOST:PORT OR [IPV6]:PORT");
+        return;
+    }
+    config.password = room.password;
+    config.game_version = kCoopGameVersion;
+    config.name = coop_player_name({});
+    config.character = room.character;
+    std::fprintf(stderr, "[coop] joining %s port %u\n", config.address.c_str(), static_cast<unsigned>(config.port));
+    const std::string address = room.join_address;
+    if (!gCoopSession.join(std::move(config))) {
+        std::string why = "THE ADDRESS COULD NOT BE REACHED";
+        for (const galaxy::coop::SessionEvent& event : gCoopSession.take_events()) {
+            if (event.kind == galaxy::coop::SessionEvent::Kind::JoinFailed) why = event.text;
+        }
+        gCoopMenu.set_message("COULD NOT JOIN: " + why);
+        return;
+    }
+    gCoopMenu.set_joining(true);
+    gCoopMenu.set_message("CONNECTING TO " + address + "...");
+}
+
+// While a join connects: true once the host let this player in and its save is ready to play.
+bool poll_coop_join() {
+    if (!gCoopMenu.joining()) return false;
+    using Kind = galaxy::coop::SessionEvent::Kind;
+    for (const galaxy::coop::SessionEvent& event : gCoopSession.take_events()) {
+        if (event.kind == Kind::JoinFailed || event.kind == Kind::Closed) {
+            gCoopMenu.set_joining(false);
+            std::fprintf(stderr, "[coop] the join failed: %s\n", event.text.c_str());
+            gCoopMenu.set_message("COULD NOT JOIN: " + (event.text.empty() ? std::string("CANCELLED") : event.text));
+            return false;
+        }
+        if (event.kind != Kind::Joined) continue;
+        gCoopMenu.set_joining(false);
+        const std::optional<galaxy::coop::RoomSave> save = gCoopSession.take_room_save();
+        fs::path folder;
+        if (!save || !write_joined_save(*save, folder)) {
+            gCoopSession.leave();
+            (void)gCoopSession.take_events();
+            gCoopMenu.set_message("COULD NOT JOIN: THE HOST'S SAVE COULD NOT BE WRITTEN");
+            return false;
+        }
+        {
+            const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+            gCoopSaveFolder = folder;
+        }
+        gCoopSaveFile = save->file;
+        gCoopLuigi.store(gCoopMenu.room().character == galaxy::CoopCharacter::Luigi, std::memory_order_relaxed);
+#if defined(NEBULA_HOST_RENDERER)
+        galaxy::achievements::set_file(folder / "achievements.ini");
+        galaxy::gx::set_coop_in_game(true);
+#endif
+        std::fprintf(stderr, "[coop] joined: the host's save (file %u, %zu file(s)), %zu player(s)\n", save->file,
+                     save->files.size(), gCoopSession.players().size());
+        note_coop_room();
+        return true;
+    }
+    return false;
+}
+
 // The menu's settings (the room's, the player's, the last address) as the runtime settings, saved as they change.
 void keep_coop_settings() {
 #if defined(NEBULA_HOST_RENDERER)
@@ -1857,6 +2087,7 @@ bool start_coop_save() {
         gCoopMenu.set_message("THE ROOM'S MODS APPLY WHEN NEBULA STARTS AGAIN: CLOSE IT AND START IT AGAIN TO HOST");
         return false;
     }
+    if (!open_coop_room(*save)) return false;
     (void)gCoopSaves->mark_played(id, static_cast<std::int64_t>(std::time(nullptr)));
     const fs::path folder = gCoopSaves->folder(id);
     {
@@ -2027,10 +2258,37 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         galaxy::gx::set_coop_in_game(false);
 #endif
         if (!gCoopMenu.is_open()) {
+            // Back at the main menu: the game ended, and with it the room.
+            if (gCoopSession.active()) gCoopSession.leave();
+            (void)gCoopSession.take_events();
+            {
+                const std::lock_guard<std::mutex> lock(gCoopLock);
+                gCoopLocalValid = false;
+            }
+            note_coop_place();
+            note_coop_room();
+            gCoopMenu.set_joining(false);
             gCoopMenu.open();
+            if (std::string notice = take_coop_notice(); !notice.empty()) gCoopMenu.set_message(notice);
             // Back after a restart for the room's mods: its save plays at once.
             std::string next = gCoopSaves ? gCoopSaves->take_next_start() : std::string();
-            if (!next.empty()) gCoopMenu.play(std::move(next));
+            if (!next.empty()) {
+                gCoopMenu.play(std::move(next));
+            } else if (const CoopAutoStart start = std::exchange(gCoopAutoStart, CoopAutoStart::None);
+                       start == CoopAutoStart::Host) {
+                // --host: the last played save, on the port given.
+                galaxy::RuntimeCoopSettings room = gCoopMenu.room();
+                room.port = gCoopAutoPort;
+                gCoopMenu.set_room(room);
+                const std::vector<galaxy::coop::SaveInfo> saves =
+                    gCoopSaves ? gCoopSaves->list() : std::vector<galaxy::coop::SaveInfo>{};
+                gCoopMenu.play(saves.empty() ? std::string() : saves.front().id);
+            } else if (start == CoopAutoStart::Join) {
+                galaxy::RuntimeCoopSettings room = gCoopMenu.room();
+                room.join_address = gCoopAutoAddress;
+                gCoopMenu.set_room(room);
+                start_coop_join();
+            }
         }
         return 0;
     case NEBULA_COOP_MENU_CLOSE:
@@ -2043,8 +2301,20 @@ int32_t svc_coop_menu(void*, uint32_t what) {
     case NEBULA_COOP_MENU_POLL:
         // What the player changed is kept as they change it, a text once kept.
         if (!gCoopMenu.editing()) keep_coop_settings();
+        if (poll_coop_join()) return NEBULA_COOP_MENU_PLAY;
         switch (gCoopMenu.take_command()) {
-        case galaxy::coop::MenuCommand::Play: return start_coop_save() ? NEBULA_COOP_MENU_PLAY : NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::Play:
+            if (gCoopMenu.joining()) return NEBULA_COOP_MENU_NONE;
+            return start_coop_save() ? NEBULA_COOP_MENU_PLAY : NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::Join:
+            if (!gCoopMenu.joining()) start_coop_join();
+            return NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::CancelJoin:
+            gCoopMenu.set_joining(false);
+            gCoopSession.leave();
+            (void)gCoopSession.take_events();
+            std::fprintf(stderr, "[coop] the join was cancelled\n");
+            return NEBULA_COOP_MENU_NONE;
         case galaxy::coop::MenuCommand::Quit: return NEBULA_COOP_MENU_QUIT;
         case galaxy::coop::MenuCommand::Settings:
 #if defined(NEBULA_HOST_RENDERER)
@@ -2065,6 +2335,29 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         if ((what & 0xffu) == NEBULA_COOP_MENU_OLD_FILES) convert_old_saves(what >> 8u);
         return 0;
     }
+}
+
+// The player list (Tab or the controller's Share held): the room's players by number, each one's place and round trip.
+uint32_t svc_coop_list(void*, NebulaCoopListPlayer* players, uint32_t capacity, uint32_t* room_size) {
+    if (room_size != nullptr) *room_size = 0u;
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return 0u;
+    const std::vector<galaxy::coop::SessionPlayer> list = gCoopSession.players();
+    if (room_size != nullptr) *room_size = gCoopSession.room().max_players;
+    const std::size_t count = std::min<std::size_t>(list.size(), players != nullptr ? capacity : 0u);
+    for (std::size_t i = 0; i < count; ++i) {
+        const galaxy::coop::SessionPlayer& from = list[i];
+        NebulaCoopListPlayer& to = players[i];
+        to = {};
+        std::snprintf(to.name, sizeof(to.name), "%s", from.name.c_str());
+        std::snprintf(to.stage, sizeof(to.stage), "%s", from.stage.c_str());
+        to.scenario = from.scenario;
+        to.number = from.index + 1u;
+        to.ping_ms = from.ping_ms;
+        to.flags = (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_LIST_LUIGI : 0u) |
+                   (from.host ? NEBULA_COOP_LIST_HOST : 0u) | (from.local ? NEBULA_COOP_LIST_YOU : 0u);
+    }
+    return static_cast<uint32_t>(list.size());
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -3131,7 +3424,15 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
             std::snprintf(action->stage, sizeof(action->stage), "%s", galaxy::gx::kGalaxyStages[stage].id);
             return 1;
         }
+        pump_coop_session();
         if (galaxy::gx::take_leave_game()) {
+            // Leave game: out of the room (closing it, for its host), then the main menu.
+            if (gCoopSession.active()) {
+                std::fprintf(stderr, "[coop] leaving the room\n");
+                gCoopSession.leave();
+                (void)gCoopSession.take_events();
+                note_coop_room();
+            }
             action->kind = NEBULA_TEST_LEAVE_GAME;
             return 1;
         }
@@ -3594,22 +3895,24 @@ int main(int argc, char** argv) {
             seconds = std::atof(argv[i + 1]);
 #if defined(NEBULA_HOST_RENDERER)
         } else if (key == "--host") {
-            // Online co-op (docs/COOP_PLAN.md), not playable yet: the options are checked, then the game starts alone.
+            // Online co-op (docs/COOP_PLAN.md): as the main menu opens, Host plays the last played save on this port.
             std::string ignored;
             std::uint16_t port = 0u;
-            if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port)) {
+            if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port) ||
+                std::string(argv[i + 1]).find_first_not_of("0123456789") != std::string::npos) {
                 die("--host takes a port, 1 to 65535");
             }
-            std::fprintf(stderr, "[coop] online co-op isn't available yet: not hosting on port %u\n",
-                         static_cast<unsigned>(port));
+            gCoopAutoStart = CoopAutoStart::Host;
+            gCoopAutoPort = port;
         } else if (key == "--join") {
+            // As the main menu opens, Join connects to the address.
             std::string address;
             std::uint16_t port = 0u;
             if (!galaxy::parse_coop_endpoint(argv[i + 1], address, port)) {
                 die("--join takes an address, address:port or [IPv6]:port");
             }
-            std::fprintf(stderr, "[coop] online co-op isn't available yet: not joining %s port %u\n", address.c_str(),
-                         static_cast<unsigned>(port));
+            gCoopAutoStart = CoopAutoStart::Join;
+            gCoopAutoAddress = argv[i + 1];
 #endif
         } else {
             die("unknown option %s", key.c_str());
@@ -3813,6 +4116,7 @@ int main(int argc, char** argv) {
     services.traced_sun = svc_traced_sun;
     services.coop_player = svc_coop_player;
     services.coop_menu = svc_coop_menu;
+    services.coop_list = svc_coop_list;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

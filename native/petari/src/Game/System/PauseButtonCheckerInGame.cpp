@@ -1,5 +1,8 @@
 #include "Game/System/PauseButtonCheckerInGame.hpp"
 #include "Game/Util/GamePadUtil.hpp"
+#ifdef TARGET_PC
+#include <revolution/os.h>
+#endif
 
 namespace {
     static const s32 sHoldCounterMax = 12;
@@ -49,6 +52,11 @@ bool PauseButtonCheckerInGame::isPermitToPlusPause() const {
 
 bool PauseButtonCheckerInGame::isPermitToMinusPause() const {
     if (mMinusHoldFrame == 0 || mMinusUsed || !isPermitToPause()) {
+        return false;
+    }
+    // In an online co-op room Minus (a controller's Share) holds the player list (NebulaPlayerList) instead: Plus
+    // pauses.
+    if (__NebulaCoopList(nullptr, 0, nullptr) != 0) {
         return false;
     }
     mPlusUsed = true;

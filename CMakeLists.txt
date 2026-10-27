@@ -98,6 +98,16 @@ add_library(galaxy_runtime_settings STATIC
 target_link_libraries(galaxy_runtime_settings PUBLIC galaxy_runtime_abi galaxy_atomic_file)
 galaxy_host_options(galaxy_runtime_settings)
 
+# Online co-op's network layer (runtime/src/net, docs/COOP_PLAN.md "Phase 1"): UDP sockets, the reliable and ordered
+# channels, the CoopNet-shaped direct transport and the session over it.
+add_library(galaxy_net STATIC
+    runtime/src/net/udp.cpp
+    runtime/src/net/link.cpp
+    runtime/src/net/direct_transport.cpp
+    runtime/src/coop_session.cpp)
+target_link_libraries(galaxy_net PUBLIC galaxy_runtime_abi ws2_32)
+galaxy_host_options(galaxy_net)
+
 add_library(galaxy_frame_cadence_diagnostics STATIC runtime/src/frame_cadence_diagnostics.cpp)
 target_link_libraries(galaxy_frame_cadence_diagnostics PUBLIC galaxy_runtime_abi)
 galaxy_host_options(galaxy_frame_cadence_diagnostics)
@@ -143,6 +153,7 @@ target_link_libraries(galaxy_native_host
     PUBLIC
         galaxy_runtime_abi
         galaxy_runtime_settings
+        galaxy_net
         galaxy_native_input
         galaxy_jaudio_mixer
         galaxy_frame_cadence_diagnostics
@@ -558,7 +569,7 @@ if(NEBULA_HOST_IPO)
     check_ipo_supported(RESULT nebula_host_ipo_supported OUTPUT nebula_host_ipo_error LANGUAGES CXX)
     if(nebula_host_ipo_supported)
         foreach(target galaxy_native_host galaxy_gx galaxy_native_input galaxy_host_pointer_events
-                galaxy_frame_cadence_diagnostics galaxy_runtime_settings galaxy_atomic_file galaxy_jaudio_mixer)
+                galaxy_frame_cadence_diagnostics galaxy_runtime_settings galaxy_net galaxy_atomic_file galaxy_jaudio_mixer)
             set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
         endforeach()
         set(nebula_host_ipo_effective ON)
@@ -590,6 +601,7 @@ set(rt runtime/src)
 galaxy_test(galaxy_atomic_file_tests SOURCES ${rt}/atomic_file_tests.cpp LIBS galaxy_atomic_file)
 galaxy_test(galaxy_runtime_settings_tests SOURCES ${rt}/runtime_settings_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_coop_menu_tests SOURCES ${rt}/coop_menu_tests.cpp LIBS galaxy_runtime_settings)
+galaxy_test(galaxy_net_tests SOURCES ${rt}/net/net_tests.cpp LIBS galaxy_net)
 galaxy_test(galaxy_achievements_tests SOURCES ${rt}/achievements_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_stats_tests SOURCES ${rt}/stats_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_controls_tests SOURCES ${rt}/controls_tests.cpp LIBS galaxy_runtime_settings galaxy_native_input)
