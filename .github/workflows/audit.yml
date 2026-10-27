@@ -1,9 +1,11 @@
-# Checks the tracked files on every push and pull request, documentation included: no game content, build outputs,
-# oversized files or credentials (tools/audit_repo.ps1).
+# Checks the tracked files on every pull request and push to main, documentation included: no game content, build
+# outputs, oversized files or credentials (tools/audit_repo.ps1).
 name: Audit
 
 on:
+  # A push to a pull request's branch is checked by the pull_request trigger.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
