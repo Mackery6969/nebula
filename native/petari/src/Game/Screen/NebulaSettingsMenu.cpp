@@ -7,6 +7,7 @@
 #include "Game/Screen/LayoutCoreUtil.hpp"
 #include "Game/Screen/LayoutManager.hpp"
 #include "Game/Screen/NebulaIcons.hpp"
+#include "Game/Screen/NebulaMenuFocus.hpp"
 #include "Game/Screen/NebulaPaneKit.hpp"
 #include "Game/Screen/NebulaUi.hpp"
 #include "Game/System/NebulaCutsceneSkip.hpp"
@@ -691,6 +692,8 @@ public:
     bool isMainMenu() const { return mShown.kind == NEBULA_SETTINGS_KIND_MAIN_MENU; }
     // The pointer is on something A presses (a tab, a footer button, a row): the screen takes that A itself.
     bool isPointerOnItem() const { return mHoverButton != nullptr || mHoverTab >= 0 || mHoverRow >= 0; }
+    // The D-pad or stick moved the selection: the pointer waits until it moves.
+    void takeFromPointer() { mPointerMode = false; }
 
 private:
     bool build();
@@ -845,17 +848,30 @@ namespace {
     bool sFreezing = false;     // the scene waits: the menu open, dropping in or rising away
     bool sMusicPaused = false;  // the music stopped once faded, as under the pause menu
     bool sMainMenuActive = false;  // the file select shows the online co-op main menu (FileSelector)
+    bool sMainMenuReading = false;  // the main menu took the pad last frame
+    NebulaMenuFocus::Repeat sMainMenuRepeat = {NebulaMenuFocus::Direction_None, 0};
 
-    // The main menu's D-pad, A and Plus/Minus: the game reads them itself (on every platform the keyboard and
-    // controllers reach it as the Wii Remote), where the settings menu's come from the host.
+    // The main menu's D-pad or stick (a press, then repeats while held: NebulaMenuFocus::readPress, as every Nebula
+    // menu), A and Plus/Minus: the game reads them itself (on every platform the keyboard and controllers reach it as
+    // the Wii Remote), where the settings menu's come from the host.
     void readMainMenuPad(const NebulaSettingsView& rView) {
-        if (MR::testCorePadTriggerUp(WPAD_CHAN0)) {
+        if (!sMainMenuReading) {
+            // A stick still held as the menu opens is not a press.
+            NebulaMenuFocus::holdCurrent(&sMainMenuRepeat);
+            sMainMenuReading = true;
+            return;
+        }
+        const NebulaMenuFocus::Direction press = NebulaMenuFocus::readPress(&sMainMenuRepeat);
+        if (press != NebulaMenuFocus::Direction_None) {
+            sScreen->takeFromPointer();
+        }
+        if (press == NebulaMenuFocus::Direction_Up) {
             __NebulaSettingsInput(NEBULA_SETTINGS_MOVE, -1);
-        } else if (MR::testCorePadTriggerDown(WPAD_CHAN0)) {
+        } else if (press == NebulaMenuFocus::Direction_Down) {
             __NebulaSettingsInput(NEBULA_SETTINGS_MOVE, 1);
-        } else if (MR::testCorePadTriggerLeft(WPAD_CHAN0)) {
+        } else if (press == NebulaMenuFocus::Direction_Left) {
             __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, -1);
-        } else if (MR::testCorePadTriggerRight(WPAD_CHAN0)) {
+        } else if (press == NebulaMenuFocus::Direction_Right) {
             __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, 1);
         } else if (MR::testCorePadTriggerMinus(WPAD_CHAN0) && rView.page > 0) {
             __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) - 1);
@@ -1514,11 +1530,20 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
     MR::convertScreenPosToLayoutPos(&layout, screen);
     const f32 x = layout.x / mScaleX;
     const f32 y = layout.y - mMenu->mTranslate.y;
-    if (__builtin_fabsf(x - mPointerX) > 0.5f || __builtin_fabsf(y - mPointerY) > 0.5f) {
+    // The main menu, played with a pad as often as a pointer, gives the pointer its highlight back only once it really
+    // moves (a gyro's or a resting stick's drift does not), as NebulaMenuFocus does; until then nothing is under it.
+    const bool mainMenu = rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
+    const f32 handBack = mainMenu ? 12.0f : 0.5f;
+    if (__builtin_fabsf(x - mPointerX) > handBack || __builtin_fabsf(y - mPointerY) > handBack) {
         mPointerMode = true;
     }
-    mPointerX = x;
-    mPointerY = y;
+    if (!mainMenu || mPointerMode) {
+        mPointerX = x;
+        mPointerY = y;
+    }
+    if (mainMenu && !mPointerMode && !mHome) {
+        return;
+    }
     if (mHome) {
         readHomePointer(x, y);
         return;
@@ -2642,6 +2667,8 @@ namespace NebulaSettingsMenu {
         sScreen->step(sView, __NebulaHomeMenu(NEBULA_HBM_VIEW, 1));
         if (mainMenu && sView.open && sScreen->isOpenFully() && !sScreen->isHome()) {
             readMainMenuPad(sView);
+        } else {
+            sMainMenuReading = false;
         }
         // The whole game waits from the first frame of the drop to the last of the rise. Its sound fades and the music
         // stops as under the pause menu, and both come back as they were. The HOME Menu holds the game itself
