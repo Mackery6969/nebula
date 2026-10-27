@@ -10,6 +10,7 @@ namespace {
 
 std::atomic<std::uint64_t> g_travel{0u};  // stage + 1 in the low 32 bits, star in the high
 std::atomic<bool> g_grand_stars{false};
+std::atomic<bool> g_leave_game{false};
 std::atomic<bool> g_names_wanted{false};
 std::atomic<bool> g_names_known{false};
 std::mutex g_names_mutex;
@@ -41,6 +42,14 @@ bool take_galaxy_travel(std::size_t& stage, std::uint32_t& star) noexcept {
 
 bool take_grand_stars() noexcept {
     return g_grand_stars.exchange(false, std::memory_order_acq_rel);
+}
+
+void request_leave_game() noexcept {
+    g_leave_game.store(true, std::memory_order_release);
+}
+
+bool take_leave_game() noexcept {
+    return g_leave_game.exchange(false, std::memory_order_acq_rel);
 }
 
 void want_galaxy_select_names() noexcept {

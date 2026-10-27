@@ -48,9 +48,12 @@ const char* interaction_word(CoopPlayerInteraction interaction) {
 }
 
 // `value` stepped by `delta` within [0, count), stopping at the ends.
+// `delta` -2 or 2 (a click on the row) goes round past the ends instead.
 unsigned step(unsigned value, int delta, unsigned count) {
-    return static_cast<unsigned>(
-        std::clamp(static_cast<int>(value) + (delta < 0 ? -1 : 1), 0, static_cast<int>(count) - 1));
+    const int next = static_cast<int>(value) + (delta < 0 ? -1 : 1);
+    const int last = static_cast<int>(count) - 1;
+    if (delta <= -2 || delta >= 2) return static_cast<unsigned>(next < 0 ? last : next > last ? 0 : next);
+    return static_cast<unsigned>(std::clamp(next, 0, last));
 }
 
 }  // namespace
@@ -173,8 +176,7 @@ void MainMenu::change(int delta) {
             erase_armed_ = false;
             return;
         case RowPlayers:
-            coop.max_players =
-                std::clamp(delta < 0 ? coop.max_players - 1u : coop.max_players + 1u, 2u, kCoopMaxPlayersLimit);
+            coop.max_players = step(coop.max_players - 2u, delta, kCoopMaxPlayersLimit - 1u) + 2u;
             break;
         case RowInteraction:
             coop.player_interaction = static_cast<CoopPlayerInteraction>(
@@ -186,7 +188,7 @@ void MainMenu::change(int delta) {
         case RowPvp:
             coop.pvp_mode = static_cast<CoopPvpMode>(step(static_cast<unsigned>(coop.pvp_mode), delta, 2u));
             break;
-        case RowCheats: coop.cheats = delta > 0; break;
+        case RowCheats: coop.cheats = step(coop.cheats ? 1u : 0u, delta, 2u) == 1u; break;
         default: break;
         }
     }

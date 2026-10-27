@@ -27,6 +27,8 @@
 #endif
 #include "Game/AudioLib/AudSceneMgr.hpp"
 #include "Game/AudioLib/AudWrap.hpp"
+#include "Game/AudioLib/AudSystem.hpp"
+#include "Game/System/GameSystemFunction.hpp"
 #include "Game/LiveActor/AllLiveActorGroup.hpp"
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Map/LightFunction.hpp"
@@ -320,7 +322,7 @@ void GameScene::draw() const {
         sPendingStar == NEBULA_TEST_GET_GRAND_STAR ? MR::requestGrandStarGetDemo() : MR::requestPowerStarGetDemo();
         sPendingStar = 0;
     }
-    // The settings' galaxy select (its ADVANCED page) names its galaxies and stars in the game's own words, asked once.
+    // The settings' galaxy select (its ONLINE page's cheats) names its galaxies and stars in the game's own words, asked once.
     if (__NebulaGalaxySelectNamesWanted() != 0) {
         char id[64];
         u32 stars = 0;
@@ -340,6 +342,10 @@ void GameScene::draw() const {
             MR::requestChangeStageInGameMoving(sStage, action.scenario);
         } else if (action.kind == NEBULA_TEST_PLACE_PLAYER) {
             MR::setPlayerPos(TVec3f(action.position[0], action.position[1], action.position[2]));
+        } else if (action.kind == NEBULA_TEST_LEAVE_GAME) {
+            // As the HOME menu's Reset: the game starts again, its file select the co-op main menu.
+            AudWrap::getSystem()->preProcessToReset();
+            GameSystemFunction::requestResetGameSystem(true);
         } else if (action.kind == NEBULA_TEST_KILL_PLAYER) {
             MR::forceKillPlayerByAbyss();
         } else if (action.kind == NEBULA_TEST_GET_STAR || action.kind == NEBULA_TEST_GET_GRAND_STAR) {

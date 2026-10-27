@@ -1,0 +1,45 @@
+# Co-op to-do
+
+What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoning behind each item is in
+[docs/COOP_PLAN.md](docs/COOP_PLAN.md); this list is what's done and what's next. Tick an item when it's merged.
+
+## Main menu and saves (Phase 0.5)
+
+- [x] Main menu in place of the title and file select, over the file select's space backdrop
+- [x] Pointer, D-pad, stick, A and B work on the menu
+- [x] Host page: pick a save (left and right, or New save), Erase, room settings, Host and Back
+- [x] Unlimited saves, each a folder under `coop_saves/`; the old save's files converted once
+- [x] Achievements belong to the save: each save keeps its own
+- [x] Settings: ADVANCED renamed ONLINE, with room settings, Leave game and cheats that need the room's cheats on
+- [ ] The game's logo above the main menu, as on the title screen
+- [ ] Player page: name and character (Mario or Luigi), the character per player instead of per save
+- [ ] Text entry (keyboard, or letter by letter on a controller), then: renaming a save, the Host page's port and
+      password, the Join page's address
+- [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page only imports and
+      removes
+- [ ] Pause menu and Nebula's menus no longer pause the game (the server keeps running)
+- [ ] Options on Linux and Android (the in-game settings menu is Windows-only today)
+
+## Playing together (Phase 1)
+
+- [ ] Network layer (UDP, reliable and ordered channels) on every platform
+- [ ] Host opens the room; Join connects to `address:port`; Leave game closes or leaves it
+- [ ] Other players drawn as remote Marios and Luigis from their snapshots
+- [ ] Nametags over each player's head
+- [ ] Player list while Tab (keyboard) or Share (controller) is held
+- [ ] Version, mods and disc check when a player joins
+
+## Same world (Phase 2)
+
+- [ ] Instances per galaxy and mission: players only see others on the same mission
+- [ ] The server decides everything except the visuals: save, collectibles, objects, enemies
+- [ ] Cutscenes and transitions that move a player along (the Bowser opening, dome launches, Grand Star returns)
+      play again for each player, so nobody gets stuck
+- [ ] An achievement unlocked in a save is every player's who plays in it
+- [ ] Player collisions with sm64coopdx's options (non-solid, solid, friendly fire, knockback, PvP mode)
+
+## Later (Phases 3 and 4)
+
+- [ ] Shared enemies and objects
+- [ ] Bosses and story demos with several players
+- [ ] Dedicated server (the game with no window)

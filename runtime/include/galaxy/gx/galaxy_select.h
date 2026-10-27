@@ -44,9 +44,12 @@ inline constexpr const char* kObservatoryName = "COMET OBSERVATORY";
 
 void request_galaxy_travel(std::size_t stage, std::uint32_t star) noexcept;
 void request_grand_stars() noexcept;
+// The Online page's Leave game: the game starts again at the main menu.
+void request_leave_game() noexcept;
 // The game, once per scene frame: a travel the page asked for (true, once), and the Grand Stars.
 [[nodiscard]] bool take_galaxy_travel(std::size_t& stage, std::uint32_t& star) noexcept;
 [[nodiscard]] bool take_grand_stars() noexcept;
+[[nodiscard]] bool take_leave_game() noexcept;
 // The page asks for the names while it has none; the game is asked once (true), then gives them.
 void want_galaxy_select_names() noexcept;
 [[nodiscard]] bool take_galaxy_select_names_wanted() noexcept;

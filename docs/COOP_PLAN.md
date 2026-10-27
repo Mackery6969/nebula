@@ -174,6 +174,27 @@ plays whatever animation the network names, at the position, rotation and gravit
 packets. It has no physics or state machine of its own. Later phases give it collision with the local Mario and with
 enemies.
 
+- **Nametags.** Each remote player's name over their head, in the game's font, hidden when they're behind a wall or
+  far away (sm64coopdx's nametags).
+- **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
+  room, their character, and the galaxy and star they're on, as sm64coopdx's player list. It shows over play and
+  doesn't stop it.
+
+## Cutscenes and transitions
+
+A cutscene or transition that moves the story on runs for every player who reaches it, not once per save. If the save
+already has it, a player arriving later would otherwise be stuck: the opening (Bowser's attack on the Star Festival,
+then waking at the Observatory) is how a player gets from the intro stage into play, so a joiner whose host already
+finished it must still play it to come out where the others are. So:
+
+- Each demo that carries a player from one place to another (the opening, the dome launches, Grand Star returns,
+  the trip to the final battle) is keyed to the player, not the save flag, and plays again for a player who hasn't
+  seen it this session.
+- A player watching one doesn't stop the others; the server keeps the world running, and the demo only moves the
+  player watching it.
+- `native/tools/coop_inventory.py` lists the demo sites (`MR::getPlayerDemoActor`, `startEventDemo`); each is sorted
+  into "plays per player" or "plays once for the room" as Phase 4 reaches it.
+
 ## Player collisions
 
 The same handler and options as sm64coopdx (`interact_player` / `interact_player_pvp` in its `src/game/interaction.c`).
@@ -247,8 +268,8 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Text rows (name, address, password); the Host page's port and password; renaming a save.
 - [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page and the
       launcher's Mods tab only import and remove.
-- [ ] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
-      only with the room's cheats on (`coop_cheats`).
+- [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
+      only with the room's cheats on (`coop_cheats`). Windows only, as the in-game settings menu is.
 
 ### Phase 1: ghosts
 
@@ -257,13 +278,15 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Host and Join (`address:port`) in Nebula's settings menu and on the command line; an optional password.
 - [ ] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost").
-- [ ] Each player's name over their head; a player list in Nebula's settings menu.
+- [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
 - [ ] Version and `main.dol` hash handshake. Clients with a different build or different mods are refused.
 
 ### Phase 2: same world
 
+- [ ] The opening and the other transition demos play again for each player who reaches them
+      ([Cutscenes and transitions](#cutscenes-and-transitions)).
 - [ ] Instances: each client reports its stage and scenario, sees only players in its own instance, and a player
-      entering an occupied instance gets its state from the instance owner.
+      entering an occupied instance gets its state from the server.
 - [ ] Collectibles and save flags sync, with the host authoritative.
 - [ ] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
       with lag compensation. The options are already read from `runtime_settings.ini`.

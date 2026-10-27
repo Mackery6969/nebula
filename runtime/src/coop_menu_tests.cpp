@@ -131,6 +131,10 @@ void test_menu(const fs::path& scratch) {
         "then a new one, which can't be erased");
     host.change(1);
     expect(host.view().rows[0].value == "NEW SAVE", "the new save is the last");
+    host.change(2);
+    expect(host.view().rows[0].value == "ONE", "a click on the row goes round to the first");
+    host.change(-2);
+    expect(host.view().rows[0].value == "NEW SAVE", "and back round to the last");
     host.change(-1);
 
     host.move(1);

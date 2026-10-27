@@ -57,7 +57,8 @@ public:
     void select_row(unsigned row);
     // Up or down `delta` rows, past the ends to the other end.
     void move(int delta);
-    // Left or right: the selected row's next or previous button, or its next or previous value.
+    // Left or right (-1 or 1): the selected row's next or previous button, or its next or previous value; -2 or 2
+    // (a click on the row) the same, going round past its ends.
     void change(int delta);
     // The selected row's `button` pressed (the pointer names it; A presses the selected one).
     void press(unsigned button);

@@ -1850,7 +1850,9 @@ void fill_coop_menu_view(NebulaSettingsView* view) {
     for (uint32_t i = 0; i < view->row_count; ++i) {
         copy_settings_text(view->rows[i].label, menu.rows[i].label);
         copy_settings_text(view->rows[i].value, menu.rows[i].value);
-        view->rows[i].flags = menu.rows[i].buttons ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_BUTTONS) : 0u;
+        view->rows[i].flags = (menu.rows[i].buttons ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_BUTTONS) : 0u) |
+                              (menu.rows[i].changes ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_CHANGES) : 0u) |
+                              (menu.rows[i].name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_NAME) : 0u);
     }
     view->selected = menu.selected;
     view->selected_button = menu.selected_button;
@@ -3024,7 +3026,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
     ++scene_frames;
     gSceneFrames.store(scene_frames, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
-    // The settings' galaxy select (ADVANCED page): a travel the player asked for, through the game's own stage change,
+    // The settings' Online page: Leave game, and its cheats' galaxy select: a travel the player asked for, through the game's own stage change,
     // and the Grand Stars with the Observatory they power.
     {
         std::size_t stage = 0u;
@@ -3033,6 +3035,10 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
             action->kind = NEBULA_TEST_CHANGE_STAGE;
             action->scenario = static_cast<int32_t>(star);
             std::snprintf(action->stage, sizeof(action->stage), "%s", galaxy::gx::kGalaxyStages[stage].id);
+            return 1;
+        }
+        if (galaxy::gx::take_leave_game()) {
+            action->kind = NEBULA_TEST_LEAVE_GAME;
             return 1;
         }
         if (galaxy::gx::take_grand_stars()) {
