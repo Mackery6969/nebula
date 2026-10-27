@@ -1,12 +1,13 @@
 # Test builds
 
-Every pull request and every push builds Nebula for Windows, Linux and Android, runs its tests, and keeps what it built
-as a download for 14 days (the Build workflow, `.github/workflows/build.yml`). These are test builds, not releases:
-they have no installer, no launcher, no update check and no ray-tracing material tables, the Windows programs are built
-without cross-file optimization (as the tests are), and the Android app is signed with a debug key. macOS and iOS have
-no build yet.
+Every pull request and every push to `main` builds Nebula for Windows, Linux and Android, runs its tests, and keeps what
+it built as a download for 14 days (the Build workflow, `.github/workflows/build.yml`). These are test builds, not
+releases: they have no installer, no launcher, no update check and no ray-tracing material tables, the Windows programs
+are built without cross-file optimization (as the tests are), and the Android app is signed with a debug key. macOS and
+iOS have no build yet.
 
-To download one, open the pull request's **Checks** tab (or the run under **Actions** > **Build**) and pick an
+A branch without a pull request is not built on its own; run **Actions** > **Build** > **Run workflow** on it to get
+one. To download one, open the pull request's **Checks** tab (or the run under **Actions** > **Build**) and pick an
 artifact under **Artifacts**. You need to be signed in to GitHub.
 
 | Artifact | Contents |
