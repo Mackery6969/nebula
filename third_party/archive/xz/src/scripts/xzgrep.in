@@ -1,0 +1,4 @@
+#!@POSIX_SHELL@
+# Placeholder: xz's CMake generates this script on Unix even with XZ_TOOL_SCRIPTS off; Nebula builds only liblzma
+# (cmake/archive_deps.cmake), so the script is never installed or run.
+exit 1
