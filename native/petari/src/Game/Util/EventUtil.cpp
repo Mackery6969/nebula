@@ -18,6 +18,8 @@
 #include <cstdio>
 #ifdef TARGET_PC
 #include "Game/System/NebulaAchievements.hpp"
+#include <nebula_game_api.h>
+#include <revolution/os.h>
 #endif
 
 void EventUtil_FORCE_MATCH_STRINGS() {
@@ -160,6 +162,13 @@ namespace MR {
     }
 
     bool isPlayerLuigi() {
+#ifdef TARGET_PC
+        // Online co-op: the player's own character (the main menu's Player page), whatever save they play in; a
+        // file's Luigi half still plays Luigi.
+        if (__NebulaCoopMenu(NEBULA_COOP_MENU_CHARACTER) == 1) {
+            return true;
+        }
+#endif
         return !GameDataFunction::isDataMario();
     }
 

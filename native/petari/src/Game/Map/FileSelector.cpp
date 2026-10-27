@@ -1091,6 +1091,9 @@ void FileSelector::exeCoopMenu() {
         calcBasePos(0.0f);
         MR::startStageBGM("MBGM_FILE_SELECT", false);
         mIsCoopPlayWanted = false;
+        // The game's logo over the menu, as on the title screen.
+        mTitle->appearLogo();
+        NebulaSettingsMenu::setMainMenuLogo(mTitle->getLogo());
         NebulaSettingsMenu::setMainMenuActive(true);
         __NebulaCoopMenu(NEBULA_COOP_MENU_OPEN);
         // The user files the save data holds: the old saves' files become co-op saves once.
@@ -1103,6 +1106,7 @@ void FileSelector::exeCoopMenu() {
         __NebulaCoopMenu(NEBULA_COOP_MENU_OLD_FILES | (files << 8));
     }
 
+    mTitle->updateLogo();
     const s32 choice = __NebulaCoopMenu(NEBULA_COOP_MENU_POLL);
     if (choice == NEBULA_COOP_MENU_QUIT) {
         __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
@@ -1117,6 +1121,8 @@ void FileSelector::exeCoopMenu() {
 
     __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
     NebulaSettingsMenu::setMainMenuActive(false);
+    NebulaSettingsMenu::setMainMenuLogo(nullptr);
+    mTitle->killLogo();
     MR::endStarPointerMode(this);
     setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopLoad));
 }
@@ -1174,6 +1180,8 @@ void FileSelector::exeCoopCreate() {
 void FileSelector::exeCoopQuit() {
     if (MR::isFirstStep(this)) {
         NebulaSettingsMenu::setMainMenuActive(false);
+        NebulaSettingsMenu::setMainMenuLogo(nullptr);
+        mTitle->killLogo();
         MR::endStarPointerMode(this);
         mQuitFrames = 0;
         MR::closeSystemWipeFade();

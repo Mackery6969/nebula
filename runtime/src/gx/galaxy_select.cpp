@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 namespace galaxy::gx {
@@ -12,6 +13,9 @@ std::atomic<std::uint64_t> g_travel{0u};  // stage + 1 in the low 32 bits, star 
 std::atomic<bool> g_grand_stars{false};
 std::atomic<bool> g_leave_game{false};
 std::atomic<bool> g_coop_in_game{false};
+std::atomic<bool> g_text_entry{false};
+std::mutex g_text_mutex;
+std::vector<char32_t> g_text;  // typed, not taken yet
 std::atomic<bool> g_names_wanted{false};
 std::atomic<bool> g_names_known{false};
 std::mutex g_names_mutex;
@@ -55,6 +59,28 @@ void set_coop_in_game(bool in_game) noexcept {
 
 bool coop_in_game() noexcept {
     return g_coop_in_game.load(std::memory_order_acquire);
+}
+
+void set_coop_text_entry(bool on) noexcept {
+    if (g_text_entry.exchange(on, std::memory_order_acq_rel) && !on) {
+        const std::lock_guard<std::mutex> lock(g_text_mutex);
+        g_text.clear();
+    }
+}
+
+bool coop_text_entry() noexcept {
+    return g_text_entry.load(std::memory_order_acquire);
+}
+
+void push_coop_text(char32_t key) {
+    if (!coop_text_entry()) return;
+    const std::lock_guard<std::mutex> lock(g_text_mutex);
+    if (g_text.size() < 256u) g_text.push_back(key);
+}
+
+std::vector<char32_t> take_coop_text_input() {
+    const std::lock_guard<std::mutex> lock(g_text_mutex);
+    return std::exchange(g_text, {});
 }
 
 bool take_leave_game() noexcept {

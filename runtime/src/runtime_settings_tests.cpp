@@ -619,7 +619,8 @@ int main() {
     // Co-op: the keys load, sanitize, round-trip, and stay out of a file that keeps the defaults.
     write_text(settings_path,
                "coop_port=9000\ncoop_max_players=40\ncoop_player_name=  Mario\x01 Bros  \ncoop_password=pw\n"
-               "coop_player_interaction=Friendly_Fire\ncoop_knockback_strength=60\ncoop_pvp_mode=revamped\ncoop_cheats=1\n");
+               "coop_player_interaction=Friendly_Fire\ncoop_knockback_strength=60\ncoop_pvp_mode=revamped\ncoop_cheats=1\n"
+               "coop_character=Luigi\ncoop_join_address=192.168.1.20:7778\n");
     galaxy::load_runtime_settings_from_file();
     const galaxy::RuntimeCoopSettings coop = galaxy::get_runtime_settings().coop;
     passed &= expect(static_cast<unsigned>(coop.port) == 9000u && coop.max_players == 8u &&
@@ -627,7 +628,8 @@ int main() {
                          coop.password == "pw" &&
                          coop.player_interaction == galaxy::CoopPlayerInteraction::FriendlyFire &&
                          coop.knockback_strength == galaxy::kCoopKnockbackTooMuch &&
-                         coop.pvp_mode == galaxy::CoopPvpMode::Revamped && coop.cheats,
+                         coop.pvp_mode == galaxy::CoopPvpMode::Revamped && coop.cheats &&
+                         coop.character == galaxy::CoopCharacter::Luigi && coop.join_address == "192.168.1.20:7778",
                      "co-op keys load; an out-of-range count and control characters are dropped");
     passed &= expect(galaxy::save_runtime_settings_to_file(), "co-op settings save");
     galaxy::load_runtime_settings_from_file();

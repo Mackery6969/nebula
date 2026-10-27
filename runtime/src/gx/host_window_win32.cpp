@@ -6,6 +6,7 @@
 #include "galaxy/controller_hid.h"
 
 #include "galaxy/gx/display_modes.h"
+#include "galaxy/coop_menu.h"
 #include "galaxy/gx/galaxy_select.h"
 #include "galaxy/gx/post_process_settings.h"
 #include "galaxy/gx/render_config.h"
@@ -102,6 +103,7 @@ bool mods_restart_key(WPARAM key, bool was_down);
 bool mods_page_key(WPARAM key, bool accept, bool was_down);
 unsigned mods_draft_changes();
 void commit_mods_draft();
+void forget_mods_scan();
 void revert_mods_draft();
 void dlss_dismiss_prompt();
 void poll_dlss_download();
@@ -1485,6 +1487,8 @@ void set_native_settings_visible(bool visible) {
         reset_runtime_draft();
         reset_controls_draft();
         refresh_controls_devices(true);
+        // The mods as mods.ini has them now: the main menu's Host page sets which are on.
+        forget_mods_scan();
         settle_native_settings_row();
     }
     if (!visible) {
@@ -2856,7 +2860,8 @@ std::mutex s_mods_mutex;
 std::vector<galaxy::mods::ModInfo> s_mods;
 std::vector<galaxy::mods::ModInfo> s_mods_saved;  // as mods.ini has them
 bool s_mods_scanned = false;
-std::string s_mod_focus;    // the mod last selected in a list: the buttons' Options act on it
+std::string s_mod_focus;    // the mod last selected: the buttons' Options and Remove act on it
+std::string s_mod_remove_armed;  // Remove pressed once on this mod: pressed again, it goes
 std::string s_mod_held;     // a mod picked up to move with the arrows (empty: none)
 std::string s_mod_options;  // the mod whose options show instead of the lists (empty: none)
 
@@ -2868,6 +2873,13 @@ std::vector<galaxy::mods::ModInfo>& mods_list() {
         s_mods_scanned = true;
     }
     return s_mods;
+}
+
+void forget_mods_scan() {
+    const std::lock_guard<std::mutex> lock(s_mods_mutex);
+    s_mods_scanned = false;
+    s_mod_options.clear();
+    s_mod_remove_armed.clear();
 }
 
 // With s_mods_mutex held: the texture packs and movies of the mods mods.ini has on to the renderer now (disc changes
@@ -3264,19 +3276,17 @@ std::vector<SettingsRow> mod_options_page(std::size_t i) {
     return rows;
 }
 
-// A mod in its list: its name, and what it changes as the line under the page. With s_mods_mutex held.
+// A mod: its name, and what it changes as the line under the page. With s_mods_mutex held.
 SettingsRow mod_row(const galaxy::mods::ModInfo& mod) {
     SettingsRow row{mods_ui_text(mod.id, 26u), {}, nullptr, mod_details(mod)};
     row.key = "mod:" + mod.id;
     row.names = 1u;
-    row.list = mod.enabled ? 2u : 1u;
-    row.held = s_mod_held == mod.id;
     return row;
 }
 
-// The buttons under the lists, as the launcher's: Import file, Import folder, Options (of the mod last selected in a
-// list; '-' before a word: unavailable), Open mods folder and Rescan. The line under the page says how an import goes.
-// With s_mods_mutex held.
+// The buttons under the mods, as the launcher's: Import file, Import folder, Options and Remove (of the mod last
+// selected; '-' before a word: unavailable; Remove asks by its word first), Open mods folder and Rescan. The line under
+// the page says how an import or a removal goes. With s_mods_mutex held.
 SettingsRow mods_buttons_row() {
     std::string help;
     {
@@ -3286,8 +3296,11 @@ SettingsRow mods_buttons_row() {
     if (s_mod_dialog_open.load(std::memory_order_acquire)) help = "CHOOSING";
     const auto focus = std::find_if(s_mods.begin(), s_mods.end(), [](const galaxy::mods::ModInfo& m) { return m.id == s_mod_focus; });
     const bool options = focus != s_mods.end() && mod_has_options(*focus, next_start_language_folder());
+    const char* const remove = focus == s_mods.end()            ? "-REMOVE"
+                               : s_mod_remove_armed == s_mod_focus ? "PRESS AGAIN TO REMOVE"
+                                                                   : "REMOVE";
     SettingsRow row = button_row(
-        {}, {"IMPORT FILE", "IMPORT FOLDER", options ? "OPTIONS" : "-OPTIONS", "OPEN FOLDER", "RESCAN"},
+        {}, {"IMPORT FILE", "IMPORT FOLDER", options ? "OPTIONS" : "-OPTIONS", remove, "OPEN FOLDER", "RESCAN"},
         [](RenderConfig&, unsigned button) {
             switch (button) {
             case 0u:
@@ -3304,7 +3317,26 @@ SettingsRow mods_buttons_row() {
                 }
                 return;
             }
-            case 3u:
+            case 3u: {
+                const std::lock_guard<std::mutex> lock(s_mods_mutex);
+                if (s_mod_focus.empty()) return;
+                if (s_mod_remove_armed != s_mod_focus) {
+                    s_mod_remove_armed = s_mod_focus;
+                    return;
+                }
+                std::string message;
+                galaxy::mods::remove_mod(galaxy::mods::mods_folder(), s_mod_focus, &message);
+                std::cerr << "[settings] " << message << '\n';
+                {
+                    const std::lock_guard<std::mutex> import_lock(s_mod_import_mutex);
+                    s_mod_import_message = message;
+                }
+                s_mod_remove_armed.clear();
+                s_mod_focus.clear();
+                reread_mods_locked();
+                return;
+            }
+            case 4u:
                 open_folder_in_explorer(galaxy::mods::mods_folder());
                 return;
             default: {
@@ -3319,8 +3351,9 @@ SettingsRow mods_buttons_row() {
     return row;
 }
 
-// The MODS page as the launcher's Mods tab: the mods off, then the mods on (the higher one wins a conflict), each list
-// under its title, then the buttons. A mod's options show instead while they are open.
+// The MODS page: the mods in the mods folder by name, then the buttons. It imports and removes them and sets their
+// options; which play is the room's, picked on the main menu's Host page (docs/COOP_PLAN.md, "Mods"). A mod's options
+// show instead while they are open.
 std::vector<SettingsRow> mods_page(const RenderConfig&) {
     std::vector<SettingsRow> rows;
     const std::lock_guard<std::mutex> lock(s_mods_mutex);
@@ -3330,18 +3363,19 @@ std::vector<SettingsRow> mods_page(const RenderConfig&) {
         return mod_options_page(static_cast<std::size_t>(open - mods.begin()));
     }
     s_mod_options.clear();
-    SettingsRow off{"DISABLED", {}, nullptr, {}, true};
-    off.list = 1u;
-    rows.push_back(std::move(off));
-    for (const galaxy::mods::ModInfo& mod : mods) {
-        if (!mod.enabled) rows.push_back(mod_row(mod));
+    rows.push_back({"MODS (THE HOST PAGE PICKS THE ROOM'S)", {}, nullptr, {}, true});
+    std::vector<const galaxy::mods::ModInfo*> by_name;
+    for (const galaxy::mods::ModInfo& mod : mods) by_name.push_back(&mod);
+    std::sort(by_name.begin(), by_name.end(),
+              [](const galaxy::mods::ModInfo* a, const galaxy::mods::ModInfo* b) { return a->id < b->id; });
+    for (const galaxy::mods::ModInfo* mod : by_name) rows.push_back(mod_row(*mod));
+    // The buttons act on the mod selected last; Remove asks again for another.
+    const unsigned selected = s_native_settings_row.load(std::memory_order_relaxed);
+    if (s_native_settings_tab.load(std::memory_order_relaxed) % kNativeSettingsTabCount == kModsTab &&
+        selected < rows.size() && rows[selected].key.rfind("mod:", 0) == 0) {
+        s_mod_focus = rows[selected].key.substr(4u);
     }
-    SettingsRow on{"ENABLED (TOP HAS PRIORITY)", {}, nullptr, {}, true};
-    on.list = 2u;
-    rows.push_back(std::move(on));
-    for (const galaxy::mods::ModInfo& mod : mods) {
-        if (mod.enabled) rows.push_back(mod_row(mod));
-    }
+    if (s_mod_remove_armed != s_mod_focus) s_mod_remove_armed.clear();
     rows.push_back(mods_buttons_row());
     return rows;
 }
@@ -3356,132 +3390,14 @@ void close_mod_options(const RenderConfig& render) {
     select_mods_row(render, "mod:" + id);
 }
 
-// The MODS page's keys while its lists show, as the launcher's lists: up and down within a list, left and right to
-// the other list at the same place, down from a list's last mod to the buttons and up again. A or Space picks the
-// selected mod up; held, up and down move it among the mods on (a higher one wins), left turns it off, right on, and
-// A, Space, Enter or Escape puts it down. On a mod's options, Escape goes back to the lists.
-bool mods_page_key(WPARAM key, bool accept, bool was_down) {
+// The MODS page's keys: on a mod's options, Escape goes back to the mods; elsewhere the page's keys are every page's.
+bool mods_page_key(WPARAM key, bool, bool was_down) {
     if (s_native_settings_tab.load(std::memory_order_relaxed) % kNativeSettingsTabCount != kModsTab) return false;
-    const std::vector<SettingsRow> rows = mods_page(s_settings_draft);
-    bool lists = false;
-    for (const SettingsRow& row : rows) lists = lists || row.list != 0u;
-    if (!lists) {
-        if (key != VK_ESCAPE) return false;
-        if (!was_down) close_mod_options(s_settings_draft);
-        return true;
-    }
-    const unsigned selected = std::min(s_native_settings_row.load(std::memory_order_relaxed),
-                                       static_cast<unsigned>(rows.size()) - 1u);
-    // The rows of each list (1 off, 2 on) in order, and the buttons' row.
-    std::vector<unsigned> members[3];
-    unsigned buttons = 0u;
-    for (unsigned r = 0; r < rows.size(); ++r) {
-        if (rows[r].list != 0u && !rows[r].heading) members[rows[r].list].push_back(r);
-        if (rows[r].key == "buttons") buttons = r;
-    }
-    const std::uint8_t list = rows[selected].heading ? 0u : rows[selected].list;
-    const std::size_t place = list != 0u ? static_cast<std::size_t>(
-        std::find(members[list].begin(), members[list].end(), selected) - members[list].begin()) : 0u;
-    const auto select = [&](unsigned row) {
-        s_native_settings_row.store(row, std::memory_order_relaxed);
-        s_native_settings_button_row.store(~0u, std::memory_order_relaxed);
-        if (rows[row].list != 0u && !rows[row].heading) {
-            const std::lock_guard<std::mutex> lock(s_mods_mutex);
-            s_mod_focus = rows[row].key.substr(4u);
-        }
-    };
-    if (rows[selected].heading) {
-        // The rows moved under the selection (a rescan, an import): the first mod, else the buttons.
-        select(!members[1].empty() ? members[1].front() : !members[2].empty() ? members[2].front() : buttons);
-        return true;
-    }
-    std::string held;
     {
         const std::lock_guard<std::mutex> lock(s_mods_mutex);
-        held = s_mod_held;
-        // The mod the buttons act on: the one selected, however it was.
-        if (list != 0u) s_mod_focus = rows[selected].key.substr(4u);
+        if (s_mod_options.empty() || key != VK_ESCAPE) return false;
     }
-    if (!held.empty()) {
-        if (key != VK_UP && key != VK_DOWN && key != VK_LEFT && key != VK_RIGHT && key != VK_SPACE &&
-            key != VK_RETURN && key != VK_ESCAPE) {
-            return true;
-        }
-        const bool moves = (key == VK_UP || key == VK_DOWN || key == VK_LEFT || key == VK_RIGHT) && !accept;
-        if (!moves) {
-            if (!was_down) {
-                const std::lock_guard<std::mutex> lock(s_mods_mutex);
-                s_mod_held.clear();
-            }
-            return true;
-        }
-        {
-            const std::lock_guard<std::mutex> lock(s_mods_mutex);
-            const auto it = std::find_if(s_mods.begin(), s_mods.end(), [&](const galaxy::mods::ModInfo& m) { return m.id == held; });
-            if (it == s_mods.end()) {
-                s_mod_held.clear();
-                return true;
-            }
-            const std::size_t enabled = static_cast<std::size_t>(
-                std::count_if(s_mods.begin(), s_mods.end(), [](const galaxy::mods::ModInfo& m) { return m.enabled; }));
-            const std::size_t at = static_cast<std::size_t>(it - s_mods.begin());
-            if (key == VK_LEFT && it->enabled) {
-                place_mod_locked(held, false, 0u);
-            } else if (key == VK_RIGHT && !it->enabled) {
-                place_mod_locked(held, true, std::min(place, enabled));
-            } else if (key == VK_UP && it->enabled && at > 0u) {
-                place_mod_locked(held, true, at - 1u);
-            } else if (key == VK_DOWN && it->enabled) {
-                place_mod_locked(held, true, at + 1u);
-            }
-        }
-        select_mods_row(s_settings_draft, "mod:" + held);
-        return true;
-    }
-    if (key == VK_RETURN || key == VK_ESCAPE) return false;  // apply and close, as on every page
-    if (list == 0u) {
-        // The buttons: up goes back to the mod last selected (else the first in a list); left, right and pressing
-        // are the buttons'.
-        if (key != VK_UP) return key == VK_DOWN;
-        std::string focus;
-        {
-            const std::lock_guard<std::mutex> lock(s_mods_mutex);
-            focus = s_mod_focus;
-        }
-        for (unsigned r = 0; r < rows.size(); ++r) {
-            if (rows[r].key == "mod:" + focus) {
-                select(r);
-                return true;
-            }
-        }
-        if (!members[2].empty() || !members[1].empty()) select(!members[1].empty() ? members[1].front() : members[2].front());
-        return true;
-    }
-    switch (key) {
-    case VK_UP:
-        if (place > 0u) select(members[list][place - 1u]);
-        return true;
-    case VK_DOWN:
-        select(place + 1u < members[list].size() ? members[list][place + 1u] : buttons);
-        return true;
-    case VK_LEFT:
-    case VK_RIGHT: {
-        if (accept) break;
-        const std::uint8_t other = key == VK_LEFT ? 1u : 2u;
-        if (other != list && !members[other].empty()) select(members[other][std::min(place, members[other].size() - 1u)]);
-        return true;
-    }
-    case VK_SPACE:
-        break;
-    default:
-        return false;
-    }
-    // A or Space: picked up.
-    if (!was_down) {
-        const std::lock_guard<std::mutex> lock(s_mods_mutex);
-        s_mod_held = rows[selected].key.substr(4u);
-        s_mod_focus = s_mod_held;
-    }
+    if (!was_down) close_mod_options(s_settings_draft);
     return true;
 }
 
@@ -4533,6 +4449,24 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         if (native_settings_handle_window_key(wp, was_down)) {
             return 0;
         }
+        // A main menu text row being edited: the editing keys go to it (characters come as WM_CHAR), nothing to the
+        // game.
+        if (coop_text_entry()) {
+            switch (wp) {
+            case VK_BACK: push_coop_text(galaxy::coop::kTextBackspace); break;
+            case VK_DELETE: push_coop_text(galaxy::coop::kTextDelete); break;
+            case VK_RETURN: push_coop_text(galaxy::coop::kTextEnter); break;
+            case VK_ESCAPE: push_coop_text(galaxy::coop::kTextEscape); break;
+            case VK_LEFT: push_coop_text(galaxy::coop::kTextLeft); break;
+            case VK_RIGHT: push_coop_text(galaxy::coop::kTextRight); break;
+            case VK_UP: push_coop_text(galaxy::coop::kTextUp); break;
+            case VK_DOWN: push_coop_text(galaxy::coop::kTextDown); break;
+            case VK_HOME: push_coop_text(galaxy::coop::kTextHome); break;
+            case VK_END: push_coop_text(galaxy::coop::kTextEnd); break;
+            default: return DefWindowProcW(hwnd, msg, wp, lp);
+            }
+            return 0;
+        }
         if (wp == VK_TAB) s_coop_keys_held.fetch_or(1u, std::memory_order_relaxed);
         if (wp == VK_ESCAPE) s_coop_keys_held.fetch_or(2u, std::memory_order_relaxed);
         if (!galaxy::host::native_keyboard_capture_active()) {
@@ -4550,6 +4484,11 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             }
             galaxy::host::publish_native_window_key_state(normalized, true);
         }
+    }
+    if (msg == WM_CHAR && coop_text_entry()) {
+        // Typed into the main menu's text row (Backspace, Enter and Escape come as their keys).
+        if (wp >= 0x20u && wp != 0x7Fu) push_coop_text(static_cast<char32_t>(wp));
+        return 0;
     }
     if (msg == WM_KEYUP || msg == WM_SYSKEYUP) {
         const UINT key = static_cast<UINT>(wp);
@@ -5692,7 +5631,7 @@ bool sharp_2d_requested() noexcept {
 }
 
 bool native_window_input_captured() noexcept {
-    return s_native_settings_visible.load(std::memory_order_relaxed) ||
+    return s_native_settings_visible.load(std::memory_order_relaxed) || coop_text_entry() ||
         s_home_menu_visible.load(std::memory_order_relaxed) ||
         s_system_menu_active.load(std::memory_order_acquire) ||
         host_window::move_size_active.load(std::memory_order_acquire);
@@ -5851,7 +5790,7 @@ void native_settings_input(NativeSettingsInput input, int arg) {
             if (tab == kModsTab) {
                 // The mod the buttons' Options and Remove act on.
                 const std::vector<SettingsRow> rows = mods_page(s_settings_draft);
-                if (static_cast<unsigned>(arg) < rows.size() && rows[static_cast<unsigned>(arg)].list != 0u) {
+                if (static_cast<unsigned>(arg) < rows.size() && rows[static_cast<unsigned>(arg)].key.rfind("mod:", 0) == 0) {
                     const std::lock_guard<std::mutex> mods_lock(s_mods_mutex);
                     s_mod_focus = rows[static_cast<unsigned>(arg)].key.substr(4u);
                 }
@@ -5996,6 +5935,10 @@ void host_window::native_settings_set_refresh_override_for_tests(unsigned hz) no
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
+}
+
+bool request_restart() noexcept {
+    return restart_through_launcher();
 }
 
 unsigned coop_keys_held() noexcept {

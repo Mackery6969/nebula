@@ -5,7 +5,9 @@
 
 #include "sdl_host.h"
 
+#include "galaxy/coop_menu.h"
 #include "galaxy/gx/display_modes.h"
+#include "galaxy/gx/galaxy_select.h"
 #include "galaxy/gx/host_window.h"
 #include "galaxy/gx/vk/vk_context.h"
 #include "galaxy/gx/render_config.h"
@@ -22,12 +24,13 @@
 #include <android/log.h>
 #include <android/native_window.h>
 #include <jni.h>
-#include <unistd.h>
 #endif
+#include <unistd.h>
 
 #include <algorithm>
 #include <atomic>
 #include <bit>
+#include <cerrno>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -35,7 +38,9 @@
 #include <cstring>
 #include <filesystem>
 #include <mutex>
+#include <string>
 #include <thread>
+#include <vector>
 
 namespace galaxy::sdl {
 namespace {
@@ -423,6 +428,16 @@ void pump_events(int timeout_ms) noexcept {
         wait_cpu = 0;
         waits = 0;
     }
+    // A main menu text row being edited takes the keyboard's typing (Android: its on-screen keyboard shows).
+    static bool s_text_input = false;
+    if (g_window != nullptr && galaxy::gx::coop_text_entry() != s_text_input) {
+        s_text_input = !s_text_input;
+        if (s_text_input) {
+            SDL_StartTextInput(g_window);
+        } else {
+            SDL_StopTextInput(g_window);
+        }
+    }
     {
     std::lock_guard<std::mutex> lock(g_input_mutex);
     while (any) {
@@ -495,7 +510,32 @@ void pump_events(int timeout_ms) noexcept {
                 }
                 break;
             }
+            if (event.type == SDL_EVENT_KEY_DOWN && galaxy::gx::coop_text_entry()) {
+                // The editing keys to the text row; nothing reaches the game while it is edited.
+                switch (event.key.scancode) {
+                case SDL_SCANCODE_BACKSPACE: galaxy::gx::push_coop_text(galaxy::coop::kTextBackspace); break;
+                case SDL_SCANCODE_DELETE: galaxy::gx::push_coop_text(galaxy::coop::kTextDelete); break;
+                case SDL_SCANCODE_RETURN:
+                case SDL_SCANCODE_KP_ENTER: galaxy::gx::push_coop_text(galaxy::coop::kTextEnter); break;
+                case SDL_SCANCODE_ESCAPE: galaxy::gx::push_coop_text(galaxy::coop::kTextEscape); break;
+                case SDL_SCANCODE_LEFT: galaxy::gx::push_coop_text(galaxy::coop::kTextLeft); break;
+                case SDL_SCANCODE_RIGHT: galaxy::gx::push_coop_text(galaxy::coop::kTextRight); break;
+                case SDL_SCANCODE_UP: galaxy::gx::push_coop_text(galaxy::coop::kTextUp); break;
+                case SDL_SCANCODE_DOWN: galaxy::gx::push_coop_text(galaxy::coop::kTextDown); break;
+                case SDL_SCANCODE_HOME: galaxy::gx::push_coop_text(galaxy::coop::kTextHome); break;
+                case SDL_SCANCODE_END: galaxy::gx::push_coop_text(galaxy::coop::kTextEnd); break;
+                default: break;
+                }
+                break;
+            }
             set_key(virtual_key(event.key.scancode), event.type == SDL_EVENT_KEY_DOWN);
+            break;
+        case SDL_EVENT_TEXT_INPUT:
+            // Typed characters (UTF-8): the printable ASCII the game's font draws.
+            for (const char* text = event.text.text; text != nullptr && *text != '\0'; ++text) {
+                const unsigned char c = static_cast<unsigned char>(*text);
+                if (c >= 0x20u && c < 0x7Fu) galaxy::gx::push_coop_text(static_cast<char32_t>(c));
+            }
             break;
         case SDL_EVENT_GAMEPAD_ADDED:
             open_gamepad(event.gdevice.which);
@@ -877,6 +917,31 @@ void native_settings_post_key(std::uintptr_t) noexcept {}
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
+}
+
+bool request_restart() noexcept {
+#if defined(__ANDROID__)
+    return false;
+#else
+    // The same program with the same arguments, in this process's place.
+    std::FILE* file = std::fopen("/proc/self/cmdline", "rb");
+    if (file == nullptr) return false;
+    std::string line;
+    char buffer[4096];
+    for (std::size_t read = 0; (read = std::fread(buffer, 1, sizeof(buffer), file)) > 0;) line.append(buffer, read);
+    std::fclose(file);
+    std::vector<char*> args;
+    for (std::size_t at = 0; at < line.size(); at = line.find('\0', at) + 1u) {
+        args.push_back(line.data() + at);
+        if (line.find('\0', at) == std::string::npos) break;
+    }
+    if (args.empty()) return false;
+    args.push_back(nullptr);
+    std::fflush(stderr);
+    execv("/proc/self/exe", args.data());
+    std::fprintf(stderr, "[coop] could not start Nebula again: %s\n", std::strerror(errno));
+    return false;
+#endif
 }
 
 unsigned coop_keys_held() noexcept {

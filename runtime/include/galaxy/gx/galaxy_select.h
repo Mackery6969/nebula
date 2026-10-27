@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace galaxy::gx {
 
@@ -49,6 +50,12 @@ void request_leave_game() noexcept;
 // A save is being played (Host left the main menu): the Online page works only then.
 void set_coop_in_game(bool in_game) noexcept;
 [[nodiscard]] bool coop_in_game() noexcept;
+// The main menu's text rows (galaxy/coop_menu.h): while one is edited, the window's keys type into it (characters and
+// galaxy::coop::TextKey keys) instead of reaching the game; the host takes what was typed each frame. Any thread.
+void set_coop_text_entry(bool on) noexcept;
+[[nodiscard]] bool coop_text_entry() noexcept;
+void push_coop_text(char32_t key);
+[[nodiscard]] std::vector<char32_t> take_coop_text_input();
 // The game, once per scene frame: a travel the page asked for (true, once), and the Grand Stars.
 [[nodiscard]] bool take_galaxy_travel(std::size_t& stage, std::uint32_t& star) noexcept;
 [[nodiscard]] bool take_grand_stars() noexcept;
