@@ -320,6 +320,7 @@ void MainMenu::move(int delta) {
         return;
     }
     const int count = static_cast<int>(row_count());
+    if (count <= 0) return;
     const int next = ((static_cast<int>(selected_) + delta) % count + count) % count;
     select_row(static_cast<unsigned>(next));
 }
