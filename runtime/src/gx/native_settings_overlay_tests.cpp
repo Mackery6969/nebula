@@ -124,7 +124,7 @@ int main() {
     passed &= expect(!snapshot.visible, "overlay starts hidden");
     passed &= expect(!snapshot.dirty, "overlay starts clean");
     passed &= expect(!snapshot.save_error, "overlay starts without a save error");
-    passed &= expect(snapshot.tab_count == 8u, "display/graphics/controls/audio/game/mods/system/advanced tabs exist");
+    passed &= expect(snapshot.tab_count == 8u, "display/graphics/controls/audio/game/mods/system/online tabs exist");
     passed &= expect(snapshot.tab == 0u && snapshot.row == 1u, "the first setting row (below its heading) is selected");
     passed &= expect(
         snapshot.row_count == 9u,
@@ -565,10 +565,11 @@ int main() {
     passed &= expect(snapshot.row == 0u && key(VK_RIGHT) && key(VK_LEFT) &&
                          galaxy::gx::native_settings_overlay_snapshot().pending_changes == 0u,
                      "the graphics card row cannot be changed in game");
-    passed &= expect(key(VK_TAB), "Tab enters the advanced page");
+    passed &= expect(key(VK_TAB), "Tab enters the online page");
     snapshot = galaxy::gx::native_settings_overlay_snapshot();
-    passed &= expect(snapshot.tab == 7u && snapshot.row_count == 5u,
-                     "advanced page has the galaxy select heading, galaxy, star and its two buttons");
+    passed &= expect(snapshot.tab == 7u && snapshot.row_count == 13u,
+                     "online page has the room (its heading, players, five settings and Leave game) and the cheats "
+                     "(their heading, galaxy, star and two buttons)");
     passed &= expect(key(VK_TAB), "Tab navigation wraps");
     passed &= expect(
         galaxy::gx::native_settings_overlay_snapshot().tab == 0u,
