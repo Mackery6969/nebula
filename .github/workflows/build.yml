@@ -55,7 +55,7 @@ jobs:
         run: cargo build --release --locked -p nebula-import
       - name: Test
         run: cargo test --locked -p nebula-import
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-import
           path: target/release/nebula-import.exe
@@ -86,7 +86,7 @@ jobs:
       # The libraries CMake builds at configure time (zlib, xz, libarchive, the FidelityFX SDK) and the downloaded
       # Vulkan sources: each is skipped when its files are already in the build tree.
       - name: Cache configure-time dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             build/host/archive-deps
@@ -106,7 +106,7 @@ jobs:
         run: ctest --test-dir build/host --output-on-failure
       # The Vulkan build makes both programs: the test build's.
       - if: matrix.vulkan == 'ON'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-hosts
           path: |
@@ -124,7 +124,7 @@ jobs:
         run: '& "C:\Program Files\LLVM\bin\clang.exe" --version'
       - name: Build
         run: .\native\build.ps1 -Petari native\petari -Build build\game
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-game-module
           path: build/game/smg_game.dll
@@ -158,14 +158,14 @@ jobs:
             THIRD-PARTY-NOTICES.md
             docs/TEST_BUILDS.md
           sparse-checkout-cone-mode: false
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: windows-*
           path: dist
           merge-multiple: true
       - name: Stage
         run: cp LICENSE THIRD-PARTY-NOTICES.md docs/TEST_BUILDS.md dist/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nebula-windows-x64
           path: dist
@@ -226,7 +226,7 @@ jobs:
           cp LICENSE THIRD-PARTY-NOTICES.md docs/TEST_BUILDS.md dist/
           # Artifacts drop file modes: a tar keeps the programs executable.
           tar -C dist -czf nebula-linux-x64.tar.gz .
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nebula-linux-x64
           path: nebula-linux-x64.tar.gz
@@ -269,12 +269,12 @@ jobs:
           .\platform\android\build_apk.ps1 -Deps "$PWD\deps" -Work "$PWD\build\android"
       - name: Logs
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-build-logs
           path: build/android/*.log
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nebula-android
           path: |
