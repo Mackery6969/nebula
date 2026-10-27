@@ -1,8 +1,6 @@
 #include "Game/Screen/NebulaSettingsMenu.hpp"
 
 #ifdef TARGET_PC
-#include "Game/AudioLib/AudSystem.hpp"
-#include "Game/AudioLib/AudWrap.hpp"
 #include "Game/Screen/LayoutActor.hpp"
 #include "Game/Screen/LayoutCoreUtil.hpp"
 #include "Game/Screen/LayoutManager.hpp"
@@ -857,8 +855,7 @@ private:
 namespace {
     NebulaSettingsScreen* sScreen = nullptr;
     NebulaSettingsView sView;
-    bool sFreezing = false;     // the scene waits: the menu open, dropping in or rising away
-    bool sMusicPaused = false;  // the music stopped once faded, as under the pause menu
+    bool sHoldingInput = false;  // the game plays on without the player's input: the menu open, dropping in or rising away
     bool sMainMenuActive = false;  // the file select shows the online co-op main menu (FileSelector)
     bool sMainMenuReading = false;  // the main menu took the pad last frame
     u32 sMainMenuKeys = 0;          // the host's keys held last frame (NEBULA_COOP_KEY_*)
@@ -2792,31 +2789,19 @@ namespace NebulaSettingsMenu {
         if (sMainMenuActive) {
             placeLogo();
         }
-        // The whole game waits from the first frame of the drop to the last of the rise. Its sound fades and the music
-        // stops as under the pause menu, and both come back as they were. The HOME Menu holds the game itself
-        // (HomeButtonLayout).
-        // The main menu doesn't: the file select under it runs on, its music with it.
-        const bool freezing = !mainMenu && !sScreen->isMainMenu() && (sView.open || (sScreen->isShown() && !sScreen->isHome()));
-        AudSystem* pAudio = AudWrap::getSystem();
-        if (freezing != sFreezing) {
-            sFreezing = freezing;
-            if (pAudio != nullptr) {
-                pAudio->holdForSettingsMenu(freezing, NebulaCutsceneSkip::isFreezingScene() || NebulaCutsceneSkip::isSkipping());
-                if (!freezing && sMusicPaused) {
-                    pAudio->unpause();
-                }
-            }
-            sMusicPaused = false;
-        }
-        if (freezing && !sMusicPaused && sScreen->isOpenFully() && pAudio != nullptr && !pAudio->mIsPaused &&
-            !pAudio->isPauseMenuActive() && !pAudio->isHomeButtonMenuActive()) {
-            pAudio->pause();
-            sMusicPaused = true;
-        }
+        // The game plays on under the menu, its sound and music with it (docs/COOP_PLAN.md: nothing a player opens
+        // stops the world), but without the player's input from the first frame of the drop to the last of the rise:
+        // GameSystem holds the remotes once the menu has read them. The HOME Menu holds the game itself
+        // (HomeButtonLayout). The main menu has its own input (readMainMenuPad) and the file select under it none.
+        sHoldingInput = !mainMenu && !sScreen->isMainMenu() && (sView.open || (sScreen->isShown() && !sScreen->isHome()));
         setSharp(SharpSettings, sScreen->isShown());
         if (sScreen->isShown()) {
             MR::requestStarPointerModePauseMenu(sScreen);
-            MR::updateStarPointerModeWhileSceneHeld();
+            // The scene's sequence takes the request when it runs; the main menu and a held scene (the cutscene skip's
+            // question) take it here.
+            if (!sHoldingInput || NebulaCutsceneSkip::isFreezingScene()) {
+                MR::updateStarPointerModeWhileSceneHeld();
+            }
             sScreen->calcAnim();
         }
     }
@@ -2827,8 +2812,8 @@ namespace NebulaSettingsMenu {
         }
     }
 
-    bool isFreezingScene() {
-        return sFreezing;
+    bool isHoldingInput() {
+        return sHoldingInput;
     }
 
     bool isShown() {

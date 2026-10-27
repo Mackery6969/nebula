@@ -19,7 +19,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Text entry (keyboard, or letter by letter on a controller), then: renaming a save, the Host page's port and
       password, the Join page's address
 - [x] Mods as a room setting: the Host page picks them; the MODS page only imports and removes
-- [ ] Pause menu and Nebula's menus no longer pause the game (the server keeps running)
+- [x] Pause menu and Nebula's menus no longer pause the game (the server keeps running)
 - [ ] Options on Linux and Android (the in-game settings menu is Windows-only today)
 
 ## Playing together (Phase 1)

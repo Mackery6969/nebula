@@ -347,6 +347,17 @@ namespace MR {
 
         return pWPad->mButton->testButtonB();
     }
+
+#ifdef TARGET_PC
+    void holdWPadsForMenu() {
+        for (s32 channel = WPAD_CHAN0; channel < WPAD_MAX_CONTROLLERS; channel++) {
+            WPad* pWPad = MR::getWPad(channel);
+            if (pWPad != nullptr) {
+                pWPad->holdForMenu();
+            }
+        }
+    }
+#endif
 };  // namespace MR
 
 namespace WPadFunction {

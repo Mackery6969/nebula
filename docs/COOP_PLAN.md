@@ -274,7 +274,8 @@ Each phase ships on its own and leaves the game playable.
       existing `GameData.bin` converted; Rename on the Host page.
 - [x] The Host page: the save, max players, Player Interaction, Knockback Strength, PvP Mode and Cheats
       (`coop_cheats`), Host and Back.
-- [ ] The pause menu and Nebula's menus leave the game running.
+- [x] The pause menu and Nebula's menus (settings, achievement board) leave the game running, without the
+      player's input; a miss or a demo closes the pause menu.
 - [x] The game's logo above the menu, as on the title screen.
 - [x] The Player page: name and character per player (`coop_character`), not per save.
 - [x] Text rows (name, address, password; the keyboard, or letter by letter on a controller); the Host page's port
