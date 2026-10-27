@@ -155,6 +155,9 @@ public:
     [[nodiscard]] bool rt_scene_open() const noexcept { return false; }
     [[nodiscard]] bool rt_glow_open() const noexcept { return false; }
     [[nodiscard]] bool rt_water_open() const noexcept { return false; }
+    // The ray tracer's effects layer (RendererD3D12::begin_layer_window), opened over the traced water: never here.
+    void begin_layer_window() noexcept {}
+    [[nodiscard]] bool layer_window() const noexcept { return false; }
     [[nodiscard]] bool rt_late_open() const noexcept { return false; }
     [[nodiscard]] bool rt_sky_open() const noexcept { return false; }
     void rt_begin_sky() noexcept {}
