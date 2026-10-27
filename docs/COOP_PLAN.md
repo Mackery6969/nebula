@@ -92,21 +92,51 @@ The title screen and the file select go. In their place is a co-op main menu lik
   | Page | Rows |
   |---|---|
   | Main | The game's logo, then Host, Join, Player, Options, Quit; Nebula's version in a corner |
-  | Host | Save file (the six, each with its Power Stars and an Erase button), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, then Host |
+  | Host | Save (any number, each with its name and Power Stars; New, Rename and Erase), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, then Host |
   | Join | Address (`host[:port]`), password, then Join; the last address is remembered. No public or private lobbies: there's no relay |
-  | Player | Name, character (Mario or Luigi) |
+  | Player | Name, character (Mario or Luigi, as sm64coopdx's player options pick a model) |
   | Options | Nebula's settings pages as they are today |
   | Quit | "Quit to desktop?" yes or no |
 
-- **Starting.** Host loads the chosen save through the file select's own path (`FileSelector::exeDemo`:
-  `GameSequenceFunction::startGameDataLoadSequence`, the user name) and opens the session. With nobody joining
-  it's single player, as in sm64coopdx. Join needs Phase 1: a joining player plays the host's save, sent at join
-  (sm64coopdx's `packet_save_file`), so their own saves stay untouched.
-- **Dropped with the file select:** copying files and Mii icons for files. Erasing moves to the Host page.
+- **Saves: any number, no characters.** The game's own format (`GameData.bin`: six user files, each with a Mario
+  and a Luigi half) stays inside, but the player never sees it. Each Nebula save is a folder of its own
+  (`coop_saves/<id>/`, with a `save.ini` naming it) holding one `GameData.bin`, of which only user file 1's Mario
+  half is used. The host points the game's save path (`title/00010000/524d4745/data`) at the chosen folder; the
+  game reads it again when Host is pressed (`SaveDataHandleSequence`'s pre-load, which otherwise runs once at boot),
+  then loads user file 1 (`startGameDataLoadSequence(0, true)`). An existing install's `GameData.bin` becomes
+  saves of its own, one per used file and character, on first start.
+- **Character: the player's, not the save's.** `MR::isPlayerLuigi()` (today `!isDataMario()`, the save's half)
+  follows the Player page's character (`coop_character`, `mario` or `luigi`) instead, so the same save plays as
+  either. Remote players show each player's own character (`NEBULA_COOP_PLAYER_LUIGI`).
+- **Starting.** Host loads the chosen save through the file select's own path (`FileSelector::exeDemo`) and opens
+  the session. With nobody joining it's single player, as in sm64coopdx. Join needs Phase 1: a joining player plays
+  the host's save, sent at join (sm64coopdx's `packet_save_file`), so their own saves stay untouched.
+- **Dropped with the file select:** its six files, the Mario and Luigi halves, copying files and Mii icons.
+- **Portable.** The menu's model (pages, rows, saves, keys) is host code shared by every host
+  (`runtime/src/coop_menu.cpp`), not the Windows window's: the in-game settings menu is Windows-only today, the
+  main menu can't be. The game draws it with the settings menu's screen and turns the remote's buttons into its
+  input, so it works with whatever controls the player has on every platform.
 
 Order: first the menu shell (Main, Host with a save file, Options, Quit) replacing the title and file select, so the
 game plays as before through it; then text rows, the Player page and the Host page's server rows; then Join with
 Phase 1.
+
+## The Online tab
+
+Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, but ADVANCED becomes **ONLINE**:
+
+- **Room.** The session's settings: Player Interaction, Knockback Strength, PvP Mode, Cheats and the player list.
+  The host changes them for everyone, like sm64coopdx's in-game host settings; other players see them.
+- **Leave game.** The only way out of an online game apart from closing the window: it ends the session (the host
+  closes the room, a joiner disconnects) and returns to the main menu. The pause menu's own ways out of a galaxy
+  stay, but none of them leaves the session.
+- **Cheats.** Today's ADVANCED rows (Galaxy Select: travel to any galaxy and star; Grand Stars: give the save Grand
+  Stars 1-6) move here under a Cheats heading. They work only while the room has cheats on (`coop_cheats`, the
+  host's choice, off by default), and are shown greyed out otherwise. A host playing alone turns cheats on for
+  their own room.
+
+The settings menu is Windows-only today (its model is the Windows window's), so the Online tab is too until that
+model moves into code every host shares, as the main menu's does.
 
 ## Remote players
 
@@ -177,9 +207,13 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 0.5: main menu
 
-- [ ] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host (a save file),
-      Options, Quit, over the file select's space backdrop.
-- [ ] Text rows; the Player page; the Host page's server rows.
+- [ ] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host, Player
+      (character), Options, Quit, over the file select's space backdrop; Host plays the current save.
+- [ ] Saves: any number, each a folder of its own; New, Rename, Erase; the existing `GameData.bin` converted.
+- [ ] Character per player (`coop_character`), not per save.
+- [ ] Text rows (name, address, password); the Host page's server rows.
+- [ ] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
+      only with the room's cheats on (`coop_cheats`).
 
 ### Phase 1: ghosts
 
