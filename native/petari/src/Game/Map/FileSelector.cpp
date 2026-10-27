@@ -1081,6 +1081,10 @@ void FileSelector::updateBgm() {
 void FileSelector::exeCoopMenu() {
     if (MR::isFirstStep(this)) {
         MR::deactivateDefaultGameLayout();
+        // The pointer shows, without the file select's guidance: the logos' hidden pointer let go of first, as the
+        // title's own mode would.
+        MR::setStarPointerModeBase();
+        MR::startStarPointerModePauseMenu(this);
         MR::resetCameraMan();
         mCameraController->goToFarPoint();
         calcBasePos(0.0f);
@@ -1115,6 +1119,7 @@ void FileSelector::exeCoopMenu() {
     }
     __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
     NebulaSettingsMenu::setMainMenuActive(false);
+    MR::endStarPointerMode(this);
     if (mUserFile[0].isCreated()) {
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvDemoStartWait));
     } else {
@@ -1144,6 +1149,7 @@ void FileSelector::exeCoopCreate() {
 void FileSelector::exeCoopQuit() {
     if (MR::isFirstStep(this)) {
         NebulaSettingsMenu::setMainMenuActive(false);
+        MR::endStarPointerMode(this);
         mQuitFrames = 0;
         MR::closeSystemWipeFade();
         AudSystem* pAudio = AudWrap::getSystem();
