@@ -4,6 +4,8 @@
 // The ADVANCED page's galaxy select: its stage list, the page's requests (taken by the game each scene frame,
 // svc_test_scene_frame) and the names the game gives it in its own words.
 
+#include "galaxy/runtime_settings.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -50,6 +52,15 @@ void request_leave_game() noexcept;
 // A save is being played (Host left the main menu): the Online page works only then.
 void set_coop_in_game(bool in_game) noexcept;
 [[nodiscard]] bool coop_in_game() noexcept;
+// The room as online play has it, for the Online page: how many play in it, and for a player who joined, the host's
+// settings (shown, not changed: the host's are the room's).
+struct CoopRoomStatus {
+    unsigned players = 1u;
+    bool joined = false;
+    RuntimeCoopSettings room{};
+};
+void set_coop_room_status(const CoopRoomStatus& status);
+[[nodiscard]] CoopRoomStatus coop_room_status();
 // The main menu's text rows (galaxy/coop_menu.h): while one is edited, the window's keys type into it (characters and
 // galaxy::coop::TextKey keys) instead of reaching the game; the host takes what was typed each frame. Any thread.
 void set_coop_text_entry(bool on) noexcept;

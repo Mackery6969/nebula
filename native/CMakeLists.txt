@@ -162,7 +162,11 @@ endif()
 add_executable(nebula_native_host host/host_main.cpp
     ../runtime/src/mods.cpp ../runtime/src/mod_xml.cpp ../runtime/src/virtual_disc.cpp ../runtime/src/atomic_file.cpp
     ../runtime/src/crash_report.cpp ../runtime/src/discord_presence.cpp ../runtime/src/coop_menu.cpp
-    ../runtime/src/coop_saves.cpp)
+    ../runtime/src/coop_saves.cpp ../runtime/src/coop_session.cpp ../runtime/src/net/udp.cpp
+    ../runtime/src/net/link.cpp ../runtime/src/net/direct_transport.cpp)
+if(WIN32)
+    target_link_libraries(nebula_native_host PRIVATE ws2_32)
+endif()
 target_include_directories(nebula_native_host PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/include")
 target_compile_features(nebula_native_host PRIVATE cxx_std_20)

@@ -118,6 +118,10 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/controller_roster.cpp
     ${rt}/coop_menu.cpp
     ${rt}/coop_saves.cpp
+    ${rt}/coop_session.cpp
+    ${rt}/net/udp.cpp
+    ${rt}/net/link.cpp
+    ${rt}/net/direct_transport.cpp
     ${rt}/input_bindings.cpp
     ${rt}/host_pointer_events.cpp
     ${rt}/native_input.cpp

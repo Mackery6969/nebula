@@ -257,6 +257,7 @@ void test_menu(const fs::path& scratch) {
 
 void test_join_and_player() {
     using galaxy::coop::MainMenu;
+    using galaxy::coop::MenuCommand;
     MainMenu menu(true);
     menu.open();
     menu.select_row(1u);
@@ -264,7 +265,7 @@ void test_join_and_player() {
     galaxy::coop::MenuView view = menu.view();
     expect(view.pages[0] == "JOIN" && view.rows.size() == 4u && view.rows[0].value == "NONE" &&
                view.rows[2].value == "-JOIN",
-           "the Join page: no address yet, joining waits for online play");
+           "the Join page: no address yet, so no joining");
     menu.press(0u);
     for (const char c : std::string("bad address")) menu.type(static_cast<char32_t>(c));
     expect(menu.view().rows[0].value == "badaddress_", "an address takes no spaces");
@@ -275,6 +276,19 @@ void test_join_and_player() {
     for (const char c : std::string("]:7778")) menu.type(static_cast<char32_t>(c));
     menu.press(0u);
     expect(!menu.view().editing && menu.room().join_address == "[::1]:7778", "an address is kept");
+    menu.select_row(2u);
+    expect(menu.view().rows[2].value == "JOIN", "then Join can be pressed");
+    menu.press(0u);
+    expect(menu.take_command() == MenuCommand::Join, "and joins");
+    menu.set_joining(true);
+    expect(menu.view().rows[2].value == "CANCEL", "while connecting it reads Cancel");
+    menu.press(0u);
+    expect(menu.take_command() == MenuCommand::CancelJoin, "which stops the join");
+    menu.back();
+    expect(menu.take_command() == MenuCommand::CancelJoin, "as B does");
+    menu.set_joining(false);
+    menu.select_row(1u);
+    menu.press(0u);
     menu.back();
     expect(menu.view().pages[0] == "PLAY" && menu.view().selected == 1u, "back on Join");
 

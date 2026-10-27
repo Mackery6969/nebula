@@ -4,9 +4,9 @@
 //
 // The main page: Host, Join, Player, Options, Quit. Host opens the Host page: the save to play (left and right through
 // the saves, then New save), Rename and Erase, the room's port and password, its settings (room(): the coop_* runtime
-// settings), the mods it plays with (a page of their own) and Host, which plays. Join opens the Join page (the
-// address and password; joining itself comes with online play), Player the Player page (the name and character). B
-// or Back returns to the main page.
+// settings), the mods it plays with (a page of their own) and Host, which plays. Join opens the Join page (the address
+// and password, then Join, which connects; Cancel or B stops it), Player the Player page (the name and character). B or
+// Back returns to the main page.
 //
 // Text rows (a name, a port, an address, a password) are edited in place: pressed, they take the keyboard's typing
 // (type()) or, letter by letter, a controller's: up and down pick the letter at the cursor, left and right move it,
@@ -45,8 +45,9 @@ struct MenuView {
     bool editing = false;  // the selected row's text is being edited
 };
 
-// What the player chose, for the game to act on (MainMenu::take_command).
-enum class MenuCommand { None, Play, Quit, Settings };
+// What the player chose, for the game to act on (MainMenu::take_command). Join: connect to the Join page's address
+// (room().join_address, with room().password); CancelJoin: stop connecting (the Join page's Cancel, or B on it).
+enum class MenuCommand { None, Play, Quit, Settings, Join, CancelJoin };
 
 // A mod of the mods folder as the Host page picks it for the room: on or off, the ones on first, the top one winning.
 struct RoomMod {
@@ -116,6 +117,9 @@ public:
 
     // A line under the page in place of the selected row's help, until the player moves on.
     void set_message(std::string message) { message_ = std::move(message); }
+    // While a join connects: the Join page's Join reads Cancel.
+    void set_joining(bool joining) noexcept { joining_ = joining; }
+    [[nodiscard]] bool joining() const noexcept { return joining_; }
 
     // The last choice, once: None after it was taken.
     [[nodiscard]] MenuCommand take_command() noexcept;
@@ -158,6 +162,7 @@ private:
     unsigned selected_ = 0u;
     unsigned selected_button_ = 0u;
     MenuCommand command_ = MenuCommand::None;
+    bool joining_ = false;
     // The Host page: the saves (their ids) as it opened, the one picked (their count: a new save), and Erase asked
     // once.
     std::vector<std::string> save_ids_;

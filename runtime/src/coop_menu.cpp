@@ -217,7 +217,7 @@ std::vector<MenuRow> MainMenu::rows() const {
         const unsigned on = mods_on(mods_);
         rows[RowMods] = {"MODS", on == 0u ? "NONE" : std::to_string(on) + " ON",
                          "THE MODS THE ROOM PLAYS WITH. PLAYERS WHO JOIN GET THEM FROM YOU", true};
-        rows[RowStart] = {"HOST", "HOST", "PLAYS THE SAVE. OTHER PLAYERS JOINING COMES WITH ONLINE PLAY", true};
+        rows[RowStart] = {"HOST", "HOST", "PLAYS THE SAVE AND OPENS THE ROOM: OTHERS JOIN YOUR ADDRESS AND PORT", true};
         rows[RowBack] = {"BACK", "BACK", "BACK TO THE MAIN MENU", true};
         if (edit_.field == Field::Port || edit_.field == Field::Password) rows[edit_.row].help = kEditHelp;
         return rows;
@@ -254,7 +254,10 @@ std::vector<MenuRow> MainMenu::rows() const {
                                                                 : std::string(coop.password.size(), '*'),
                                  "THE ROOM'S PASSWORD, WHEN IT HAS ONE", false, false,
                                  !coop.password.empty() || edit_.field == Field::Password, true};
-        rows[RowJoinStart] = {"JOIN", "-JOIN", "JOINING ANOTHER PLAYER'S GAME COMES WITH ONLINE PLAY", true};
+        rows[RowJoinStart] = joining_                  ? MenuRow{"JOIN", "CANCEL", "CONNECTING TO THE HOST...", true}
+                             : coop.join_address.empty() ? MenuRow{"JOIN", "-JOIN", "TYPE THE HOST'S ADDRESS FIRST", true}
+                                                         : MenuRow{"JOIN", "JOIN",
+                                                                   "CONNECTS TO THE HOST AND PLAYS IN THEIR ROOM", true};
         rows[RowJoinBack] = {"BACK", "BACK", "BACK TO THE MAIN MENU", true};
         if (editing()) rows[edit_.row].help = kEditHelp;
         return rows;
@@ -421,6 +424,7 @@ void MainMenu::press(unsigned button) {
     case Screen::Host: press_host(selected_, button); return;
     case Screen::Mods: press_mods(selected_); return;
     case Screen::Join:
+        if (selected_ == RowJoinStart) command_ = joining_ ? MenuCommand::CancelJoin : MenuCommand::Join;
         if (selected_ == RowJoinBack) back();
         return;
     case Screen::Player:
@@ -650,7 +654,10 @@ void MainMenu::back() {
     case Screen::Main: return;
     case Screen::Host: show(Screen::Main, RowHost); return;
     case Screen::Mods: show(Screen::Host, RowMods); return;
-    case Screen::Join: show(Screen::Main, RowJoin); return;
+    case Screen::Join:
+        if (joining_) command_ = MenuCommand::CancelJoin;
+        show(Screen::Main, RowJoin);
+        return;
     case Screen::Player: show(Screen::Main, RowPlayer); return;
     }
 }

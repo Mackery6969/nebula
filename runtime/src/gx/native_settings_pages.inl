@@ -1397,16 +1397,25 @@ std::vector<SettingsRow> game_page(const RuntimeSettings& runtime) {
     return rows;
 }
 
+// The room's cheats as they apply now: the host's for a player who joined, else this player's room's.
+bool coop_room_cheats() {
+    const CoopRoomStatus status = coop_room_status();
+    return status.joined ? status.room.cheats : galaxy::get_runtime_settings().coop.cheats;
+}
+
 // ONLINE (docs/COOP_PLAN.md, "The Online tab"): the room's settings, Leave game, and the cheats, which work only while
 // the room has them on (coop_cheats, applied): any galaxy and star, entered with the game's own stage change (names
 // in its own words), and the Grand Stars that power the Observatory.
 std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
     std::vector<SettingsRow> rows;
-    const RuntimeCoopSettings& coop = runtime.coop;
+    // A player who joined sees the host's room, which only the host changes.
+    const CoopRoomStatus status = coop_room_status();
+    const RuntimeCoopSettings& coop = status.joined ? status.room : runtime.coop;
     rows.push_back({"ROOM", {}, nullptr, {}, true});
     char players[32]{};
-    std::snprintf(players, sizeof(players), "1 OF %u", coop.max_players);
-    rows.push_back({"PLAYERS", players, nullptr, "ONLY YOU UNTIL ONLINE PLAY CONNECTS OTHERS"});
+    std::snprintf(players, sizeof(players), "%u OF %u", std::max(status.players, 1u), coop.max_players);
+    rows.push_back({"PLAYERS", players, nullptr, "THE PLAYERS IN THE ROOM NOW, YOU INCLUDED"});
+    const std::size_t first_room_row = rows.size();
     rows.push_back({"MAX PLAYERS", std::to_string(coop.max_players),
                     [](RenderConfig&, int delta) {
                         unsigned& max = s_runtime_draft.coop.max_players;
@@ -1454,8 +1463,18 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
                     },
                     "BACK TO THE MAIN MENU. PROGRESS SINCE THE LAST SAVE IS LOST"));
 
-    // The cheats: the room's, applied (a change waiting to be applied does not count yet).
-    const bool cheats = galaxy::get_runtime_settings().coop.cheats;
+    // A player who joined: the room's rows show the host's settings, unchanged.
+    if (status.joined) {
+        for (std::size_t r = first_room_row; r < rows.size(); ++r) {
+            if (!rows[r].buttons.empty()) continue;  // Leave game
+            rows[r].change = nullptr;
+            rows[r].help = "THE HOST'S SETTING: ONLY THE HOST CHANGES THE ROOM";
+        }
+    }
+
+    // The cheats: the room's, applied (a change waiting to be applied does not count yet); the host's for a player
+    // who joined.
+    const bool cheats = status.joined ? status.room.cheats : galaxy::get_runtime_settings().coop.cheats;
     rows.push_back({"CHEATS", {}, nullptr, {}, true});
     want_galaxy_select_names();
     const std::size_t stage = std::min(s_galaxy_select_stage, kGalaxyStageCount - 1u);
@@ -1487,7 +1506,7 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
     rows.back().names = 2u;
     rows.push_back(button_row("TRAVEL", {cheats ? "GO" : "-GO"},
                     [](RenderConfig&, unsigned) {
-                        if (!galaxy::get_runtime_settings().coop.cheats) return;
+                        if (!coop_room_cheats()) return;
                         const std::size_t at = std::min(s_galaxy_select_stage, kGalaxyStageCount - 1u);
                         request_galaxy_travel(at, std::clamp(s_galaxy_select_star, 1u, kGalaxyStages[at].stars));
                         std::cerr << "[settings] travel to " << kGalaxyStages[at].id << ' '
@@ -1498,7 +1517,7 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
                            : "THE ROOM'S CHEATS ARE OFF: TURN THEM ON ABOVE AND APPLY"));
     rows.push_back(button_row("GRAND STARS", {cheats ? "GET" : "-GET"},
                     [](RenderConfig&, unsigned) {
-                        if (!galaxy::get_runtime_settings().coop.cheats) return;
+                        if (!coop_room_cheats()) return;
                         request_grand_stars();
                         std::cerr << "[settings] grand stars\n";
                         set_native_settings_visible(false);

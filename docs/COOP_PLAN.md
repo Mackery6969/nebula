@@ -289,9 +289,11 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 1: ghosts
 
-- [ ] Socket layer in `runtime/src/net/` (UDP, Windows and POSIX, the SDL host included) with reliable/ordered
-      channels on top. sm64coopdx's `packet_reliable.c` / `packet_ordered.c` are a reference for the design.
-- [ ] Host and Join (`address:port`) in Nebula's settings menu and on the command line; an optional password.
+- [x] Socket layer in `runtime/src/net/` (UDP, Windows and POSIX, the SDL host included) with reliable/ordered
+      channels on top. sm64coopdx's `packet_reliable.c` / `packet_ordered.c` are a reference for the design. See
+      [The network layer](#the-network-layer).
+- [x] Host and Join (`address:port`) on the main menu and on the command line (`--host <port>`, `--join
+      <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
 - [ ] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost").
 - [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
@@ -320,6 +322,29 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Demos/cutscenes: whoever triggers one plays it, everyone else is frozen or faded out.
 - [ ] Camera and HUD per player; spectate on death.
 - [ ] Chat, Discord presence for the lobby (`discord_presence.cpp` already exists), player colours.
+
+## The network layer
+
+Shaped like sm64coopdx's CoopNet, over direct UDP (no relay: see [Hosting](#hosting)). Four layers, each with its
+tests in `runtime/src/net/net_tests.cpp`:
+
+- **Sockets** (`galaxy/net/udp.h`): one non-blocking UDP socket, dual-stack IPv6 where the system allows, Winsock on
+  Windows and POSIX sockets on Linux, Android (the app has the `INTERNET` permission) and macOS.
+- **Channels** (`galaxy/net/link.h`): unreliable (snapshots), reliable (acknowledged and sent again, delivered once)
+  and ordered (reliable and in order; long messages such as a save or a mod are cut into datagrams and joined again,
+  with 256 datagrams in flight at most). The resend timeout follows the measured round trip; a message unacknowledged
+  for 15 seconds breaks the link.
+- **Transport** (`galaxy/net/transport.h`, `galaxy/net/direct_transport.h`): CoopNet's model. The host creates a
+  lobby; members join it, each gets a peer id, and everyone hears of members joining and leaving through callbacks
+  (`on_lobby_joined`, `on_peer_joined`, `on_peer_left`, `on_receive`, `on_error` with CoopNet's errors: lobby full,
+  wrong password, another protocol, a peer that stopped answering). The direct transport admits members on the host's
+  port and passes their messages on, so only the host's port needs forwarding. A relay that joins by a code would be
+  another `Transport`, with nothing above it changing.
+- **Session** (`galaxy/coop_session.h`): the room as the game sees it, on a thread of its own. A joiner asks to be let
+  in with the game's version, their name and character; the host answers with the player's number, the room's
+  settings, its save (sm64coopdx's `packet_join` and `packet_save_file`) and who is playing, and tells everyone else.
+  The joiner plays the host's save from `coop_joined/` under the NAND folder, so their own saves stay untouched.
+  Later features send their own message types with `Session::send` and `Session::on_message`.
 
 ## Licensing
 

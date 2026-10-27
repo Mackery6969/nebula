@@ -9,6 +9,9 @@
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
     <uses-feature android:name="android.hardware.type.pc" android:required="false" />
 
+    <!-- Online co-op: hosting and joining rooms over UDP. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Controller rumble and the touch controls' feedback. -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Setup copies the game from the disc image in a foreground service, with its progress as a notification. -->
