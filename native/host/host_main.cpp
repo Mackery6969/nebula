@@ -1870,9 +1870,25 @@ void note_coop_room() {
 #endif
 }
 
+// Where this player plays (the player list's galaxy and star), as the game last reported it: the session tells the
+// others when it changes. Nowhere once back at the main menu.
+void note_coop_place() {
+    std::string stage;
+    int scenario = 0;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        if (gCoopLocalValid) {
+            stage = gCoopLocal.stage;
+            scenario = gCoopLocal.scenario;
+        }
+    }
+    gCoopSession.set_place(stage, scenario);
+}
+
 // What happened in the room since the last call, on the game's thread: logged, and a room that ended while playing
 // takes the player back to the main menu. The host's room settings (the Online page's) reach the others.
 void pump_coop_session() {
+    note_coop_place();
     if (!gCoopSession.active()) return;
 #if defined(NEBULA_HOST_RENDERER)
     if (gCoopSession.is_host()) gCoopSession.set_room(galaxy::get_runtime_settings().coop);
@@ -2245,6 +2261,11 @@ int32_t svc_coop_menu(void*, uint32_t what) {
             // Back at the main menu: the game ended, and with it the room.
             if (gCoopSession.active()) gCoopSession.leave();
             (void)gCoopSession.take_events();
+            {
+                const std::lock_guard<std::mutex> lock(gCoopLock);
+                gCoopLocalValid = false;
+            }
+            note_coop_place();
             note_coop_room();
             gCoopMenu.set_joining(false);
             gCoopMenu.open();
@@ -2314,6 +2335,29 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         if ((what & 0xffu) == NEBULA_COOP_MENU_OLD_FILES) convert_old_saves(what >> 8u);
         return 0;
     }
+}
+
+// The player list (Tab or the controller's Share held): the room's players by number, each one's place and round trip.
+uint32_t svc_coop_list(void*, NebulaCoopListPlayer* players, uint32_t capacity, uint32_t* room_size) {
+    if (room_size != nullptr) *room_size = 0u;
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return 0u;
+    const std::vector<galaxy::coop::SessionPlayer> list = gCoopSession.players();
+    if (room_size != nullptr) *room_size = gCoopSession.room().max_players;
+    const std::size_t count = std::min<std::size_t>(list.size(), players != nullptr ? capacity : 0u);
+    for (std::size_t i = 0; i < count; ++i) {
+        const galaxy::coop::SessionPlayer& from = list[i];
+        NebulaCoopListPlayer& to = players[i];
+        to = {};
+        std::snprintf(to.name, sizeof(to.name), "%s", from.name.c_str());
+        std::snprintf(to.stage, sizeof(to.stage), "%s", from.stage.c_str());
+        to.scenario = from.scenario;
+        to.number = from.index + 1u;
+        to.ping_ms = from.ping_ms;
+        to.flags = (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_LIST_LUIGI : 0u) |
+                   (from.host ? NEBULA_COOP_LIST_HOST : 0u) | (from.local ? NEBULA_COOP_LIST_YOU : 0u);
+    }
+    return static_cast<uint32_t>(list.size());
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -4072,6 +4116,7 @@ int main(int argc, char** argv) {
     services.traced_sun = svc_traced_sun;
     services.coop_player = svc_coop_player;
     services.coop_menu = svc_coop_menu;
+    services.coop_list = svc_coop_list;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.
