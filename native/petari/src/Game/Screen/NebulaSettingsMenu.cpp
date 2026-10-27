@@ -121,8 +121,8 @@ namespace {
     enum { ChoiceNum = 3 };
 
     // What the hints and buttons name a key or button for. KeyPress: a row's button (IMPORT, OPEN) is pressed with
-    // Space or the bottom button.
-    enum { KeyApply, KeyUndo, KeyBack, KeyPage, KeyChange, KeyBind, KeyPress, KeyNum };
+    // Space or the bottom button. KeyReset: the main menu's Tab, a controller's Back (View, Minus, Create).
+    enum { KeyApply, KeyUndo, KeyBack, KeyPage, KeyChange, KeyBind, KeyPress, KeyReset, KeyNum };
 
     // The questions the host asks over the page (NEBULA_SETTINGS_STATUS_*), with their answers: each one's word, what it
     // sends and the key or button that gives it.
@@ -254,6 +254,8 @@ namespace {
         {{L"\u00D7", 0xFFFFFFFF, cText}, {L"\u25CB", 0xFFFFFFFF, cText}, {L"\u25A1", 0xFFFFFFFF, cText}, {L"\u25B3", 0xFFFFFFFF, cText}},
     };
     const wchar_t* const cPadShoulders[3][2] = {{L"LB", L"RB"}, {L"L", L"R"}, {L"L1", L"R1"}};
+    // The controllers' Back button, which resets the main menu's settings: a pill as the shoulders are.
+    const wchar_t* const cPadBack[3] = {L"View", L"\u2212", L"Create"};
     const PadButton cShoulders[3] = {{nullptr, 0x45474EFF, 0xFFFFFFFF}, {nullptr, 0xFFFFFFFF, cText}, {nullptr, 0xFFFFFFFF, cText}};
     const u32 cBadgeRing = 0xB4C2DEFF;  // round a white badge, as the window's rules
 
@@ -484,7 +486,8 @@ namespace {
             append(pDst, pDst + capacity, L"\u2190\u2192");
             return;
         }
-        static const char* const cKeys[KeyNum] = {"KeyEnter", "KeyBackspace", "KeyEscape", "KeyTab", nullptr, "KeyEnter", "KeySpace"};
+        static const char* const cKeys[KeyNum] = {"KeyEnter", "KeyBackspace", "KeyEscape", "KeyTab", nullptr, "KeyEnter", "KeySpace",
+                                                   "KeyTab"};
         NebulaText::get(pDst, capacity, key == KeyApply && controls ? "KeySpace" : cKeys[key]);
     }
 
@@ -552,12 +555,12 @@ namespace {
         } else if (key >= 0) {
             const s32 layout = static_cast< s32 >(input) - 1;
             const f32 diameter = rCap.mSize * cBadgeScale;
-            static const s32 cFace[KeyNum] = {3, 2, 1, -1, 0, 0, 0};
+            static const s32 cFace[KeyNum] = {3, 2, 1, -1, 0, 0, 0, -1};
             rCap.mBadgeCount = key == KeyPage ? 2 : 1;
             for (s32 i = 0; i < rCap.mBadgeCount; i++) {
-                const PadButton& rLook = key == KeyPage ? cShoulders[layout] : cPadFaces[layout][cFace[key]];
-                const bool face = key != KeyPage;
-                setText(rCap.mLabels[i], face ? rLook.mLabel : cPadShoulders[layout][i]);
+                const bool face = key != KeyPage && key != KeyReset;
+                const PadButton& rLook = face ? cPadFaces[layout][cFace[key]] : cShoulders[layout];
+                setText(rCap.mLabels[i], face ? rLook.mLabel : key == KeyReset ? cPadBack[layout] : cPadShoulders[layout][i]);
                 setTextColor(rCap.mLabels[i], rLook.mInk, rLook.mInk);
                 paint(rCap.mBadges[i], rLook.mFill, rLook.mFill == 0xFFFFFFFF ? cBadgeRing : darker(rLook.mFill));
                 f32 labelWidth = 0.0f;
@@ -849,12 +852,17 @@ namespace {
     bool sMusicPaused = false;  // the music stopped once faded, as under the pause menu
     bool sMainMenuActive = false;  // the file select shows the online co-op main menu (FileSelector)
     bool sMainMenuReading = false;  // the main menu took the pad last frame
+    u32 sMainMenuKeys = 0;          // the host's keys held last frame (NEBULA_COOP_KEY_*)
     NebulaMenuFocus::Repeat sMainMenuRepeat = {NebulaMenuFocus::Direction_None, 0};
 
     // The main menu's D-pad or stick (a press, then repeats while held: NebulaMenuFocus::readPress, as every Nebula
-    // menu), A, B and Plus/Minus: the game reads them itself (on every platform the keyboard and controllers reach it as
+    // menu), A, B and Minus (Tab and Escape from the host): the game reads them itself (on every platform the keyboard and controllers reach it as
     // the Wii Remote), where the settings menu's come from the host.
     void readMainMenuPad(const NebulaSettingsView& rView) {
+        // Tab and Escape, which the Wii Remote has no button for, from the host: pressed as they go down.
+        const u32 keys = static_cast< u32 >(__NebulaCoopMenu(NEBULA_COOP_MENU_KEYS));
+        const u32 keysPressed = keys & ~sMainMenuKeys;
+        sMainMenuKeys = keys;
         if (!sMainMenuReading) {
             // A stick still held as the menu opens is not a press.
             NebulaMenuFocus::holdCurrent(&sMainMenuRepeat);
@@ -873,14 +881,13 @@ namespace {
             __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, -1);
         } else if (press == NebulaMenuFocus::Direction_Right) {
             __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, 1);
-        } else if (MR::testCorePadTriggerMinus(WPAD_CHAN0) && rView.page > 0) {
-            __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) - 1);
-        } else if (MR::testCorePadTriggerPlus(WPAD_CHAN0) && rView.page + 1 < rView.page_count) {
-            __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) + 1);
+        } else if ((keysPressed & NEBULA_COOP_KEY_TAB) != 0 || MR::testCorePadTriggerMinus(WPAD_CHAN0)) {
+            // Tab, a controller's Back (View, Minus, Create): the selected setting back to its default.
+            __NebulaSettingsInput(NEBULA_SETTINGS_REVERT, 0);
         } else if (MR::testCorePadTriggerA(WPAD_CHAN0) && !sScreen->isPointerOnItem()) {
             __NebulaSettingsInput(NEBULA_SETTINGS_PRESS, static_cast< s32 >(rView.selected_button));
         }
-        if (MR::testCorePadTriggerB(WPAD_CHAN0)) {
+        if ((keysPressed & NEBULA_COOP_KEY_ESCAPE) != 0 || MR::testCorePadTriggerB(WPAD_CHAN0)) {
             // A page under the main one (Host) back to it.
             __NebulaSettingsInput(NEBULA_SETTINGS_CLOSE, 0);
         }
@@ -1212,10 +1219,12 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
         NebulaText::get(text, 256, rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU ? "CoopMenuTitle" : "SettingsTitle");
         setText(mTitle, text);
         measure(mTitle, 4000.0f, &width, &height);
+        // The main menu's pages are one each: no page buttons.
+        const u32 tabs = rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU && rView.page_count <= 1 ? 0 : rView.page_count;
         for (u32 i = 0; i < NEBULA_SETTINGS_PAGES; i++) {
             Chip& rTab = mTabs[i];
-            rTab.mRoot->SetVisible(i < rView.page_count);
-            if (i >= rView.page_count) {
+            rTab.mRoot->SetVisible(i < tabs);
+            if (i >= tabs) {
                 continue;
             }
             translateLine(text, 64, rView.pages[i], false);
@@ -1357,8 +1366,10 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
     setTextColor(mStatus, statusColor, statusColor);
     mStatusRoom = -1.0f;  // fitted again where it is placed
 
-    // The hints: changing (pressing, on a row of buttons; moving a mod), the page's own key, the pages.
-    const bool controls = rView.page == rView.controls_page;
+    // The hints: changing (pressing, on a row of buttons; moving a mod), the page's own key, the pages. The main menu
+    // has one page and nothing to undo: on a page under the main one, Back and Reset instead.
+    const bool mainMenu = rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
+    const bool controls = !mainMenu && rView.page == rView.controls_page;
     static const s32 cPageKeys[cHintsMax] = {KeyChange, KeyUndo, KeyPage};
     static const char* const cPageWords[cHintsMax] = {"SettingsHintChange", "SettingsHintUndo", "SettingsHintPage"};
     static const s32 cControlsKeys[cHintsMax] = {KeyBind, KeyUndo, KeyPage};
@@ -1371,6 +1382,11 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
         if (i == 0 && hint != HintChange) {
             key = KeyPress;
             pWord = cFirstWords[hint];
+        }
+        if (mainMenu && i > 0) {
+            const bool under = rView.back != 0;
+            key = !under ? -1 : i == 1 ? KeyBack : KeyReset;
+            pWord = !under ? nullptr : i == 1 ? "SettingsBack" : "SettingsHintReset";
         }
         fillKeyCap(rHint.mKey, key, rView.input, controls);
         text[0] = 0;

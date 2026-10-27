@@ -328,6 +328,8 @@ std::atomic<unsigned> s_native_settings_button{0};
 std::atomic<unsigned> s_native_settings_button_row{~0u};
 // The native game draws the menu (it read native_settings_view): the overlay draws nothing of its own.
 std::atomic<bool> s_settings_drawn_by_game{false};
+// Tab (1) and Escape (2) down in the window (coop_keys_held).
+std::atomic<unsigned> s_coop_keys_held{0u};
 // Leaving with changes not applied asks first: apply them, discard them, or stay. Under s_native_settings_mutex.
 bool s_settings_leave_asking = false;
 // Apply saved mod changes this session did not start with: the menu asks whether to restart now.
@@ -3662,6 +3664,23 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
                     },
                     "GIVES THIS SAVE FILE GRAND STARS 1-6 (EVERY DOME POWERED) AND LOADS THE OBSERVATORY. "
                     "USE A SPARE FILE"));
+    // From the main menu (no game yet) the page only shows: its room is set on the Host page.
+    if (!coop_in_game()) {
+        for (SettingsRow& row : rows) {
+            if (row.heading) continue;
+            row.change = nullptr;
+            row.press = nullptr;
+            if (!row.buttons.empty()) {
+                // Each button unavailable ('-' before its word).
+                row.value.clear();
+                for (std::string& word : row.buttons) {
+                    if (word.empty() || word[0] != '-') word.insert(word.begin(), '-');
+                    row.value += (row.value.empty() ? "" : "|") + word;
+                }
+            }
+            row.help = "ONLY IN A GAME. THE ROOM IS SET ON THE MAIN MENU'S HOST PAGE";
+        }
+    }
     return rows;
 }
 
@@ -4514,6 +4533,8 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         if (native_settings_handle_window_key(wp, was_down)) {
             return 0;
         }
+        if (wp == VK_TAB) s_coop_keys_held.fetch_or(1u, std::memory_order_relaxed);
+        if (wp == VK_ESCAPE) s_coop_keys_held.fetch_or(2u, std::memory_order_relaxed);
         if (!galaxy::host::native_keyboard_capture_active()) {
             const UINT key = static_cast<UINT>(wp);
             const UINT mapped_shift = key == VK_SHIFT
@@ -4532,6 +4553,8 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     }
     if (msg == WM_KEYUP || msg == WM_SYSKEYUP) {
         const UINT key = static_cast<UINT>(wp);
+        if (key == VK_TAB) s_coop_keys_held.fetch_and(~1u, std::memory_order_relaxed);
+        if (key == VK_ESCAPE) s_coop_keys_held.fetch_and(~2u, std::memory_order_relaxed);
         const UINT mapped_shift = key == VK_SHIFT
             ? MapVirtualKeyA(
                 (static_cast<UINT>(lp) >> 16u) & 0xffu,
@@ -4696,6 +4719,7 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         return 0;
     }
     if (msg == WM_KILLFOCUS) {
+        s_coop_keys_held.store(0u, std::memory_order_relaxed);
         galaxy::host::clear_native_window_key_presses();
         s_pointer_focused.store(false, std::memory_order_relaxed);
         invalidate_pointer_focus_once();
@@ -5972,5 +5996,10 @@ void host_window::native_settings_set_refresh_override_for_tests(unsigned hz) no
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
+}
+
+unsigned coop_keys_held() noexcept {
+    return s_native_settings_visible.load(std::memory_order_relaxed) ? 0u
+                                                                      : s_coop_keys_held.load(std::memory_order_relaxed);
 }
 }  // namespace galaxy::gx

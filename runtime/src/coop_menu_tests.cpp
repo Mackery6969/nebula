@@ -159,6 +159,17 @@ void test_menu(const fs::path& scratch) {
     expect(host.room().knockback_strength == galaxy::kCoopKnockbackTooMuch,
            "knockback stops at too much");
 
+    expect(host.view().back && !MainMenu(true).view().back, "the Host page has a way back, the main page none");
+    host.reset();
+    expect(host.room().knockback_strength == galaxy::kCoopKnockbackNormal, "Tab resets the selected setting");
+    expect(host.room().cheats, "and only it");
+    host.select_row(6u);
+    host.reset();
+    expect(!host.room().cheats, "cheats reset to off");
+    host.select_row(0u);
+    host.reset();
+    expect(host.view().rows[0].value == "ONE", "the save has no default");
+
     host.select_row(7u);
     host.press(0u);
     expect(host.take_command() == MenuCommand::Play && host.chosen_save() == first, "Host plays the picked save");

@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 34u
+#define NEBULA_GAME_API_VERSION 35u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -351,6 +351,7 @@ typedef struct NebulaSettingsView {
     int32_t status_number;
     char status_text[160];
     uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
+    uint32_t back; /* the main menu: a page under the main one, which B leaves; its rows reset to their defaults */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -361,7 +362,7 @@ enum {
     NEBULA_SETTINGS_SELECT_ROW,  /* arg: the row */
     NEBULA_SETTINGS_CHANGE,      /* arg: -1 or 1, the selected row's value; -2 or 2 the same, going round at its ends */
     NEBULA_SETTINGS_APPLY,
-    NEBULA_SETTINGS_REVERT,
+    NEBULA_SETTINGS_REVERT,      /* the main menu: the selected row back to its default */
     NEBULA_SETTINGS_PRESS,       /* arg: the selected row's button */
     NEBULA_SETTINGS_MOVE_MOD,    /* the selected mod dropped: arg >> 16 the list (1 off, 2 on), its low 16 bits the place */
     NEBULA_SETTINGS_SET_VALUE,   /* arg: the step the selected setting's slider is dragged to */
@@ -381,13 +382,19 @@ enum {
    NEBULA_COOP_MENU_OLD_FILES, as the menu first opens: the user files the save data holds, bit i (from bit 8 of
    `what`) for file i + 1; once per install the host makes each into a co-op save. NEBULA_COOP_MENU_SAVE_FILE, after
    PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
-   game reads again (empty for a new save). */
+   game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
+   for (NEBULA_COOP_KEY_*), outside Nebula's settings menu. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
     NEBULA_COOP_MENU_POLL,
     NEBULA_COOP_MENU_CLOSE,
     NEBULA_COOP_MENU_OLD_FILES,
     NEBULA_COOP_MENU_SAVE_FILE,
+    NEBULA_COOP_MENU_KEYS,
+};
+enum {
+    NEBULA_COOP_KEY_TAB = 1u << 0,    /* the main menu's reset (as the controller's Back, the Wii Remote's Minus) */
+    NEBULA_COOP_KEY_ESCAPE = 1u << 1, /* the main menu's back (as B) */
 };
 enum {
     NEBULA_COOP_MENU_NONE = 0,

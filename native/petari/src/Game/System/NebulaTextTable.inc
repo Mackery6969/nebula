@@ -1007,6 +1007,8 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Change", nullptr, L"Modifier", L"Modifier", L"Cambiar", L"Cambiar", L"\u00C4ndern", L"Cambia", L"Wijzigen", L"Mudar", L"\u5909\u66F4", L"\uBCC0\uACBD", L"\u66F4\u6539", L"\u8B8A\u66F4"}},
     {"SettingsHintUndo",
      {L"Undo", nullptr, L"Annuler", L"Annuler", L"Deshacer", L"Deshacer", L"R\u00FCckg\u00E4ngig", L"Annulla", L"Ongedaan maken", L"Desfazer", L"\u5143\u306B\u623B\u3059", L"\uB418\uB3CC\uB9AC\uAE30", L"\u64A4\u9500", L"\u5FA9\u539F"}},
+    {"SettingsHintReset",
+     {L"Reset", nullptr, L"R\u00E9initialiser", L"R\u00E9initialiser", L"Restablecer", L"Restablecer", L"Zur\u00FCcksetzen", L"Ripristina", L"Herstellen", L"Redefinir", L"\u30EA\u30BB\u30C3\u30C8", L"\uCD08\uAE30\uD654", L"\u91CD\u7F6E", L"\u91CD\u8A2D"}},
     {"SettingsHintPage",
      {L"Page", nullptr, L"Page", L"Page", L"P\u00E1gina", L"P\u00E1gina", L"Seite", L"Pagina", L"Pagina", L"P\u00E1gina", L"\u30DA\u30FC\u30B8", L"\uD398\uC774\uC9C0", L"\u9875\u9762", L"\u9801\u9762"}},
     {"SettingsHintBind",

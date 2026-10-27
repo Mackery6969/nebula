@@ -11,12 +11,14 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Unlimited saves, each a folder under `coop_saves/`; the old save's files converted once
 - [x] Achievements belong to the save: each save keeps its own
 - [x] Settings: ADVANCED renamed ONLINE, with room settings, Leave game and cheats that need the room's cheats on
+- [x] The Online tab greyed out when opened from the main menu
+- [x] Tab (a controller's Back) resets the selected Host page setting to its default; Escape or B goes back
+- [x] No page tabs or page hint on the main menu's one-page screens
 - [ ] The game's logo above the main menu, as on the title screen
 - [ ] Player page: name and character (Mario or Luigi), the character per player instead of per save
 - [ ] Text entry (keyboard, or letter by letter on a controller), then: renaming a save, the Host page's port and
       password, the Join page's address
-- [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page only imports and
-      removes
+- [ ] Mods as a room setting: the Host page picks them; the MODS page only imports and removes
 - [ ] Pause menu and Nebula's menus no longer pause the game (the server keeps running)
 - [ ] Options on Linux and Android (the in-game settings menu is Windows-only today)
 
@@ -28,6 +30,8 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [ ] Nametags over each player's head
 - [ ] Player list while Tab (keyboard) or Share (controller) is held
 - [ ] Version, mods and disc check when a player joins
+- [ ] Mod sharing as sm64coopdx's: joiners download the room's mods they don't have from the host
+- [ ] Chat (keyboard only; controllers read it)
 
 ## Same world (Phase 2)
 
@@ -43,3 +47,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [ ] Shared enemies and objects
 - [ ] Bosses and story demos with several players
 - [ ] Dedicated server (the game with no window)
+
+## Maybe later
+
+- [ ] A relay like sm64coopdx's CoopNet (join by code, no port forwarding), only if the project grows

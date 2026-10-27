@@ -1,4 +1,5 @@
 #include "galaxy/gx_d3d12.h"
+#include "galaxy/gx/galaxy_select.h"
 #include "galaxy/gx/host_window_win32.h"
 #include "galaxy/gx/render_config.h"
 #include "galaxy/gx/temporal_upscaler.h"
@@ -102,6 +103,8 @@ int main() {
     bool passed = true;
     // The frame rate targets follow the display: a 240 Hz one here, whatever this machine has.
     galaxy::gx::host_window::native_settings_set_refresh_override_for_tests(240u);
+    // In a game: the Online page's rows change (from the main menu they only show).
+    galaxy::gx::set_coop_in_game(true);
     const ScopedEnv render_path_env("GALAXY_RENDER_CONFIG_PATH");
     const ScopedEnv runtime_path_env("GALAXY_RUNTIME_SETTINGS_PATH");
 

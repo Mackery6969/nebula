@@ -42,6 +42,7 @@ namespace {
 
 std::mutex g_input_mutex;
 InputState g_input;                 // guarded by g_input_mutex
+std::atomic<unsigned> g_coop_keys_held{0u};  // galaxy::gx::coop_keys_held
 SDL_Window* g_window = nullptr;
 std::atomic<int> g_home_choice{-1};
 std::atomic<bool> g_home_visible{false};
@@ -207,6 +208,10 @@ void set_key(int vk, bool down) {
     if (vk <= 0 || vk > 0xFF) {
         return;
     }
+    // Tab (1) and Escape (2): coop_keys_held.
+    const unsigned coop = vk == VK_TAB ? 1u : vk == VK_ESCAPE ? 2u : 0u;
+    if (coop != 0u && down) g_coop_keys_held.fetch_or(coop, std::memory_order_relaxed);
+    if (coop != 0u && !down) g_coop_keys_held.fetch_and(~coop, std::memory_order_relaxed);
     g_input.keys.set_key(static_cast<std::uint8_t>(vk), down);
     // The runtime's bindings name the generic modifier keys too.
     if (vk == VK_LSHIFT || vk == VK_RSHIFT) g_input.keys.set_key(VK_SHIFT, down);
@@ -439,6 +444,7 @@ void pump_events(int timeout_ms) noexcept {
         case SDL_EVENT_WINDOW_FOCUS_LOST:
             g_input.window_focused = false;
             g_input.keys = {};
+            g_coop_keys_held.store(0u, std::memory_order_relaxed);
             break;
         case SDL_EVENT_FINGER_DOWN:
         case SDL_EVENT_FINGER_MOTION:
@@ -871,6 +877,10 @@ void native_settings_post_key(std::uintptr_t) noexcept {}
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
+}
+
+unsigned coop_keys_held() noexcept {
+    return sdl::g_coop_keys_held.load(std::memory_order_relaxed);
 }
 
 }  // namespace galaxy::gx

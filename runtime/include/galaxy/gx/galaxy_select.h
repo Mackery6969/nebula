@@ -46,6 +46,9 @@ void request_galaxy_travel(std::size_t stage, std::uint32_t star) noexcept;
 void request_grand_stars() noexcept;
 // The Online page's Leave game: the game starts again at the main menu.
 void request_leave_game() noexcept;
+// A save is being played (Host left the main menu): the Online page works only then.
+void set_coop_in_game(bool in_game) noexcept;
+[[nodiscard]] bool coop_in_game() noexcept;
 // The game, once per scene frame: a travel the page asked for (true, once), and the Grand Stars.
 [[nodiscard]] bool take_galaxy_travel(std::size_t& stage, std::uint32_t& star) noexcept;
 [[nodiscard]] bool take_grand_stars() noexcept;

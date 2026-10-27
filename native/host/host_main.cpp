@@ -1804,6 +1804,9 @@ bool start_coop_save() {
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::achievements::set_file(folder / "achievements.ini");
 #endif
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::gx::set_coop_in_game(true);
+#endif
     std::fprintf(stderr, "[coop] hosting save %s (%s, file %u)\n", save->id.c_str(), save->name.c_str(), save->file);
     return true;
 }
@@ -1856,6 +1859,7 @@ void fill_coop_menu_view(NebulaSettingsView* view) {
     }
     view->selected = menu.selected;
     view->selected_button = menu.selected_button;
+    view->back = menu.back ? 1u : 0u;
     if (menu.selected < menu.rows.size()) {
         copy_settings_text(view->help, menu.rows[menu.selected].help);
     }
@@ -1930,6 +1934,7 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
         case NEBULA_SETTINGS_CHANGE: gCoopMenu.change(arg); break;
         case NEBULA_SETTINGS_PRESS: gCoopMenu.press(static_cast<unsigned>(std::max(arg, 0))); break;
         case NEBULA_SETTINGS_CLOSE: gCoopMenu.back(); break;
+        case NEBULA_SETTINGS_REVERT: gCoopMenu.reset(); break;
         default: break;  // nothing to apply or revert: the main menu stays until a choice leaves it
         }
         return;
@@ -1948,6 +1953,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
     case NEBULA_COOP_MENU_OPEN:
 #if defined(NEBULA_HOST_RENDERER)
         if (!gCoopMenu.is_open()) gCoopMenu.set_room(galaxy::get_runtime_settings().coop);
+        galaxy::gx::set_coop_in_game(false);
 #endif
         gCoopMenu.open();
         return 0;
@@ -1967,6 +1973,12 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         }
         return NEBULA_COOP_MENU_NONE;
     case NEBULA_COOP_MENU_SAVE_FILE: return static_cast<int32_t>(gCoopSaveFile);
+    case NEBULA_COOP_MENU_KEYS:
+#if defined(NEBULA_HOST_RENDERER)
+        return static_cast<int32_t>(galaxy::gx::coop_keys_held());
+#else
+        return 0;
+#endif
     default:
         if ((what & 0xffu) == NEBULA_COOP_MENU_OLD_FILES) convert_old_saves(what >> 8u);
         return 0;

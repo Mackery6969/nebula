@@ -48,6 +48,8 @@ Games are self-hosted. There is no lobby server, relay or account system run by 
 - **Reaching the host.** The host forwards the UDP port on their router, or the group uses a VPN overlay such as
   Tailscale, ZeroTier or Radmin VPN and joins by its address. The docs explain both; Nebula itself does no NAT
   traversal.
+- **A relay (maybe, much later).** sm64coopdx's CoopNet lets players join by a code without forwarding ports. Galaxy
+  could have the same, but it needs a server someone runs; it's a side idea, only worth it if the project grows.
 - **Dedicated server (later).** The world simulation *is* the game, so a server with nobody playing on it needs a
   headless Nebula: the game module running with no window, renderer or audio output, and no local Mario (or a hidden
   one). That's a real but separate project after Phase 2. The protocol is designed so the authority doesn't have to be
@@ -163,6 +165,8 @@ Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, 
   Stars 1-6) move here under a Cheats heading. They work only while the room has cheats on (`coop_cheats`, the
   host's choice, off by default), and are shown greyed out otherwise. A host playing alone turns cheats on for
   their own room.
+- **From the main menu** (Options, before any game) the whole tab shows greyed out: the room is set on the Host
+  page.
 
 The settings menu is Windows-only today (its model is the Windows window's), so the Online tab is too until that
 model moves into code every host shares, as the main menu's does.
@@ -179,6 +183,13 @@ enemies.
 - **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
   room, their character, and the galaxy and star they're on, as sm64coopdx's player list. It shows over play and
   doesn't stop it.
+
+## Chat
+
+A text chat as sm64coopdx's, keyboard only: Enter (or T) opens a line at the screen's bottom left, Enter sends it to
+everyone in the room, Escape drops it. The last few messages fade in over play and out after a few seconds, each with
+the sender's name in their colour; joins and leaves show there too. It doesn't stop the game, and while the line is
+open the keyboard types instead of playing. A controller has no way to type, so it only reads the chat.
 
 ## Cutscenes and transitions
 

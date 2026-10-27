@@ -32,6 +32,7 @@ struct MenuView {
     std::vector<MenuRow> rows;  // the page's
     unsigned selected = 0u;
     unsigned selected_button = 0u;
+    bool back = false;  // a page under the main one: B leaves it, Tab resets its rows
 };
 
 // What the player chose, for the game to act on (MainMenu::take_command).
@@ -64,6 +65,8 @@ public:
     void press(unsigned button);
     // B: the Host page back to the main page.
     void back();
+    // Tab (or the controller's Back): the selected room setting back to its default.
+    void reset();
 
     // The last choice, once: None after it was taken.
     [[nodiscard]] MenuCommand take_command() noexcept;

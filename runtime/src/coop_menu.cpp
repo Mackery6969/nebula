@@ -145,6 +145,7 @@ MenuView MainMenu::view() const {
     view.rows = rows();
     view.selected = selected_;
     view.selected_button = selected_button_;
+    view.back = screen_ != Screen::Main;
     return view;
 }
 
@@ -235,6 +236,19 @@ void MainMenu::press_host(unsigned row) {
         return;
     case RowBack: back(); return;
     default: return;
+    }
+}
+
+void MainMenu::reset() {
+    if (!open_ || screen_ != Screen::Host) return;
+    const RuntimeCoopSettings defaults{};
+    switch (selected_) {
+    case RowPlayers: room_.max_players = defaults.max_players; break;
+    case RowInteraction: room_.player_interaction = defaults.player_interaction; break;
+    case RowKnockback: room_.knockback_strength = defaults.knockback_strength; break;
+    case RowPvp: room_.pvp_mode = defaults.pvp_mode; break;
+    case RowCheats: room_.cheats = defaults.cheats; break;
+    default: break;  // the save and the buttons have no default
     }
 }
 
