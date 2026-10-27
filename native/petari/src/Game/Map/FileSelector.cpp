@@ -46,6 +46,8 @@
 #include "Game/AudioLib/AudSystem.hpp"
 #include "Game/AudioLib/AudWrap.hpp"
 #include "Game/Screen/NebulaQuitButton.hpp"
+#include "Game/Screen/NebulaSettingsMenu.hpp"
+#include <nebula_game_api.h>
 #include "Game/System/GameSystemFunction.hpp"
 #endif
 
@@ -133,6 +135,11 @@ namespace NrvFileSelector {
     NEW_NERVE(FileSelectorNrvFileBroken, FileSelector, FileBroken);
     NEW_NERVE(FileSelectorNrvManualStart, FileSelector, ManualStart);
     NEW_NERVE(FileSelectorNrvManual, FileSelector, Manual);
+#ifdef TARGET_PC
+    NEW_NERVE(FileSelectorNrvCoopMenu, FileSelector, CoopMenu);
+    NEW_NERVE(FileSelectorNrvCoopCreate, FileSelector, CoopCreate);
+    NEW_NERVE(FileSelectorNrvCoopQuit, FileSelector, CoopQuit);
+#endif
 };  // namespace NrvFileSelector
 
 void FileSelector_FORCE_MATCH_SDATA2() {
@@ -147,7 +154,7 @@ FileSelector::FileSelector(const char* pName)
       mBgmState(), mSelectEffect()
 #ifdef TARGET_PC
       ,
-      mQuitButton(), mQuitWindow(), mIsAskingQuit(false), mQuitFrames(-1), mIsQuitFocusWanted(false)
+      mQuitButton(), mQuitWindow(), mIsAskingQuit(false), mQuitFrames(-1), mIsQuitFocusWanted(false), mIsCoopPlayWanted(false)
 #endif
 {
 }
@@ -262,7 +269,12 @@ void FileSelector::control() {
 bool FileSelector::receiveOtherMsg(u32 msg, HitSensor* pSender, HitSensor* pReceiver) {
     if (MR::isMsgAutoRushBegin(msg) && isNerve(GET_NERVE(FileSelector, FileSelectorNrvWaitBind))) {
         MR::hidePlayer();
+#ifdef TARGET_PC
+        // Online co-op: the main menu in place of the title and the files (docs/COOP_PLAN.md, "Main menu").
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopMenu));
+#else
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvTitle));
+#endif
 
         return true;
     }
@@ -1061,6 +1073,90 @@ void FileSelector::updateBgm() {
 
     mBgmState = state;
 }
+
+#ifdef TARGET_PC
+// The online co-op main menu over the file select's sky and music, the files not shown. Host plays user file 1 (it is
+// made first when new), Quit leaves as Quit to desktop does; the menu itself is the host's (coop_menu), drawn by
+// NebulaSettingsMenu.
+void FileSelector::exeCoopMenu() {
+    if (MR::isFirstStep(this)) {
+        MR::deactivateDefaultGameLayout();
+        MR::resetCameraMan();
+        mCameraController->goToFarPoint();
+        calcBasePos(0.0f);
+        MR::startStageBGM("MBGM_FILE_SELECT", false);
+        mIsCoopPlayWanted = false;
+        NebulaSettingsMenu::setMainMenuActive(true);
+        __NebulaCoopMenu(NEBULA_COOP_MENU_OPEN);
+    }
+
+    const s32 choice = __NebulaCoopMenu(NEBULA_COOP_MENU_POLL);
+    if (choice == NEBULA_COOP_MENU_QUIT) {
+        __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopQuit));
+        return;
+    }
+    mIsCoopPlayWanted = mIsCoopPlayWanted || choice == NEBULA_COOP_MENU_PLAY;
+    // A file's Mii name is read as it starts: the Mii data first, as the title waits for it before the files.
+    if (!mIsCoopPlayWanted || !::getMiiFacePartsHolder()->isInitEnd()) {
+        return;
+    }
+
+    _B4 = nullptr;
+    for (int i = 0; i < mItems->getObjNum(); i++) {
+        FileSelectItem* pItem = static_cast< FileSelectItem* >(mItems->getActor(i));
+        if (pItem->_140 == 1) {
+            _B4 = pItem;
+        }
+    }
+    if (_B4 == nullptr) {
+        mIsCoopPlayWanted = false;
+        return;
+    }
+    __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
+    NebulaSettingsMenu::setMainMenuActive(false);
+    if (mUserFile[0].isCreated()) {
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvDemoStartWait));
+    } else {
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopCreate));
+    }
+}
+
+// A new install's user file 1, made before it plays (the file select's Create, without its Mii choice).
+void FileSelector::exeCoopCreate() {
+    if (MR::isFirstStep(this)) {
+        GameSequenceFunction::startCreateUserFileSequence(_B4->_140);
+    }
+
+    if (GameSequenceFunction::isActiveSaveDataHandleSequence()) {
+        return;
+    }
+
+    if (GameSequenceFunction::isSuccessSaveDataHandleSequence()) {
+        restoreUserFile();
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvDemoStartWait));
+    } else {
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopMenu));
+    }
+}
+
+// Quit to desktop from the main menu: the picture and sound fade, then the game's own way out.
+void FileSelector::exeCoopQuit() {
+    if (MR::isFirstStep(this)) {
+        NebulaSettingsMenu::setMainMenuActive(false);
+        mQuitFrames = 0;
+        MR::closeSystemWipeFade();
+        AudSystem* pAudio = AudWrap::getSystem();
+        if (pAudio != nullptr) {
+            pAudio->fadeOutForQuit();
+        }
+    }
+
+    if (++mQuitFrames >= 2 && !MR::isSystemWipeActive()) {
+        GameSystemFunction::requestGoWiiMenu(true);
+    }
+}
+#endif
 
 void FileSelector::exeWaitBind() {
     mPosition.set(*MR::getPlayerPos());

@@ -148,6 +148,9 @@ public:
     void exeManualStart();
     void exeManual();
 #ifdef TARGET_PC
+    void exeCoopMenu();
+    void exeCoopCreate();
+    void exeCoopQuit();
     void createQuitButton();
     void updateQuitButton();
     bool updateQuitQuestion();
@@ -188,5 +191,6 @@ public:
     bool mIsAskingQuit;
     s32 mQuitFrames;  // from Yes: the fade to black, then the game's own way out
     bool mIsQuitFocusWanted;  // Up from the top files: the highlight goes to Quit to desktop once it shows
+    bool mIsCoopPlayWanted;   // the main menu's Host: the save starts once the Mii data is ready
 #endif
 };

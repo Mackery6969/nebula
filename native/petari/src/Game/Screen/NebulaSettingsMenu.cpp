@@ -688,6 +688,9 @@ public:
     bool isShown() const { return mOpen > 0.0f; }
     bool isOpenFully() const { return mOpen >= 1.0f && !mClosing; }
     bool isHome() const { return mHome; }
+    bool isMainMenu() const { return mShown.kind == NEBULA_SETTINGS_KIND_MAIN_MENU; }
+    // The pointer is on something A presses (a tab, a footer button, a row): the screen takes that A itself.
+    bool isPointerOnItem() const { return mHoverButton != nullptr || mHoverTab >= 0 || mHoverRow >= 0; }
 
 private:
     bool build();
@@ -841,6 +844,27 @@ namespace {
     NebulaSettingsView sView;
     bool sFreezing = false;     // the scene waits: the menu open, dropping in or rising away
     bool sMusicPaused = false;  // the music stopped once faded, as under the pause menu
+    bool sMainMenuActive = false;  // the file select shows the online co-op main menu (FileSelector)
+
+    // The main menu's D-pad, A and Plus/Minus: the game reads them itself (on every platform the keyboard and
+    // controllers reach it as the Wii Remote), where the settings menu's come from the host.
+    void readMainMenuPad(const NebulaSettingsView& rView) {
+        if (MR::testCorePadTriggerUp(WPAD_CHAN0)) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_MOVE, -1);
+        } else if (MR::testCorePadTriggerDown(WPAD_CHAN0)) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_MOVE, 1);
+        } else if (MR::testCorePadTriggerLeft(WPAD_CHAN0)) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, -1);
+        } else if (MR::testCorePadTriggerRight(WPAD_CHAN0)) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, 1);
+        } else if (MR::testCorePadTriggerMinus(WPAD_CHAN0) && rView.page > 0) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) - 1);
+        } else if (MR::testCorePadTriggerPlus(WPAD_CHAN0) && rView.page + 1 < rView.page_count) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) + 1);
+        } else if (MR::testCorePadTriggerA(WPAD_CHAN0) && !sScreen->isPointerOnItem()) {
+            __NebulaSettingsInput(NEBULA_SETTINGS_PRESS, static_cast< s32 >(rView.selected_button));
+        }
+    }
 };  // namespace
 
 NebulaSettingsScreen::NebulaSettingsScreen()
@@ -1165,7 +1189,7 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
     f32 width = 0.0f;
     f32 height = 0.0f;
     if (pShown == nullptr) {
-        NebulaText::get(text, 256, "SettingsTitle");
+        NebulaText::get(text, 256, rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU ? "CoopMenuTitle" : "SettingsTitle");
         setText(mTitle, text);
         measure(mTitle, 4000.0f, &width, &height);
         for (u32 i = 0; i < NEBULA_SETTINGS_PAGES; i++) {
@@ -1513,7 +1537,7 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
                 mHoverTab = static_cast< s32 >(i);
             }
         }
-        for (s32 i = 0; i < FooterNum; i++) {
+        for (s32 i = 0; i < FooterNum && rView.kind != NEBULA_SETTINGS_KIND_MAIN_MENU; i++) {
             if (isOnButton(x, y, mFooter[i].mChip.mX, mFooterY, mFooter[i].mChip.mWidth, cButtonHeight, cButtonGap)) {
                 mHoverButton = &mFooter[i];
             }
@@ -2259,9 +2283,12 @@ void NebulaSettingsScreen::place(const NebulaSettingsView& rView) {
 
     // The footer: Apply and Back for the pointer on the right; the line under the page and the hints in the room left,
     // narrowed when a language runs long.
+    // The main menu has nothing to apply and nowhere to go back to: no footer buttons, the line under the page takes
+    // the whole width.
+    const bool footer = rView.kind != NEBULA_SETTINGS_KIND_MAIN_MENU;
     f32 buttonWidths[FooterNum];
     f32 buttonsWidth = 0.0f;
-    for (s32 i = 0; i < FooterNum; i++) {
+    for (s32 i = 0; i < FooterNum && footer; i++) {
         const Button& rButton = mFooter[i];
         buttonWidths[i] = rButton.mKey.mWidth + cKeyGap + rButton.mWordWidth + 44.0f;
         buttonWidths[i] = buttonWidths[i] < 110.0f ? 110.0f : buttonWidths[i];
@@ -2269,6 +2296,10 @@ void NebulaSettingsScreen::place(const NebulaSettingsView& rView) {
     }
     f32 x = mRight;
     for (s32 i = FooterNum - 1; i >= 0; i--) {
+        mFooter[i].mChip.mRoot->SetVisible(footer);
+        if (!footer) {
+            continue;
+        }
         placeButton(mFooter[i], x - buttonWidths[i] * 0.5f, mFooterY, buttonWidths[i]);
         x -= buttonWidths[i] + cButtonGap;
     }
@@ -2443,8 +2474,10 @@ void NebulaSettingsScreen::step(const NebulaSettingsView& rView, s32 homeView) {
     }
     const bool wanted = rView.open || homeView >= 0;
     const bool home = !rView.open;
-    if (wanted && (!isShown() || mClosing || home != mHome)) {
-        if (!isShown() || home != mHome) {
+    // The main menu and the settings menu share the screen: one opened over the other (Options) fills it anew.
+    const bool otherKind = rView.open && rView.kind != mShown.kind;
+    if (wanted && (!isShown() || mClosing || home != mHome || otherKind)) {
+        if (!isShown() || home != mHome || otherKind) {
             appear();
             mHome = home;
             mHomeView = -1;
@@ -2598,17 +2631,23 @@ namespace NebulaSettingsMenu {
             return;
         }
         __NebulaSettingsView(&sView);
-        // Not before a file is chosen (the logos, the title, the file select): asked for there, it closes at once.
-        if (sView.open && !sScreen->isShown() &&
+        // Not before a file is chosen (the logos, the title, the file select): asked for there, it closes at once. The
+        // main menu shows there, and so do the settings its Options opens.
+        const bool mainMenu = sView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
+        if (sView.open && !sScreen->isShown() && !mainMenu && !sMainMenuActive &&
             (MR::isEqualSceneName("Logo") || MR::isEqualSceneName("Title") || MR::isStageFileSelect())) {
             __NebulaSettingsInput(NEBULA_SETTINGS_CLOSE, 0);
             sView.open = 0;
         }
         sScreen->step(sView, __NebulaHomeMenu(NEBULA_HBM_VIEW, 1));
+        if (mainMenu && sView.open && sScreen->isOpenFully() && !sScreen->isHome()) {
+            readMainMenuPad(sView);
+        }
         // The whole game waits from the first frame of the drop to the last of the rise. Its sound fades and the music
         // stops as under the pause menu, and both come back as they were. The HOME Menu holds the game itself
         // (HomeButtonLayout).
-        const bool freezing = sView.open || (sScreen->isShown() && !sScreen->isHome());
+        // The main menu doesn't: the file select under it runs on, its music with it.
+        const bool freezing = !mainMenu && !sScreen->isMainMenu() && (sView.open || (sScreen->isShown() && !sScreen->isHome()));
         AudSystem* pAudio = AudWrap::getSystem();
         if (freezing != sFreezing) {
             sFreezing = freezing;
@@ -2649,6 +2688,10 @@ namespace NebulaSettingsMenu {
 
     void requestOpen() {
         __NebulaSettingsInput(NEBULA_SETTINGS_OPEN, 0);
+    }
+
+    void setMainMenuActive(bool active) {
+        sMainMenuActive = active;
     }
 };  // namespace NebulaSettingsMenu
 #endif

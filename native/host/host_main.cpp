@@ -17,6 +17,7 @@
 #include <nebula_game_api.h>
 
 #include "galaxy/atomic_file.h"
+#include "galaxy/coop_menu.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -1715,7 +1716,6 @@ uint64_t svc_stat_get(void*, const char* name) {
 #endif
 }
 
-#if defined(NEBULA_HOST_RENDERER)
 // UTF-8 text into a fixed field, cut at a whole character, always terminated.
 template <std::size_t N>
 void copy_settings_text(char (&field)[N], const std::string& text) {
@@ -1726,7 +1726,6 @@ void copy_settings_text(char (&field)[N], const std::string& text) {
     std::memcpy(field, text.data(), length);
     field[length] = '\0';
 }
-#endif
 
 #if defined(NEBULA_HOST_RENDERER)
 static_assert(static_cast<uint32_t>(galaxy::gx::NativeSettingsStatus::Leave) == NEBULA_SETTINGS_STATUS_LEAVE &&
@@ -1749,10 +1748,54 @@ static_assert(static_cast<uint32_t>(galaxy::gx::NativeSettingsInput::Open) == NE
 
 // The settings menu for the game's own (NebulaSettingsMenu): the overlay's state, which the game draws from then on.
 // The headless host has no settings menu: always closed.
+// The online co-op main menu (coop_menu), in place of the title and the file select. Its Options opens Nebula's
+// settings menu where this host has one (the Windows window's); the main menu waits under it.
+#if defined(_WIN32) && defined(NEBULA_HOST_RENDERER) && !defined(NEBULA_HOST_SDL)
+constexpr bool kHostSettingsMenu = true;
+#else
+constexpr bool kHostSettingsMenu = false;
+#endif
+galaxy::coop::MainMenu gCoopMenu{kHostSettingsMenu};
+
+bool host_settings_open() {
+#if defined(NEBULA_HOST_RENDERER)
+    return galaxy::gx::native_settings_view().open;
+#else
+    return false;
+#endif
+}
+
+void fill_coop_menu_view(NebulaSettingsView* view) {
+    const galaxy::coop::MenuView menu = gCoopMenu.view();
+    view->kind = NEBULA_SETTINGS_KIND_MAIN_MENU;
+    view->open = menu.open ? 1u : 0u;
+    view->page = menu.page;
+    view->page_count = static_cast<uint32_t>(std::min<std::size_t>(menu.pages.size(), NEBULA_SETTINGS_PAGES));
+    for (uint32_t i = 0; i < view->page_count; ++i) {
+        copy_settings_text(view->pages[i], menu.pages[i]);
+    }
+    view->total_rows = static_cast<uint32_t>(std::min<std::size_t>(menu.rows.size(), NEBULA_SETTINGS_ROWS));
+    view->row_count = view->total_rows;
+    for (uint32_t i = 0; i < view->row_count; ++i) {
+        copy_settings_text(view->rows[i].label, menu.rows[i].label);
+        copy_settings_text(view->rows[i].value, menu.rows[i].value);
+        view->rows[i].flags = menu.rows[i].buttons ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_BUTTONS) : 0u;
+    }
+    view->selected = menu.selected;
+    view->selected_button = menu.selected_button;
+    if (menu.selected < menu.rows.size()) {
+        copy_settings_text(view->help, menu.rows[menu.selected].help);
+    }
+}
+
 void svc_settings_view(void*, NebulaSettingsView* view) {
     std::memset(view, 0, sizeof(*view));
 #if defined(NEBULA_HOST_RENDERER)
     const galaxy::gx::NativeSettingsView source = galaxy::gx::native_settings_view();
+    if (!source.open && gCoopMenu.is_open()) {
+        fill_coop_menu_view(view);
+        return;
+    }
     view->open = source.open ? 1u : 0u;
     view->page = source.page;
     view->page_count = static_cast<uint32_t>(std::min<std::size_t>(source.pages.size(), NEBULA_SETTINGS_PAGES));
@@ -1799,11 +1842,24 @@ void svc_settings_view(void*, NebulaSettingsView* view) {
     view->status = static_cast<uint32_t>(source.status);
     view->status_number = source.status_number;
     copy_settings_text(view->status_text, source.status_text);
+#else
+    if (gCoopMenu.is_open()) fill_coop_menu_view(view);
 #endif
 }
 
 // The pointer's input to the settings menu: NEBULA_SETTINGS_* are galaxy::gx::NativeSettingsInput's values.
 void svc_settings_input(void*, uint32_t action, int32_t arg) {
+    if (gCoopMenu.is_open() && !host_settings_open()) {
+        switch (action) {
+        case NEBULA_SETTINGS_SELECT_PAGE: gCoopMenu.select_page(static_cast<unsigned>(std::max(arg, 0))); break;
+        case NEBULA_SETTINGS_SELECT_ROW: gCoopMenu.select_row(static_cast<unsigned>(std::max(arg, 0))); break;
+        case NEBULA_SETTINGS_MOVE: gCoopMenu.move(arg); break;
+        case NEBULA_SETTINGS_CHANGE: gCoopMenu.change(arg); break;
+        case NEBULA_SETTINGS_PRESS: gCoopMenu.press(static_cast<unsigned>(std::max(arg, 0))); break;
+        default: break;  // nothing to apply, revert or close: the main menu stays until a choice leaves it
+        }
+        return;
+    }
 #if defined(NEBULA_HOST_RENDERER)
     if (action >= NEBULA_SETTINGS_OPEN && action <= NEBULA_SETTINGS_SET_VALUE) {
         galaxy::gx::native_settings_input(static_cast<galaxy::gx::NativeSettingsInput>(action), arg);
@@ -1811,6 +1867,30 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
 #else
     (void)action, (void)arg;
 #endif
+}
+
+int32_t svc_coop_menu(void*, uint32_t what) {
+    switch (what) {
+    case NEBULA_COOP_MENU_OPEN:
+        gCoopMenu.open();
+        return 0;
+    case NEBULA_COOP_MENU_CLOSE:
+        gCoopMenu.close();
+        return 0;
+    case NEBULA_COOP_MENU_POLL:
+        switch (gCoopMenu.take_command()) {
+        case galaxy::coop::MenuCommand::Play: return NEBULA_COOP_MENU_PLAY;
+        case galaxy::coop::MenuCommand::Quit: return NEBULA_COOP_MENU_QUIT;
+        case galaxy::coop::MenuCommand::Settings:
+#if defined(NEBULA_HOST_RENDERER)
+            galaxy::gx::native_settings_input(galaxy::gx::NativeSettingsInput::Open, 0);
+#endif
+            return NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::None: break;
+        }
+        return NEBULA_COOP_MENU_NONE;
+    default: return 0;
+    }
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -3551,6 +3631,7 @@ int main(int argc, char** argv) {
     services.light_reach = svc_light_reach;
     services.traced_sun = svc_traced_sun;
     services.coop_player = svc_coop_player;
+    services.coop_menu = svc_coop_menu;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

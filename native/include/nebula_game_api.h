@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 32u
+#define NEBULA_GAME_API_VERSION 33u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -349,6 +349,7 @@ typedef struct NebulaSettingsView {
     uint32_t status; /* NEBULA_SETTINGS_STATUS_* */
     int32_t status_number;
     char status_text[160];
+    uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -363,6 +364,28 @@ enum {
     NEBULA_SETTINGS_PRESS,       /* arg: the selected row's button */
     NEBULA_SETTINGS_MOVE_MOD,    /* the selected mod dropped: arg >> 16 the list (1 off, 2 on), its low 16 bits the place */
     NEBULA_SETTINGS_SET_VALUE,   /* arg: the step the selected setting's slider is dragged to */
+    NEBULA_SETTINGS_MOVE,        /* the main menu: arg -1 up or 1 down a row (the game reads its D-pad itself) */
+};
+
+/* What a NebulaSettingsView shows (`kind`). */
+enum {
+    NEBULA_SETTINGS_KIND_SETTINGS = 0, /* Nebula's settings menu: it holds the game still while open */
+    NEBULA_SETTINGS_KIND_MAIN_MENU,    /* the online co-op main menu (coop_menu), over the running file select */
+};
+
+/* The online co-op main menu (coop_menu, docs/COOP_PLAN.md "Main menu"), which replaces the title and the file
+   select. NEBULA_COOP_MENU_OPEN shows it (settings_view then sends it, `kind` NEBULA_SETTINGS_KIND_MAIN_MENU, and
+   settings_input drives it); NEBULA_COOP_MENU_POLL returns the player's choice once (NEBULA_COOP_MENU_*), and
+   NEBULA_COOP_MENU_CLOSE hides it. */
+enum {
+    NEBULA_COOP_MENU_OPEN = 1,
+    NEBULA_COOP_MENU_POLL,
+    NEBULA_COOP_MENU_CLOSE,
+};
+enum {
+    NEBULA_COOP_MENU_NONE = 0,
+    NEBULA_COOP_MENU_PLAY, /* Host: play the save */
+    NEBULA_COOP_MENU_QUIT, /* Quit to desktop */
 };
 
 typedef struct NebulaHostServices {
@@ -537,6 +560,9 @@ typedef struct NebulaHostServices {
     /* Online co-op: the local player, once per game scene frame while the scene has one (GameScene::update). Called
        on the simulation thread; `player` is valid during the call only. */
     void (*coop_player)(void* user, const NebulaCoopPlayer* player);
+    /* The online co-op main menu (NEBULA_COOP_MENU_*): what the game asks of it, and for POLL the player's choice.
+       Called on the simulation thread. */
+    int32_t (*coop_menu)(void* user, uint32_t what);
 } NebulaHostServices;
 
 enum {

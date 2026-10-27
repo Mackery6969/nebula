@@ -488,6 +488,7 @@ S.FXAA_PASS	FXAA works		FXAA fonctionne	FXAA fonctionne	FXAA funciona	FXAA funci
 S.SMAA_FAIL	SMAA failed		SMAA en échec	SMAA en échec	SMAA falló	SMAA falló	SMAA fehlgeschlagen	SMAA non riuscito	SMAA mislukt	SMAA falhou	SMAA 失敗	SMAA 실패	SMAA 失败	SMAA 失敗
 S.FXAA_FAIL	FXAA failed		FXAA en échec	FXAA en échec	FXAA falló	FXAA falló	FXAA fehlgeschlagen	FXAA non riuscito	FXAA mislukt	FXAA falhou	FXAA 失敗	FXAA 실패	FXAA 失败	FXAA 失敗
 S.ANTI-ALIASING,_FSR_#_AND_SHARPENING	Anti-aliasing, FSR {0} and sharpening.		Anticrénelage, FSR {0} et netteté.	Anticrénelage, FSR {0} et netteté.	Antialiasing, FSR {0} y nitidez.	Antialiasing, FSR {0} y nitidez.	Kantenglättung, FSR {0} und Schärfe.	Anti-aliasing, FSR {0} e nitidezza.	Anti-aliasing, FSR {0} en verscherping.	Antisserrilhado, FSR {0} e nitidez.	アンチエイリアス、FSR {0}、シャープネスです。	안티 앨리어싱, FSR {0}, 선명도입니다.	抗锯齿、FSR {0} 与锐化。	反鋸齒、FSR {0} 與銳利化。
+CoopMenuTitle	Main Menu		Menu principal	Menu principal	Menú principal	Menú principal	Hauptmenü	Menu principale	Hoofdmenu	Menu principal	メインメニュー	메인 메뉴	主菜单	主選單
 SettingsTitle	Settings		Paramètres	Paramètres	Configuración	Configuración	Einstellungen	Impostazioni	Instellingen	Configurações	設定	설정	设置	設定
 SettingsApply	Apply		Appliquer	Appliquer	Aplicar	Aplicar	Übernehmen	Applica	Toepassen	Aplicar	適用	적용	应用	套用
 SettingsBack	Back		Retour	Retour	Volver	Volver	Zurück	Indietro	Terug	Voltar	もどる	돌아가기	返回	返回

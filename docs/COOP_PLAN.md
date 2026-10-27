@@ -15,7 +15,7 @@ of shipped features.
 | Input | Each Nebula instance drives one Wii Remote, channel 0 (`native/host/host_main.cpp`, `gModule.wpad_report(0, ...)`) | Nothing to change: every player controls the local Mario on their own PC with their own controls |
 | Co-Star | Removed. The native WPAD layer (`native/sdk/wpad/wpad_native.c`) ignores the host on channels 1-3, so a second player's star pointer never connects | The game's 2P code (pointer assists, 2P jumps, `Manual2P`, 2P guidance) stays in Petari but can't run. Online co-op replaces it |
 | Simulation | The game's threads run on one host thread under the SDK's scheduler (`docs/ARCHITECTURE.md`) | Same-frame state is easy to read and write from one place; a network tick fits next to `nebula_game_vi_retrace` |
-| Host/game boundary | Plain C interface, `native/include/nebula_game_api.h` (version 32, which added `coop_player`) | Netcode lives in the host; the game module gets a small set of new `nebula_game_*` / `NebulaHostServices` entries |
+| Host/game boundary | Plain C interface, `native/include/nebula_game_api.h` (version 33: `coop_player` added in 32, `coop_menu` in 33) | Netcode lives in the host; the game module gets a small set of new `nebula_game_*` / `NebulaHostServices` entries |
 | Networking | None | Sockets, the protocol, the lobby and the UI are all new |
 
 ## Approach: state sync with remote player actors (sm64coopdx's model)
@@ -83,6 +83,8 @@ The title screen and the file select go. In their place is a co-op main menu lik
 
 - **Where.** The `FileSelect` stage stays for its backdrop and music, but its `FileSelector` skips the title
   (`exeTitle`) and the six file bubbles and shows the menu instead. Boot goes from the logos straight to it.
+- **The game's look.** It keeps Super Mario Galaxy's feel: the file select's space backdrop and music, the game's
+  title logo above the menu as on the title screen, and the game's own windows, buttons and font.
 - **How it's drawn.** With Nebula's settings menu machinery: pages and rows kept by the host
   (`NebulaSettingsView`), drawn by the game in its own windows and font (`NebulaSettingsMenu`). The main menu is a new
   set of pages. Text rows (address, name, password) are new: typed on a keyboard, or picked letter by letter on a
@@ -111,7 +113,9 @@ The title screen and the file select go. In their place is a co-op main menu lik
 - **Starting.** Host loads the chosen save through the file select's own path (`FileSelector::exeDemo`) and opens
   the session. With nobody joining it's single player, as in sm64coopdx. Join needs Phase 1: a joining player plays
   the host's save, sent at join (sm64coopdx's `packet_save_file`), so their own saves stay untouched.
-- **Dropped with the file select:** its six files, the Mario and Luigi halves, copying files and Mii icons.
+- **Dropped with the file select:** its six files, the Mario and Luigi halves, copying files, and Miis, which only
+  ever named and pictured files: the file icons, Nebula's Mii import (Settings > GENERAL > IMPORT MIIS, the `miis`
+  folder) and the wait for the Mii data before a file starts. The player's name is the Player page's.
 - **Portable.** The menu's model (pages, rows, saves, keys) is host code shared by every host
   (`runtime/src/coop_menu.cpp`), not the Windows window's: the in-game settings menu is Windows-only today, the
   main menu can't be. The game draws it with the settings menu's screen and turns the remote's buttons into its
