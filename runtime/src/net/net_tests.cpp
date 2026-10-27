@@ -507,6 +507,26 @@ void test_session() {
     expect(wait_for([&] { return host_got == 1 && joiner_got >= 1 && third_got == 1; }),
            "a feature's messages reach every player");
 
+    // Where each plays, for the player list: told to everyone as it changes, and to who joins later with the room.
+    const auto place_of = [](const Session& session, unsigned index) {
+        for (const SessionPlayer& player : session.players()) {
+            if (player.index == index) return player.stage + "/" + std::to_string(player.scenario);
+        }
+        return std::string("none");
+    };
+    host_session.set_place("AstroGalaxy", 0);
+    joiner.set_place("EggStarGalaxy", 2);
+    third.set_place("Bad name!", 1);
+    expect(wait_for([&] {
+               return place_of(third, 0u) == "AstroGalaxy/0" && place_of(third, 1u) == "EggStarGalaxy/2" &&
+                      place_of(host_session, 1u) == "EggStarGalaxy/2" && place_of(joiner, 0u) == "AstroGalaxy/0" &&
+                      place_of(joiner, 2u) == "/1" && place_of(joiner, 1u) == "EggStarGalaxy/2";
+           }),
+           "every player's place reaches everyone (a name the game couldn't have is dropped)");
+    const std::vector<SessionPlayer> seen = joiner.players();
+    expect(std::all_of(seen.begin(), seen.end(), [](const SessionPlayer& p) { return !p.local || p.ping_ms == 0u; }),
+           "and this player has no round trip of its own");
+
     // Full: the room holds three.
     Session fourth;
     (void)fourth.join({"127.0.0.1", port, "pw", "test 1", "FOURTH", galaxy::CoopCharacter::Mario});
@@ -526,6 +546,14 @@ void test_session() {
     third.leave();
     expect(wait_for([&] { return host_session.players().size() == 2u && joiner.players().size() == 2u; }),
            "a player leaving leaves everyone's list");
+    Session late;
+    expect(late.join({"127.0.0.1", port, "pw", "test 1", "LATE", galaxy::CoopCharacter::Mario}) &&
+               wait_for([&] { return late.state() == SessionState::Joined; }),
+           "a player joins later");
+    expect(place_of(late, 0u) == "AstroGalaxy/0" && place_of(late, 1u) == "EggStarGalaxy/2",
+           "and gets everyone's place with the room");
+    late.leave();
+    expect(wait_for([&] { return host_session.players().size() == 2u; }), "and leaves");
     host_session.leave();
     expect(wait_for([&] {
                for (auto& e : joiner.take_events()) joiner_events.push_back(e);

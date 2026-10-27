@@ -197,7 +197,11 @@ enemies.
   far away (sm64coopdx's nametags).
 - **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
   room, their character, and the galaxy and star they're on, as sm64coopdx's player list. It shows over play and
-  doesn't stop it.
+  doesn't stop it. The controller's button is the Wii Remote's Minus (Share's default binding): in a room Minus holds
+  the list instead of pausing, and Plus (Start) pauses. Each player tells the room where it plays as that changes
+  (the session's own message, sent with the room to who joins later), so the list has every player's place before
+  remote players exist; the game names the galaxy and star in the played language (`NebulaPlayerList`,
+  `coop_list`). The round trip to each player shows beside them.
 
 ## Chat
 
