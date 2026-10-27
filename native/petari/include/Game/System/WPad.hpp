@@ -22,6 +22,11 @@ public:
 
     void setReadInfo(WPadReadDataInfo*);
     void update();
+#ifdef TARGET_PC
+    // A neutral remote for the rest of the frame: no buttons, stick or swing (the pointer stays). A menu over the
+    // running game reads the remote first, then holds it from the game.
+    void holdForMenu();
+#endif
     WPadRumble* getRumbleInstance() const;
     void startLeaveWatcher();
     void stopLeaveWatcher();

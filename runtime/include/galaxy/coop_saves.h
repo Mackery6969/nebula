@@ -35,6 +35,13 @@ public:
     // The save's folder and all it holds.
     bool erase(std::string_view id);
     bool mark_played(std::string_view id, std::int64_t now);
+    // The save's name (cut to printable ASCII, 32 bytes at most); false when it is empty then or can't be written.
+    bool rename(std::string_view id, std::string_view name);
+
+    // A save to play as the next start reaches the main menu (Host restarting Nebula for the room's mods): kept in
+    // the folder until taken once.
+    bool set_next_start(std::string_view id);
+    [[nodiscard]] std::string take_next_start();
 
     // Once per install: one save per user file the old saves have (bit i of `files`: file i + 1), each a copy of
     // `nand_data` and of `achievements` (the old achievements.ini, shared by every file then) when it exists. True

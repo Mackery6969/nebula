@@ -189,6 +189,12 @@ void PauseMenu::draw() const {
     }
 }
 
+#ifdef TARGET_PC
+bool PauseMenu::isSelecting() const {
+    return isNerve(GET_NERVE(PauseMenu, PauseMenuNrvSelecting));
+}
+#endif
+
 void PauseMenu::kill() {
     LayoutActor::kill();
 #ifdef TARGET_PC

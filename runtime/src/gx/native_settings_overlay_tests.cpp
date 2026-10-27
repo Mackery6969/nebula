@@ -561,7 +561,7 @@ int main() {
                      "up returns to text speed");
     passed &= expect(key(VK_TAB), "Tab enters the mods page");
     snapshot = galaxy::gx::native_settings_overlay_snapshot();
-    passed &= expect(snapshot.tab == 5u && snapshot.row_count >= 3u, "mods page has its two lists and its buttons");
+    passed &= expect(snapshot.tab == 5u && snapshot.row_count >= 2u, "mods page has its list and its buttons");
     passed &= expect(key(VK_TAB), "Tab enters the system page");
     snapshot = galaxy::gx::native_settings_overlay_snapshot();
     passed &= expect(snapshot.tab == 6u && snapshot.row_count == 7u, "system page has the graphics card and six status rows");
@@ -738,35 +738,35 @@ int main() {
         }
         passed &= expect(controls_split, "the controls page's rows come as label and value");
 
-        // A row of buttons (the MODS page's, under its two lists): Left and Right move between them (none past either
-        // end), Space and the pointer press one, the row starts at its first when selected again. RESCAN only: the
-        // others open a file picker or a folder, or act on a mod.
+        // A row of buttons (the MODS page's, under its mods): Left and Right move between them (none past either end),
+        // Space and the pointer press one, the row starts at its first when selected again. RESCAN only: the others
+        // open a file picker or a folder, or act on a mod.
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 5);
         int buttons = -1;
         view = galaxy::gx::native_settings_view();
         for (unsigned i = 0; i < view.rows.size(); ++i) {
             if (view.rows[i].buttons) buttons = static_cast<int>(i);
         }
-        passed &= expect(view.rows.size() >= 3u && view.rows[0].heading && view.rows[0].mod_list == 1u &&
-                             view.rows[0].label == "DISABLED",
-                         "the MODS page starts with the list of mods off");
+        passed &= expect(view.rows.size() >= 2u && view.rows[0].heading && view.rows[0].mod_list == 0u &&
+                             view.rows[0].label == "MODS (THE HOST PAGE PICKS THE ROOM'S)",
+                         "the MODS page is one list: the Host page picks the room's mods");
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectRow, buttons);
         view = galaxy::gx::native_settings_view();
         passed &= expect(buttons >= 0 &&
                              view.rows[static_cast<unsigned>(buttons)].value ==
-                                 "IMPORT FILE|IMPORT FOLDER|-OPTIONS|OPEN FOLDER|RESCAN" &&
+                                 "IMPORT FILE|IMPORT FOLDER|-OPTIONS|-REMOVE|OPEN FOLDER|RESCAN" &&
                              view.selected_button == 0u,
                          "the MODS page's buttons are the launcher's, the first selected");
-        for (int i = 0; i < 5; ++i) (void)key(VK_RIGHT);
-        passed &= expect(galaxy::gx::native_settings_view().selected_button == 4u,
+        for (int i = 0; i < 6; ++i) (void)key(VK_RIGHT);
+        passed &= expect(galaxy::gx::native_settings_view().selected_button == 5u,
                          "Right moves to the last button and stays there");
-        passed &= expect(key(VK_SPACE) && galaxy::gx::native_settings_view().selected_button == 4u,
+        passed &= expect(key(VK_SPACE) && galaxy::gx::native_settings_view().selected_button == 5u,
                          "Space presses the selected button (RESCAN)");
-        passed &= expect(key(VK_LEFT) && galaxy::gx::native_settings_view().selected_button == 3u, "Left moves back");
-        galaxy::gx::native_settings_input(NativeSettingsInput::Press, 4);
-        passed &= expect(galaxy::gx::native_settings_view().selected_button == 4u, "the pointer's press selects its button");
+        passed &= expect(key(VK_LEFT) && galaxy::gx::native_settings_view().selected_button == 4u, "Left moves back");
         galaxy::gx::native_settings_input(NativeSettingsInput::Press, 5);
-        passed &= expect(galaxy::gx::native_settings_view().selected_button == 4u, "a press past the row's buttons does nothing");
+        passed &= expect(galaxy::gx::native_settings_view().selected_button == 5u, "the pointer's press selects its button");
+        galaxy::gx::native_settings_input(NativeSettingsInput::Press, 6);
+        passed &= expect(galaxy::gx::native_settings_view().selected_button == 5u, "a press past the row's buttons does nothing");
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 4);
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 5);
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectRow, buttons);

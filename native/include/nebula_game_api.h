@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 35u
+#define NEBULA_GAME_API_VERSION 36u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -237,6 +237,7 @@ enum {
     NEBULA_SETTINGS_ROW_HELD = 256,      /* the mod picked up to move: the arrows move it */
     NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at` */
     NEBULA_SETTINGS_ROW_BINDING = 1024,  /* a control's binding: changing it waits for an input */
+    NEBULA_SETTINGS_ROW_TEXT = 2048,     /* the main menu: a text (a name, an address); pressed, it is edited in place */
 };
 
 /* The game's button icons (its picture font's A, B, C, Z, 1, 2, Plus, Minus, HOME and Control Pad, in this order):
@@ -352,6 +353,7 @@ typedef struct NebulaSettingsView {
     char status_text[160];
     uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
     uint32_t back; /* the main menu: a page under the main one, which B leaves; its rows reset to their defaults */
+    uint32_t editing; /* the main menu: the selected text row is edited (A keeps it, B drops it, Minus deletes) */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -383,7 +385,9 @@ enum {
    `what`) for file i + 1; once per install the host makes each into a co-op save. NEBULA_COOP_MENU_SAVE_FILE, after
    PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
    game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
-   for (NEBULA_COOP_KEY_*), outside Nebula's settings menu. */
+   for (NEBULA_COOP_KEY_*), outside Nebula's settings menu and the main menu's text rows.
+   NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (the Player page's character as Host played), else 0;
+   MR::isPlayerLuigi follows it in every save. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
     NEBULA_COOP_MENU_POLL,
@@ -391,6 +395,7 @@ enum {
     NEBULA_COOP_MENU_OLD_FILES,
     NEBULA_COOP_MENU_SAVE_FILE,
     NEBULA_COOP_MENU_KEYS,
+    NEBULA_COOP_MENU_CHARACTER,
 };
 enum {
     NEBULA_COOP_KEY_TAB = 1u << 0,    /* the main menu's reset (as the controller's Back, the Wii Remote's Minus) */

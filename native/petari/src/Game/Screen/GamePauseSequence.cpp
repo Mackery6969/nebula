@@ -34,7 +34,10 @@ void GamePauseSequence::initWindowMenu(const MR::FunctorBase& rFunc) {
 }
 
 void GamePauseSequence::startPause(MenuType type) {
+#ifndef TARGET_PC
+    // Nebula's game plays on under the pause menu, its sound and music with it (docs/COOP_PLAN.md).
     AudWrap::getSystem()->enterPauseMenu();
+#endif
     mMenuType = type;
     appear();
     MR::startStarPointerModePauseMenu(this);
@@ -59,6 +62,26 @@ void GamePauseSequence::deactivate() {
     GameSystemFunction::onPauseEndAllRumble();
     setNerve(GET_NERVE_ANON(GamePauseSequenceDeactive));
 }
+
+#ifdef TARGET_PC
+bool GamePauseSequence::isActive() const {
+    return !isNerve(GET_NERVE_ANON(GamePauseSequenceDeactive));
+}
+
+bool GamePauseSequence::closeForWorld() {
+    if (!isActive()) {
+        return true;
+    }
+    if (mPauseMenu != nullptr && !MR::isDead(mPauseMenu)) {
+        if (!mPauseMenu->isSelecting()) {
+            return false;
+        }
+        mPauseMenu->kill();
+    }
+    deactivate();
+    return true;
+}
+#endif
 
 void GamePauseSequence::exeDeactive() {
 }

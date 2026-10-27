@@ -1771,27 +1771,89 @@ constexpr bool kHostSettingsMenu = true;
 constexpr bool kHostSettingsMenu = false;
 #endif
 galaxy::coop::MainMenu gCoopMenu{kHostSettingsMenu};
+std::vector<galaxy::coop::RoomMod> coop_room_mods();
 // The co-op saves, under the NAND root (coop_saves/): made once the NAND root is known.
 std::optional<galaxy::coop::SaveStore> gCoopSaves;
 unsigned gCoopSaveFile = 1u;  // the user file the played save plays
 
-// Host's save, as Play leaves the menu: made when new, then the game's save folder (save_folder_override), with its
-// achievements; the room's settings are kept. False when it could not be made.
-bool start_coop_save() {
+// The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): the Player page's, as Host left the menu.
+std::atomic<bool> gCoopLuigi{false};
+
+// The menu's settings (the room's, the player's, the last address) as the runtime settings, saved as they change.
+void keep_coop_settings() {
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::RuntimeSettings settings = galaxy::get_runtime_settings();
-    if (settings.coop != gCoopMenu.room()) {
-        settings.coop = gCoopMenu.room();
-        galaxy::set_runtime_settings(settings);
-        (void)galaxy::save_runtime_settings_to_file();
-    }
+    if (settings.coop == gCoopMenu.room()) return;
+    settings.coop = gCoopMenu.room();
+    galaxy::set_runtime_settings(settings);
+    (void)galaxy::save_runtime_settings_to_file();
 #endif
+}
+
+// The mods folder's mods for the Host page: mods.ini's on and off (the room last hosted), the ones on in their order.
+std::vector<galaxy::coop::RoomMod> coop_room_mods() {
+    std::vector<galaxy::coop::RoomMod> room;
+    if (galaxy::mods::mods_folder().empty()) return room;
+    for (const galaxy::mods::ModInfo& mod : galaxy::mods::scan_mods()) room.push_back({mod.id, mod.enabled});
+    return room;
+}
+
+// The Host page's mods to mods.ini (in its order, the ones on first); texture packs and movies apply at once. True when
+// the disc's mods now differ from the ones this session started with: a restart applies them.
+bool keep_coop_mods() {
+    if (galaxy::mods::mods_folder().empty()) return false;
+    std::vector<galaxy::mods::ModInfo> scanned = galaxy::mods::scan_mods();
+    if (gCoopMenu.mods_changed()) {
+        std::vector<galaxy::mods::ModInfo> ordered;
+        for (const galaxy::coop::RoomMod& room : gCoopMenu.room_mods()) {
+            const auto it = std::find_if(scanned.begin(), scanned.end(),
+                                         [&room](const galaxy::mods::ModInfo& mod) { return mod.id == room.id; });
+            if (it == scanned.end()) continue;
+            it->enabled = room.on;
+            ordered.push_back(std::move(*it));
+            scanned.erase(it);
+        }
+        // Mods new since the page read the folder stay as mods.ini has them, after the room's.
+        for (galaxy::mods::ModInfo& mod : scanned) ordered.push_back(std::move(mod));
+        std::stable_partition(ordered.begin(), ordered.end(), [](const galaxy::mods::ModInfo& mod) { return mod.enabled; });
+        for (std::size_t i = 0; i < ordered.size(); ++i) ordered[i].order = static_cast<unsigned>(i + 1u);
+        if (!galaxy::mods::save_mod_settings(ordered)) {
+            std::fprintf(stderr, "[coop] mods.ini could not be written\n");
+        }
+        scanned = std::move(ordered);
+#if defined(NEBULA_HOST_RENDERER)
+        galaxy::gx::set_texture_pack_mod_folders(galaxy::mods::texture_folders(scanned));
+        galaxy::gx::set_movie_mod_folders(galaxy::mods::movie_folders(scanned));
+#endif
+    }
+    return galaxy::mods::mods_differ_from_session(scanned);
+}
+
+// Host's save, as Play leaves the menu: made when new, then the game's save folder (save_folder_override), with its
+// achievements; the room's settings and mods are kept. When the room's mods change the disc, Nebula starts again to
+// apply them and plays the save once back at the menu. False when it doesn't play now.
+bool start_coop_save() {
+    keep_coop_settings();
     if (!gCoopSaves) return false;
     std::string id = gCoopMenu.chosen_save();
     if (id.empty()) id = gCoopSaves->create();
     const std::optional<galaxy::coop::SaveInfo> save = gCoopSaves->find(id);
     if (!save) {
         std::fprintf(stderr, "[coop] the save could not be made in %s\n", gCoopSaves->root().string().c_str());
+        return false;
+    }
+    if (keep_coop_mods()) {
+        bool restarting = false;
+#if defined(NEBULA_HOST_RENDERER)
+        restarting = gCoopSaves->set_next_start(id) && galaxy::gx::request_restart();
+#endif
+        if (restarting) {
+            std::fprintf(stderr, "[coop] restarting for the room's mods, then hosting %s\n", id.c_str());
+            gCoopMenu.set_message("NEBULA STARTS AGAIN WITH THE ROOM'S MODS, THEN HOSTS");
+            return false;
+        }
+        (void)gCoopSaves->take_next_start();
+        gCoopMenu.set_message("THE ROOM'S MODS APPLY WHEN NEBULA STARTS AGAIN: CLOSE IT AND START IT AGAIN TO HOST");
         return false;
     }
     (void)gCoopSaves->mark_played(id, static_cast<std::int64_t>(std::time(nullptr)));
@@ -1801,13 +1863,13 @@ bool start_coop_save() {
         gCoopSaveFolder = folder;
     }
     gCoopSaveFile = save->file;
+    gCoopLuigi.store(gCoopMenu.room().character == galaxy::CoopCharacter::Luigi, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::achievements::set_file(folder / "achievements.ini");
-#endif
-#if defined(NEBULA_HOST_RENDERER)
     galaxy::gx::set_coop_in_game(true);
 #endif
-    std::fprintf(stderr, "[coop] hosting save %s (%s, file %u)\n", save->id.c_str(), save->name.c_str(), save->file);
+    std::fprintf(stderr, "[coop] hosting save %s (%s, file %u) as %s\n", save->id.c_str(), save->name.c_str(),
+                 save->file, galaxy::coop_character_key(gCoopMenu.room().character));
     return true;
 }
 
@@ -1840,6 +1902,11 @@ bool host_settings_open() {
 }
 
 void fill_coop_menu_view(NebulaSettingsView* view) {
+#if defined(NEBULA_HOST_RENDERER)
+    // What the keyboard typed into a text row; while one is edited the window's keys type instead of playing.
+    for (const char32_t key : galaxy::gx::take_coop_text_input()) gCoopMenu.type(key);
+    galaxy::gx::set_coop_text_entry(gCoopMenu.editing());
+#endif
     const galaxy::coop::MenuView menu = gCoopMenu.view();
     view->kind = NEBULA_SETTINGS_KIND_MAIN_MENU;
     view->open = menu.open ? 1u : 0u;
@@ -1855,11 +1922,14 @@ void fill_coop_menu_view(NebulaSettingsView* view) {
         copy_settings_text(view->rows[i].value, menu.rows[i].value);
         view->rows[i].flags = (menu.rows[i].buttons ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_BUTTONS) : 0u) |
                               (menu.rows[i].changes ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_CHANGES) : 0u) |
-                              (menu.rows[i].name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_NAME) : 0u);
+                              (menu.rows[i].name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_NAME) : 0u) |
+                              (menu.rows[i].text ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_TEXT) : 0u) |
+                              (menu.rows[i].label_name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_LABEL_NAME) : 0u);
     }
     view->selected = menu.selected;
     view->selected_button = menu.selected_button;
     view->back = menu.back ? 1u : 0u;
+    view->editing = menu.editing ? 1u : 0u;
     if (menu.selected < menu.rows.size()) {
         copy_settings_text(view->help, menu.rows[menu.selected].help);
     }
@@ -1955,12 +2025,23 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         if (!gCoopMenu.is_open()) gCoopMenu.set_room(galaxy::get_runtime_settings().coop);
         galaxy::gx::set_coop_in_game(false);
 #endif
-        gCoopMenu.open();
+        if (!gCoopMenu.is_open()) {
+            gCoopMenu.open();
+            // Back after a restart for the room's mods: its save plays at once.
+            std::string next = gCoopSaves ? gCoopSaves->take_next_start() : std::string();
+            if (!next.empty()) gCoopMenu.play(std::move(next));
+        }
         return 0;
     case NEBULA_COOP_MENU_CLOSE:
         gCoopMenu.close();
+#if defined(NEBULA_HOST_RENDERER)
+        galaxy::gx::set_coop_text_entry(false);
+#endif
         return 0;
+    case NEBULA_COOP_MENU_CHARACTER: return gCoopLuigi.load(std::memory_order_relaxed) ? 1 : 0;
     case NEBULA_COOP_MENU_POLL:
+        // What the player changed is kept as they change it, a text once kept.
+        if (!gCoopMenu.editing()) keep_coop_settings();
         switch (gCoopMenu.take_command()) {
         case galaxy::coop::MenuCommand::Play: return start_coop_save() ? NEBULA_COOP_MENU_PLAY : NEBULA_COOP_MENU_NONE;
         case galaxy::coop::MenuCommand::Quit: return NEBULA_COOP_MENU_QUIT;
@@ -3548,6 +3629,7 @@ int main(int argc, char** argv) {
     gNandRoot = nand;
     gCoopSaves.emplace(gNandRoot / "coop_saves");
     gCoopMenu.set_saves(&*gCoopSaves);
+    gCoopMenu.set_mods_source(coop_room_mods);
     std::error_code error;
     fs::create_directories(gNandRoot / "title/00010000/524d4745/data", error);
     fs::create_directories(gNandRoot / "tmp", error);  // where saves stage their banner before moving it

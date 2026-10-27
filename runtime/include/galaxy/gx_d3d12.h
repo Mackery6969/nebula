@@ -299,6 +299,9 @@ void request_sharp_2d(bool on) noexcept;
 // Keys the game's Wii Remote has no button for, held in the window outside Nebula's settings menu, for online co-op
 // (NEBULA_COOP_KEY_*: Tab, the main menu's reset and the player list; Escape, its back). Any thread.
 [[nodiscard]] unsigned coop_keys_held() noexcept;
+// Nebula closes and starts again (the main menu's Host, for mods that change the disc): Windows through the launcher,
+// Linux in place. False when this system can't (Android, no launcher beside the game), and nothing happens.
+bool request_restart() noexcept;
 
 // The native game's HOME Menu with the console menu's choices, taking the keyboard and controllers while open: return
 // to the game, reset, or leave it (the console's Wii Menu), the last two after "are you sure?". The game opens it

@@ -37,6 +37,7 @@
 #include "Game/Screen/NebulaSettingsMenu.hpp"
 #include "Game/Screen/NebulaIcons.hpp"
 #include "Game/System/NebulaCutsceneSkip.hpp"
+#include "Game/Util/GamePadUtil.hpp"
 #endif
 
 #define GX_FIFO_SIZE 0x80000
@@ -263,8 +264,10 @@ void GameSystem::update() {
     NebulaMenuFocus::update();
     NebulaSettingsMenu::update();
     NebulaIcons::update();
-    // The skip's question waits under the settings menu.
-    if (!NebulaSettingsMenu::isFreezingScene()) {
+    // The settings menu has read the remotes: the game plays on without them. The skip's question waits under it.
+    if (NebulaSettingsMenu::isHoldingInput()) {
+        MR::holdWPadsForMenu();
+    } else {
         NebulaCutsceneSkip::update();
     }
 #endif
@@ -298,15 +301,13 @@ void GameSystem::updateSceneController() {
     }
 
 #ifdef TARGET_PC
-    // The cutscene skip's question and its fade out, and the settings menu, hold the scene still as the HOME Menu does
-    // (a movie resumes in step after them).
+    // The cutscene skip's question and its fade out hold the scene still as the HOME Menu does (a movie resumes in step
+    // after them). The settings menu doesn't: the game plays on under it.
     const bool isSkipPrompt = NebulaCutsceneSkip::isFreezingScene();
-    const bool isSettingsMenu = NebulaSettingsMenu::isFreezingScene();
-    if (isSkipPrompt || isSettingsMenu) {
+    if (isSkipPrompt) {
         isSceneUpdate = false;
     }
-    mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning() ||
-                                     isSkipPrompt || isSettingsMenu);
+    mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning() || isSkipPrompt);
 #else
     mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning());
 #endif
@@ -323,7 +324,7 @@ void GameSystem::updateSceneController() {
         mSceneController->updateScene();
     }
 #ifdef TARGET_PC
-    else if (isSkipPrompt && !isSettingsMenu && mSystemWipeHolder != nullptr) {
+    else if (isSkipPrompt && mSystemWipeHolder != nullptr) {
         // The skip's fade to black runs over the held scene.
         mSystemWipeHolder->movement();
     }

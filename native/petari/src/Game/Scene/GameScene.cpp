@@ -54,6 +54,7 @@
 #include "Game/System/GameSequenceFunction.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/DemoUtil.hpp"
+#include "Game/Util/GamePadUtil.hpp"
 #include "Game/Util/DrawUtil.hpp"
 #include "Game/Util/EventUtil.hpp"
 #include "Game/Player/MarioActor.hpp"
@@ -269,6 +270,9 @@ void GameScene::start() {
 }
 
 void GameScene::update() {
+#ifdef TARGET_PC
+    updateMenusLeftOpen();
+#endif
     mPauseCtrl->updateNerve();
     updateNerve();
 #ifdef TARGET_PC
@@ -512,6 +516,12 @@ void GameScene::requestGrandStarGetDemo() {
 }
 
 void GameScene::setNerveAfterPauseMenu() {
+#ifdef TARGET_PC
+    // The world may have gone on to a miss or a demo under the menu.
+    if (!isNerve(GET_NERVE(GameScene, GameScenePauseMenu))) {
+        return;
+    }
+#endif
     setNerve(GET_NERVE(GameScene, GameSceneAction));
 }
 
@@ -835,7 +845,7 @@ void GameScene::requestShowNebulaBoard() {
     }
 }
 
-// As the galaxy map: the world held, the pointer in its menu mode, the board's own frame each frame.
+// The pointer in its menu mode, the board's own frame each frame, and the world on under it.
 void GameScene::exeNebulaBoard() {
     NebulaAchievementBoard* pBoard = MR::getGameSceneLayoutHolder()->mAchievementBoard;
     if (MR::isFirstStep(this)) {
@@ -848,6 +858,31 @@ void GameScene::exeNebulaBoard() {
         setNerve(GET_NERVE(GameScene, GameSceneAction));
     } else {
         CategoryList::execute(MR::MovementType_LayoutOnPause);
+        updateWorldUnderMenu();
+    }
+}
+
+void GameScene::updateWorldUnderMenu() {
+    MR::holdWPadsForMenu();
+    SceneFunction::movementStopSceneController();
+    SceneFunction::executeMovementList();
+}
+
+void GameScene::updateMenusLeftOpen() {
+    if (mPauseSeq != nullptr && mPauseSeq->isActive() && !isNerve(GET_NERVE(GameScene, GameScenePauseMenu)) &&
+        !mPauseSeq->closeForWorld()) {
+        mPauseSeq->movement();
+        CategoryList::execute(MR::MovementType_LayoutOnPause);
+        MR::holdWPadsForMenu();
+    }
+    NebulaAchievementBoard* pBoard =
+        MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) ? MR::getGameSceneLayoutHolder()->mAchievementBoard : nullptr;
+    if (pBoard != nullptr && pBoard->isOpen() && !isNerve(GET_NERVE(GameScene, GameSceneNebulaBoard))) {
+        pBoard->update();
+        MR::holdWPadsForMenu();
+        if (!pBoard->isOpen()) {
+            MR::endStarPointerMode(this);
+        }
     }
 }
 #endif
@@ -919,6 +954,13 @@ void GameScene::exePauseMenu() {
 
     mPauseSeq->movement();
     CategoryList::execute(MR::MovementType_LayoutOnPause);
+#ifdef TARGET_PC
+    // Nebula's world plays on under the pause menu (docs/COOP_PLAN.md); a miss or a demo takes the screen back.
+    if ((MR::isPlayerDead() || MR::isDemoActive()) && mPauseSeq->closeForWorld()) {
+        setNerve(GET_NERVE(GameScene, GameSceneAction));
+    }
+    updateWorldUnderMenu();
+#endif
 }
 
 void GameScene::exeSceneAction() {

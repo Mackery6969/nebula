@@ -18,6 +18,8 @@ namespace fs = std::filesystem;
 constexpr const char* kInfoFile = "save.ini";
 // Written once the old saves were made into co-op saves (SaveStore::convert).
 constexpr const char* kConvertedFile = ".converted";
+// The save the next start plays (SaveStore::set_next_start).
+constexpr const char* kNextStartFile = ".next_start";
 constexpr std::size_t kNameLimit = 32u;
 
 // A save's id: "save" and a number, nothing that leaves the folder.
@@ -126,6 +128,33 @@ bool SaveStore::mark_played(std::string_view id, std::int64_t now) {
     if (!info) return false;
     info->last_played = now;
     return write_info(*info);
+}
+
+bool SaveStore::rename(std::string_view id, std::string_view name) {
+    std::optional<SaveInfo> info = find(id);
+    const std::string cleaned = clean_name(name);
+    if (!info || cleaned.find_first_not_of(' ') == std::string::npos) return false;
+    info->name = cleaned.substr(cleaned.find_first_not_of(' '));
+    info->name.erase(info->name.find_last_not_of(' ') + 1u);
+    return write_info(*info);
+}
+
+bool SaveStore::set_next_start(std::string_view id) {
+    if (!valid_id(id)) return false;
+    return io::write_text_file_atomically(root_ / kNextStartFile, std::string(id) + "\n");
+}
+
+std::string SaveStore::take_next_start() {
+    std::error_code error;
+    std::string id;
+    {
+        std::ifstream in(root_ / kNextStartFile);
+        if (!in) return {};
+        std::getline(in, id);
+    }
+    fs::remove(root_ / kNextStartFile, error);
+    if (!id.empty() && id.back() == '\r') id.pop_back();
+    return find(id) ? id : std::string();
 }
 
 bool SaveStore::convert(const std::filesystem::path& nand_data, unsigned files,

@@ -45,6 +45,8 @@ inline constexpr std::uint16_t kCoopDefaultPort = 7777u;
 inline constexpr unsigned kCoopMaxPlayersLimit = 16u;
 // The longest player name and password, in bytes (printable ASCII; longer values are cut).
 inline constexpr std::size_t kCoopTextLimit = 32u;
+// The longest remembered join address ("host:port", "[ipv6]:port"), in bytes.
+inline constexpr std::size_t kCoopAddressLimit = 64u;
 
 // How players touch one another, sm64coopdx's options (docs/COOP_PLAN.md, "Player collisions"). Non-solid: they pass
 // through. Solid: they push apart, bounce off each other's heads and knock one another back with attacks, with no
@@ -53,6 +55,8 @@ enum class CoopPlayerInteraction : std::uint8_t { NonSolid, Solid, FriendlyFire 
 // Friendly fire's rules: sm64coopdx's original ones, or its revamped ones (which attacks beat which, the knockback
 // each gives).
 enum class CoopPvpMode : std::uint8_t { Classic, Revamped };
+// The player's character (the main menu's Player page): the player's own, whatever save they play in.
+enum class CoopCharacter : std::uint8_t { Mario, Luigi };
 // Knockback strength, 0 to 255; the menu's choices are weak, normal and too much (sm64coopdx's values).
 inline constexpr unsigned kCoopKnockbackWeak = 10u, kCoopKnockbackNormal = 25u, kCoopKnockbackTooMuch = 60u;
 
@@ -60,7 +64,9 @@ struct RuntimeCoopSettings {
     std::uint16_t port = kCoopDefaultPort;
     unsigned max_players = 8u;  // 2 to kCoopMaxPlayersLimit, the host included
     std::string player_name;    // empty: the save file's name
+    CoopCharacter character = CoopCharacter::Mario;
     std::string password;       // a host's: joining needs it; a joiner's: sent to the host. Empty: none
+    std::string join_address;   // the Join page's last address, "host[:port]" (empty: none yet)
     // The host's are the session's: they reach every player as they join.
     CoopPlayerInteraction player_interaction = CoopPlayerInteraction::Solid;
     unsigned knockback_strength = kCoopKnockbackNormal;
@@ -76,6 +82,8 @@ struct RuntimeCoopSettings {
 // "nonsolid", "solid" or "friendly_fire"; "classic" or "revamped" (runtime_settings.ini).
 [[nodiscard]] const char* coop_player_interaction_key(CoopPlayerInteraction interaction) noexcept;
 [[nodiscard]] const char* coop_pvp_mode_key(CoopPvpMode mode) noexcept;
+// "mario" or "luigi" (runtime_settings.ini's coop_character).
+[[nodiscard]] const char* coop_character_key(CoopCharacter character) noexcept;
 
 struct RuntimeSettings {
     RuntimeInputMode input_mode = RuntimeInputMode::Auto;

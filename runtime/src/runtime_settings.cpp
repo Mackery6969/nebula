@@ -37,12 +37,12 @@ RuntimeSettings s_settings{};
 std::uint64_t s_input_mode_generation = 1u;
 std::shared_mutex s_settings_lock;
 
-// Printable ASCII only, with no surrounding spaces, at most kCoopTextLimit bytes: the file stays one line per key and
-// the game's font draws every character.
-std::string sanitize_coop_text(std::string_view text) {
+// Printable ASCII only, with no surrounding spaces, at most `limit` bytes: the file stays one line per key and the
+// game's font draws every character.
+std::string sanitize_coop_text(std::string_view text, std::size_t limit = kCoopTextLimit) {
     std::string out;
     for (const char ch : text) {
-        if (ch >= 0x20 && ch < 0x7F && out.size() < kCoopTextLimit) {
+        if (ch >= 0x20 && ch < 0x7F && out.size() < limit) {
             out.push_back(ch);
         }
     }
@@ -112,6 +112,10 @@ RuntimeSettings sanitize_settings(RuntimeSettings settings) {
     }
     settings.coop.player_name = sanitize_coop_text(settings.coop.player_name);
     settings.coop.password = sanitize_coop_text(settings.coop.password);
+    if (settings.coop.character > CoopCharacter::Luigi) {
+        settings.coop.character = CoopCharacter::Mario;
+    }
+    settings.coop.join_address = sanitize_coop_text(settings.coop.join_address, kCoopAddressLimit);
     return settings;
 }
 
@@ -218,6 +222,12 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
         settings.coop.player_name = value;
     } else if (std::strcmp(key, "coop_password") == 0) {
         settings.coop.password = value;
+    } else if (std::strcmp(key, "coop_character") == 0) {
+        for (const CoopCharacter character : {CoopCharacter::Mario, CoopCharacter::Luigi}) {
+            if (_stricmp(value, coop_character_key(character)) == 0) settings.coop.character = character;
+        }
+    } else if (std::strcmp(key, "coop_join_address") == 0) {
+        settings.coop.join_address = value;
     } else if (std::strcmp(key, "coop_player_interaction") == 0) {
         for (const CoopPlayerInteraction interaction :
              {CoopPlayerInteraction::NonSolid, CoopPlayerInteraction::Solid, CoopPlayerInteraction::FriendlyFire}) {
@@ -555,6 +565,12 @@ bool save_runtime_settings_to_file() {
         }
         if (!settings.coop.player_name.empty()) contents << "coop_player_name=" << settings.coop.player_name << '\n';
         if (!settings.coop.password.empty()) contents << "coop_password=" << settings.coop.password << '\n';
+        if (settings.coop.character != defaults.character) {
+            contents << "coop_character=" << coop_character_key(settings.coop.character) << '\n';
+        }
+        if (!settings.coop.join_address.empty()) {
+            contents << "coop_join_address=" << settings.coop.join_address << '\n';
+        }
         if (settings.coop.player_interaction != defaults.player_interaction) {
             contents << "coop_player_interaction=" << coop_player_interaction_key(settings.coop.player_interaction)
                      << '\n';
@@ -626,6 +642,10 @@ const char* coop_player_interaction_key(CoopPlayerInteraction interaction) noexc
 
 const char* coop_pvp_mode_key(CoopPvpMode mode) noexcept {
     return mode == CoopPvpMode::Revamped ? "revamped" : "classic";
+}
+
+const char* coop_character_key(CoopCharacter character) noexcept {
+    return character == CoopCharacter::Luigi ? "luigi" : "mario";
 }
 
 const char* runtime_input_mode_name(RuntimeInputMode mode) {

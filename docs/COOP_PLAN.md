@@ -271,14 +271,18 @@ Each phase ships on its own and leaves the game playable.
 - [x] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host, Options, Quit,
       over the file select's space backdrop, with the pointer, D-pad, stick, A and B.
 - [x] Saves: any number, each a folder of its own, with its own achievements; New and Erase on the Host page; the
-      existing `GameData.bin` converted. Rename waits for text rows.
+      existing `GameData.bin` converted; Rename on the Host page.
 - [x] The Host page: the save, max players, Player Interaction, Knockback Strength, PvP Mode and Cheats
       (`coop_cheats`), Host and Back.
-- [ ] The pause menu and Nebula's menus leave the game running.
-- [ ] Character per player (`coop_character`), not per save.
-- [ ] Text rows (name, address, password); the Host page's port and password; renaming a save.
-- [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page and the
-      launcher's Mods tab only import and remove.
+- [x] The pause menu and Nebula's menus (settings, achievement board) leave the game running, without the
+      player's input; a miss or a demo closes the pause menu.
+- [x] The game's logo above the menu, as on the title screen.
+- [x] The Player page: name and character per player (`coop_character`), not per save.
+- [x] Text rows (name, address, password; the keyboard, or letter by letter on a controller); the Host page's port
+      and password; the Join page's address (`coop_join_address`); renaming a save.
+- [x] Mods as a room setting: the Host page picks them (a restart when the disc's mods change); the MODS page only
+      imports and removes.
+- [ ] Joiners download the host's mods (with online play); the launcher's Mods tab only imports and removes.
 - [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
       only with the room's cheats on (`coop_cheats`). Windows only, as the in-game settings menu is.
 

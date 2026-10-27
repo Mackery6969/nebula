@@ -9,6 +9,7 @@
 #include <iterator>
 #include <string>
 #include <system_error>
+#include <vector>
 
 namespace {
 int s_failures = 0;
@@ -60,6 +61,11 @@ void test_saves(const fs::path& scratch) {
     expect(store.create() == "save4", "an erased number isn't reused while a later one remains");
     expect(!store.erase("../nand_data") && fs::exists(nand), "an id never leaves the saves folder");
     expect(!store.find("save9"), "a missing save isn't found");
+    expect(store.rename("save1", "  My Save  ") && store.find("save1")->name == "My Save", "renamed, trimmed");
+    expect(!store.rename("save1", "   ") && store.find("save1")->name == "My Save", "never to nothing");
+    expect(store.take_next_start().empty(), "no save waits for the next start");
+    expect(store.set_next_start("save1") && store.take_next_start() == "save1" && store.take_next_start().empty(),
+           "the next start's save, taken once");
 
     SaveStore empty(scratch / "empty_saves");
     expect(empty.convert(scratch / "missing", 0u, {}) && empty.converted() && empty.list().empty(),
@@ -78,15 +84,12 @@ void test_menu(const fs::path& scratch) {
     menu.open();
     galaxy::coop::MenuView view = menu.view();
     expect(view.open && view.page == 0u && view.pages.size() == 1u && view.pages[0] == "PLAY", "one page, open");
-    expect(view.rows.size() == 4u && view.selected == 0u, "four rows, Host selected");
-    expect(view.rows[0].label == "HOST" && view.rows[1].value == "-JOIN" && view.rows[2].value == "OPEN",
-           "Host opens its page, Join unavailable, Options opens");
+    expect(view.rows.size() == 5u && view.selected == 0u, "five rows, Host selected");
+    expect(view.rows[0].label == "HOST" && view.rows[1].value == "OPEN" && view.rows[2].label == "PLAYER" &&
+               view.rows[3].value == "OPEN",
+           "Host, Join and Player open their pages, Options opens");
 
-    menu.move(1);
-    expect(menu.view().selected == 1u, "down to Join");
-    menu.press(0u);
-    expect(menu.take_command() == MenuCommand::None, "Join is unavailable");
-    menu.move(1);
+    menu.move(3);
     menu.press(0u);
     expect(menu.take_command() == MenuCommand::Settings, "Options opens the settings");
     expect(menu.take_command() == MenuCommand::None, "a command is taken once");
@@ -96,9 +99,9 @@ void test_menu(const fs::path& scratch) {
     menu.move(1);
     expect(menu.view().selected == 0u, "down from the last row wraps to the first");
     menu.move(-1);
-    expect(menu.view().selected == 3u, "up from the first row wraps to the last");
+    expect(menu.view().selected == 4u, "up from the first row wraps to the last");
     menu.select_row(9u);
-    expect(menu.view().selected == 3u, "a row past the page is ignored");
+    expect(menu.view().selected == 4u, "a row past the page is ignored");
     menu.press(1u);
     expect(menu.take_command() == MenuCommand::None, "a button the row doesn't have is ignored");
     menu.back();
@@ -106,8 +109,8 @@ void test_menu(const fs::path& scratch) {
 
     MainMenu no_settings(false);
     no_settings.open();
-    expect(no_settings.view().rows[2].value == "-OPEN", "Options unavailable without the in-game settings");
-    no_settings.select_row(2u);
+    expect(no_settings.view().rows[3].value == "-OPEN", "Options unavailable without the in-game settings");
+    no_settings.select_row(3u);
     no_settings.press(0u);
     expect(no_settings.take_command() == MenuCommand::None, "an unavailable Options does nothing");
 
@@ -121,14 +124,14 @@ void test_menu(const fs::path& scratch) {
     host.press(0u);
     expect(host.take_command() == MenuCommand::None, "Host opens its page, nothing to play yet");
     view = host.view();
-    expect(view.pages[0] == "HOST" && view.rows.size() == 9u && view.selected == 0u, "the Host page, Save selected");
+    expect(view.pages[0] == "HOST" && view.rows.size() == 12u && view.selected == 0u, "the Host page, Save selected");
     expect(view.rows[0].value == "ONE" && view.rows[0].changes && view.rows[0].name, "the last played save first");
     host.change(1);
     expect(host.view().rows[0].value == "TWO", "right: the next save");
     host.change(1);
-    expect(
-        host.view().rows[0].value == "NEW SAVE" && !host.view().rows[0].name && host.view().rows[1].value == "-ERASE",
-        "then a new one, which can't be erased");
+    expect(host.view().rows[0].value == "NEW SAVE" && !host.view().rows[0].name &&
+               host.view().rows[1].value == "-RENAME|-ERASE",
+           "then a new one, which can't be renamed or erased");
     host.change(1);
     expect(host.view().rows[0].value == "NEW SAVE", "the new save is the last");
     host.change(2);
@@ -138,22 +141,80 @@ void test_menu(const fs::path& scratch) {
     host.change(-1);
 
     host.move(1);
-    host.press(0u);
-    expect(host.view().rows[1].value == "PRESS AGAIN TO ERASE" && store.find(second), "Erase asks first");
-    host.press(0u);
+    host.change(1);
+    host.press(1u);
+    expect(host.view().rows[1].value == "RENAME|PRESS AGAIN TO ERASE" && store.find(second), "Erase asks first");
+    host.press(1u);
     expect(!store.find(second) && host.view().rows[0].value == "NEW SAVE", "then erases: the new save is next");
     host.move(-1);
     host.change(-1);
     expect(host.view().rows[0].value == "ONE", "left: back to the save");
 
-    const galaxy::RuntimeCoopSettings before = host.room();
-    host.select_row(2u);
+    // Rename: the save's row takes the text, typed or letter by letter.
+    host.select_row(1u);
+    host.press(0u);
+    view = host.view();
+    expect(view.editing && view.selected == 0u && view.rows[0].value == "ONE_", "Rename edits the save's name");
+    host.select_row(5u);
+    expect(host.view().selected == 0u, "the row being edited keeps the selection");
+    host.type(galaxy::coop::kTextBackspace);
+    host.type(U'!');
+    host.type(galaxy::coop::kTextLeft);
+    expect(host.view().rows[0].value == "ON[!]", "typed at the cursor, which the brackets show");
+    host.move(-1);
+    expect(host.view().rows[0].value == "ON[?]", "up: the next letter at the cursor");
+    host.reset();
+    expect(host.view().rows[0].value == "ON_", "Tab or Minus deletes it");
     host.change(1);
-    host.select_row(6u);
+    host.move(-1);
+    expect(host.view().rows[0].value == "ON[A]", "up past the end adds a letter, the cursor on it");
+    host.press(0u);
+    expect(!host.view().editing && host.view().rows[0].value == "ONA" && store.find(first)->name == "ONA",
+           "A keeps it: the save is renamed");
+    host.select_row(1u);
+    host.press(0u);
+    for (int i = 0; i < 3; ++i) host.type(galaxy::coop::kTextBackspace);
+    host.press(0u);
+    expect(host.view().editing && host.view().rows[0].help == "A SAVE NEEDS A NAME", "an empty name isn't kept");
+    host.back();
+    expect(!host.view().editing && store.find(first)->name == "ONA", "B drops the edit");
+
+    // The port and password.
+    host.select_row(2u);
+    host.press(0u);
+    host.type(U'x');
+    host.type(U'1');
+    expect(host.view().rows[2].value == "77771_", "a port takes digits");
+    host.type(galaxy::coop::kTextEnter);
+    expect(host.view().editing && host.room().port == 7777u, "a port past 65535 isn't kept");
+    host.type(galaxy::coop::kTextBackspace);
+    host.type(galaxy::coop::kTextBackspace);
+    host.type(U'8');
+    host.type(galaxy::coop::kTextEnter);
+    expect(!host.view().editing && host.room().port == 7778u, "Enter keeps the port");
+    host.reset();
+    expect(host.room().port == galaxy::kCoopDefaultPort, "Tab puts it back to 7777");
+    host.select_row(3u);
+    expect(host.view().rows[3].value == "NONE", "no password");
+    host.press(0u);
+    host.type(U'p');
+    host.type(U'w');
+    host.type(galaxy::coop::kTextEscape);
+    expect(host.room().password.empty(), "Escape drops it");
+    host.press(0u);
+    host.type(U'p');
+    host.type(U'w');
+    host.press(0u);
+    expect(host.room().password == "pw" && host.view().rows[3].value == "**", "kept, and hidden");
+
+    const galaxy::RuntimeCoopSettings before = host.room();
+    host.select_row(4u);
+    host.change(1);
+    host.select_row(8u);
     host.change(1);
     const galaxy::RuntimeCoopSettings after = host.room();
     expect(after.max_players == before.max_players + 1u && after.cheats, "the room's settings change");
-    host.select_row(4u);
+    host.select_row(6u);
     host.change(1);
     host.change(1);
     expect(host.room().knockback_strength == galaxy::kCoopKnockbackTooMuch,
@@ -163,24 +224,24 @@ void test_menu(const fs::path& scratch) {
     host.reset();
     expect(host.room().knockback_strength == galaxy::kCoopKnockbackNormal, "Tab resets the selected setting");
     expect(host.room().cheats, "and only it");
-    host.select_row(6u);
+    host.select_row(8u);
     host.reset();
     expect(!host.room().cheats, "cheats reset to off");
     host.select_row(0u);
     host.reset();
-    expect(host.view().rows[0].value == "ONE", "the save has no default");
+    expect(host.view().rows[0].value == "ONA", "the save has no default");
 
-    host.select_row(7u);
+    host.select_row(10u);
     host.press(0u);
     expect(host.take_command() == MenuCommand::Play && host.chosen_save() == first, "Host plays the picked save");
 
-    host.select_row(8u);
+    host.select_row(11u);
     host.press(0u);
-    expect(host.view().pages[0] == "PLAY" && host.view().selected == 0u, "Back returns to the main page");
+    expect(host.view().pages[0] == "PLAY" && host.view().selected == 0u, "Back returns to the main page, on Host");
     host.press(0u);
     host.select_row(0u);
     host.change(1);
-    host.select_row(7u);
+    host.select_row(10u);
     host.press(0u);
     expect(host.take_command() == MenuCommand::Play && host.chosen_save().empty(), "Host on New save: a new one");
     host.back();
@@ -190,6 +251,104 @@ void test_menu(const fs::path& scratch) {
     expect(!host.view().open, "closed");
     host.open();
     expect(host.view().selected == 0u && host.view().pages[0] == "PLAY", "reopening starts at Host");
+    host.play(second);
+    expect(host.take_command() == MenuCommand::Play && host.chosen_save() == second, "a save played at once");
+}
+
+void test_join_and_player() {
+    using galaxy::coop::MainMenu;
+    MainMenu menu(true);
+    menu.open();
+    menu.select_row(1u);
+    menu.press(0u);
+    galaxy::coop::MenuView view = menu.view();
+    expect(view.pages[0] == "JOIN" && view.rows.size() == 4u && view.rows[0].value == "NONE" &&
+               view.rows[2].value == "-JOIN",
+           "the Join page: no address yet, joining waits for online play");
+    menu.press(0u);
+    for (const char c : std::string("bad address")) menu.type(static_cast<char32_t>(c));
+    expect(menu.view().rows[0].value == "badaddress_", "an address takes no spaces");
+    for (int i = 0; i < 10; ++i) menu.type(galaxy::coop::kTextBackspace);
+    for (const char c : std::string("[::1")) menu.type(static_cast<char32_t>(c));
+    menu.press(0u);
+    expect(menu.view().editing && menu.room().join_address.empty(), "a malformed address isn't kept");
+    for (const char c : std::string("]:7778")) menu.type(static_cast<char32_t>(c));
+    menu.press(0u);
+    expect(!menu.view().editing && menu.room().join_address == "[::1]:7778", "an address is kept");
+    menu.back();
+    expect(menu.view().pages[0] == "PLAY" && menu.view().selected == 1u, "back on Join");
+
+    menu.select_row(2u);
+    menu.press(0u);
+    view = menu.view();
+    expect(view.pages[0] == "PLAYER" && view.rows[0].value == "PLAYER" && view.rows[1].value == "MARIO",
+           "the Player page: no name yet, Mario");
+    menu.move(1);
+    menu.change(1);
+    expect(menu.room().character == galaxy::CoopCharacter::Luigi && menu.view().rows[1].value == "LUIGI",
+           "right: Luigi");
+    menu.reset();
+    expect(menu.room().character == galaxy::CoopCharacter::Mario, "Tab: back to Mario");
+    menu.move(-1);
+    menu.press(0u);
+    // Letter by letter, as a controller: up from nothing starts at A.
+    menu.move(-1);
+    menu.move(-1);
+    menu.change(1);
+    menu.move(1);
+    expect(menu.view().rows[0].value == "B[']", "letters picked by a pad: down past the end starts at the last");
+    menu.press(0u);
+    expect(menu.room().player_name.size() == 2u && menu.room().player_name[0] == 'B', "the name is kept");
+    menu.press(0u);
+    for (int i = 0; i < 30; ++i) menu.type(U'x');
+    menu.press(0u);
+    expect(menu.room().player_name.size() == galaxy::coop::kPlayerNameLimit, "a name is cut at its limit");
+}
+
+void test_mods() {
+    using galaxy::coop::MainMenu;
+    using galaxy::coop::RoomMod;
+    MainMenu menu(true);
+    menu.set_mods_source([] {
+        return std::vector<RoomMod>{{"Alpha", false}, {"Textures", true}, {"Zed", false}, {"Music", true}};
+    });
+    menu.open();
+    menu.press(0u);
+    expect(menu.view().rows[9].value == "2 ON" && !menu.mods_changed(), "the Host page counts the mods on");
+    menu.select_row(9u);
+    menu.press(0u);
+    galaxy::coop::MenuView view = menu.view();
+    expect(view.pages[0] == "MODS" && view.rows.size() == 5u && view.rows[0].label == "Textures" &&
+               view.rows[0].value == "ON (1)" && view.rows[1].value == "ON (2)" && view.rows[2].value == "OFF" &&
+               view.rows[0].label_name,
+           "the mods page: the ones on first, numbered");
+    menu.select_row(3u);
+    menu.press(0u);
+    view = menu.view();
+    expect(view.rows[0].label == "Zed" && view.rows[0].value == "ON (1)" && view.selected == 0u && menu.mods_changed(),
+           "turned on: on top, winning");
+    menu.change(1);
+    view = menu.view();
+    expect(view.rows[3].label == "Zed" && view.rows[3].value == "OFF" && view.selected == 3u && !menu.mods_changed(),
+           "turned off again: among the others by name");
+    menu.select_row(1u);
+    menu.reset();
+    expect(menu.mods_changed() && menu.room_mods()[1].id == "Alpha" && !menu.room_mods()[1].on,
+           "Tab turns a mod off");
+    menu.back();
+    expect(menu.view().pages[0] == "HOST" && menu.view().selected == 9u && menu.view().rows[9].value == "1 ON",
+           "B: back to the Host page, its mods kept");
+    menu.press(0u);
+    menu.select_row(4u);
+    menu.press(0u);
+    expect(menu.view().pages[0] == "HOST" && menu.mods_changed(), "Done: back too");
+
+    MainMenu none(true);
+    none.open();
+    none.press(0u);
+    none.select_row(9u);
+    none.press(0u);
+    expect(none.view().rows.size() == 2u && none.view().rows[0].label == "NO MODS YET", "no mods to pick");
 }
 }  // namespace
 
@@ -200,6 +359,8 @@ int main() {
     fs::create_directories(scratch, error);
     test_saves(scratch);
     test_menu(scratch);
+    test_join_and_player();
+    test_mods();
     fs::remove_all(scratch, error);
 
     if (s_failures != 0) return 1;

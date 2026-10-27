@@ -33,7 +33,12 @@ namespace {
 
 TitleSequenceProduct::TitleSequenceProduct()
     : NerveExecutor(""), mLogoLayout(nullptr), mPressStartLayout(nullptr), mEncouragePal60Window(nullptr), mAButtonChecker(nullptr),
-      mBButtonChecker(nullptr) {
+      mBButtonChecker(nullptr)
+#ifdef TARGET_PC
+      ,
+      mIsLogoWaiting(false)
+#endif
+{
     if (MR::isDisplayEncouragePal60Window()) {
         initNerve(GET_NERVE_ANON(TitleSequenceProductDisplayEncouragePal60Window));
     } else {
@@ -199,3 +204,37 @@ void TitleSequenceProduct::updatePressStartReaction() {
         MR::startAnim(mPressStartLayout, "ButtonReaction", 0);
     }
 }
+
+#ifdef TARGET_PC
+void TitleSequenceProduct::appearLogo() {
+    mLogoLayout->appear();
+    MR::startAnim(mLogoLayout, "Appear", 0);
+    mIsLogoWaiting = false;
+}
+
+void TitleSequenceProduct::updateLogo() {
+    if (mIsLogoWaiting || MR::isDead(mLogoLayout) || !MR::isAnimStopped(mLogoLayout, 0)) {
+        return;
+    }
+    // As exeLogoWait: the logo's idle and its lights.
+    mIsLogoWaiting = true;
+    MR::startAnim(mLogoLayout, "Wait", 0);
+    MR::emitEffect(mLogoLayout, "TitleLogoLight");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightB");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightC");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightD");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightE");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightF");
+    MR::emitEffect(mLogoLayout, "TitleLogoLightG");
+}
+
+void TitleSequenceProduct::killLogo() {
+    MR::deleteEffectAll(mLogoLayout);
+    mLogoLayout->kill();
+    mIsLogoWaiting = false;
+}
+
+LayoutActor* TitleSequenceProduct::getLogo() const {
+    return mLogoLayout;
+}
+#endif

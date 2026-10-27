@@ -44,6 +44,10 @@ public:
     void exeStaffRoll();
 #ifdef TARGET_PC
     void exeNebulaBoard();
+    // The world plays on under a menu (the pause menu, the achievement board), without the player's input.
+    void updateWorldUnderMenu();
+    // A menu the world left open (it went on to a miss or a demo under it) keeps its own frame and the player's input.
+    void updateMenusLeftOpen();
 #endif
     void initSequences();
     void initEffect();
@@ -57,7 +61,7 @@ public:
     bool isPermitToPauseMenu() const;
     void requestShowGalaxyMap();
 #ifdef TARGET_PC
-    // Nebula's achievement board (the Observatory's Achievement Luma): the world held while it is open.
+    // Nebula's achievement board (the Observatory's Achievement Luma): the world plays on while it is open.
     void requestShowNebulaBoard();
     // Over everything the game draws, the system's wipes included (GameSystem::draw, under the settings menu): Nebula's
     // achievement pop-up.

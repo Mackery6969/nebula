@@ -13,6 +13,7 @@ public:
     void update();
 #ifdef TARGET_PC
     bool updateNebulaShake();
+    void holdForMenu();
 #endif
 
     /* 0x00 */ const WPad* mPad;

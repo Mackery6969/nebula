@@ -7,6 +7,7 @@
 #include "Game/System/GameDataHolder.hpp"
 #include "Game/System/GameSequenceFunction.hpp"
 #include "Game/System/NebulaText.hpp"
+#include "Game/Util/EventUtil.hpp"
 #include "Game/Util/JMapInfo.hpp"
 #include "Game/Util/SceneUtil.hpp"
 #include "Game/Util/StringUtil.hpp"
@@ -175,11 +176,11 @@ namespace {
         return nullptr;
     }
 
-    // Its name in the played language: NebulaText's Achievement.<id>, or Achievement.<id>.Luigi on a Luigi file.
+    // Its name in the played language: NebulaText's Achievement.<id>, or Achievement.<id>.Luigi playing Luigi.
     s32 getEntryName(wchar_t* pDst, s32 capacity, const char* pId) {
         char textId[64];
         snprintf(textId, sizeof(textId), "Achievement.%s.Luigi", pId);
-        if (GameDataFunction::isDataMario() || !NebulaText::has(textId)) {
+        if (!MR::isPlayerLuigi() || !NebulaText::has(textId)) {
             snprintf(textId, sizeof(textId), "Achievement.%s", pId);
         }
         return NebulaText::get(pDst, capacity, textId);
@@ -352,7 +353,8 @@ namespace NebulaAchievements {
             return;
         }
         const s32 queuedBefore = sQueued;
-        const bool mario = GameDataFunction::isDataMario();
+        // The player's character (the Player page's, else the file's half).
+        const bool mario = !MR::isPlayerLuigi();
 
         // The story, in the order it is played.
         tryUnlock("first_star");

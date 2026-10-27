@@ -54,6 +54,23 @@ void WPad::update() {
     _34 = true;
 }
 
+#ifdef TARGET_PC
+void WPad::holdForMenu() {
+    mButton->holdForMenu();
+    mCorePadSwing->holdForMenu();
+    mSubPadSwing->holdForMenu();
+    mStick->mStick.zero();
+    mStick->mSpeed = 0.0f;
+    mStick->mHold = 0;
+    mStick->mTrigger = 0;
+    mStick->mRelease = 0;
+    mStick->mIsTriggerUp = false;
+    mStick->mIsTriggerDown = false;
+    mStick->mIsHoldUp = false;
+    mStick->mIsHoldDown = false;
+}
+#endif
+
 WPadRumble* WPad::getRumbleInstance() const {
     return _18->getRumbleInstance();
 }
