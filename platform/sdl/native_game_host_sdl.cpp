@@ -264,6 +264,10 @@ void install_host_pointer_transition_provider(HostPointerTransitionProvider) noe
 void install_native_keyboard_capture_provider(NativeKeyboardCaptureProvider) noexcept {}
 void install_native_settings_pad_hooks(NativeSettingsVisibleProvider, NativeSettingsKeySink) noexcept {}
 void set_env_flag_cache_enabled(bool) noexcept {}
+// The Wii's own button icons: this host doesn't tell controller families apart yet (native_host.cpp does on Windows).
+input::ButtonIconSpec button_icons(bool) noexcept {
+    return {};
+}
 
 // Sound: the JAudio DSP program on the game's command words, its blocks through an SDL audio stream.
 struct NativeGameAudio::State {
