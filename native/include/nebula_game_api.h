@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 37u
+#define NEBULA_GAME_API_VERSION 38u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -155,6 +155,22 @@ typedef struct NebulaCoopPlayer {
 enum {
     NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
     NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
+};
+
+/* A player in the online co-op room, for the player list (coop_list, docs/COOP_PLAN.md "Player list"). */
+typedef struct NebulaCoopListPlayer {
+    char name[32];     /* printable ASCII */
+    char stage[48];    /* where they play (NebulaCoopPlayer's stage), "" until they reach one */
+    int32_t scenario;  /* and its scenario: 0 where no star was chosen */
+    uint32_t number;   /* 1 the host, then 2, 3... as they joined */
+    uint32_t ping_ms;  /* the round trip to them, 0 for this player or when unknown */
+    uint32_t flags;    /* NEBULA_COOP_LIST_* */
+} NebulaCoopListPlayer;
+
+enum {
+    NEBULA_COOP_LIST_LUIGI = 1u << 0, /* plays Luigi */
+    NEBULA_COOP_LIST_HOST = 1u << 1,  /* the room's host */
+    NEBULA_COOP_LIST_YOU = 1u << 2,   /* this player */
 };
 
 /* Nebula options the game follows (option). */
@@ -610,6 +626,9 @@ typedef struct NebulaHostServices {
     /* The online co-op main menu (NEBULA_COOP_MENU_*): what the game asks of it, and for POLL the player's choice.
        Called on the simulation thread. */
     int32_t (*coop_menu)(void* user, uint32_t what);
+    /* The online co-op room's players by number, at most `capacity` into `players`, and the room's size in
+       `room_size`: how many there are, 0 when there is no room. Called on the simulation thread. */
+    uint32_t (*coop_list)(void* user, NebulaCoopListPlayer* players, uint32_t capacity, uint32_t* room_size);
     /* Online co-op's chat as it shows now (NebulaCoopChatView): nothing outside a room's game. Called on the simulation
        thread, each frame the game shows play. */
     void (*coop_chat)(void* user, NebulaCoopChatView* view);

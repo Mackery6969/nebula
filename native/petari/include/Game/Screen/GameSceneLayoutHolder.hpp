@@ -12,6 +12,7 @@ class MissLayout;
 class NebulaAchievementBoard;
 class NebulaAchievementToast;
 class NebulaCoopChat;
+class NebulaPlayerList;
 #endif
 class NoteCounter;
 class OneUpBoard;
@@ -63,6 +64,8 @@ public:
     NebulaAchievementBoard* mAchievementBoard;
     // Online co-op's chat: GameScene runs and draws it (over everything else in 2D, the pop-up included).
     NebulaCoopChat* mCoopChat;
+    // Online co-op's player list (Tab or the controller's Share held): GameScene runs and draws it over everything.
+    NebulaPlayerList* mPlayerList;
 #endif
 };
 

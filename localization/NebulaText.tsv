@@ -493,6 +493,9 @@ CoopMenuTitle	Main Menu		Menu principal	Menu principal	Menú principal	Menú pri
 CoopHintDone	Done		Terminé	Terminé	Listo	Listo	Fertig	Fatto	Klaar	Concluir	決定	완료	完成	完成
 CoopHintCancel	Cancel		Annuler	Annuler	Cancelar	Cancelar	Abbrechen	Annulla	Annuleren	Cancelar	キャンセル	취소	取消	取消
 CoopHintDelete	Delete		Effacer	Effacer	Borrar	Borrar	Löschen	Cancella	Wissen	Apagar	削除	삭제	删除	刪除
+PlayerListTitle	Players		Joueurs	Joueurs	Jugadores	Jugadores	Spieler	Giocatori	Spelers	Jogadores	プレイヤー	플레이어	玩家	玩家
+PlayerListHost	Host		Hôte	Hôte	Anfitrión	Anfitrión	Host	Host	Host	Anfitrião	ホスト	호스트	房主	房主
+PlayerListArriving	On the way...		En route...	En route...	En camino...	En camino...	Unterwegs...	In arrivo...	Onderweg...	A caminho...	移動中…	이동 중...	正在前往…	正在前往…
 SettingsTitle	Settings		Paramètres	Paramètres	Configuración	Configuración	Einstellungen	Impostazioni	Instellingen	Configurações	設定	설정	设置	設定
 SettingsApply	Apply		Appliquer	Appliquer	Aplicar	Aplicar	Übernehmen	Applica	Toepassen	Aplicar	適用	적용	应用	套用
 SettingsBack	Back		Retour	Retour	Volver	Volver	Zurück	Indietro	Terug	Voltar	もどる	돌아가기	返回	返回

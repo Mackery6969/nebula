@@ -26,7 +26,7 @@
 namespace galaxy::coop {
 
 // The session's own protocol (its messages, below the transport's): a different one refuses the join.
-inline constexpr std::uint16_t kSessionProtocol = 1u;
+inline constexpr std::uint16_t kSessionProtocol = 2u;
 // The first message type a feature may use with send() and on_message(); below are the session's.
 inline constexpr std::uint8_t kFirstFeatureMessage = 32u;
 // The host's save, sent at a join: this many bytes at most.
@@ -39,6 +39,11 @@ struct SessionPlayer {
     CoopCharacter character = CoopCharacter::Mario;
     bool host = false;
     bool local = false;
+    // Where they play (set_place): the stage's name and its scenario; empty until they reach one.
+    std::string stage;
+    int scenario = 0;
+    // The round trip to them (to the host, for a joiner's view of the others), 0 for this player or when unknown.
+    unsigned ping_ms = 0u;
 };
 
 // A file of the save the room plays (its folder's GameData.bin...), by name.
@@ -122,6 +127,9 @@ public:
     [[nodiscard]] std::uint16_t port() const;
     // The host changes the room's settings for everyone.
     void set_room(const RuntimeCoopSettings& room);
+    // Where this player plays (the player list's galaxy and star), told to everyone as it changes. Kept while there
+    // is no room too: a room opened or joined later starts with it.
+    void set_place(const std::string& stage, int scenario);
 
     [[nodiscard]] std::vector<SessionEvent> take_events();
     // Once, after Joined: the host's save.
