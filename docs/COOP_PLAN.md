@@ -121,6 +121,24 @@ Order: first the menu shell (Main, Host with a save file, Options, Quit) replaci
 game plays as before through it; then text rows, the Player page and the Host page's server rows; then Join with
 Phase 1.
 
+## Mods: the room's, not the player's
+
+Mods work as in sm64coopdx (`djui_panel_host_mods.c`, `packet_mod_list.c`, `packet_download.c`): they're a room
+setting, not each player's own.
+
+- **The host picks them.** The Host page gets a Mods row listing the mods in the `mods` folder (Riivolution mods,
+  disc files, texture packs, movies) to turn on for this room, in order. The room plays with exactly those.
+- **Joiners get the host's.** On joining, a player receives the room's mod list. Mods they already have (same name
+  and hash) are used as they are; the rest are downloaded from the host into a cache before the game starts, and
+  turned off again when they leave. A player's own enabled mods don't apply in someone else's room.
+- **No mods page outside a room.** The settings menu's MODS page and the launcher's Mods tab stop turning mods on
+  for every game: importing and removing mods stays, choosing them moves to the Host page.
+- **Mods apply at the start.** Nebula applies mods when the game starts (the virtual disc), so a room's mods are
+  set before the joiner's game loads the galaxy, and changing them means restarting the room.
+
+Open: whether purely cosmetic packs (texture packs, HD movies) should stay each player's own choice, as
+sm64coopdx keeps model and texture packs (DynOS) per player.
+
 ## The Online tab
 
 Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, but ADVANCED becomes **ONLINE**:
@@ -212,6 +230,8 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Saves: any number, each a folder of its own; New, Rename, Erase; the existing `GameData.bin` converted.
 - [ ] Character per player (`coop_character`), not per save.
 - [ ] Text rows (name, address, password); the Host page's server rows.
+- [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page and the
+      launcher's Mods tab only import and remove.
 - [ ] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
       only with the room's cheats on (`coop_cheats`).
 
