@@ -72,6 +72,10 @@ void __NebulaGameLight(u32 kind, u32 id, const f32* values);
 void __NebulaGameStage(const char* name);
 // What the player is doing, for Discord (NebulaHostServices::presence).
 void __NebulaPresence(const u16* galaxy, const u16* star, s32 power_stars);
+// The local player for online co-op, once per game scene frame (NebulaHostServices::coop_player).
+void __NebulaCoopPlayer(const struct NebulaCoopPlayer* player);
+// The online co-op main menu (NebulaHostServices::coop_menu, NEBULA_COOP_MENU_*).
+s32 __NebulaCoopMenu(u32 what);
 // An achievement the save data meets: 1 when newly unlocked, its name in `name` (NebulaHostServices::achievement).
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity);
 s32 __NebulaAchievementDate(const char* id);

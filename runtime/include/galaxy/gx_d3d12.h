@@ -296,6 +296,9 @@ void request_sharp_2d(bool on) noexcept;
 // The mouse wheel's turn since the last call, in 120ths of a notch, positive away from the player (host_window's
 // pointer_wheel: the settings menu takes the wheel itself while it shows). Any thread.
 [[nodiscard]] std::int32_t take_pointer_wheel() noexcept;
+// Keys the game's Wii Remote has no button for, held in the window outside Nebula's settings menu, for online co-op
+// (NEBULA_COOP_KEY_*: Tab, the main menu's reset and the player list; Escape, its back). Any thread.
+[[nodiscard]] unsigned coop_keys_held() noexcept;
 
 // The native game's HOME Menu with the console menu's choices, taking the keyboard and controllers while open: return
 // to the game, reset, or leave it (the console's Wii Menu), the last two after "are you sure?". The game opens it

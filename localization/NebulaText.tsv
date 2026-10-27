@@ -121,6 +121,7 @@ S.AUDIO	Audio		Audio	Audio	Audio	Audio	Audio	Audio	Audio	Áudio	サウンド	사
 S.GENERAL	General		Général	Général	General	General	Allgemein	Generale	Algemeen	Geral	一般	일반	常规	一般
 S.MODS	Mods		Mods	Mods	Mods	Mods	Mods	Mod	Mods	Mods	MOD	모드	模组	模組
 S.SYSTEM	System		Système	Système	Sistema	Sistema	System	Sistema	Systeem	Sistema	システム	시스템	系统	系統
+S.ONLINE	Online		En ligne	En ligne	En línea	En línea	Online	Online	Online	Online	オンライン	온라인	在线	線上
 S.ADVANCED	Advanced		Avancé	Avancé	Avanzado	Avanzado	Erweitert	Avanzate	Geavanceerd	Avançado	詳細設定	고급	高级	進階
 S.ON	On		Activé	Activé	Sí	Sí	An	Sì	Aan	Ligado	オン	켜기	开	開
 S.OFF	Off		Désactivé	Désactivé	No	No	Aus	No	Uit	Desligado	オフ	끄기	关	關
@@ -488,6 +489,7 @@ S.FXAA_PASS	FXAA works		FXAA fonctionne	FXAA fonctionne	FXAA funciona	FXAA funci
 S.SMAA_FAIL	SMAA failed		SMAA en échec	SMAA en échec	SMAA falló	SMAA falló	SMAA fehlgeschlagen	SMAA non riuscito	SMAA mislukt	SMAA falhou	SMAA 失敗	SMAA 실패	SMAA 失败	SMAA 失敗
 S.FXAA_FAIL	FXAA failed		FXAA en échec	FXAA en échec	FXAA falló	FXAA falló	FXAA fehlgeschlagen	FXAA non riuscito	FXAA mislukt	FXAA falhou	FXAA 失敗	FXAA 실패	FXAA 失败	FXAA 失敗
 S.ANTI-ALIASING,_FSR_#_AND_SHARPENING	Anti-aliasing, FSR {0} and sharpening.		Anticrénelage, FSR {0} et netteté.	Anticrénelage, FSR {0} et netteté.	Antialiasing, FSR {0} y nitidez.	Antialiasing, FSR {0} y nitidez.	Kantenglättung, FSR {0} und Schärfe.	Anti-aliasing, FSR {0} e nitidezza.	Anti-aliasing, FSR {0} en verscherping.	Antisserrilhado, FSR {0} e nitidez.	アンチエイリアス、FSR {0}、シャープネスです。	안티 앨리어싱, FSR {0}, 선명도입니다.	抗锯齿、FSR {0} 与锐化。	反鋸齒、FSR {0} 與銳利化。
+CoopMenuTitle	Main Menu		Menu principal	Menu principal	Menú principal	Menú principal	Hauptmenü	Menu principale	Hoofdmenu	Menu principal	メインメニュー	메인 메뉴	主菜单	主選單
 SettingsTitle	Settings		Paramètres	Paramètres	Configuración	Configuración	Einstellungen	Impostazioni	Instellingen	Configurações	設定	설정	设置	設定
 SettingsApply	Apply		Appliquer	Appliquer	Aplicar	Aplicar	Übernehmen	Applica	Toepassen	Aplicar	適用	적용	应用	套用
 SettingsBack	Back		Retour	Retour	Volver	Volver	Zurück	Indietro	Terug	Voltar	もどる	돌아가기	返回	返回
@@ -496,6 +498,7 @@ SettingsJoyConConnect	Connect both Joy-Con by Bluetooth, then hold L and R.		Con
 SettingsJoyConPaired	Joy-Con paired.		Joy-Con associés.	Joy-Con associés.	Joy-Con emparejados.	Joy-Con emparejados.	Joy-Con gekoppelt.	Joy-Con associati.	Joy-Con gekoppeld.	Joy-Con pareados.	Joy-Con をペアにしました。	Joy-Con이 페어링되었습니다.	Joy-Con 已配对。	Joy-Con 已配對。
 SettingsHintChange	Change		Modifier	Modifier	Cambiar	Cambiar	Ändern	Cambia	Wijzigen	Mudar	変更	변경	更改	變更
 SettingsHintUndo	Undo		Annuler	Annuler	Deshacer	Deshacer	Rückgängig	Annulla	Ongedaan maken	Desfazer	元に戻す	되돌리기	撤销	復原
+SettingsHintReset	Reset		Réinitialiser	Réinitialiser	Restablecer	Restablecer	Zurücksetzen	Ripristina	Herstellen	Redefinir	リセット	초기화	重置	重設
 SettingsHintPage	Page		Page	Page	Página	Página	Seite	Pagina	Pagina	Página	ページ	페이지	页面	頁面
 SettingsHintBind	Add input		Ajouter	Ajouter	Añadir	Añadir	Hinzufügen	Aggiungi	Toevoegen	Adicionar	追加	추가	添加	新增
 SettingsHintClear	Clear		Effacer	Effacer	Borrar	Borrar	Leeren	Cancella	Wissen	Limpar	クリア	지우기	清除	清除

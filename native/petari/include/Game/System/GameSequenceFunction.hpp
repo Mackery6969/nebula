@@ -68,5 +68,8 @@ namespace GameSequenceFunction {
 #ifdef TARGET_PC
     // After startGameDataSaveSequence: the caller opens a system window once the save is done (SaveDataHandleSequence).
     void setGameDataSaveWindowFollows();
+    // The save data read again from the NAND, as at the start, nothing of the last read kept: online co-op's save
+    // folder changed (a missing file reads as a new console's).
+    void startReloadSaveDataSequence();
 #endif
 };  // namespace GameSequenceFunction

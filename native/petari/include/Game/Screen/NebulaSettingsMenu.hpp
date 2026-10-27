@@ -13,5 +13,6 @@ namespace NebulaSettingsMenu {
     bool isFreezingScene();  // open or opening or closing: the scene waits
     bool isShown();          // drawn this frame (the pointer is drawn over it)
     void requestOpen();      // the pause menu's Settings
+    void setMainMenuActive(bool active);  // the file select shows the online co-op main menu (FileSelector)
 };  // namespace NebulaSettingsMenu
 #endif

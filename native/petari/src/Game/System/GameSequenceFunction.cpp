@@ -302,6 +302,10 @@ namespace GameSequenceFunction {
     }
 #ifdef TARGET_PC
 
+    void startReloadSaveDataSequence() {
+        ::getSaveDataHandleSequence()->startReload();
+    }
+
     void setGameDataSaveWindowFollows() {
         ::getSaveDataHandleSequence()->setWindowFollows(true);
     }

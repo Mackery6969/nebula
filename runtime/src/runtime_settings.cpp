@@ -231,6 +231,8 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
         if (end != value && *end == '\0' && strength <= 255u) {
             settings.coop.knockback_strength = static_cast<unsigned>(strength);
         }
+    } else if (std::strcmp(key, "coop_cheats") == 0) {
+        settings.coop.cheats = std::strcmp(value, "1") == 0;
     } else if (std::strcmp(key, "coop_pvp_mode") == 0) {
         for (const CoopPvpMode mode : {CoopPvpMode::Classic, CoopPvpMode::Revamped}) {
             if (_stricmp(value, coop_pvp_mode_key(mode)) == 0) settings.coop.pvp_mode = mode;
@@ -563,6 +565,7 @@ bool save_runtime_settings_to_file() {
         if (settings.coop.pvp_mode != defaults.pvp_mode) {
             contents << "coop_pvp_mode=" << coop_pvp_mode_key(settings.coop.pvp_mode) << '\n';
         }
+        if (settings.coop.cheats != defaults.cheats) contents << "coop_cheats=" << (settings.coop.cheats ? 1 : 0) << '\n';
         contents << input::format_controls_settings(input::get_controls_config());
         if (!contents) {
             return false;

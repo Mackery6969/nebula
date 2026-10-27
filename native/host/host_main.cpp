@@ -17,6 +17,8 @@
 #include <nebula_game_api.h>
 
 #include "galaxy/atomic_file.h"
+#include "galaxy/coop_menu.h"
+#include "galaxy/coop_saves.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -85,6 +87,7 @@ inline int64_t perf_hint_retrace() noexcept { return 0; }
 #include <limits>
 #include <mutex>
 #include <optional>
+#include <ctime>
 #include <span>
 #include <string>
 #include <thread>
@@ -617,17 +620,30 @@ constexpr int32_t kNandNotEmpty = -13;
 
 // The game's save folder on the NAND (title/00010000/<the game's four-character code in hex>/data).
 std::string gSaveDataPath;
+// The co-op save being played (galaxy::coop::SaveStore): the game's save folder while set. The fs thread reads it.
+std::mutex gCoopSaveMutex;
+fs::path gCoopSaveFolder;
+
+// Where the game's save folder is instead of the NAND's: the co-op save's, else a Riivolution mod's savegame folder.
+fs::path save_folder_override() {
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        if (!gCoopSaveFolder.empty()) return gCoopSaveFolder;
+    }
+    return gMods != nullptr ? gMods->save_folder : fs::path();
+}
 
 bool nand_path(const char* path, fs::path* out) {
     if (path == nullptr || path[0] != '/') {
         return false;
     }
     fs::path result = gNandRoot;
-    // A Riivolution mod's savegame: the game's saves in its folder.
-    if (gMods != nullptr && !gMods->save_folder.empty() && !gSaveDataPath.empty() &&
-        std::strncmp(path, gSaveDataPath.c_str(), gSaveDataPath.size()) == 0 &&
-        (path[gSaveDataPath.size()] == '/' || path[gSaveDataPath.size()] == '\0')) {
-        result = gMods->save_folder;
+    // The game's saves in another folder (save_folder_override).
+    fs::path saves;
+    if (!gSaveDataPath.empty() && std::strncmp(path, gSaveDataPath.c_str(), gSaveDataPath.size()) == 0 &&
+        (path[gSaveDataPath.size()] == '/' || path[gSaveDataPath.size()] == '\0') &&
+        !(saves = save_folder_override()).empty()) {
+        result = saves;
         path += gSaveDataPath.size();
         if (*path == '\0') {
             *out = result;
@@ -1537,6 +1553,32 @@ void svc_game_stage(void*, const char* name) {
     }
 }
 
+// Online co-op (docs/COOP_PLAN.md): the local player as the game last reported it (coop_player), for the netcode to
+// send; a change of instance (stage or scenario) is logged.
+std::mutex gCoopLock;
+NebulaCoopPlayer gCoopLocal{};
+bool gCoopLocalValid = false;
+
+void svc_coop_player(void*, const NebulaCoopPlayer* player) {
+    if (player == nullptr) {
+        return;
+    }
+    NebulaCoopPlayer copy = *player;
+    copy.stage[sizeof(copy.stage) - 1] = '\0';
+    copy.animation[sizeof(copy.animation) - 1] = '\0';
+    bool moved = false;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        moved = !gCoopLocalValid || std::strcmp(gCoopLocal.stage, copy.stage) != 0 ||
+                gCoopLocal.scenario != copy.scenario;
+        gCoopLocal = copy;
+        gCoopLocalValid = true;
+    }
+    if (moved) {
+        std::fprintf(stderr, "[coop] instance %s, scenario %d\n", copy.stage, static_cast<int>(copy.scenario));
+    }
+}
+
 void svc_object_name(void*, uint32_t id, const char* name) {
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::gx::note_object_name(id, name);
@@ -1689,7 +1731,6 @@ uint64_t svc_stat_get(void*, const char* name) {
 #endif
 }
 
-#if defined(NEBULA_HOST_RENDERER)
 // UTF-8 text into a fixed field, cut at a whole character, always terminated.
 template <std::size_t N>
 void copy_settings_text(char (&field)[N], const std::string& text) {
@@ -1700,7 +1741,6 @@ void copy_settings_text(char (&field)[N], const std::string& text) {
     std::memcpy(field, text.data(), length);
     field[length] = '\0';
 }
-#endif
 
 #if defined(NEBULA_HOST_RENDERER)
 static_assert(static_cast<uint32_t>(galaxy::gx::NativeSettingsStatus::Leave) == NEBULA_SETTINGS_STATUS_LEAVE &&
@@ -1723,10 +1763,116 @@ static_assert(static_cast<uint32_t>(galaxy::gx::NativeSettingsInput::Open) == NE
 
 // The settings menu for the game's own (NebulaSettingsMenu): the overlay's state, which the game draws from then on.
 // The headless host has no settings menu: always closed.
+// The online co-op main menu (coop_menu), in place of the title and the file select. Its Options opens Nebula's
+// settings menu where this host has one (the Windows window's); the main menu waits under it.
+#if defined(_WIN32) && defined(NEBULA_HOST_RENDERER) && !defined(NEBULA_HOST_SDL)
+constexpr bool kHostSettingsMenu = true;
+#else
+constexpr bool kHostSettingsMenu = false;
+#endif
+galaxy::coop::MainMenu gCoopMenu{kHostSettingsMenu};
+// The co-op saves, under the NAND root (coop_saves/): made once the NAND root is known.
+std::optional<galaxy::coop::SaveStore> gCoopSaves;
+unsigned gCoopSaveFile = 1u;  // the user file the played save plays
+
+// Host's save, as Play leaves the menu: made when new, then the game's save folder (save_folder_override), with its
+// achievements; the room's settings are kept. False when it could not be made.
+bool start_coop_save() {
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::RuntimeSettings settings = galaxy::get_runtime_settings();
+    if (settings.coop != gCoopMenu.room()) {
+        settings.coop = gCoopMenu.room();
+        galaxy::set_runtime_settings(settings);
+        (void)galaxy::save_runtime_settings_to_file();
+    }
+#endif
+    if (!gCoopSaves) return false;
+    std::string id = gCoopMenu.chosen_save();
+    if (id.empty()) id = gCoopSaves->create();
+    const std::optional<galaxy::coop::SaveInfo> save = gCoopSaves->find(id);
+    if (!save) {
+        std::fprintf(stderr, "[coop] the save could not be made in %s\n", gCoopSaves->root().string().c_str());
+        return false;
+    }
+    (void)gCoopSaves->mark_played(id, static_cast<std::int64_t>(std::time(nullptr)));
+    const fs::path folder = gCoopSaves->folder(id);
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        gCoopSaveFolder = folder;
+    }
+    gCoopSaveFile = save->file;
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::achievements::set_file(folder / "achievements.ini");
+#endif
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::gx::set_coop_in_game(true);
+#endif
+    std::fprintf(stderr, "[coop] hosting save %s (%s, file %u)\n", save->id.c_str(), save->name.c_str(), save->file);
+    return true;
+}
+
+// The old saves (the NAND's, before co-op): once, a co-op save from each user file they hold, with the achievements
+// of then. Not after a co-op save played: the game's files are its then.
+void convert_old_saves(unsigned files) {
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        if (!gCoopSaveFolder.empty()) return;
+    }
+    if (!gCoopSaves || gCoopSaves->converted() || gSaveDataPath.empty()) return;
+    const fs::path old_saves = gMods != nullptr && !gMods->save_folder.empty() ? gMods->save_folder
+                                                                               : gNandRoot / gSaveDataPath.substr(1);
+    fs::path achievements;
+#if defined(NEBULA_HOST_RENDERER)
+    const fs::path settings_folder = galaxy::runtime_settings_folder();
+    if (!settings_folder.empty()) achievements = settings_folder / "achievements.ini";
+#endif
+    if (gCoopSaves->convert(old_saves, files & 0x3fu, achievements)) {
+        std::fprintf(stderr, "[coop] the old saves' files (0x%02x) are co-op saves now\n", files & 0x3fu);
+    }
+}
+
+bool host_settings_open() {
+#if defined(NEBULA_HOST_RENDERER)
+    return galaxy::gx::native_settings_view().open;
+#else
+    return false;
+#endif
+}
+
+void fill_coop_menu_view(NebulaSettingsView* view) {
+    const galaxy::coop::MenuView menu = gCoopMenu.view();
+    view->kind = NEBULA_SETTINGS_KIND_MAIN_MENU;
+    view->open = menu.open ? 1u : 0u;
+    view->page = menu.page;
+    view->page_count = static_cast<uint32_t>(std::min<std::size_t>(menu.pages.size(), NEBULA_SETTINGS_PAGES));
+    for (uint32_t i = 0; i < view->page_count; ++i) {
+        copy_settings_text(view->pages[i], menu.pages[i]);
+    }
+    view->total_rows = static_cast<uint32_t>(std::min<std::size_t>(menu.rows.size(), NEBULA_SETTINGS_ROWS));
+    view->row_count = view->total_rows;
+    for (uint32_t i = 0; i < view->row_count; ++i) {
+        copy_settings_text(view->rows[i].label, menu.rows[i].label);
+        copy_settings_text(view->rows[i].value, menu.rows[i].value);
+        view->rows[i].flags = (menu.rows[i].buttons ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_BUTTONS) : 0u) |
+                              (menu.rows[i].changes ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_CHANGES) : 0u) |
+                              (menu.rows[i].name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_NAME) : 0u);
+    }
+    view->selected = menu.selected;
+    view->selected_button = menu.selected_button;
+    view->back = menu.back ? 1u : 0u;
+    if (menu.selected < menu.rows.size()) {
+        copy_settings_text(view->help, menu.rows[menu.selected].help);
+    }
+}
+
 void svc_settings_view(void*, NebulaSettingsView* view) {
     std::memset(view, 0, sizeof(*view));
 #if defined(NEBULA_HOST_RENDERER)
     const galaxy::gx::NativeSettingsView source = galaxy::gx::native_settings_view();
+    if (!source.open && gCoopMenu.is_open()) {
+        fill_coop_menu_view(view);
+        return;
+    }
     view->open = source.open ? 1u : 0u;
     view->page = source.page;
     view->page_count = static_cast<uint32_t>(std::min<std::size_t>(source.pages.size(), NEBULA_SETTINGS_PAGES));
@@ -1773,11 +1919,26 @@ void svc_settings_view(void*, NebulaSettingsView* view) {
     view->status = static_cast<uint32_t>(source.status);
     view->status_number = source.status_number;
     copy_settings_text(view->status_text, source.status_text);
+#else
+    if (gCoopMenu.is_open()) fill_coop_menu_view(view);
 #endif
 }
 
 // The pointer's input to the settings menu: NEBULA_SETTINGS_* are galaxy::gx::NativeSettingsInput's values.
 void svc_settings_input(void*, uint32_t action, int32_t arg) {
+    if (gCoopMenu.is_open() && !host_settings_open()) {
+        switch (action) {
+        case NEBULA_SETTINGS_SELECT_PAGE: gCoopMenu.select_page(static_cast<unsigned>(std::max(arg, 0))); break;
+        case NEBULA_SETTINGS_SELECT_ROW: gCoopMenu.select_row(static_cast<unsigned>(std::max(arg, 0))); break;
+        case NEBULA_SETTINGS_MOVE: gCoopMenu.move(arg); break;
+        case NEBULA_SETTINGS_CHANGE: gCoopMenu.change(arg); break;
+        case NEBULA_SETTINGS_PRESS: gCoopMenu.press(static_cast<unsigned>(std::max(arg, 0))); break;
+        case NEBULA_SETTINGS_CLOSE: gCoopMenu.back(); break;
+        case NEBULA_SETTINGS_REVERT: gCoopMenu.reset(); break;
+        default: break;  // nothing to apply or revert: the main menu stays until a choice leaves it
+        }
+        return;
+    }
 #if defined(NEBULA_HOST_RENDERER)
     if (action >= NEBULA_SETTINGS_OPEN && action <= NEBULA_SETTINGS_SET_VALUE) {
         galaxy::gx::native_settings_input(static_cast<galaxy::gx::NativeSettingsInput>(action), arg);
@@ -1785,6 +1946,43 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
 #else
     (void)action, (void)arg;
 #endif
+}
+
+int32_t svc_coop_menu(void*, uint32_t what) {
+    switch (what) {
+    case NEBULA_COOP_MENU_OPEN:
+#if defined(NEBULA_HOST_RENDERER)
+        if (!gCoopMenu.is_open()) gCoopMenu.set_room(galaxy::get_runtime_settings().coop);
+        galaxy::gx::set_coop_in_game(false);
+#endif
+        gCoopMenu.open();
+        return 0;
+    case NEBULA_COOP_MENU_CLOSE:
+        gCoopMenu.close();
+        return 0;
+    case NEBULA_COOP_MENU_POLL:
+        switch (gCoopMenu.take_command()) {
+        case galaxy::coop::MenuCommand::Play: return start_coop_save() ? NEBULA_COOP_MENU_PLAY : NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::Quit: return NEBULA_COOP_MENU_QUIT;
+        case galaxy::coop::MenuCommand::Settings:
+#if defined(NEBULA_HOST_RENDERER)
+            galaxy::gx::native_settings_input(galaxy::gx::NativeSettingsInput::Open, 0);
+#endif
+            return NEBULA_COOP_MENU_NONE;
+        case galaxy::coop::MenuCommand::None: break;
+        }
+        return NEBULA_COOP_MENU_NONE;
+    case NEBULA_COOP_MENU_SAVE_FILE: return static_cast<int32_t>(gCoopSaveFile);
+    case NEBULA_COOP_MENU_KEYS:
+#if defined(NEBULA_HOST_RENDERER)
+        return static_cast<int32_t>(galaxy::gx::coop_keys_held());
+#else
+        return 0;
+#endif
+    default:
+        if ((what & 0xffu) == NEBULA_COOP_MENU_OLD_FILES) convert_old_saves(what >> 8u);
+        return 0;
+    }
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -2840,7 +3038,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
     ++scene_frames;
     gSceneFrames.store(scene_frames, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
-    // The settings' galaxy select (ADVANCED page): a travel the player asked for, through the game's own stage change,
+    // The settings' Online page: Leave game, and its cheats' galaxy select: a travel the player asked for, through the game's own stage change,
     // and the Grand Stars with the Observatory they power.
     {
         std::size_t stage = 0u;
@@ -2849,6 +3047,10 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
             action->kind = NEBULA_TEST_CHANGE_STAGE;
             action->scenario = static_cast<int32_t>(star);
             std::snprintf(action->stage, sizeof(action->stage), "%s", galaxy::gx::kGalaxyStages[stage].id);
+            return 1;
+        }
+        if (galaxy::gx::take_leave_game()) {
+            action->kind = NEBULA_TEST_LEAVE_GAME;
             return 1;
         }
         if (galaxy::gx::take_grand_stars()) {
@@ -3344,6 +3546,8 @@ int main(int argc, char** argv) {
 #endif
     }
     gNandRoot = nand;
+    gCoopSaves.emplace(gNandRoot / "coop_saves");
+    gCoopMenu.set_saves(&*gCoopSaves);
     std::error_code error;
     fs::create_directories(gNandRoot / "title/00010000/524d4745/data", error);
     fs::create_directories(gNandRoot / "tmp", error);  // where saves stage their banner before moving it
@@ -3524,6 +3728,8 @@ int main(int argc, char** argv) {
     services.object_name = svc_object_name;
     services.light_reach = svc_light_reach;
     services.traced_sun = svc_traced_sun;
+    services.coop_player = svc_coop_player;
+    services.coop_menu = svc_coop_menu;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

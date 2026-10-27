@@ -328,13 +328,15 @@ std::atomic<unsigned> s_native_settings_button{0};
 std::atomic<unsigned> s_native_settings_button_row{~0u};
 // The native game draws the menu (it read native_settings_view): the overlay draws nothing of its own.
 std::atomic<bool> s_settings_drawn_by_game{false};
+// Tab (1) and Escape (2) down in the window (coop_keys_held).
+std::atomic<unsigned> s_coop_keys_held{0u};
 // Leaving with changes not applied asks first: apply them, discard them, or stay. Under s_native_settings_mutex.
 bool s_settings_leave_asking = false;
 // Apply saved mod changes this session did not start with: the menu asks whether to restart now.
 std::atomic<bool> s_mods_restart_ask{false};
 // The pages, in order.
 constexpr const char* kNativeSettingsTabNames[] = {"DISPLAY", "GRAPHICS", "CONTROLS", "AUDIO", "GENERAL", "MODS", "SYSTEM",
-                                                   "ADVANCED"};
+                                                   "ONLINE"};
 
 // Settings menu draft. Display and graphics rows edit s_settings_draft, the game's settings (the audio mix, text
 // speed, button icons, language, Discord status) s_runtime_draft; Enter (Y on a controller) applies them, Backspace
@@ -752,7 +754,7 @@ unsigned runtime_draft_changes(RuntimeSettings* live) {
     take(d.language, b.language, out.language);
     take(d.discord_status, b.discord_status, out.discord_status);
     take(d.button_icons, b.button_icons, out.button_icons);
-    take(d.coop, b.coop, out.coop);  // no menu rows yet: the draft keeps what it took
+    take(d.coop, b.coop, out.coop);
     return changes;
 }
 
@@ -3554,10 +3556,66 @@ std::vector<SettingsRow> game_page(const RuntimeSettings& runtime) {
     return rows;
 }
 
-// ADVANCED: any galaxy and star, entered with the game's own stage change (names in its own words), and the Grand
-// Stars that power the Observatory.
-std::vector<SettingsRow> advanced_page() {
+// ONLINE (docs/COOP_PLAN.md, "The Online tab"): the room's settings, Leave game, and the cheats, which work only while
+// the room has them on (coop_cheats, applied): any galaxy and star, entered with the game's own stage change (names
+// in its own words), and the Grand Stars that power the Observatory.
+std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
     std::vector<SettingsRow> rows;
+    const RuntimeCoopSettings& coop = runtime.coop;
+    rows.push_back({"ROOM", {}, nullptr, {}, true});
+    char players[32]{};
+    std::snprintf(players, sizeof(players), "1 OF %u", coop.max_players);
+    rows.push_back({"PLAYERS", players, nullptr, "ONLY YOU UNTIL ONLINE PLAY CONNECTS OTHERS"});
+    rows.push_back({"MAX PLAYERS", std::to_string(coop.max_players),
+                    [](RenderConfig&, int delta) {
+                        unsigned& max = s_runtime_draft.coop.max_players;
+                        max = settings_step(max - 2u, kCoopMaxPlayersLimit - 1u, delta) + 2u;
+                    },
+                    "HOW MANY PLAYERS THE ROOM HOLDS, YOU INCLUDED"});
+    static constexpr const char* kInteractions[] = {"NON-SOLID", "SOLID", "FRIENDLY FIRE"};
+    rows.push_back({"PLAYER INTERACTION", kInteractions[std::min(static_cast<unsigned>(coop.player_interaction), 2u)],
+                    [](RenderConfig&, int delta) {
+                        CoopPlayerInteraction& interaction = s_runtime_draft.coop.player_interaction;
+                        interaction = static_cast<CoopPlayerInteraction>(
+                            settings_step(static_cast<unsigned>(interaction), 3u, delta));
+                    },
+                    "NON-SOLID: PLAYERS PASS THROUGH. SOLID: THEY BUMP AND KNOCK BACK. FRIENDLY FIRE: ATTACKS HURT"});
+    static constexpr unsigned kKnockbacks[] = {kCoopKnockbackWeak, kCoopKnockbackNormal, kCoopKnockbackTooMuch};
+    static constexpr const char* kKnockbackNames[] = {"WEAK", "NORMAL", "TOO MUCH"};
+    const auto knockback = [](unsigned strength) {
+        return strength < (kCoopKnockbackWeak + kCoopKnockbackNormal) / 2u      ? 0u
+               : strength < (kCoopKnockbackNormal + kCoopKnockbackTooMuch) / 2u ? 1u
+                                                                                 : 2u;
+    };
+    rows.push_back({"KNOCKBACK STRENGTH", kKnockbackNames[knockback(coop.knockback_strength)],
+                    [knockback](RenderConfig&, int delta) {
+                        unsigned& strength = s_runtime_draft.coop.knockback_strength;
+                        strength = kKnockbacks[settings_step(knockback(strength), 3u, delta)];
+                    },
+                    "HOW FAR A PLAYER'S ATTACK KNOCKS ANOTHER"});
+    rows.push_back({"PVP MODE", coop.pvp_mode == CoopPvpMode::Revamped ? std::string("REVAMPED") : std::string("CLASSIC"),
+                    [](RenderConfig&, int delta) {
+                        CoopPvpMode& mode = s_runtime_draft.coop.pvp_mode;
+                        mode = static_cast<CoopPvpMode>(settings_step(static_cast<unsigned>(mode), 2u, delta));
+                    },
+                    "FRIENDLY FIRE'S RULES: CLASSIC, OR REVAMPED (WHICH ATTACKS BEAT WHICH)"});
+    rows.push_back({"ALLOW CHEATS", coop.cheats ? std::string("ON") : std::string("OFF"),
+                    [](RenderConfig&, int delta) {
+                        if (delta == 0) return;
+                        s_runtime_draft.coop.cheats = !s_runtime_draft.coop.cheats;
+                    },
+                    "ON: EVERYONE IN THE ROOM MAY USE THE CHEATS BELOW, ONCE APPLIED. OFF: THEY DO NOTHING"});
+    rows.push_back(button_row("LEAVE GAME", {"LEAVE"},
+                    [](RenderConfig&, unsigned) {
+                        galaxy::gx::request_leave_game();
+                        std::cerr << "[settings] leave game\n";
+                        set_native_settings_visible(false);
+                    },
+                    "BACK TO THE MAIN MENU. PROGRESS SINCE THE LAST SAVE IS LOST"));
+
+    // The cheats: the room's, applied (a change waiting to be applied does not count yet).
+    const bool cheats = galaxy::get_runtime_settings().coop.cheats;
+    rows.push_back({"CHEATS", {}, nullptr, {}, true});
     want_galaxy_select_names();
     const std::size_t stage = std::min(s_galaxy_select_stage, kGalaxyStageCount - 1u);
     const std::uint32_t star = std::clamp(s_galaxy_select_star, 1u, kGalaxyStages[stage].stars);
@@ -3566,7 +3624,6 @@ std::vector<SettingsRow> advanced_page() {
         name = std::string_view(kGalaxyStages[stage].id) == kObservatoryId ? std::string(kObservatoryName)
                                                                             : upper_ascii(kGalaxyStages[stage].id);
     }
-    rows.push_back({"GALAXY SELECT", {}, nullptr, {}, true});
     rows.push_back({"GALAXY", name,
                     [](RenderConfig&, int delta) {
                         s_galaxy_select_stage = settings_step(
@@ -3587,23 +3644,43 @@ std::vector<SettingsRow> advanced_page() {
                     },
                     "THE MISSION TO PLAY"});
     rows.back().names = 2u;
-    rows.push_back(button_row("TRAVEL", {"GO"},
+    rows.push_back(button_row("TRAVEL", {cheats ? "GO" : "-GO"},
                     [](RenderConfig&, unsigned) {
+                        if (!galaxy::get_runtime_settings().coop.cheats) return;
                         const std::size_t at = std::min(s_galaxy_select_stage, kGalaxyStageCount - 1u);
                         request_galaxy_travel(at, std::clamp(s_galaxy_select_star, 1u, kGalaxyStages[at].stars));
                         std::cerr << "[settings] travel to " << kGalaxyStages[at].id << ' '
                                   << s_galaxy_select_star << '\n';
                         set_native_settings_visible(false);
                     },
-                    "LOADS IT WITH THE GAME OWN STAGE CHANGE, FROM ANY GALAXY"));
-    rows.push_back(button_row("GRAND STARS", {"GET"},
+                    cheats ? "LOADS IT WITH THE GAME OWN STAGE CHANGE, FROM ANY GALAXY"
+                           : "THE ROOM'S CHEATS ARE OFF: TURN THEM ON ABOVE AND APPLY"));
+    rows.push_back(button_row("GRAND STARS", {cheats ? "GET" : "-GET"},
                     [](RenderConfig&, unsigned) {
+                        if (!galaxy::get_runtime_settings().coop.cheats) return;
                         request_grand_stars();
                         std::cerr << "[settings] grand stars\n";
                         set_native_settings_visible(false);
                     },
                     "GIVES THIS SAVE FILE GRAND STARS 1-6 (EVERY DOME POWERED) AND LOADS THE OBSERVATORY. "
                     "USE A SPARE FILE"));
+    // From the main menu (no game yet) the page only shows: its room is set on the Host page.
+    if (!coop_in_game()) {
+        for (SettingsRow& row : rows) {
+            if (row.heading) continue;
+            row.change = nullptr;
+            row.press = nullptr;
+            if (!row.buttons.empty()) {
+                // Each button unavailable ('-' before its word).
+                row.value.clear();
+                for (std::string& word : row.buttons) {
+                    if (word.empty() || word[0] != '-') word.insert(word.begin(), '-');
+                    row.value += (row.value.empty() ? "" : "|") + word;
+                }
+            }
+            row.help = "ONLY IN A GAME. THE ROOM IS SET ON THE MAIN MENU'S HOST PAGE";
+        }
+    }
     return rows;
 }
 
@@ -3641,7 +3718,7 @@ std::vector<SettingsRow> settings_page(unsigned tab, const RenderConfig& draft, 
     case 4: return game_page(runtime);
     case 5: return mods_page(draft);
     case 6: return system_page(caps);
-    case 7: return advanced_page();
+    case 7: return online_page(runtime);
     default: return {};
     }
 }
@@ -4456,6 +4533,8 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         if (native_settings_handle_window_key(wp, was_down)) {
             return 0;
         }
+        if (wp == VK_TAB) s_coop_keys_held.fetch_or(1u, std::memory_order_relaxed);
+        if (wp == VK_ESCAPE) s_coop_keys_held.fetch_or(2u, std::memory_order_relaxed);
         if (!galaxy::host::native_keyboard_capture_active()) {
             const UINT key = static_cast<UINT>(wp);
             const UINT mapped_shift = key == VK_SHIFT
@@ -4474,6 +4553,8 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     }
     if (msg == WM_KEYUP || msg == WM_SYSKEYUP) {
         const UINT key = static_cast<UINT>(wp);
+        if (key == VK_TAB) s_coop_keys_held.fetch_and(~1u, std::memory_order_relaxed);
+        if (key == VK_ESCAPE) s_coop_keys_held.fetch_and(~2u, std::memory_order_relaxed);
         const UINT mapped_shift = key == VK_SHIFT
             ? MapVirtualKeyA(
                 (static_cast<UINT>(lp) >> 16u) & 0xffu,
@@ -4638,6 +4719,7 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         return 0;
     }
     if (msg == WM_KILLFOCUS) {
+        s_coop_keys_held.store(0u, std::memory_order_relaxed);
         galaxy::host::clear_native_window_key_presses();
         s_pointer_focused.store(false, std::memory_order_relaxed);
         invalidate_pointer_focus_once();
@@ -5914,5 +5996,10 @@ void host_window::native_settings_set_refresh_override_for_tests(unsigned hz) no
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
+}
+
+unsigned coop_keys_held() noexcept {
+    return s_native_settings_visible.load(std::memory_order_relaxed) ? 0u
+                                                                      : s_coop_keys_held.load(std::memory_order_relaxed);
 }
 }  // namespace galaxy::gx

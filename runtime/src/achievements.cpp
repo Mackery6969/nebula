@@ -203,7 +203,7 @@ void flush() {
     write_waiting();
 }
 
-void set_path_for_tests(const std::filesystem::path& path) {
+void set_file(const std::filesystem::path& path) {
     write_waiting();
     State& s = state();
     const std::lock_guard<std::mutex> io(s.io);
@@ -212,5 +212,9 @@ void set_path_for_tests(const std::filesystem::path& path) {
     s.loaded = false;
     s.dirty = false;
     s.unlocked.clear();
+}
+
+void set_path_for_tests(const std::filesystem::path& path) {
+    set_file(path);
 }
 }  // namespace galaxy::achievements

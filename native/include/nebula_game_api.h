@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 31u
+#define NEBULA_GAME_API_VERSION 35u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -123,6 +123,7 @@ enum {
     NEBULA_TEST_SET_EVENT_FLAG,   /* the save's event flag named `stage` on (GameDataFunction::onGameEventFlag) */
     NEBULA_TEST_SHAKE_CAMERA,     /* the screen shakes until the scene ends (MR::shakeCameraInfinity, Dodoryu's quake) */
     NEBULA_TEST_KILL_ACTOR,       /* the live actors whose model is `stage` killed (their kill(): what they leave behind) */
+    NEBULA_TEST_LEAVE_GAME,       /* the settings' Leave game: the game starts again, back at the co-op main menu */
 };
 
 /* The picture's shape as the game draws it (__NebulaDisplay), from the output's shape the host latches at each retrace
@@ -134,6 +135,27 @@ typedef struct NebulaDisplay {
     float canvas_width;    /* the NW4R layout canvas (608 at 16:9 and narrower) */
     float vertical_fit;    /* the layouts' height scale under 16:9 (1 at 16:9 and wider) */
 } NebulaDisplay;
+
+/* The local player as online co-op sends it (coop_player, docs/COOP_PLAN.md): the instance it plays in (the stage and
+   the scenario) and what other players' copies of it draw. Vectors are in the stage's world. */
+typedef struct NebulaCoopPlayer {
+    char stage[48];        /* MR::getCurrentStageName */
+    int32_t scenario;      /* MR::getCurrentScenarioNo: 0 where no star was chosen (the Comet Observatory) */
+    float position[3];
+    float rotation[3];     /* LiveActor::mRotation, degrees */
+    float gravity[3];      /* unit length, towards the ground */
+    float velocity[3];     /* world units per frame */
+    char animation[32];    /* the playing animation's name (Mario::getCurrentBckName), "" when none */
+    float animation_frame; /* MarioAnimator::getFrame */
+    uint32_t health;       /* MarioActor::mHealth */
+    uint32_t mode;         /* MarioActor::mPlayerMode: the power-up form (Bee, Boo, Fire, Ice, Spring, Rainbow...) */
+    uint32_t flags;        /* NEBULA_COOP_PLAYER_* */
+} NebulaCoopPlayer;
+
+enum {
+    NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
+    NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
+};
 
 /* Nebula options the game follows (option). */
 enum {
@@ -328,6 +350,8 @@ typedef struct NebulaSettingsView {
     uint32_t status; /* NEBULA_SETTINGS_STATUS_* */
     int32_t status_number;
     char status_text[160];
+    uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
+    uint32_t back; /* the main menu: a page under the main one, which B leaves; its rows reset to their defaults */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -338,10 +362,44 @@ enum {
     NEBULA_SETTINGS_SELECT_ROW,  /* arg: the row */
     NEBULA_SETTINGS_CHANGE,      /* arg: -1 or 1, the selected row's value; -2 or 2 the same, going round at its ends */
     NEBULA_SETTINGS_APPLY,
-    NEBULA_SETTINGS_REVERT,
+    NEBULA_SETTINGS_REVERT,      /* the main menu: the selected row back to its default */
     NEBULA_SETTINGS_PRESS,       /* arg: the selected row's button */
     NEBULA_SETTINGS_MOVE_MOD,    /* the selected mod dropped: arg >> 16 the list (1 off, 2 on), its low 16 bits the place */
     NEBULA_SETTINGS_SET_VALUE,   /* arg: the step the selected setting's slider is dragged to */
+    NEBULA_SETTINGS_MOVE,        /* the main menu: arg -1 up or 1 down a row (the game reads its D-pad itself) */
+};
+
+/* What a NebulaSettingsView shows (`kind`). */
+enum {
+    NEBULA_SETTINGS_KIND_SETTINGS = 0, /* Nebula's settings menu: it holds the game still while open */
+    NEBULA_SETTINGS_KIND_MAIN_MENU,    /* the online co-op main menu (coop_menu), over the running file select */
+};
+
+/* The online co-op main menu (coop_menu, docs/COOP_PLAN.md "Main menu"), which replaces the title and the file
+   select. NEBULA_COOP_MENU_OPEN shows it (settings_view then sends it, `kind` NEBULA_SETTINGS_KIND_MAIN_MENU, and
+   settings_input drives it); NEBULA_COOP_MENU_POLL returns the player's choice once (NEBULA_COOP_MENU_*), and
+   NEBULA_COOP_MENU_CLOSE hides it.
+   NEBULA_COOP_MENU_OLD_FILES, as the menu first opens: the user files the save data holds, bit i (from bit 8 of
+   `what`) for file i + 1; once per install the host makes each into a co-op save. NEBULA_COOP_MENU_SAVE_FILE, after
+   PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
+   game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
+   for (NEBULA_COOP_KEY_*), outside Nebula's settings menu. */
+enum {
+    NEBULA_COOP_MENU_OPEN = 1,
+    NEBULA_COOP_MENU_POLL,
+    NEBULA_COOP_MENU_CLOSE,
+    NEBULA_COOP_MENU_OLD_FILES,
+    NEBULA_COOP_MENU_SAVE_FILE,
+    NEBULA_COOP_MENU_KEYS,
+};
+enum {
+    NEBULA_COOP_KEY_TAB = 1u << 0,    /* the main menu's reset (as the controller's Back, the Wii Remote's Minus) */
+    NEBULA_COOP_KEY_ESCAPE = 1u << 1, /* the main menu's back (as B) */
+};
+enum {
+    NEBULA_COOP_MENU_NONE = 0,
+    NEBULA_COOP_MENU_PLAY, /* Host: play the save */
+    NEBULA_COOP_MENU_QUIT, /* Quit to desktop */
 };
 
 typedef struct NebulaHostServices {
@@ -513,6 +571,12 @@ typedef struct NebulaHostServices {
     void (*curved_surface)(void* user, uint32_t array_address, const void* array, uint32_t array_bytes,
                            const float* positions, uint32_t position_count, const float* normals, uint32_t normal_count,
                            const uint16_t* corners, uint32_t triangle_count);
+    /* Online co-op: the local player, once per game scene frame while the scene has one (GameScene::update). Called
+       on the simulation thread; `player` is valid during the call only. */
+    void (*coop_player)(void* user, const NebulaCoopPlayer* player);
+    /* The online co-op main menu (NEBULA_COOP_MENU_*): what the game asks of it, and for POLL the player's choice.
+       Called on the simulation thread. */
+    int32_t (*coop_menu)(void* user, uint32_t what);
 } NebulaHostServices;
 
 enum {
