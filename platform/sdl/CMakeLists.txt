@@ -115,6 +115,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/runtime_settings.cpp
     ${rt}/achievements.cpp
     ${rt}/stats.cpp
+    ${rt}/controller_roster.cpp
     ${rt}/coop_menu.cpp
     ${rt}/coop_saves.cpp
     ${rt}/input_bindings.cpp
@@ -161,6 +162,7 @@ set(host_sources
     "${nebula_root}/native/host/host_main.cpp"
     "${nebula_root}/runtime/src/native_thp_video.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/host_window_sdl.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/native_settings_sdl.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/display_clock.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/thread_sampler.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/native_game_host_sdl.cpp")

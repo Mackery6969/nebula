@@ -1764,8 +1764,9 @@ static_assert(static_cast<uint32_t>(galaxy::gx::NativeSettingsInput::Open) == NE
 // The settings menu for the game's own (NebulaSettingsMenu): the overlay's state, which the game draws from then on.
 // The headless host has no settings menu: always closed.
 // The online co-op main menu (coop_menu), in place of the title and the file select. Its Options opens Nebula's
-// settings menu where this host has one (the Windows window's); the main menu waits under it.
-#if defined(_WIN32) && defined(NEBULA_HOST_RENDERER) && !defined(NEBULA_HOST_SDL)
+// settings menu where this host has one (every renderer's: the Windows window's, and SDL's on Linux and Android); the
+// main menu waits under it.
+#if defined(NEBULA_HOST_RENDERER)
 constexpr bool kHostSettingsMenu = true;
 #else
 constexpr bool kHostSettingsMenu = false;

@@ -364,8 +364,20 @@ bool start() noexcept {
     return true;
 }
 
-// Requests from other threads (g_home_request, rumble), on SDL's thread.
+// Tasks other threads left for SDL's thread (run_on_sdl_thread).
+std::mutex g_task_mutex;
+std::vector<std::function<void()>> g_tasks;  // guarded by g_task_mutex
+
+// Requests from other threads (g_home_request, rumble, run_on_sdl_thread), on SDL's thread.
 void run_requests() {
+    std::vector<std::function<void()>> tasks;
+    {
+        const std::lock_guard<std::mutex> lock(g_task_mutex);
+        tasks.swap(g_tasks);
+    }
+    for (std::function<void()>& task : tasks) {
+        task();
+    }
 #if defined(__ANDROID__)
     if (const int request = g_home_request.exchange(0, std::memory_order_acq_rel); request != 0) {
         call_activity(request == 1 ? "showHomeMenu" : "hideHomeMenu");
@@ -528,6 +540,12 @@ void pump_events(int timeout_ms) noexcept {
                 }
                 break;
             }
+            if (event.type == SDL_EVENT_KEY_DOWN && galaxy::gx::native_settings_handle_window_key(
+                                                       static_cast<std::uintptr_t>(virtual_key(event.key.scancode)),
+                                                       event.key.repeat)) {
+                // F1 and the settings menu's keys: the menu's, not the game's.
+                break;
+            }
             set_key(virtual_key(event.key.scancode), event.type == SDL_EVENT_KEY_DOWN);
             break;
         case SDL_EVENT_TEXT_INPUT:
@@ -605,6 +623,11 @@ void home_menu_hide() noexcept {
 
 int home_menu_choice() noexcept {
     return g_home_choice.load(std::memory_order_acquire);
+}
+
+void run_on_sdl_thread(std::function<void()> task) noexcept {
+    const std::lock_guard<std::mutex> lock(g_task_mutex);
+    g_tasks.push_back(std::move(task));
 }
 
 }  // namespace galaxy::sdl
@@ -712,12 +735,6 @@ unsigned display_efb_scale_cap() {
     return efb_scale_covering(static_cast<unsigned>(static_cast<float>(mode->w) * density),
                               static_cast<unsigned>(static_cast<float>(mode->h) * density), kMaxEfbScale);
 }
-
-bool flush_native_settings_if_dirty() {
-    return true;  // the app's settings screens write the files
-}
-
-void poll_render_config_file() {}
 
 bool hidden_window_mode_enabled() {
     const char* value = std::getenv("GALAXY_HIDE_WINDOW");
@@ -839,13 +856,8 @@ VkSurfaceKHR create_vulkan_surface(VkInstance instance, NativeWindow window) {
 
 namespace galaxy::gx {
 
-// Nebula's in-game settings menu is the Windows window's (host_window_win32.cpp): here it stays closed and the 2D layer
-// keeps the HUD's scale. The Android launcher has its own settings.
-NativeSettingsView native_settings_view() {
-    return {};
-}
-
-void native_settings_input(NativeSettingsInput, int) {}
+// Nebula's in-game settings menu (native_settings_view, native_settings_input and the rest) is native_settings_sdl.cpp's,
+// the Windows window's model shared.
 
 void request_sharp_2d(bool) noexcept {}
 
@@ -880,12 +892,8 @@ host::HostPointerTransitionPoll poll_host_pointer_transition(std::uint64_t) noex
     return {};
 }
 
-bool native_settings_overlay_visible() noexcept {
-    return false;
-}
-
 bool native_window_input_captured() noexcept {
-    return home_menu_visible();
+    return home_menu_visible() || native_settings_overlay_visible() || coop_text_entry();
 }
 
 void home_menu_open() noexcept {
@@ -912,8 +920,6 @@ int home_menu_view(bool) noexcept {
 void home_menu_point(unsigned) noexcept {}
 
 void home_menu_choose(unsigned) noexcept {}
-
-void native_settings_post_key(std::uintptr_t) noexcept {}
 
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);

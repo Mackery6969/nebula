@@ -8,6 +8,7 @@
 #include "galaxy/input_bindings.h"
 
 #include <array>
+#include <functional>
 #include <cstdint>
 
 namespace galaxy::sdl {
@@ -100,5 +101,8 @@ void rumble(std::uint32_t pad_id, float strength) noexcept;
 void home_menu_show() noexcept;
 void home_menu_hide() noexcept;
 [[nodiscard]] int home_menu_choice() noexcept;
+
+// `task` on SDL's thread after its next pump (the file dialogs and the shell need it there). Any thread.
+void run_on_sdl_thread(std::function<void()> task) noexcept;
 
 }  // namespace galaxy::sdl

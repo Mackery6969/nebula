@@ -1,7 +1,8 @@
 #pragma once
 
 // Monitors and their display modes, for the display settings (monitor, fullscreen resolution and refresh rate) and
-// the internal-resolution cap. The monitor list is Windows-only.
+// the internal-resolution cap. Windows lists them through GDI (display_modes.cpp), SDL hosts through SDL's displays
+// (platform/sdl/native_settings_sdl.cpp).
 
 #if defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
@@ -34,7 +35,16 @@ namespace galaxy::gx {
     return std::clamp(static_cast<unsigned>(std::ceil(needed - 1e-6)), 1u, max_scale);
 }
 
-#if defined(_WIN32)
+#if !defined(_WIN32)
+// A rectangle in desktop coordinates, as Win32's RECT.
+struct RECT {
+    long left = 0;
+    long top = 0;
+    long right = 0;
+    long bottom = 0;
+};
+#endif
+
 struct DisplayModeInfo {
     unsigned width = 0;
     unsigned height = 0;
@@ -44,7 +54,7 @@ struct DisplayModeInfo {
 };
 
 struct MonitorInfo {
-    std::wstring device;   // GDI device name, e.g. \\.\DISPLAY2
+    std::wstring device;   // GDI device name, e.g. \\.\DISPLAY2 (SDL: the display's number)
     std::string name;      // monitor's own name (EDID), UTF-8; may be empty
     RECT bounds{};         // desktop coordinates, physical pixels
     RECT work_area{};
@@ -67,6 +77,5 @@ struct MonitorInfo {
 
 [[nodiscard]] std::string narrow_utf8(std::wstring_view text);
 [[nodiscard]] std::wstring widen_utf8(std::string_view text);
-#endif
 
 }  // namespace galaxy::gx
