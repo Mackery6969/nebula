@@ -116,6 +116,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/achievements.cpp
     ${rt}/stats.cpp
     ${rt}/coop_menu.cpp
+    ${rt}/coop_saves.cpp
     ${rt}/input_bindings.cpp
     ${rt}/host_pointer_events.cpp
     ${rt}/native_input.cpp

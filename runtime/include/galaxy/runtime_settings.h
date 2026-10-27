@@ -65,6 +65,8 @@ struct RuntimeCoopSettings {
     CoopPlayerInteraction player_interaction = CoopPlayerInteraction::Solid;
     unsigned knockback_strength = kCoopKnockbackNormal;
     CoopPvpMode pvp_mode = CoopPvpMode::Classic;
+    // The room's cheats (the Online tab's Cheats): off, they do nothing for anyone in it.
+    bool cheats = false;
 
     friend bool operator==(const RuntimeCoopSettings&, const RuntimeCoopSettings&) = default;
 };

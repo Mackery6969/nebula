@@ -37,7 +37,7 @@ SaveDataHandleSequence::SaveDataHandleSequence()
       mNerveForError(), mTempBuffer(), mOnSaveSuccessFunc(), mJustBeforeSaveFunc(), mSaveIcon()
 #ifdef TARGET_PC
       ,
-      mWindowFollows(false)
+      mWindowFollows(false), mNewSysConfigFile(nullptr), mNewUserFile(nullptr)
 #endif
 {
     mTempBuffer = new (32) u8[SaveDataHandler::getEnoughtTempBufferSize()];
@@ -50,6 +50,10 @@ void SaveDataHandleSequence::initAfterResourceLoaded() {
     mCurrentUserFile = new UserFile();
     mBackupUserFile = new UserFile();
     mSaveDataHandler = new SaveDataHandler(mSysConfigFile, mCurrentUserFile);
+#ifdef TARGET_PC
+    mNewSysConfigFile = new SysConfigFile();
+    mNewUserFile = new UserFile();
+#endif
 
     mSysInfoWindowConfirm = MR::createSysInfoWindowExecuteWithChildren();
     mSysInfoWindowConfirm->kill();
@@ -109,6 +113,17 @@ void SaveDataHandleSequence::draw() const {
 void SaveDataHandleSequence::startPreLoad() {
     setNerve(GET_NERVE_ANON(SaveDataHandleSequencePreLoad));
 }
+
+#ifdef TARGET_PC
+void SaveDataHandleSequence::startReload() {
+    // The constructor's start: every file as new, then whatever the folder holds read over it.
+    SaveDataHandler::resetSaveData(mSaveDataHandler->_18);
+    SaveDataHandler::initializeAllFileInSaveData(mSaveDataHandler->_18, mNewSysConfigFile, mNewUserFile);
+    restoreSysConfigFile(mSysConfigFile);
+    _24 = 0;
+    startPreLoad();
+}
+#endif
 
 void SaveDataHandleSequence::startCreateUserFile(int index) {
     restoreUserFile(mCurrentUserFile, index, true);

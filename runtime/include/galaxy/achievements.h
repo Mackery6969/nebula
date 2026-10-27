@@ -5,7 +5,7 @@
 #include <string_view>
 
 // Nebula's achievements. The game checks them against its save data (NebulaAchievements) and asks the host to unlock
-// them; they are kept across save files in achievements.ini next to the settings.
+// them. Online co-op keeps them with the save (set_file): one unlocked in a save is every player's who plays it.
 namespace galaxy::achievements {
 
 enum class Group { Story, Challenge, Extra };
@@ -29,6 +29,10 @@ bool unlock(std::string_view id);
 
 // Writes what is not written yet, now (before the process ends).
 void flush();
+
+// Writes what is waiting, then sets the file (empty: achievements.ini in the settings folder) and drops the cache: the
+// played co-op save's own.
+void set_file(const std::filesystem::path& path);
 
 // Tests: writes what is waiting, then sets the file (empty: achievements.ini in the settings folder) and drops the
 // cache.

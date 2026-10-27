@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 33u
+#define NEBULA_GAME_API_VERSION 34u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -376,11 +376,17 @@ enum {
 /* The online co-op main menu (coop_menu, docs/COOP_PLAN.md "Main menu"), which replaces the title and the file
    select. NEBULA_COOP_MENU_OPEN shows it (settings_view then sends it, `kind` NEBULA_SETTINGS_KIND_MAIN_MENU, and
    settings_input drives it); NEBULA_COOP_MENU_POLL returns the player's choice once (NEBULA_COOP_MENU_*), and
-   NEBULA_COOP_MENU_CLOSE hides it. */
+   NEBULA_COOP_MENU_CLOSE hides it.
+   NEBULA_COOP_MENU_OLD_FILES, as the menu first opens: the user files the save data holds, bit i (from bit 8 of
+   `what`) for file i + 1; once per install the host makes each into a co-op save. NEBULA_COOP_MENU_SAVE_FILE, after
+   PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
+   game reads again (empty for a new save). */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
     NEBULA_COOP_MENU_POLL,
     NEBULA_COOP_MENU_CLOSE,
+    NEBULA_COOP_MENU_OLD_FILES,
+    NEBULA_COOP_MENU_SAVE_FILE,
 };
 enum {
     NEBULA_COOP_MENU_NONE = 0,

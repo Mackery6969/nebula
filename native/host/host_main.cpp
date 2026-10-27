@@ -18,6 +18,7 @@
 
 #include "galaxy/atomic_file.h"
 #include "galaxy/coop_menu.h"
+#include "galaxy/coop_saves.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -86,6 +87,7 @@ inline int64_t perf_hint_retrace() noexcept { return 0; }
 #include <limits>
 #include <mutex>
 #include <optional>
+#include <ctime>
 #include <span>
 #include <string>
 #include <thread>
@@ -618,17 +620,30 @@ constexpr int32_t kNandNotEmpty = -13;
 
 // The game's save folder on the NAND (title/00010000/<the game's four-character code in hex>/data).
 std::string gSaveDataPath;
+// The co-op save being played (galaxy::coop::SaveStore): the game's save folder while set. The fs thread reads it.
+std::mutex gCoopSaveMutex;
+fs::path gCoopSaveFolder;
+
+// Where the game's save folder is instead of the NAND's: the co-op save's, else a Riivolution mod's savegame folder.
+fs::path save_folder_override() {
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        if (!gCoopSaveFolder.empty()) return gCoopSaveFolder;
+    }
+    return gMods != nullptr ? gMods->save_folder : fs::path();
+}
 
 bool nand_path(const char* path, fs::path* out) {
     if (path == nullptr || path[0] != '/') {
         return false;
     }
     fs::path result = gNandRoot;
-    // A Riivolution mod's savegame: the game's saves in its folder.
-    if (gMods != nullptr && !gMods->save_folder.empty() && !gSaveDataPath.empty() &&
-        std::strncmp(path, gSaveDataPath.c_str(), gSaveDataPath.size()) == 0 &&
-        (path[gSaveDataPath.size()] == '/' || path[gSaveDataPath.size()] == '\0')) {
-        result = gMods->save_folder;
+    // The game's saves in another folder (save_folder_override).
+    fs::path saves;
+    if (!gSaveDataPath.empty() && std::strncmp(path, gSaveDataPath.c_str(), gSaveDataPath.size()) == 0 &&
+        (path[gSaveDataPath.size()] == '/' || path[gSaveDataPath.size()] == '\0') &&
+        !(saves = save_folder_override()).empty()) {
+        result = saves;
         path += gSaveDataPath.size();
         if (*path == '\0') {
             *out = result;
@@ -1756,6 +1771,62 @@ constexpr bool kHostSettingsMenu = true;
 constexpr bool kHostSettingsMenu = false;
 #endif
 galaxy::coop::MainMenu gCoopMenu{kHostSettingsMenu};
+// The co-op saves, under the NAND root (coop_saves/): made once the NAND root is known.
+std::optional<galaxy::coop::SaveStore> gCoopSaves;
+unsigned gCoopSaveFile = 1u;  // the user file the played save plays
+
+// Host's save, as Play leaves the menu: made when new, then the game's save folder (save_folder_override), with its
+// achievements; the room's settings are kept. False when it could not be made.
+bool start_coop_save() {
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::RuntimeSettings settings = galaxy::get_runtime_settings();
+    if (settings.coop != gCoopMenu.room()) {
+        settings.coop = gCoopMenu.room();
+        galaxy::set_runtime_settings(settings);
+        (void)galaxy::save_runtime_settings_to_file();
+    }
+#endif
+    if (!gCoopSaves) return false;
+    std::string id = gCoopMenu.chosen_save();
+    if (id.empty()) id = gCoopSaves->create();
+    const std::optional<galaxy::coop::SaveInfo> save = gCoopSaves->find(id);
+    if (!save) {
+        std::fprintf(stderr, "[coop] the save could not be made in %s\n", gCoopSaves->root().string().c_str());
+        return false;
+    }
+    (void)gCoopSaves->mark_played(id, static_cast<std::int64_t>(std::time(nullptr)));
+    const fs::path folder = gCoopSaves->folder(id);
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        gCoopSaveFolder = folder;
+    }
+    gCoopSaveFile = save->file;
+#if defined(NEBULA_HOST_RENDERER)
+    galaxy::achievements::set_file(folder / "achievements.ini");
+#endif
+    std::fprintf(stderr, "[coop] hosting save %s (%s, file %u)\n", save->id.c_str(), save->name.c_str(), save->file);
+    return true;
+}
+
+// The old saves (the NAND's, before co-op): once, a co-op save from each user file they hold, with the achievements
+// of then. Not after a co-op save played: the game's files are its then.
+void convert_old_saves(unsigned files) {
+    {
+        const std::lock_guard<std::mutex> lock(gCoopSaveMutex);
+        if (!gCoopSaveFolder.empty()) return;
+    }
+    if (!gCoopSaves || gCoopSaves->converted() || gSaveDataPath.empty()) return;
+    const fs::path old_saves = gMods != nullptr && !gMods->save_folder.empty() ? gMods->save_folder
+                                                                               : gNandRoot / gSaveDataPath.substr(1);
+    fs::path achievements;
+#if defined(NEBULA_HOST_RENDERER)
+    const fs::path settings_folder = galaxy::runtime_settings_folder();
+    if (!settings_folder.empty()) achievements = settings_folder / "achievements.ini";
+#endif
+    if (gCoopSaves->convert(old_saves, files & 0x3fu, achievements)) {
+        std::fprintf(stderr, "[coop] the old saves' files (0x%02x) are co-op saves now\n", files & 0x3fu);
+    }
+}
 
 bool host_settings_open() {
 #if defined(NEBULA_HOST_RENDERER)
@@ -1856,7 +1927,8 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
         case NEBULA_SETTINGS_MOVE: gCoopMenu.move(arg); break;
         case NEBULA_SETTINGS_CHANGE: gCoopMenu.change(arg); break;
         case NEBULA_SETTINGS_PRESS: gCoopMenu.press(static_cast<unsigned>(std::max(arg, 0))); break;
-        default: break;  // nothing to apply, revert or close: the main menu stays until a choice leaves it
+        case NEBULA_SETTINGS_CLOSE: gCoopMenu.back(); break;
+        default: break;  // nothing to apply or revert: the main menu stays until a choice leaves it
         }
         return;
     }
@@ -1872,6 +1944,9 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
 int32_t svc_coop_menu(void*, uint32_t what) {
     switch (what) {
     case NEBULA_COOP_MENU_OPEN:
+#if defined(NEBULA_HOST_RENDERER)
+        if (!gCoopMenu.is_open()) gCoopMenu.set_room(galaxy::get_runtime_settings().coop);
+#endif
         gCoopMenu.open();
         return 0;
     case NEBULA_COOP_MENU_CLOSE:
@@ -1879,7 +1954,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         return 0;
     case NEBULA_COOP_MENU_POLL:
         switch (gCoopMenu.take_command()) {
-        case galaxy::coop::MenuCommand::Play: return NEBULA_COOP_MENU_PLAY;
+        case galaxy::coop::MenuCommand::Play: return start_coop_save() ? NEBULA_COOP_MENU_PLAY : NEBULA_COOP_MENU_NONE;
         case galaxy::coop::MenuCommand::Quit: return NEBULA_COOP_MENU_QUIT;
         case galaxy::coop::MenuCommand::Settings:
 #if defined(NEBULA_HOST_RENDERER)
@@ -1889,7 +1964,10 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         case galaxy::coop::MenuCommand::None: break;
         }
         return NEBULA_COOP_MENU_NONE;
-    default: return 0;
+    case NEBULA_COOP_MENU_SAVE_FILE: return static_cast<int32_t>(gCoopSaveFile);
+    default:
+        if ((what & 0xffu) == NEBULA_COOP_MENU_OLD_FILES) convert_old_saves(what >> 8u);
+        return 0;
     }
 }
 
@@ -3450,6 +3528,8 @@ int main(int argc, char** argv) {
 #endif
     }
     gNandRoot = nand;
+    gCoopSaves.emplace(gNandRoot / "coop_saves");
+    gCoopMenu.set_saves(&*gCoopSaves);
     std::error_code error;
     fs::create_directories(gNandRoot / "title/00010000/524d4745/data", error);
     fs::create_directories(gNandRoot / "tmp", error);  // where saves stage their banner before moving it

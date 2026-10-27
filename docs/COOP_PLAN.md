@@ -31,6 +31,11 @@ We use the same model, for these reasons:
 - The local Mario stays exactly as Petari wrote it. Nothing in `Game/Player` changes to get the first version working.
 - sm64coopdx shows the model holds up in a 3D Mario game with dozens of players.
 
+**The server runs everything but the visuals.** The host (later a dedicated server) decides all of the game's state:
+the save, collectibles, objects, enemies, timers, who is where. A client moves its own player and draws; everything
+else it shows is what the server sent. So nothing a player opens stops the world: the pause menu, the settings and
+the other menus show over a game that keeps running, as sm64coopdx's do, and the pause menu no longer pauses.
+
 ## Hosting
 
 Games are self-hosted. There is no lobby server, relay or account system run by the project.
@@ -50,7 +55,7 @@ Games are self-hosted. There is no lobby server, relay or account system run by 
 - **Server settings.** The `coop_*` keys in `runtime_settings.ini`, so a dedicated server can be configured without a
   menu: `coop_port` (default 7777), `coop_max_players` (2-16, default 8), `coop_player_name`, `coop_password`, and the
   [player collision](#player-collisions) options `coop_player_interaction`, `coop_knockback_strength` and
-  `coop_pvp_mode`. They're written only once they differ from the defaults. The host's collision options and save are
+  `coop_pvp_mode`, and `coop_cheats`. They're written only once they differ from the defaults. The host's collision options and save are
   the session's, as in sm64coopdx.
 
 ## Instances: one per galaxy and mission
@@ -63,10 +68,9 @@ don't. The Comet Observatory (and the other hub/demo stages) is an instance too,
 - **Visibility.** A client draws remote players, and receives their snapshots, only for its own instance. Players in
   other instances don't appear, can't be touched and don't touch anything. They still show in the player list with
   the galaxy and star they're on.
-- **Instance owner.** Within an instance, the connected player with the lowest player index who's in it settles
-  shared object state (sm64coopdx's `get_network_player_smallest_global()`). When that player leaves, the next lowest
-  takes over. The session host owns only the session (joins, kicks, the save) and isn't the world authority
-  everywhere.
+- **Authority.** The server settles every instance's shared state, the ones it has no player in included (it runs
+  them without drawing them), as well as the session (joins, kicks, the save). This replaces the earlier idea of the
+  instance's lowest-index player settling it (sm64coopdx's `get_network_player_smallest_global()`).
 - **Joining an instance.** A player who enters an instance others are already in asks the owner for its current
   state (objects killed, coins and star bits taken, switches pressed) before their local copy runs, like
   sm64coopdx's `packet_level_area_request` / `packet_level_area_inform`. An empty instance starts fresh from the stage
@@ -94,7 +98,7 @@ The title screen and the file select go. In their place is a co-op main menu lik
   | Page | Rows |
   |---|---|
   | Main | The game's logo, then Host, Join, Player, Options, Quit; Nebula's version in a corner |
-  | Host | Save (any number, each with its name and Power Stars; New, Rename and Erase), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, then Host |
+  | Host | Save (any number, each with its name and Power Stars; New, Rename and Erase), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, Cheats, then Host and Back |
   | Join | Address (`host[:port]`), password, then Join; the last address is remembered. No public or private lobbies: there's no relay |
   | Player | Name, character (Mario or Luigi, as sm64coopdx's player options pick a model) |
   | Options | Nebula's settings pages as they are today |
@@ -102,11 +106,14 @@ The title screen and the file select go. In their place is a co-op main menu lik
 
 - **Saves: any number, no characters.** The game's own format (`GameData.bin`: six user files, each with a Mario
   and a Luigi half) stays inside, but the player never sees it. Each Nebula save is a folder of its own
-  (`coop_saves/<id>/`, with a `save.ini` naming it) holding one `GameData.bin`, of which only user file 1's Mario
-  half is used. The host points the game's save path (`title/00010000/524d4745/data`) at the chosen folder; the
-  game reads it again when Host is pressed (`SaveDataHandleSequence`'s pre-load, which otherwise runs once at boot),
-  then loads user file 1 (`startGameDataLoadSequence(0, true)`). An existing install's `GameData.bin` becomes
-  saves of its own, one per used file and character, on first start.
+  (`coop_saves/<id>/` in the NAND folder, `galaxy::coop::SaveStore`) holding its own copy of the game's save folder
+  and a `save.ini` (its name, the user file it plays, when it was last played). Host points the game's save folder
+  (`title/00010000/524d4745/data`) at the chosen save's; the game reads it again from a new console's data
+  (`SaveDataHandleSequence::startReload`, so a new save keeps nothing of the last one), then plays its user file,
+  made first when new. A new save plays user file 1. On the first start, the old `GameData.bin`'s used files
+  become saves of their own (`FILE 1`, `FILE 3`, ...), each playing its old file; the old folder stays as it was.
+- **Achievements: the save's.** Each save keeps its own `achievements.ini`; an achievement unlocked in a save is
+  every player's who plays in it. The old shared `achievements.ini` is copied into each converted save.
 - **Character: the player's, not the save's.** `MR::isPlayerLuigi()` (today `!isDataMario()`, the save's half)
   follows the Player page's character (`coop_character`, `mario` or `luigi`) instead, so the same save plays as
   either. Remote players show each player's own character (`NEBULA_COOP_PLAYER_LUIGI`).
@@ -229,11 +236,15 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 0.5: main menu
 
-- [ ] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host, Player
-      (character), Options, Quit, over the file select's space backdrop; Host plays the current save.
-- [ ] Saves: any number, each a folder of its own; New, Rename, Erase; the existing `GameData.bin` converted.
+- [x] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host, Options, Quit,
+      over the file select's space backdrop, with the pointer, D-pad, stick, A and B.
+- [x] Saves: any number, each a folder of its own, with its own achievements; New and Erase on the Host page; the
+      existing `GameData.bin` converted. Rename waits for text rows.
+- [x] The Host page: the save, max players, Player Interaction, Knockback Strength, PvP Mode and Cheats
+      (`coop_cheats`), Host and Back.
+- [ ] The pause menu and Nebula's menus leave the game running.
 - [ ] Character per player (`coop_character`), not per save.
-- [ ] Text rows (name, address, password); the Host page's server rows.
+- [ ] Text rows (name, address, password); the Host page's port and password; renaming a save.
 - [ ] Mods as a room setting: the Host page picks them, joiners download the host's; the MODS page and the
       launcher's Mods tab only import and remove.
 - [ ] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work

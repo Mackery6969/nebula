@@ -852,7 +852,7 @@ namespace {
     NebulaMenuFocus::Repeat sMainMenuRepeat = {NebulaMenuFocus::Direction_None, 0};
 
     // The main menu's D-pad or stick (a press, then repeats while held: NebulaMenuFocus::readPress, as every Nebula
-    // menu), A and Plus/Minus: the game reads them itself (on every platform the keyboard and controllers reach it as
+    // menu), A, B and Plus/Minus: the game reads them itself (on every platform the keyboard and controllers reach it as
     // the Wii Remote), where the settings menu's come from the host.
     void readMainMenuPad(const NebulaSettingsView& rView) {
         if (!sMainMenuReading) {
@@ -879,6 +879,10 @@ namespace {
             __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, static_cast< s32 >(rView.page) + 1);
         } else if (MR::testCorePadTriggerA(WPAD_CHAN0) && !sScreen->isPointerOnItem()) {
             __NebulaSettingsInput(NEBULA_SETTINGS_PRESS, static_cast< s32 >(rView.selected_button));
+        }
+        if (MR::testCorePadTriggerB(WPAD_CHAN0)) {
+            // A page under the main one (Host) back to it.
+            __NebulaSettingsInput(NEBULA_SETTINGS_CLOSE, 0);
         }
     }
 };  // namespace

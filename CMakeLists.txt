@@ -93,7 +93,8 @@ add_library(galaxy_runtime_settings STATIC
     runtime/src/input_bindings.cpp
     runtime/src/achievements.cpp
     runtime/src/stats.cpp
-    runtime/src/coop_menu.cpp)
+    runtime/src/coop_menu.cpp
+    runtime/src/coop_saves.cpp)
 target_link_libraries(galaxy_runtime_settings PUBLIC galaxy_runtime_abi galaxy_atomic_file)
 galaxy_host_options(galaxy_runtime_settings)
 

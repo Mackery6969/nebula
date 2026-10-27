@@ -137,6 +137,7 @@ namespace NrvFileSelector {
     NEW_NERVE(FileSelectorNrvManual, FileSelector, Manual);
 #ifdef TARGET_PC
     NEW_NERVE(FileSelectorNrvCoopMenu, FileSelector, CoopMenu);
+    NEW_NERVE(FileSelectorNrvCoopLoad, FileSelector, CoopLoad);
     NEW_NERVE(FileSelectorNrvCoopCreate, FileSelector, CoopCreate);
     NEW_NERVE(FileSelectorNrvCoopQuit, FileSelector, CoopQuit);
 #endif
@@ -1075,8 +1076,8 @@ void FileSelector::updateBgm() {
 }
 
 #ifdef TARGET_PC
-// The online co-op main menu over the file select's sky and music, the files not shown. Host plays user file 1 (it is
-// made first when new), Quit leaves as Quit to desktop does; the menu itself is the host's (coop_menu), drawn by
+// The online co-op main menu over the file select's sky and music, the files not shown. Host plays the save picked
+// on its page (CoopLoad), Quit leaves as Quit to desktop does; the menu itself is the host's (coop_menu), drawn by
 // NebulaSettingsMenu.
 void FileSelector::exeCoopMenu() {
     if (MR::isFirstStep(this)) {
@@ -1092,6 +1093,14 @@ void FileSelector::exeCoopMenu() {
         mIsCoopPlayWanted = false;
         NebulaSettingsMenu::setMainMenuActive(true);
         __NebulaCoopMenu(NEBULA_COOP_MENU_OPEN);
+        // The user files the save data holds: the old saves' files become co-op saves once.
+        u32 files = 0;
+        for (int i = 0; i < USER_FILE_NUM; i++) {
+            if (mUserFile[i].isCreated()) {
+                files |= 1u << i;
+            }
+        }
+        __NebulaCoopMenu(NEBULA_COOP_MENU_OLD_FILES | (files << 8));
     }
 
     const s32 choice = __NebulaCoopMenu(NEBULA_COOP_MENU_POLL);
@@ -1106,21 +1115,37 @@ void FileSelector::exeCoopMenu() {
         return;
     }
 
-    _B4 = nullptr;
-    for (int i = 0; i < mItems->getObjNum(); i++) {
-        FileSelectItem* pItem = static_cast< FileSelectItem* >(mItems->getActor(i));
-        if (pItem->_140 == 1) {
-            _B4 = pItem;
-        }
-    }
-    if (_B4 == nullptr) {
-        mIsCoopPlayWanted = false;
-        return;
-    }
     __NebulaCoopMenu(NEBULA_COOP_MENU_CLOSE);
     NebulaSettingsMenu::setMainMenuActive(false);
     MR::endStarPointerMode(this);
-    if (mUserFile[0].isCreated()) {
+    setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopLoad));
+}
+
+// The picked save read: the host has made its folder the game's save folder. Its user file plays (made first when
+// new); a read that fails returns to the menu.
+void FileSelector::exeCoopLoad() {
+    if (MR::isFirstStep(this)) {
+        GameSequenceFunction::startReloadSaveDataSequence();
+    }
+
+    if (GameSequenceFunction::isActiveSaveDataHandleSequence()) {
+        return;
+    }
+
+    _B4 = nullptr;
+    if (GameSequenceFunction::isSuccessSaveDataHandleSequence()) {
+        initUserFile();
+        const s32 file = __NebulaCoopMenu(NEBULA_COOP_MENU_SAVE_FILE);
+        for (int i = 0; i < mItems->getObjNum(); i++) {
+            FileSelectItem* pItem = static_cast< FileSelectItem* >(mItems->getActor(i));
+            if (pItem->_140 == file) {
+                _B4 = pItem;
+            }
+        }
+    }
+    if (_B4 == nullptr) {
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopMenu));
+    } else if (mUserFile[_B4->_140 - 1].isCreated()) {
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvDemoStartWait));
     } else {
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopCreate));

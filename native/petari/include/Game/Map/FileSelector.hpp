@@ -149,6 +149,7 @@ public:
     void exeManual();
 #ifdef TARGET_PC
     void exeCoopMenu();
+    void exeCoopLoad();
     void exeCoopCreate();
     void exeCoopQuit();
     void createQuitButton();

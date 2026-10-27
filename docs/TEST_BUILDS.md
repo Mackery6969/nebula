@@ -33,6 +33,10 @@ artifact under **Artifacts**. You need to be signed in to GitHub.
    `libsmg_game.so` (they're found next to the program), and you need a Vulkan driver. Nebula's in-game settings menu
    (F1) is Windows-only for now: on Linux, settings come from `runtime_settings.ini` and `config.ini`.
 
+The main menu's Host opens the Host page: pick a save with left and right (or New save), set the room, then press
+Host. Saves are folders under `saves/coop_saves/`, each with its own achievements; on the first start the files of
+your old save become saves named `FILE 1`, `FILE 2` and so on, and the old save is left as it was.
+
 Online co-op lines in the log start with `[coop]`. `--host <port>` and `--join <address[:port]>` are accepted but don't
 connect to anything yet (docs/COOP_PLAN.md).
 
