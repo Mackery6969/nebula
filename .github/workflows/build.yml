@@ -16,14 +16,9 @@ on:
       - "!LICENSE"
       - "!.github/**"
       - ".github/workflows/build.yml"
+  # Every pull request, so that the Build result check always reports and can be required: a pull request that changes
+  # nothing the build uses (the push paths above) skips the jobs, which counts as passing.
   pull_request:
-    paths:
-      - "**"
-      - "!**.md"
-      - "!docs/**"
-      - "!LICENSE"
-      - "!.github/**"
-      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 concurrency:
@@ -44,8 +39,36 @@ env:
   SPIRV_HEADERS_COMMIT: 496543121ce6419f23d6fa5d7194ba66c36212d2
 
 jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-24.04
+    outputs:
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+      - uses: actions/Checkout@v7
+        if: github.event_name == 'pull_request'
+        with:
+          # The pull request's merge commit and the base branch it was merged onto (its first parent).
+          fetch-depth: 2
+      - id: filter
+        # The same files as the push paths: anything but documentation and the other workflows.
+        run: |
+          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
+            echo build=true >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files=$(git diff --name-only HEAD^1 HEAD)
+          if printf '%s\n' "$files" | grep -qxF .github/workflows/build.yml ||
+             printf '%s\n' "$files" | grep -vE '\.md$|^docs/|^LICENSE$|^\.github/' | grep -q .; then
+            echo build=true >> "$GITHUB_OUTPUT"
+          else
+            echo build=false >> "$GITHUB_OUTPUT"
+          fi
+
   import:
     name: Disc import tool (Rust)
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: windows-2025
     env:
       # The C runtime linked in, as Setup ships it: it runs on PCs without the Visual C++ runtime.
@@ -67,6 +90,8 @@ jobs:
 
   host:
     name: Host (${{ matrix.renderer }})
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     # Visual Studio 2022's MSVC: with 2026's (MSVC 19.51, windows-2025) the frame interpolation and interp GPU
     # tests fail every palette check, which no other compiler reproduces.
     runs-on: windows-2022
@@ -120,6 +145,8 @@ jobs:
 
   game:
     name: Game module
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: windows-2025
     steps:
       - uses: actions/Checkout@v7
@@ -136,6 +163,8 @@ jobs:
 
   sdk-tests:
     name: Native SDK tests
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: windows-2025
     steps:
       - uses: actions/Checkout@v7
@@ -177,6 +206,8 @@ jobs:
 
   linux:
     name: Linux
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/Checkout@v7
@@ -238,6 +269,8 @@ jobs:
 
   android:
     name: Android
+    needs: changes
+    if: needs.changes.outputs.build == 'true'
     runs-on: windows-2025
     steps:
       - uses: actions/Checkout@v7
@@ -285,3 +318,15 @@ jobs:
             docs/TEST_BUILDS.md
           retention-days: 14
           if-no-files-found: error
+
+  # The one check to require before merging: it fails when any job above failed or was cancelled, and passes when they
+  # passed or were skipped.
+  result:
+    name: Build result
+    if: always()
+    needs: [changes, import, host, game, sdk-tests, windows, linux, android]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
