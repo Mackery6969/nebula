@@ -10,6 +10,7 @@
 #include "Game/NPC/NebulaAchievementLuma.hpp"
 #include "Game/Screen/NebulaAchievementBoard.hpp"
 #include "Game/Screen/NebulaAchievementToast.hpp"
+#include "Game/Screen/NebulaCoopChat.hpp"
 #include "Game/Screen/NoteCounter.hpp"
 #include "Game/Screen/OneUpBoard.hpp"
 #include "Game/Screen/PurpleCoinCounter.hpp"
@@ -57,6 +58,8 @@ GameSceneLayoutHolder::GameSceneLayoutHolder()
 #ifdef TARGET_PC
     mAchievementToast = new NebulaAchievementToast();
     mAchievementToast->initWithoutIter();
+    mCoopChat = new NebulaCoopChat();
+    mCoopChat->initWithoutIter();
     mAchievementBoard = nullptr;
     if (NebulaAchievementLuma::isHere()) {
         mAchievementBoard = new NebulaAchievementBoard();

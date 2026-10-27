@@ -104,7 +104,8 @@ add_library(galaxy_net STATIC
     runtime/src/net/udp.cpp
     runtime/src/net/link.cpp
     runtime/src/net/direct_transport.cpp
-    runtime/src/coop_session.cpp)
+    runtime/src/coop_session.cpp
+    runtime/src/coop_chat.cpp)
 target_link_libraries(galaxy_net PUBLIC galaxy_runtime_abi ws2_32)
 galaxy_host_options(galaxy_net)
 
@@ -602,6 +603,7 @@ galaxy_test(galaxy_atomic_file_tests SOURCES ${rt}/atomic_file_tests.cpp LIBS ga
 galaxy_test(galaxy_runtime_settings_tests SOURCES ${rt}/runtime_settings_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_coop_menu_tests SOURCES ${rt}/coop_menu_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_net_tests SOURCES ${rt}/net/net_tests.cpp LIBS galaxy_net)
+galaxy_test(galaxy_coop_chat_tests SOURCES ${rt}/coop_chat_tests.cpp LIBS galaxy_net)
 galaxy_test(galaxy_achievements_tests SOURCES ${rt}/achievements_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_stats_tests SOURCES ${rt}/stats_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_controls_tests SOURCES ${rt}/controls_tests.cpp LIBS galaxy_runtime_settings galaxy_native_input)

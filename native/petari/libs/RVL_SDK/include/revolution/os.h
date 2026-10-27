@@ -76,6 +76,9 @@ void __NebulaPresence(const u16* galaxy, const u16* star, s32 power_stars);
 void __NebulaCoopPlayer(const struct NebulaCoopPlayer* player);
 // The online co-op main menu (NebulaHostServices::coop_menu, NEBULA_COOP_MENU_*).
 s32 __NebulaCoopMenu(u32 what);
+// Online co-op's chat as it shows now (coop_chat in nebula_game_api.h).
+struct NebulaCoopChatView;
+void __NebulaCoopChat(struct NebulaCoopChatView* view);
 // An achievement the save data meets: 1 when newly unlocked, its name in `name` (NebulaHostServices::achievement).
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity);
 s32 __NebulaAchievementDate(const char* id);

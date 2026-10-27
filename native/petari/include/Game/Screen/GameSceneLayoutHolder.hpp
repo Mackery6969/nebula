@@ -11,6 +11,7 @@ class MissLayout;
 #ifdef TARGET_PC
 class NebulaAchievementBoard;
 class NebulaAchievementToast;
+class NebulaCoopChat;
 #endif
 class NoteCounter;
 class OneUpBoard;
@@ -60,6 +61,8 @@ public:
     NebulaAchievementToast* mAchievementToast;
     // Nebula's achievement board, in the Observatory (its Luma opens it); null elsewhere.
     NebulaAchievementBoard* mAchievementBoard;
+    // Online co-op's chat: GameScene runs and draws it (over everything else in 2D, the pop-up included).
+    NebulaCoopChat* mCoopChat;
 #endif
 };
 

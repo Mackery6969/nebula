@@ -103,6 +103,10 @@ s32 __NebulaCoopMenu(u32 what) {
     return sHost->coop_menu(sHost->user, what);
 }
 
+void __NebulaCoopChat(struct NebulaCoopChatView* view) {
+    sHost->coop_chat(sHost->user, view);
+}
+
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity) {
     return sHost->achievement(sHost->user, id, name, capacity);
 }

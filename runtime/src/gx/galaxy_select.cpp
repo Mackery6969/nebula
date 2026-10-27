@@ -2,6 +2,7 @@
 #include "galaxy/gx/galaxy_select.h"
 
 #include <atomic>
+#include <chrono>
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -18,6 +19,11 @@ CoopRoomStatus g_room;
 std::atomic<bool> g_text_entry{false};
 std::mutex g_text_mutex;
 std::vector<char32_t> g_text;  // typed, not taken yet
+std::atomic<bool> g_chat_available{false};
+std::atomic<bool> g_chat_open{false};
+// The key that opened the chat, as a character: the window may also send it as typed, which the line doesn't take.
+char32_t g_chat_swallow = 0u;
+std::chrono::steady_clock::time_point g_chat_opened{};
 std::atomic<bool> g_names_wanted{false};
 std::atomic<bool> g_names_known{false};
 std::mutex g_names_mutex;
@@ -87,12 +93,38 @@ bool coop_text_entry() noexcept {
 void push_coop_text(char32_t key) {
     if (!coop_text_entry()) return;
     const std::lock_guard<std::mutex> lock(g_text_mutex);
+    if (const char32_t swallow = std::exchange(g_chat_swallow, 0u); swallow != 0u) {
+        // Its character comes right after the key, or not at all (the SDL host starts its typing a frame later).
+        const bool fresh = std::chrono::steady_clock::now() - g_chat_opened < std::chrono::milliseconds(250);
+        if (fresh && (key == swallow || key == swallow - 0x20u)) return;
+    }
     if (g_text.size() < 256u) g_text.push_back(key);
 }
 
 std::vector<char32_t> take_coop_text_input() {
     const std::lock_guard<std::mutex> lock(g_text_mutex);
     return std::exchange(g_text, {});
+}
+
+void set_coop_chat_available(bool available) noexcept {
+    g_chat_available.store(available, std::memory_order_release);
+}
+
+bool coop_chat_key(std::uint32_t virtual_key) noexcept {
+    if (virtual_key != 'T' || !g_chat_available.load(std::memory_order_acquire) || coop_text_entry()) return false;
+    {
+        const std::lock_guard<std::mutex> lock(g_text_mutex);
+        g_text.clear();
+        g_chat_swallow = U't';
+        g_chat_opened = std::chrono::steady_clock::now();
+    }
+    set_coop_text_entry(true);
+    g_chat_open.store(true, std::memory_order_release);
+    return true;
+}
+
+bool take_coop_chat_open() noexcept {
+    return g_chat_open.exchange(false, std::memory_order_acq_rel);
 }
 
 bool take_leave_game() noexcept {

@@ -67,6 +67,13 @@ void set_coop_text_entry(bool on) noexcept;
 [[nodiscard]] bool coop_text_entry() noexcept;
 void push_coop_text(char32_t key);
 [[nodiscard]] std::vector<char32_t> take_coop_text_input();
+// Online co-op's chat (galaxy/coop_chat.h): while the host allows it (in a room's game, no menu over it), T pressed in
+// the window opens a line, which then takes the window's typing as a text row does. The window asks coop_chat_key for
+// each key pressed (a Windows virtual-key code): true when it opened the line, the key then reaching nothing else.
+// The host takes the opening once (take_coop_chat_open). Any thread.
+void set_coop_chat_available(bool available) noexcept;
+[[nodiscard]] bool coop_chat_key(std::uint32_t virtual_key) noexcept;
+[[nodiscard]] bool take_coop_chat_open() noexcept;
 // The game, once per scene frame: a travel the page asked for (true, once), and the Grand Stars.
 [[nodiscard]] bool take_galaxy_travel(std::size_t& stage, std::uint32_t& star) noexcept;
 [[nodiscard]] bool take_grand_stars() noexcept;
