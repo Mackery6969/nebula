@@ -6,10 +6,12 @@
 #include "sdl_host.h"
 
 #include "galaxy/content_viewport.h"
+#include "galaxy/controller_roster.h"
 #include "galaxy/input_bindings.h"
 #include "galaxy/jaudio_host_mixer.h"
 #include "galaxy/native_host.h"
 #include "galaxy/native_input.h"
+#include "galaxy/native_settings_pad.h"
 #include "galaxy/platform_time.h"
 #include "galaxy/pointer_control.h"
 #include "galaxy/runtime_settings.h"
@@ -20,6 +22,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <sstream>
@@ -40,6 +43,115 @@ constexpr std::uint64_t kStickPointerHoldMs = 3000;
 constexpr std::uint8_t kTapPressReports = 10;
 constexpr std::uint64_t kTapHoverMs = 200;
 constexpr float kTriggerThreshold = 96.0f / 255.0f;  // the Windows host's XInput trigger threshold
+
+// Nebula's settings menu (native_settings_sdl.cpp): whether it shows, and where its keys go (install_native_settings_pad_hooks).
+std::atomic<NativeSettingsVisibleProvider> g_settings_visible{nullptr};
+std::atomic<NativeSettingsKeySink> g_settings_key_sink{nullptr};
+
+// The CONTROLS page's binding capture: 0 idle, else 1 + scheme with the pad's slot above it; the result is
+// (1 << 16) | kind << 8 | code (as native_host.cpp's).
+std::atomic<std::uint32_t> g_capture_armed{0u};
+std::atomic<std::uint32_t> g_capture_result{0u};
+// The device that last gave input, for the CONTROLS page: (scheme << 8) | slot.
+constexpr std::uint32_t kLastInputNone = 0xFFFFFFFFu;
+constexpr std::uint32_t kLastInputKeyboard = 0xFFFFFFFEu;
+std::atomic<std::uint32_t> g_last_input{kLastInputNone};
+
+constexpr in::ControlScheme capture_scheme_of(std::uint32_t armed) noexcept {
+    return static_cast<in::ControlScheme>(std::max<std::uint32_t>(armed & 0xffu, 1u) - 1u);
+}
+
+// A first new press on the armed pad completes a capture; the menu hears of it through its key sink.
+bool service_binding_capture(const sdl::InputState& state) {
+    static in::PadSample s_baseline{};
+    static std::uint32_t s_baseline_for = 0u;
+    const std::uint32_t armed = g_capture_armed.load(std::memory_order_acquire);
+    if (armed == 0u) {
+        s_baseline_for = 0u;
+        return false;
+    }
+    const in::ControlScheme scheme = capture_scheme_of(armed);
+    const auto slot = static_cast<std::uint8_t>(armed >> 8u);
+    const in::PadSample* match = nullptr;
+    for (std::size_t i = 0; i < sdl::kMaxPads; ++i) {
+        if (state.pads[i].connected && state.pads[i].scheme == scheme && (slot == in::kKeyboardSlot || slot == i)) {
+            match = &state.pads[i];
+            break;
+        }
+    }
+    if (match == nullptr) {
+        return false;
+    }
+    if (s_baseline_for != armed) {
+        s_baseline = *match;
+        s_baseline_for = armed;
+        return false;
+    }
+    const auto source = in::detect_pad_capture(s_baseline, *match);
+    s_baseline = *match;
+    std::uint32_t expected = armed;
+    if (!source || !g_capture_armed.compare_exchange_strong(expected, 0u, std::memory_order_acq_rel)) {
+        return false;
+    }
+    g_capture_result.store(0x10000u | (static_cast<std::uint32_t>(source->kind) << 8u) | source->code,
+                           std::memory_order_release);
+    s_baseline_for = 0u;
+    if (const NativeSettingsKeySink sink = g_settings_key_sink.load(std::memory_order_acquire)) {
+        sink(kBindingCaptureKey);
+    }
+    return true;
+}
+
+// The pads drive the settings menu while it shows (native_settings_pad.h), and the game sees them neutral; a capture
+// keeps them from both.
+void route_settings_pads(sdl::InputState& state, bool capture_finished) {
+    static in::NativeSettingsPadState s_pad{};
+    static std::uint16_t s_capture_hold = 0u;
+    const NativeSettingsVisibleProvider visible = g_settings_visible.load(std::memory_order_acquire);
+    const NativeSettingsKeySink sink = g_settings_key_sink.load(std::memory_order_acquire);
+    std::uint16_t word = 0u;
+    float stick_x = 0.0f;
+    float stick_y = 0.0f;
+    bool any = false;
+    for (const in::PadSample& pad : state.pads) {
+        if (!pad.connected) continue;
+        any = true;
+        word = static_cast<std::uint16_t>(word | in::settings_pad_buttons(pad.scheme, pad.buttons));
+        if (std::fabs(pad.axes[0]) > std::fabs(stick_x)) stick_x = pad.axes[0];
+        if (std::fabs(pad.axes[1]) > std::fabs(stick_y)) stick_y = pad.axes[1];
+    }
+    const auto neutral_all = [&state] {
+        for (in::PadSample& pad : state.pads) {
+            pad.buttons = 0u;
+            pad.axes = {};
+        }
+    };
+    if (capture_finished || g_capture_armed.load(std::memory_order_acquire) != 0u) {
+        s_capture_hold = word;
+        neutral_all();
+        return;
+    }
+    s_capture_hold = static_cast<std::uint16_t>(s_capture_hold & word);
+    word = static_cast<std::uint16_t>(word & ~s_capture_hold);
+    if (!any || visible == nullptr || sink == nullptr) {
+        return;
+    }
+    const in::NativeSettingsPadStep step =
+        in::native_settings_pad_step(s_pad, word, stick_x, stick_y, visible(), galaxy::steady_ms());
+    for (std::size_t i = 0; i < step.key_count; ++i) {
+        sink(step.keys[i]);
+    }
+    if (step.game_neutral || s_capture_hold != 0u) {
+        neutral_all();
+        return;
+    }
+    for (in::PadSample& pad : state.pads) {
+        if (!pad.connected) continue;
+        const std::uint16_t own = in::settings_pad_buttons(pad.scheme, pad.buttons);
+        pad.buttons = in::unified_from_settings_pad(pad.scheme, static_cast<std::uint16_t>(own & step.game_buttons),
+                                                    pad.buttons);
+    }
+}
 
 const in::ControlsConfig& live_controls() {
     static in::ControlsConfig config = in::get_controls_config();
@@ -107,9 +219,23 @@ in::WiimoteInputSnapshot native_game_wiimote_snapshot(std::uint64_t, bool ir_ena
     const in::tilt::Section section = tilt_section == 1u ? in::tilt::Section::StarBall
         : tilt_section == 2u ? in::tilt::Section::Ray
         : in::tilt::Section::None;
-    const sdl::InputState state = sdl::input_state();
+    sdl::InputState state = sdl::input_state();
     const in::ControlsConfig& config = live_controls();
     in::WiimoteInputSnapshot snapshot{};
+
+    // The device in use, for the CONTROLS page; then the settings menu and a binding capture take what they need.
+    for (std::size_t i = 0; i < sdl::kMaxPads; ++i) {
+        const in::PadSample& pad = state.pads[i];
+        if (pad.connected && (pad.buttons != 0u || std::fabs(pad.axes[0]) + std::fabs(pad.axes[1]) > 0.5f)) {
+            g_last_input.store(static_cast<std::uint32_t>(pad.scheme) << 8u | static_cast<std::uint32_t>(i),
+                               std::memory_order_relaxed);
+        }
+    }
+    route_settings_pads(state, service_binding_capture(state));
+    const NativeSettingsVisibleProvider settings_visible = g_settings_visible.load(std::memory_order_acquire);
+    if (settings_visible != nullptr && settings_visible()) {
+        state.keys = {};
+    }
 
     // Gamepads: the bindings and tuning of each one's scheme, as on Windows.
     static std::array<std::uint32_t, sdl::kMaxPads> s_previous{};
@@ -262,7 +388,60 @@ GamePaths locate_game(const std::filesystem::path& input) {
 void install_host_pointer_provider(HostPointerProvider) noexcept {}
 void install_host_pointer_transition_provider(HostPointerTransitionProvider) noexcept {}
 void install_native_keyboard_capture_provider(NativeKeyboardCaptureProvider) noexcept {}
-void install_native_settings_pad_hooks(NativeSettingsVisibleProvider, NativeSettingsKeySink) noexcept {}
+void install_native_settings_pad_hooks(NativeSettingsVisibleProvider visible, NativeSettingsKeySink sink) noexcept {
+    g_settings_visible.store(visible, std::memory_order_release);
+    g_settings_key_sink.store(sink, std::memory_order_release);
+}
+
+// The CONTROLS page's controllers: SDL's gamepads, each in its slot.
+std::size_t connected_controllers(std::span<input::ControllerInfo> out) noexcept {
+    const sdl::InputState state = sdl::input_state();
+    std::size_t count = 0;
+    for (std::size_t i = 0; i < sdl::kMaxPads && count < out.size(); ++i) {
+        if (!state.pads[i].connected) continue;
+        input::ControllerInfo& info = out[count++];
+        info = {};
+        info.scheme = state.pads[i].scheme;
+        info.slot = static_cast<std::uint8_t>(i);
+        info.model = input::control_scheme_label(state.pads[i].scheme);
+    }
+    return count;
+}
+
+bool controller_present_now() noexcept {
+    std::array<input::ControllerInfo, sdl::kMaxPads> pads{};
+    return connected_controllers(pads) != 0u;
+}
+
+std::optional<input::DeviceKey> last_input_device() noexcept {
+    const std::uint32_t key = g_last_input.load(std::memory_order_relaxed);
+    if (key == kLastInputNone) return std::nullopt;
+    if (key == kLastInputKeyboard) return input::DeviceKey{input::ControlScheme::Keyboard, input::kKeyboardSlot};
+    return input::DeviceKey{static_cast<input::ControlScheme>((key >> 8u) & 0xffu), static_cast<std::uint8_t>(key & 0xffu)};
+}
+
+void note_keyboard_input() noexcept {
+    g_last_input.store(kLastInputKeyboard, std::memory_order_relaxed);
+}
+
+void arm_controller_binding_capture(input::ControlScheme scheme, std::uint8_t slot) noexcept {
+    g_capture_result.store(0u, std::memory_order_release);
+    g_capture_armed.store((static_cast<std::uint32_t>(slot) << 8u) | (1u + static_cast<std::uint32_t>(scheme)),
+                          std::memory_order_release);
+}
+
+void cancel_controller_binding_capture() noexcept {
+    g_capture_armed.store(0u, std::memory_order_release);
+}
+
+std::optional<input::InputSource> take_controller_binding_capture() noexcept {
+    const std::uint32_t result = g_capture_result.exchange(0u, std::memory_order_acq_rel);
+    if ((result & 0x10000u) == 0u) {
+        return std::nullopt;
+    }
+    return input::InputSource{static_cast<input::SourceKind>((result >> 8u) & 0xffu),
+                              static_cast<std::uint8_t>(result & 0xffu)};
+}
 void set_env_flag_cache_enabled(bool) noexcept {}
 // The Wii's own button icons: this host doesn't tell controller families apart yet (native_host.cpp does on Windows).
 input::ButtonIconSpec button_icons(bool) noexcept {

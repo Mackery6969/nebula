@@ -373,7 +373,7 @@ enum {
 
 /* What a NebulaSettingsView shows (`kind`). */
 enum {
-    NEBULA_SETTINGS_KIND_SETTINGS = 0, /* Nebula's settings menu: it holds the game still while open */
+    NEBULA_SETTINGS_KIND_SETTINGS = 0, /* Nebula's settings menu: the game runs on under it, its pads held */
     NEBULA_SETTINGS_KIND_MAIN_MENU,    /* the online co-op main menu (coop_menu), over the running file select */
 };
 

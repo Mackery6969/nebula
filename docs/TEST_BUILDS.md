@@ -32,7 +32,8 @@ artifact under **Artifacts**. You need to be signed in to GitHub.
 
    `saves` is created if it's missing and holds the save files. On Linux the folder must also hold `libSDL3.so.0` and
    `libsmg_game.so` (they're found next to the program), and you need a Vulkan driver. Nebula's in-game settings menu
-   (F1) is Windows-only for now: on Linux, settings come from `runtime_settings.ini` and `config.ini`.
+   opens with F1 (or View and Menu, Minus and Plus on a controller) and the main menu's Options, as on Windows; it
+   writes `runtime_settings.ini` and `config.ini`. Windows-only settings (DLSS, Joy-Con pairing) aren't offered.
 
 The main menu's Host opens the Host page: pick a save with left and right (or New save), set the room, then press
 Host. Saves are folders under `saves/coop_saves/`, each with its own achievements; on the first start the files of

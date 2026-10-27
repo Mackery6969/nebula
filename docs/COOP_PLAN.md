@@ -126,9 +126,10 @@ The title screen and the file select go. In their place is a co-op main menu lik
   ever named and pictured files: the file icons, Nebula's Mii import (Settings > GENERAL > IMPORT MIIS, the `miis`
   folder) and the wait for the Mii data before a file starts. The player's name is the Player page's.
 - **Portable.** The menu's model (pages, rows, saves, keys) is host code shared by every host
-  (`runtime/src/coop_menu.cpp`), not the Windows window's: the in-game settings menu is Windows-only today, the
-  main menu can't be. The game draws it with the settings menu's screen and turns the remote's buttons into its
-  input, so it works with whatever controls the player has on every platform.
+  (`runtime/src/coop_menu.cpp`), not the Windows window's, as the settings menu's model is now too
+  (`runtime/src/gx/native_settings_*.inl`, shared by the Windows window and the SDL host). The game draws it with
+  the settings menu's screen and turns the remote's buttons into its input, so it works with whatever controls the
+  player has on every platform.
 
 Order: first the menu shell (Main, Host with a save file, Options, Quit) replacing the title and file select, so the
 game plays as before through it; then text rows, the Player page and the Host page's server rows; then Join with
@@ -168,8 +169,8 @@ Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, 
 - **From the main menu** (Options, before any game) the whole tab shows greyed out: the room is set on the Host
   page.
 
-The settings menu is Windows-only today (its model is the Windows window's), so the Online tab is too until that
-model moves into code every host shares, as the main menu's does.
+The settings menu's model is shared by every host (the Windows window's and the SDL host's on Linux and Android), so
+the Online tab is on every platform.
 
 ## Remote players
 
@@ -284,7 +285,7 @@ Each phase ships on its own and leaves the game playable.
       imports and removes.
 - [ ] Joiners download the host's mods (with online play); the launcher's Mods tab only imports and removes.
 - [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
-      only with the room's cheats on (`coop_cheats`). Windows only, as the in-game settings menu is.
+      only with the room's cheats on (`coop_cheats`). On every host, as the in-game settings menu is.
 
 ### Phase 1: ghosts
 
