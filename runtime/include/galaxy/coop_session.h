@@ -5,15 +5,22 @@
 //
 // A session runs on a thread of its own (the network keeps going while the game loads or a menu is open). Everything
 // here may be called from any thread; what happened (a player joined, the join refused, the room closed) waits in
-// take_events() for the game's thread. Later features (snapshots, chat, mods) send their own messages with send() and
+// take_events() for the game's thread. Later features (snapshots, chat) send their own messages with send() and
 // receive them with on_message().
+//
+// The join is checked as sm64coopdx's is: the same session protocol and game version, the same disc
+// (galaxy/coop_mods.h) and the room's mods. A joiner playing other mods isn't let in yet: the host sends the room's
+// list, the joiner downloads the ones it lacks from the host (before it is a player, so nobody sees it), and the
+// session ends with ModsReady for Nebula to start again with those mods and join once more.
 #pragma once
 
+#include "galaxy/coop_mods.h"
 #include "galaxy/net/transport.h"
 #include "galaxy/runtime_settings.h"
 
 #include <atomic>
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -26,7 +33,7 @@
 namespace galaxy::coop {
 
 // The session's own protocol (its messages, below the transport's): a different one refuses the join.
-inline constexpr std::uint16_t kSessionProtocol = 1u;
+inline constexpr std::uint16_t kSessionProtocol = 2u;
 // The first message type a feature may use with send() and on_message(); below are the session's.
 inline constexpr std::uint8_t kFirstFeatureMessage = 32u;
 // The host's save, sent at a join: this many bytes at most.
@@ -69,6 +76,9 @@ struct SessionEvent {
         PlayerJoined,  // name: who
         PlayerLeft,    // name: who; text: why when they stopped answering
         RoomChanged,   // the host changed the room's settings (room())
+        DownloadingMods,  // a joiner gets the room's mods it lacks (text: their ids); download_progress() says how far
+        ModsReady,     // a joiner has all the room's mods (take_room_mods()); the session ended, for Nebula to start
+                       // again with them and join again
     };
     Kind kind = Kind::Hosting;
     std::string name;
@@ -83,6 +93,8 @@ struct HostConfig {
     CoopCharacter character = CoopCharacter::Mario;
     // The save to send each joiner, read as they join (on the session's thread).
     std::function<RoomSave()> save;
+    DiscInfo disc;                 // joiners with another are refused
+    std::vector<SharedMod> mods;   // the room's mods, with their files and folders: joiners get the ones they lack
 };
 
 struct JoinConfig {
@@ -92,6 +104,19 @@ struct JoinConfig {
     std::string game_version;
     std::string name;
     CoopCharacter character = CoopCharacter::Mario;
+    DiscInfo disc;
+    std::vector<SharedMod> mods;           // the mods this game plays now (their files aren't needed)
+    std::filesystem::path mods_cache;      // where the room's mods download (ModCache), and are looked for first
+    // A copy of a room's mod this player has (its own mods folder's), checked against the mod's files and hash.
+    std::function<std::optional<std::filesystem::path>(const SharedMod&)> find_mod;
+};
+
+// A joiner's download of the room's mods.
+struct DownloadProgress {
+    bool active = false;
+    std::uint64_t done = 0u;   // bytes
+    std::uint64_t total = 0u;
+    std::string mod;           // the one downloading
 };
 
 class Session {
@@ -126,6 +151,10 @@ public:
     [[nodiscard]] std::vector<SessionEvent> take_events();
     // Once, after Joined: the host's save.
     [[nodiscard]] std::optional<RoomSave> take_room_save();
+    // While a joiner downloads the room's mods: how far.
+    [[nodiscard]] DownloadProgress download_progress() const;
+    // Once, after ModsReady: the room's mods, in its order, each with its folder here.
+    [[nodiscard]] std::optional<std::vector<SharedMod>> take_room_mods();
 
     // A feature's message (`type` from kFirstFeatureMessage), to a player or net::kEveryone. False when not in a room
     // or too long for the channel (its type byte counts).

@@ -118,6 +118,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/controller_roster.cpp
     ${rt}/coop_menu.cpp
     ${rt}/coop_saves.cpp
+    ${rt}/coop_mods.cpp
     ${rt}/coop_session.cpp
     ${rt}/net/udp.cpp
     ${rt}/net/link.cpp

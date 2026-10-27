@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <map>
 #include <utility>
 
@@ -21,11 +22,15 @@ using Clock = std::chrono::steady_clock;
 
 // The session's messages: a type, then its body.
 enum Message : std::uint8_t {
-    kJoinRequest = 1,   // joiner: the session protocol, the game's version, the player's name and character
+    kJoinRequest = 1,   // joiner: the session protocol, the game's version, the player's name and character, the
+                        // disc, the mods it plays
     kJoinAccept = 2,    // host: the joiner's number, the room, the save, everyone in the room
     kJoinRefuse = 3,    // host: why
     kPlayerInfo = 4,    // host: a player who joined (or changed)
     kRoomSettings = 5,  // host: the room's settings changed
+    kJoinMods = 6,      // host: the joiner plays other mods; the room's, with their files
+    kModRequest = 7,    // joiner: a piece of a room mod's file: the mod, the file, where, how long
+    kModPiece = 8,      // host: the mod, the file, where, then the bytes
 };
 
 // A joiner that doesn't ask to be let in this soon is removed; a join that isn't let in this soon fails.
@@ -36,6 +41,11 @@ constexpr auto kRefuseLinger = std::chrono::seconds(1);
 constexpr auto kTick = std::chrono::milliseconds(2);
 constexpr auto kIdleTick = std::chrono::milliseconds(20);
 constexpr std::size_t kMaxSaveFiles = 64u;
+// A joiner downloading the room's mods asks for this much at a time, this many pieces ahead; the host forgets one that
+// asks for nothing this long.
+constexpr std::uint32_t kPieceBytes = 60u << 10;
+constexpr unsigned kModPiecesAhead = 4u;
+constexpr auto kDownloadIdle = std::chrono::seconds(30);
 
 void write_room(ByteWriter& out, const RuntimeCoopSettings& room) {
     out.u8(static_cast<std::uint8_t>(room.player_interaction))
@@ -100,6 +110,32 @@ struct Session::State {
     std::vector<SessionEvent> events;
     std::optional<RoomSave> save;
     std::map<std::uint8_t, Handler> handlers;
+    // A host's joiners getting the room's mods (since their last request), and the file it last read for them.
+    std::map<PeerId, Clock::time_point> downloading;
+    std::ifstream serving;
+    std::filesystem::path serving_path;
+
+    // A joiner's download of the room's mods: the room's list, the ones to get (by their place in it), the next piece
+    // to ask for and the next to arrive (a mod of `needed`, its file, where in it).
+    struct Cursor {
+        std::size_t mod = 0u;
+        std::size_t file = 0u;
+        std::uint64_t offset = 0u;
+    };
+    struct Download {
+        std::vector<SharedMod> room;
+        std::vector<std::size_t> needed;
+        Cursor ask;
+        Cursor got;
+        unsigned asked = 0u;
+        std::ofstream out;
+        bool out_open = false;
+        std::filesystem::path folder;  // where the mod arriving downloads
+        std::uint64_t done = 0u;
+        std::uint64_t total = 0u;
+    };
+    std::optional<Download> download;
+    std::optional<std::vector<SharedMod>> room_mods;
 
     SessionPlayer* player(PeerId id) {
         const auto it = std::find_if(players.begin(), players.end(), [id](const auto& p) { return p.id == id; });
@@ -124,6 +160,10 @@ struct Session::State {
         players.clear();
         waiting.clear();
         refused.clear();
+        downloading.clear();
+        serving.close();
+        serving_path.clear();
+        download.reset();
         event(kind, {}, std::move(why));
     }
 
@@ -137,6 +177,7 @@ struct Session::State {
 
     void host_receive_join(PeerId from, ByteReader& in) {
         if (player(from) != nullptr || refused.count(from) != 0u) return;
+        if (downloading.count(from) != 0u) return;
         const std::uint16_t protocol = in.u16();
         const std::string version = in.str(128u);
         const std::string name = clean_name(in.str(256u));
@@ -149,8 +190,33 @@ struct Session::State {
             refuse(from, "THE HOST PLAYS ANOTHER VERSION OF NEBULA (" + host_config.game_version + ")");
             return;
         }
+        DiscInfo disc;
+        disc.game_id = in.str(16u);
+        disc.revision = in.u8();
+        disc.hash = in.u64();
+        const std::optional<std::vector<SharedMod>> mods = read_mods(in, false);
+        if (!in.ok() || !mods) {
+            refuse(from, "THE HOST COULD NOT READ YOUR GAME'S MODS");
+            return;
+        }
+        if (disc != host_config.disc) {
+            refuse(from, disc.game_id != host_config.disc.game_id || disc.revision != host_config.disc.revision
+                             ? "THE HOST PLAYS ANOTHER DISC (" + disc_text(host_config.disc) + ")"
+                             : "YOUR DISC ISN'T THE SAME AS THE HOST'S " + disc_text(host_config.disc) +
+                                   ": DUMP IT AGAIN");
+            return;
+        }
         if (players.size() >= room.max_players) {
             refuse(from, "THE ROOM IS FULL");
+            return;
+        }
+        if (!same_mods(*mods, host_config.mods)) {
+            // Other mods: the room's list, for the joiner to get the ones it lacks and come back with them.
+            ByteWriter list;
+            write_mods(list, host_config.mods, true);
+            send(from, kJoinMods, list);
+            waiting.erase(from);
+            downloading[from] = Clock::now();
             return;
         }
         // The lowest free number.
@@ -185,6 +251,212 @@ struct Session::State {
         for (const SessionPlayer& player : players) write_player(accept, player);
         send(from, kJoinAccept, accept);
         event(SessionEvent::Kind::PlayerJoined, name);
+    }
+
+    // A piece of a room mod's file for a joiner getting them.
+    void host_send_piece(PeerId from, ByteReader& in) {
+        const auto it = downloading.find(from);
+        if (it == downloading.end()) return;
+        const std::size_t mod = in.u16();
+        const std::size_t file = in.u32();
+        const std::uint64_t offset = in.u64();
+        const std::uint32_t length = std::min(in.u32(), kPieceBytes);
+        if (!in.ok() || mod >= host_config.mods.size() || file >= host_config.mods[mod].files.size()) return;
+        it->second = Clock::now();
+        const SharedMod& shared = host_config.mods[mod];
+        const ModFile& entry = shared.files[file];
+        std::vector<std::uint8_t> bytes;
+        if (offset < entry.size) {
+            const std::filesystem::path path = mod_file_path(shared.folder, entry.path);
+            if (path != serving_path || !serving.is_open()) {
+                serving.close();
+                serving.clear();
+                serving.open(path, std::ios::binary);
+                serving_path = path;
+            }
+            bytes.resize(static_cast<std::size_t>(std::min<std::uint64_t>(length, entry.size - offset)));
+            serving.clear();
+            serving.seekg(static_cast<std::streamoff>(offset));
+            serving.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+            // A file that can't be read gives nothing, which the joiner takes as the host failing it.
+            if (!serving || static_cast<std::size_t>(serving.gcount()) != bytes.size()) bytes.clear();
+        }
+        ByteWriter piece;
+        piece.u16(static_cast<std::uint16_t>(mod)).u32(static_cast<std::uint32_t>(file)).u64(offset).blob(bytes);
+        send(from, kModPiece, piece);
+    }
+
+    // The room's mods a joiner lacks: their download starts (or, with none to get, the joiner is ready to play them).
+    void join_receive_mods(ByteReader& in) {
+        if (state != SessionState::Connecting || download) return;
+        std::optional<std::vector<SharedMod>> list = read_mods(in, true);
+        if (!list) {
+            end(SessionEvent::Kind::JoinFailed, "THE HOST'S MODS COULD NOT BE READ");
+            return;
+        }
+        Download next;
+        next.room = std::move(*list);
+        const ModCache cache(join_config.mods_cache);
+        for (std::size_t i = 0; i < next.room.size(); ++i) {
+            SharedMod& mod = next.room[i];
+            std::optional<std::filesystem::path> have = cache.find(mod);
+            if (!have && join_config.find_mod) have = join_config.find_mod(mod);
+            if (have) {
+                mod.folder = *have;
+                continue;
+            }
+            next.needed.push_back(i);
+            next.total += mod.size();
+        }
+        download = std::move(next);
+        if (download->needed.empty()) {
+            mods_ready();
+            return;
+        }
+        if (join_config.mods_cache.empty()) {
+            end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS HAVE NOWHERE TO DOWNLOAD");
+            return;
+        }
+        std::string ids;
+        for (const std::size_t i : download->needed) ids += (ids.empty() ? "" : ", ") + download->room[i].id;
+        event(SessionEvent::Kind::DownloadingMods, {}, ids);
+        join_started = Clock::now();
+        if (!begin_mod()) return;
+        settle_download();
+        if (download) ask_pieces();
+    }
+
+    // The mod arriving next downloads into the cache's folder for it. False (the join failed) when it can't.
+    bool begin_mod() {
+        const SharedMod& mod = download->room[download->needed[download->got.mod]];
+        download->folder = ModCache(join_config.mods_cache).begin(mod);
+        if (download->folder.empty()) {
+            end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS COULD NOT BE SAVED");
+            return false;
+        }
+        return true;
+    }
+
+    // Asks for pieces until enough are on their way.
+    void ask_pieces() {
+        Download& d = *download;
+        while (d.asked < kModPiecesAhead && d.ask.mod < d.needed.size()) {
+            const std::size_t index = d.needed[d.ask.mod];
+            const SharedMod& mod = d.room[index];
+            if (d.ask.file >= mod.files.size()) {
+                ++d.ask.mod;
+                d.ask.file = 0u;
+                d.ask.offset = 0u;
+                continue;
+            }
+            const std::uint64_t size = mod.files[d.ask.file].size;
+            if (d.ask.offset >= size) {
+                ++d.ask.file;
+                d.ask.offset = 0u;
+                continue;
+            }
+            const auto length = static_cast<std::uint32_t>(std::min<std::uint64_t>(kPieceBytes, size - d.ask.offset));
+            ByteWriter request;
+            request.u16(static_cast<std::uint16_t>(index))
+                .u32(static_cast<std::uint32_t>(d.ask.file))
+                .u64(d.ask.offset)
+                .u32(length);
+            send(transport->owner(), kModRequest, request);
+            d.ask.offset += length;
+            ++d.asked;
+        }
+    }
+
+    // Past the files the pieces finished (and empty ones, made as they are), and the mods: each checked into the
+    // cache as it ends. The last one makes the joiner ready.
+    void settle_download() {
+        while (download) {
+            Download& d = *download;
+            const std::size_t index = d.needed[d.got.mod];
+            SharedMod& mod = d.room[index];
+            if (d.got.file < mod.files.size()) {
+                const ModFile& file = mod.files[d.got.file];
+                if (d.got.offset < file.size) return;
+                if (!d.out_open && !open_piece_file()) return;
+                d.out.close();
+                d.out_open = false;
+                if (!d.out) {
+                    end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS COULD NOT BE SAVED");
+                    return;
+                }
+                ++d.got.file;
+                d.got.offset = 0u;
+                continue;
+            }
+            const std::optional<std::filesystem::path> folder = ModCache(join_config.mods_cache).finish(mod);
+            if (!folder) {
+                end(SessionEvent::Kind::JoinFailed, "THE MOD " + mod.id + " DID NOT ARRIVE WHOLE");
+                return;
+            }
+            mod.folder = *folder;
+            ++d.got.mod;
+            d.got.file = 0u;
+            d.got.offset = 0u;
+            if (d.got.mod == d.needed.size()) {
+                mods_ready();
+                return;
+            }
+            if (!begin_mod()) return;
+        }
+    }
+
+    // The file the next piece goes into, made (empty) in the mod's download folder.
+    bool open_piece_file() {
+        Download& d = *download;
+        const ModFile& file = d.room[d.needed[d.got.mod]].files[d.got.file];
+        const std::filesystem::path path = mod_file_path(d.folder, file.path);
+        std::error_code error;
+        std::filesystem::create_directories(path.parent_path(), error);
+        d.out.clear();
+        d.out.open(path, std::ios::binary | std::ios::trunc);
+        d.out_open = static_cast<bool>(d.out);
+        if (!d.out_open) end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS COULD NOT BE SAVED");
+        return d.out_open;
+    }
+
+    void join_receive_piece(ByteReader& in) {
+        if (state != SessionState::Connecting || !download || download->got.mod >= download->needed.size()) return;
+        Download& d = *download;
+        const std::size_t mod = in.u16();
+        const std::size_t file = in.u32();
+        const std::uint64_t offset = in.u64();
+        const std::vector<std::uint8_t> bytes = in.blob(kPieceBytes);
+        const std::size_t index = d.needed[d.got.mod];
+        if (!in.ok() || mod != index || file != d.got.file || offset != d.got.offset) {
+            end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS ARRIVED OUT OF ORDER");
+            return;
+        }
+        const ModFile& entry = d.room[index].files[file];
+        if (bytes.empty() || bytes.size() > entry.size - offset) {
+            end(SessionEvent::Kind::JoinFailed, "THE HOST COULD NOT SEND THE MOD " + d.room[index].id);
+            return;
+        }
+        if (!d.out_open && !open_piece_file()) return;
+        d.out.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+        if (!d.out) {
+            end(SessionEvent::Kind::JoinFailed, "THE ROOM'S MODS COULD NOT BE SAVED");
+            return;
+        }
+        d.got.offset += bytes.size();
+        d.done += bytes.size();
+        if (d.asked > 0u) --d.asked;
+        join_started = Clock::now();
+        settle_download();
+        if (download) ask_pieces();
+    }
+
+    // Every room mod is here: the session ends, for Nebula to start again with them.
+    void mods_ready() {
+        std::vector<SharedMod> mods = std::move(download->room);
+        const std::string ids = mods_text(mods);
+        download.reset();
+        room_mods = std::move(mods);
+        end(SessionEvent::Kind::ModsReady, ids);
     }
 
     void join_receive_accept(ByteReader& in) {
@@ -234,11 +506,14 @@ struct Session::State {
         (void)channel;
         if (host) {
             if (type == kJoinRequest) host_receive_join(from, in);
+            if (type == kModRequest) host_send_piece(from, in);
             return;
         }
         if (from != transport->owner()) return;
         switch (type) {
         case kJoinAccept: join_receive_accept(in); return;
+        case kJoinMods: join_receive_mods(in); return;
+        case kModPiece: join_receive_piece(in); return;
         case kJoinRefuse: {
             const std::string why = in.str(256u);
             end(SessionEvent::Kind::JoinFailed, why.empty() ? std::string("THE HOST REFUSED") : why);
@@ -272,6 +547,7 @@ struct Session::State {
     void peer_left(PeerId peer, bool intentional) {
         waiting.erase(peer);
         refused.erase(peer);
+        downloading.erase(peer);
         const auto it = std::find_if(players.begin(), players.end(), [peer](const auto& p) { return p.id == peer; });
         if (it == players.end()) return;
         const std::string name = it->name;
@@ -307,9 +583,13 @@ struct Session::State {
         for (const auto& [peer, since] : refused) {
             if (now - since > kRefuseLinger) remove.push_back(peer);
         }
+        for (const auto& [peer, since] : downloading) {
+            if (now - since > kDownloadIdle) remove.push_back(peer);
+        }
         for (const PeerId peer : remove) {
             waiting.erase(peer);
             refused.erase(peer);
+            downloading.erase(peer);
             transport->unpeer(peer);
         }
     }
@@ -331,7 +611,11 @@ Session::Session(std::unique_ptr<net::Transport> transport) : state_(std::make_u
         body.u16(kSessionProtocol)
             .str(s->join_config.game_version)
             .str(clean_name(s->join_config.name))
-            .u8(static_cast<std::uint8_t>(s->join_config.character));
+            .u8(static_cast<std::uint8_t>(s->join_config.character))
+            .str(s->join_config.disc.game_id)
+            .u8(static_cast<std::uint8_t>(s->join_config.disc.revision))
+            .u64(s->join_config.disc.hash);
+        write_mods(body, s->join_config.mods, false);
         s->send(owner, kJoinRequest, body);
     };
     callbacks.on_peer_joined = [s](PeerId peer) {
@@ -407,6 +691,7 @@ bool Session::join(JoinConfig config) {
         state_->join_config = std::move(config);
         state_->room = RuntimeCoopSettings{};
         state_->save.reset();
+        state_->room_mods.reset();
         state_->state = SessionState::Connecting;
         state_->join_started = Clock::now();
         net::JoinConfig lobby{state_->join_config.address, state_->join_config.port, state_->join_config.password};
@@ -478,6 +763,24 @@ std::vector<SessionEvent> Session::take_events() {
 std::optional<RoomSave> Session::take_room_save() {
     const std::lock_guard<std::recursive_mutex> lock(lock_);
     return std::exchange(state_->save, std::nullopt);
+}
+
+DownloadProgress Session::download_progress() const {
+    const std::lock_guard<std::recursive_mutex> lock(lock_);
+    DownloadProgress progress;
+    const std::optional<State::Download>& download = state_->download;
+    if (!download || download->needed.empty()) return progress;
+    progress.active = true;
+    progress.done = download->done;
+    progress.total = download->total;
+    const std::size_t at = std::min(download->got.mod, download->needed.size() - 1u);
+    progress.mod = download->room[download->needed[at]].id;
+    return progress;
+}
+
+std::optional<std::vector<SharedMod>> Session::take_room_mods() {
+    const std::lock_guard<std::recursive_mutex> lock(lock_);
+    return std::exchange(state_->room_mods, std::nullopt);
 }
 
 bool Session::send(std::uint8_t type, net::Channel channel, std::span<const std::uint8_t> data, net::PeerId to) {
