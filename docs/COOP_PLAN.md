@@ -196,8 +196,8 @@ the Online tab is on every platform.
 
 A `RemotePlayer` is a `LiveActor` that loads Mario's or Luigi's model and animations (`MarioAnimator`'s resources) and
 plays whatever animation the network names, at the position, rotation and gravity it received, interpolated between
-packets. It has no physics or state machine of its own. Later phases give it collision with the local Mario and with
-enemies.
+packets. It has no physics or state machine of its own. It collides with the local Mario as the room's
+[player collision](#player-collisions) options say; collision with enemies comes later.
 
 - **Snapshots** (`galaxy/coop_snapshot.h`). Each player sends its own (the game's `coop_player` report) 30 times a
   second on the unreliable channel, as the session's message 32, to the players in its instance (a joiner's through
@@ -286,20 +286,26 @@ The host's choice is the session's and is sent to each player as they join, as s
 | Knockback Strength (`coop_knockback_strength`) | 0-255; the menu offers Weak 10, Normal 25, Too much 60 | 25 |
 | PvP Mode (`coop_pvp_mode`) | `classic` or `revamped`: the rules for which attack beats which, and how far each one throws | `classic` |
 
-The rules carried over, with SMG's equivalents:
+The rules carried over, with SMG's equivalents (`NebulaRemotePlayer`, game API 42's `coop_rules`):
 
-- **No contact** in a player's first 60 frames in an instance, or while either player is intangible (Boo Mario,
-  Rainbow Mario passing through, a demo or a star get) or not drawn.
-- **Solid.** Overlapping players push apart. One landing on another's head bounces off, and the one below is
-  squashed for a few frames (sm64coopdx's `bounceSquishTimer`), with no damage.
-- **Attacks (solid and friendly fire).** A spin, a stomp, a ground pound, a punch or a Fire Mario fireball that reaches
-  another player knocks them back by the knockback strength times the attack's scale (sm64coopdx's `scaler`), facing
-  away from the attacker. Plain jumps, falls and ledge grabs aren't attacks, and a player already being knocked back
-  can't be hit again until it ends. Only friendly fire costs the victim health. Revamped changes the scales and which
-  attacks win, for example a ground pound beats a slide.
-- **Who decides.** The attacker's client detects the hit against the victim's lag-compensated position (sm64coopdx's
-  `lag_compensation.c`) and sends it. The victim's client applies the knockback and damage to its own Mario, so each
-  player's Mario is only ever moved by its own game.
+- **No contact** in a player's first 60 frames in an instance, or while either player is intangible: dead, in a demo,
+  bound to something (a Launch Star, a bubble...), a Boo, hidden or out of the player's control
+  (`NEBULA_COOP_PLAYER_INTANGIBLE` in the snapshot). Non-solid turns the copies' body sensors off, so they cost nothing.
+- **Solid.** Each copy has a body sensor, as the cosmic ghost has, that pushes the local Mario out of it. His stomp on
+  a copy bounces him off, as off an enemy. A player landing on the local Mario's head squashes him a moment (the
+  no-damage flinch, sm64coopdx's `bounceSquishTimer`), with no damage.
+- **Attacks (solid and friendly fire).** A spin or a ground pound that reaches another player throws them away from
+  the attacker by the knockback strength times the attack's scale (sm64coopdx's `scaler`: a ground pound 2 as its
+  kick, a spin 1 as its punch; a Rainbow Star's player throws whoever they touch at 2). Galaxy runs at 60 frames a
+  second, so the strength is halved into Galaxy's speeds. Solid throws without harm (Galaxy's no-damage flip); friendly
+  fire is an enemy's hit and costs health. A player already being knocked back, or invincible, isn't hit again until
+  it ends. Revamped: a spin staggers a player on the ground on the spot (its punch), two spins meeting cancel out, a
+  ground pound throws at 1.9 and its landing reaches 1.3 times as far round.
+- **Who decides.** As sm64coopdx: the victim's game. Each snapshot says whether its player spins or ground pounds; the
+  victim's game checks that against where its own Mario was when the attacker saw him (`rewind_ms`: the round trip
+  between the two and both ways' drawing delay, sm64coopdx's `lag_compensation_get_local_state`) and moves only its
+  own Mario. No message is sent for a hit, so collisions add nothing to a room's traffic.
+- Not yet: a Fire Mario's fireballs and other thrown things, which other players' games don't draw.
 
 ## Shared world state
 
@@ -398,8 +404,8 @@ Each phase ships on its own and leaves the game playable.
       only there), and a player entering an occupied instance gets its state from the server.
 - [x] Collectibles, defeated enemies, Power Stars and save flags sync, with the host authoritative
       ([Shared world state](#shared-world-state)).
-- [ ] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
-      with lag compensation. The options are already read from `runtime_settings.ini`.
+- [x] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
+      with lag compensation.
 - [ ] Remote players stomp, spin and touch objects. Hits are sent as events to the client that owns the object.
 
 ### Phase 3: shared enemies and objects

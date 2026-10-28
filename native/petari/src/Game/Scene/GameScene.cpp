@@ -276,6 +276,19 @@ namespace {
         player.health = pActor->mHealth;
         player.mode = pActor->mPlayerMode;
         player.flags = (MR::isPlayerLuigi() ? NEBULA_COOP_PLAYER_LUIGI : 0u) | (MR::isPlayerDead() ? NEBULA_COOP_PLAYER_DEAD : 0u);
+        // What the others' games need for player collisions: the attacks, and when nothing touches this player.
+        if (MR::isPlayerSwingAction()) {
+            player.flags |= NEBULA_COOP_PLAYER_SPIN;
+        }
+        if (MR::isPlayerHipDropFalling()) {
+            player.flags |= NEBULA_COOP_PLAYER_HIP_DROP;
+        }
+        if (MR::isPlayerHipDropLand()) {
+            player.flags |= NEBULA_COOP_PLAYER_HIP_DROP_LAND;
+        }
+        if (NebulaRemotePlayer::isLocalIntangible()) {
+            player.flags |= NEBULA_COOP_PLAYER_INTANGIBLE;
+        }
         __NebulaCoopPlayer(&player);
     }
 };  // namespace
