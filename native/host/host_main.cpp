@@ -2721,8 +2721,30 @@ uint32_t svc_coop_remote(void*, NebulaCoopRemotePlayer* players, uint32_t capaci
         // The character is the room's: what they picked as they joined.
         player.flags = (snapshot.flags & ~static_cast<uint32_t>(NEBULA_COOP_PLAYER_LUIGI)) |
                        (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_PLAYER_LUIGI : 0u);
+        // Their snapshot came half a round trip ago and shows kSnapshotDelay late; what they saw of this player had
+        // come and shown as late. Two joiners reach each other through the host: each one's ping is to it.
+        const auto them = std::find_if(room.begin(), room.end(),
+                                       [&](const galaxy::coop::SessionPlayer& in) { return in.id == from.id; });
+        const bool both_joiners = !gCoopSession.is_host() && them != room.end() && !them->host;
+        const unsigned round_trip = them != room.end() ? them->ping_ms * (both_joiners ? 2u : 1u) : 0u;
+        to.rewind_ms = round_trip + 2u * static_cast<unsigned>(galaxy::coop::kSnapshotDelay.count());
     }
     return static_cast<uint32_t>(remote.size());
+}
+
+// The room's player collision options, the host's as every player has them.
+void svc_coop_rules(void*, NebulaCoopRules* rules) {
+    if (rules == nullptr) return;
+    *rules = {};
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return;
+    const galaxy::RuntimeCoopSettings room = gCoopSession.room();
+    static_assert(static_cast<unsigned>(galaxy::CoopPlayerInteraction::Solid) == NEBULA_COOP_INTERACTION_SOLID &&
+                  static_cast<unsigned>(galaxy::CoopPlayerInteraction::FriendlyFire) == NEBULA_COOP_INTERACTION_FRIENDLY_FIRE &&
+                  static_cast<unsigned>(galaxy::CoopPvpMode::Revamped) == NEBULA_COOP_PVP_REVAMPED);
+    rules->interaction = static_cast<uint32_t>(room.player_interaction);
+    rules->knockback = room.knockback_strength;
+    rules->pvp = static_cast<uint32_t>(room.pvp_mode);
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -4567,6 +4589,7 @@ int main(int argc, char** argv) {
     services.coop_remote = svc_coop_remote;
     services.coop_world_report = svc_coop_world_report;
     services.coop_world_take = svc_coop_world_take;
+    services.coop_rules = svc_coop_rules;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

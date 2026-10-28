@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 40u
+#define NEBULA_GAME_API_VERSION 41u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -162,6 +162,12 @@ typedef struct NebulaCoopPlayer {
 enum {
     NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
     NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
+    /* What player collisions (coop_rules) need of them: */
+    NEBULA_COOP_PLAYER_SPIN = 1u << 2,           /* MR::isPlayerSwingAction: a spin */
+    NEBULA_COOP_PLAYER_HIP_DROP = 1u << 3,       /* MR::isPlayerHipDropFalling: a ground pound on its way down */
+    NEBULA_COOP_PLAYER_HIP_DROP_LAND = 1u << 4,  /* MR::isPlayerHipDropLand: its landing */
+    NEBULA_COOP_PLAYER_INTANGIBLE = 1u << 5,     /* nothing touches them: dead, in a demo, bound (a Launch Star,
+                                                    a bubble...), a Boo, or out of the player's control */
 };
 
 /* Another player in the same instance (the stage and the scenario) as the local one, for its copy to draw
@@ -170,7 +176,28 @@ typedef struct NebulaCoopRemotePlayer {
     char name[32];           /* printable ASCII */
     uint32_t number;         /* 1 the host, then 2, 3... as they joined: the same player keeps theirs */
     NebulaCoopPlayer player; /* their NEBULA_COOP_PLAYER_LUIGI is their character */
+    uint32_t rewind_ms;      /* how long ago the local player was where this player saw them as they did what
+                                `player` shows: the round trip between the two and both ways' drawing delay
+                                (sm64coopdx's lag compensation) */
 } NebulaCoopRemotePlayer;
+
+/* Player collisions (coop_rules, docs/COOP_PLAN.md "Player collisions"): the room's options, the host's. */
+typedef struct NebulaCoopRules {
+    uint32_t interaction; /* NEBULA_COOP_INTERACTION_* */
+    uint32_t knockback;   /* the knockback strength, 0-255 (sm64coopdx's: Weak 10, Normal 25, Too much 60) */
+    uint32_t pvp;         /* NEBULA_COOP_PVP_* */
+} NebulaCoopRules;
+
+enum {
+    NEBULA_COOP_INTERACTION_NONSOLID = 0, /* players pass through each other (and outside a room) */
+    NEBULA_COOP_INTERACTION_SOLID,        /* they push apart, bounce on heads and knock each other back */
+    NEBULA_COOP_INTERACTION_FRIENDLY_FIRE /* solid, and attacks cost health */
+};
+
+enum {
+    NEBULA_COOP_PVP_CLASSIC = 0,
+    NEBULA_COOP_PVP_REVAMPED,
+};
 
 /* A player in the online co-op room, for the player list (coop_list, docs/COOP_PLAN.md "Player list"). */
 typedef struct NebulaCoopListPlayer {
@@ -688,6 +715,9 @@ typedef struct NebulaHostServices {
        Called on the simulation thread. */
     void (*coop_world_report)(void* user, const NebulaCoopWorldEvent* event);
     uint32_t (*coop_world_take)(void* user, NebulaCoopWorldEvent* events, uint32_t capacity);
+    /* The room's player collision options (NebulaCoopRules): non-solid outside a room. Called on the simulation
+       thread, each game scene frame. */
+    void (*coop_rules)(void* user, NebulaCoopRules* rules);
 } NebulaHostServices;
 
 enum {
