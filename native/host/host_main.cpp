@@ -1804,8 +1804,6 @@ const std::string kCoopGameVersion = "nebula-api-" + std::to_string(NEBULA_GAME_
 galaxy::coop::DiscInfo gCoopDisc;
 // This start played a room's mods for a join (the join Nebula started again for): the room's list.
 std::optional<std::vector<galaxy::coop::SharedMod>> gCoopStartedRoomMods;
-// The Join page's download line, as last shown (a percentage).
-int gCoopDownloadShown = -1;
 // Why the room ended, shown on the main menu as it opens again.
 std::mutex gCoopNoticeLock;
 std::string gCoopNotice;
@@ -2029,10 +2027,10 @@ bool restart_for_room_mods(const std::vector<galaxy::coop::SharedMod>& mods, con
     return restarting;
 }
 
-// The player's name as the room shows it: the Player page's, else the save's.
-std::string coop_player_name(const std::string& fallback) {
+// The player's name as the room shows it: Options' PLAYER page's, PLAYER (as the page shows it) when none was given.
+std::string coop_player_name() {
     const std::string& name = gCoopMenu.room().player_name;
-    return name.empty() ? (fallback.empty() ? std::string("PLAYER") : fallback) : name;
+    return name.empty() ? std::string("PLAYER") : name;
 }
 
 // The Online page's view of the room (how many play, the host's settings for a joiner).
@@ -2070,6 +2068,8 @@ void pump_coop_session() {
         gCoopAchievementsWaiting.clear();
         return;
     }
+    // A join connecting from the main menu: its events are poll_coop_join's (Joined above all, which plays the save).
+    if (gCoopMenu.joining()) return;
     const galaxy::coop::SessionState state = gCoopSession.state();
     if (state == galaxy::coop::SessionState::Hosting || state == galaxy::coop::SessionState::Joined) {
         send_coop_snapshot();
@@ -2143,12 +2143,12 @@ void pump_coop_chat() {
 #endif
 
 // Host: the room opens on the Host page's port as the save starts. False (and why on the menu) when it can't.
-bool open_coop_room(const galaxy::coop::SaveInfo& save) {
+bool open_coop_room() {
     galaxy::coop::HostConfig config;
     config.room = gCoopMenu.room();
     config.port = config.room.port;
     config.game_version = kCoopGameVersion;
-    config.name = coop_player_name(save.name);
+    config.name = coop_player_name();
     config.character = config.room.character;
     config.save = coop_room_save;
     config.disc = gCoopDisc;
@@ -2179,15 +2179,13 @@ void start_coop_join() {
     }
     config.password = room.password;
     config.game_version = kCoopGameVersion;
-    config.name = coop_player_name({});
+    config.name = coop_player_name();
     config.character = room.character;
     config.disc = gCoopDisc;
     config.mods = coop_session_mods();
     config.mods_cache = coop_mods_cache();
     config.find_mod = find_own_mod;
-    gCoopDownloadShown = -1;
     std::fprintf(stderr, "[coop] joining %s port %u\n", config.address.c_str(), static_cast<unsigned>(config.port));
-    const std::string address = room.join_address;
     listen_coop_snapshots();
     if (!gCoopSession.join(std::move(config))) {
         std::string why = "THE ADDRESS COULD NOT BE REACHED";
@@ -2198,7 +2196,6 @@ void start_coop_join() {
         return;
     }
     gCoopMenu.set_joining(true);
-    gCoopMenu.set_message("CONNECTING TO " + address + "...");
 }
 
 // While a join connects: true once the host let this player in and its save is ready to play.
@@ -2223,10 +2220,10 @@ bool poll_coop_join() {
             return false;
         }
         if (event.kind != Kind::Joined) continue;
-        gCoopMenu.set_joining(false);
         const std::optional<galaxy::coop::RoomSave> save = gCoopSession.take_room_save();
         fs::path folder;
         if (!save || !write_joined_save(*save, folder)) {
+            gCoopMenu.set_joining(false);
             gCoopSession.leave();
             (void)gCoopSession.take_events();
             gCoopMenu.set_message("COULD NOT JOIN: THE HOST'S SAVE COULD NOT BE WRITTEN");
@@ -2248,17 +2245,24 @@ bool poll_coop_join() {
 #endif
         std::fprintf(stderr, "[coop] joined: the host's save (file %u, %zu file(s)), %zu player(s)\n", save->file,
                      save->files.size(), gCoopSession.players().size());
+        gCoopMenu.finish_join("JOINED! LOADING THE HOST'S SAVE...");
         note_coop_room();
         return true;
     }
-    // The room's mods downloading: how far, on the Join page.
-    if (const galaxy::coop::DownloadProgress progress = gCoopSession.download_progress(); progress.active) {
-        const int percent = progress.total == 0u ? 100 : static_cast<int>(progress.done * 100u / progress.total);
-        if (percent != gCoopDownloadShown) {
-            gCoopDownloadShown = percent;
-            gCoopMenu.set_message("DOWNLOADING THE ROOM'S MODS: " + std::to_string(percent) + "% (" + progress.mod +
-                                  ")");
-        }
+    // The joining screen: what the join waits for, and how far (the mods' download by its bytes).
+    using Step = galaxy::coop::JoinStep;
+    switch (gCoopSession.join_step()) {
+    case Step::Reaching: gCoopMenu.set_join_status("CONNECTING TO THE HOST...", {}, 10u); break;
+    case Step::Asking: gCoopMenu.set_join_status("WAITING FOR THE HOST TO LET YOU IN...", {}, 30u); break;
+    case Step::DownloadingMods: {
+        const galaxy::coop::DownloadProgress progress = gCoopSession.download_progress();
+        const unsigned percent =
+            progress.total == 0u ? 100u : static_cast<unsigned>(progress.done * 100u / progress.total);
+        gCoopMenu.set_join_status("DOWNLOADING THE ROOM'S MODS: " + std::to_string(percent) + "%", progress.mod,
+                                  30u + percent * 60u / 100u);
+        break;
+    }
+    case Step::None: break;
     }
     return false;
 }
@@ -2348,7 +2352,7 @@ bool start_coop_save() {
         gCoopMenu.set_message("THE ROOM'S MODS APPLY WHEN NEBULA STARTS AGAIN: CLOSE IT AND START IT AGAIN TO HOST");
         return false;
     }
-    if (!open_coop_room(*save)) return false;
+    if (!open_coop_room()) return false;
     (void)gCoopSaves->mark_played(id, static_cast<std::int64_t>(std::time(nullptr)));
     const fs::path folder = gCoopSaves->folder(id);
     {
@@ -2417,7 +2421,11 @@ void fill_coop_menu_view(NebulaSettingsView* view) {
                               (menu.rows[i].changes ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_CHANGES) : 0u) |
                               (menu.rows[i].name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_NAME) : 0u) |
                               (menu.rows[i].text ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_TEXT) : 0u) |
-                              (menu.rows[i].label_name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_LABEL_NAME) : 0u);
+                              (menu.rows[i].label_name ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_LABEL_NAME) : 0u) |
+                              (menu.rows[i].bar_steps != 0u ? static_cast<uint32_t>(NEBULA_SETTINGS_ROW_SLIDER) : 0u);
+        // A loading bar: a slider that doesn't change (no NEBULA_SETTINGS_ROW_CHANGES).
+        view->rows[i].slider_steps = static_cast<uint16_t>(menu.rows[i].bar_steps);
+        view->rows[i].slider_at = static_cast<uint16_t>(menu.rows[i].bar_at);
     }
     view->selected = menu.selected;
     view->selected_button = menu.selected_button;

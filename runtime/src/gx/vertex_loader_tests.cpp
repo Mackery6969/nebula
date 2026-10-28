@@ -534,9 +534,7 @@ bool cached_packet_run_preserves_triangle_strip_boundaries(
             "could not map cached packet run index upload ring")) {
         return false;
     }
-    const auto* indices = reinterpret_cast<const std::uint16_t*>(
-        static_cast<const std::byte*>(mapped) +
-        prim.first_index * sizeof(std::uint16_t));
+    const auto* indices = static_cast<const std::uint16_t*>(mapped) + prim.first_index;
     const std::vector<std::uint16_t> expected = triangle_tails
         ? std::vector<std::uint16_t>{0, 1, 2, 4, 5, 6}
         : std::vector<std::uint16_t>{0, 1, 2, 2, 1, 3, 4, 5, 6, 6, 5, 7};

@@ -471,13 +471,18 @@ void test_session() {
            "for its version");
 
     Session joiner;
+    expect(joiner.join_step() == JoinStep::None, "a session not joining has no join step");
     expect(joiner.join({"127.0.0.1", port, "pw", "test 1", "LUIGI FAN", galaxy::CoopCharacter::Luigi}), "a player joins");
+    expect(joiner.join_step() == JoinStep::Reaching || joiner.join_step() == JoinStep::Asking ||
+               joiner.state() == SessionState::Joined,
+           "reaching the host, then asking it");
     std::vector<SessionEvent> joiner_events;
     expect(wait_for([&] {
                for (auto& e : joiner.take_events()) joiner_events.push_back(e);
                return has_event(joiner_events, Kind::Joined);
            }),
            "and is let in");
+    expect(joiner.join_step() == JoinStep::None, "and is joining no more");
     const std::optional<RoomSave> save = joiner.take_room_save();
     expect(save && save->file == 3u && save->files.size() == 1u && save->files[0].name == "GameData.bin" &&
                save->files[0].bytes == std::vector<std::uint8_t>(20000u, 0x5au),
@@ -657,7 +662,8 @@ void test_session_mods() {
         expect(wait_for(
                    [&] {
                        const DownloadProgress progress = joiner.download_progress();
-                       if (progress.active && progress.total == room_mods[0].size() && progress.mod == "Big Mod") {
+                       if (progress.active && progress.total == room_mods[0].size() && progress.mod == "Big Mod" &&
+                           joiner.join_step() == JoinStep::DownloadingMods) {
                            progressed = true;
                        }
                        for (auto& e : joiner.take_events()) events.push_back(e);

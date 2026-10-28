@@ -125,6 +125,7 @@ struct Session::State {
     std::map<PeerId, Clock::time_point> waiting;
     std::map<PeerId, Clock::time_point> refused;
     Clock::time_point join_started{};
+    bool join_asked = false;  // a joiner reached the lobby and asked the host to let it in
     std::vector<SessionEvent> events;
     std::optional<RoomSave> save;
     std::map<std::uint8_t, Handler> handlers;
@@ -671,6 +672,7 @@ Session::Session(std::unique_ptr<net::Transport> transport) : state_(std::make_u
             .u64(s->join_config.disc.hash);
         write_mods(body, s->join_config.mods, false);
         s->send(owner, kJoinRequest, body);
+        s->join_asked = true;
     };
     callbacks.on_peer_joined = [s](PeerId peer) {
         if (s->host) s->waiting[peer] = Clock::now();
@@ -748,6 +750,7 @@ bool Session::join(JoinConfig config) {
         state_->room_mods.reset();
         state_->state = SessionState::Connecting;
         state_->join_started = Clock::now();
+        state_->join_asked = false;
         net::JoinConfig lobby{state_->join_config.address, state_->join_config.port, state_->join_config.password};
         if (!state_->transport->lobby_join(lobby)) {
             // on_error already told why (JoinFailed).
@@ -838,6 +841,13 @@ std::vector<SessionEvent> Session::take_events() {
 std::optional<RoomSave> Session::take_room_save() {
     const std::lock_guard<std::recursive_mutex> lock(lock_);
     return std::exchange(state_->save, std::nullopt);
+}
+
+JoinStep Session::join_step() const {
+    const std::lock_guard<std::recursive_mutex> lock(lock_);
+    if (state_->state != SessionState::Connecting) return JoinStep::None;
+    if (state_->download && !state_->download->needed.empty()) return JoinStep::DownloadingMods;
+    return state_->join_asked ? JoinStep::Asking : JoinStep::Reaching;
 }
 
 DownloadProgress Session::download_progress() const {

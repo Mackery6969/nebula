@@ -299,7 +299,8 @@ enum {
     NEBULA_SETTINGS_ROW_MOD_OFF = 64,    /* the MODS page: a mod in the list of mods off (with HEADING: its title) */
     NEBULA_SETTINGS_ROW_MOD_ON = 128,    /* a mod in the list of mods on, the higher one winning (with HEADING: its title) */
     NEBULA_SETTINGS_ROW_HELD = 256,      /* the mod picked up to move: the arrows move it */
-    NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at` */
+    NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at`;
+                                            without CHANGES, a loading bar `slider_at` of `slider_steps` full */
     NEBULA_SETTINGS_ROW_BINDING = 1024,  /* a control's binding: changing it waits for an input */
     NEBULA_SETTINGS_ROW_TEXT = 2048,     /* a text (a name, an address); pressed, it is edited in place */
 };
