@@ -25,23 +25,34 @@ artifact under **Artifacts**. You need to be signed in to GitHub.
    nebula-import import SMG.rvz --output content
    ```
 
+   Run this in the folder that holds `NebulaNative`, so `content` lands next to it.
+
 2. Run the game from a terminal, so its log shows:
 
    ```
-   NebulaNative --pak content/game.pak --nand saves
+   NebulaNative
    ```
 
-   `saves` is created if it's missing and holds the save files. On Linux the folder must also hold `libSDL3.so.0` and
-   `libsmg_game.so` (they're found next to the program), and you need a Vulkan driver. Nebula's in-game settings menu
-   opens with F1 (or View and Menu, Minus and Plus on a controller) and the main menu's Options, as on Windows; it
-   writes `runtime_settings.ini` and `config.ini`. Windows-only settings (DLSS, Joy-Con pairing) aren't offered.
+   With no arguments, Nebula looks for `content/game.pak` (or `game.pak`) next to the program, then in the current
+   folder, then in an installed Nebula's folder. Saves go in a `saves` folder next to the program or in the current
+   folder when there is one, otherwise in Nebula's data folder (the installed Nebula's saves, with the settings). The
+   log's `paths:` line names both. `--pak <game.pak>` and `--nand <folder>` choose others, as before. On Linux the
+   folder must also hold `libSDL3.so.0` and `libsmg_game.so` (they're found next to the program), and you need a
+   Vulkan driver. Nebula's in-game settings menu opens with F1 (or View and Menu, Minus and Plus on a controller) and
+   the main menu's Options, as on Windows; it writes `runtime_settings.ini` and `config.ini`. Windows-only settings
+   (DLSS, Joy-Con pairing) aren't offered.
 
 The main menu's Host opens the Host page: pick a save with left and right (or New save), set the room, then press
 Host. Saves are folders under `saves/coop_saves/`, each with its own achievements; on the first start the files of
 your old save become saves named `FILE 1`, `FILE 2` and so on, and the old save is left as it was.
 
-Online co-op lines in the log start with `[coop]`. `--host <port>` and `--join <address[:port]>` are accepted but don't
-connect to anything yet (docs/COOP_PLAN.md).
+Online co-op lines in the log start with `[coop]`. `--host [port]` hosts the last played save as the main menu opens
+(port 7777 when none is given) and `--join <address[:port]>` joins, so two copies on one PC are:
+
+```
+NebulaNative --host
+NebulaNative --join 127.0.0.1
+```
 
 ## Android
 
