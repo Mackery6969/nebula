@@ -18,6 +18,7 @@
 
 #include "galaxy/atomic_file.h"
 #include "galaxy/coop_menu.h"
+#include "galaxy/coop_mods.h"
 #include "galaxy/coop_saves.h"
 #include "galaxy/coop_session.h"
 #include "galaxy/coop_snapshot.h"
@@ -1788,8 +1789,14 @@ std::atomic<bool> gCoopLuigi{false};
 // connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
 galaxy::coop::Session gCoopSession;
 void keep_coop_settings();
-// The game as online play compares it: a player with another is refused (the disc and mods are checked later).
+// The game as online play compares it: a player with another is refused, as is one with another disc
+// (gCoopDisc); one playing other mods gets the room's (galaxy/coop_mods.h).
 const std::string kCoopGameVersion = "nebula-api-" + std::to_string(NEBULA_GAME_API_VERSION);
+galaxy::coop::DiscInfo gCoopDisc;
+// This start played a room's mods for a join (the join Nebula started again for): the room's list.
+std::optional<std::vector<galaxy::coop::SharedMod>> gCoopStartedRoomMods;
+// The Join page's download line, as last shown (a percentage).
+int gCoopDownloadShown = -1;
 // Why the room ended, shown on the main menu as it opens again.
 std::mutex gCoopNoticeLock;
 std::string gCoopNotice;
@@ -1905,6 +1912,80 @@ bool write_joined_save(const galaxy::coop::RoomSave& save, fs::path& folder) {
     return true;
 }
 
+// Where the room's mods download (galaxy::coop::ModCache): coop_mods/ beside the mods folder. Empty without one.
+fs::path coop_mods_cache() {
+    const fs::path mods = galaxy::mods::mods_folder();
+    return mods.empty() ? fs::path{} : mods.parent_path() / "coop_mods";
+}
+
+// The join that waits for Nebula to start again with a room's mods.
+fs::path coop_next_join_file() {
+    const fs::path cache = coop_mods_cache();
+    return cache.empty() ? fs::path{} : cache / ".next_join";
+}
+
+// The mods this game started with that change it (the room's, for a host; what a joiner plays now), with their files'
+// hashes: read once, as they stay until Nebula starts again.
+const std::vector<galaxy::coop::SharedMod>& coop_session_mods() {
+    static const std::vector<galaxy::coop::SharedMod> mods = [] {
+        std::vector<galaxy::coop::SharedMod> out;
+        for (const galaxy::mods::ModInfo& mod : galaxy::mods::session_mods().started_with) {
+            if (!mod.enabled || !galaxy::mods::changes_disc(mod)) continue;
+            galaxy::coop::SharedMod shared;
+            shared.id = mod.id;
+            shared.folder = mod.path;
+            shared.own_text = mod.own_text;
+            for (const galaxy::mods::ModOption& option : mod.options) {
+                shared.options.emplace_back(option.key, option.selected);
+            }
+            if (!galaxy::coop::describe_mod(shared)) {
+                std::fprintf(stderr, "[coop] the mod %s could not be read to share\n", mod.id.c_str());
+            }
+            out.push_back(std::move(shared));
+        }
+        return out;
+    }();
+    return mods;
+}
+
+// A joiner's own copy of a room's mod: the mods folder's of its name, when it has the same files.
+std::optional<fs::path> find_own_mod(const galaxy::coop::SharedMod& mod) {
+    const fs::path folder = galaxy::mods::mods_folder();
+    if (folder.empty()) return std::nullopt;
+    galaxy::coop::SharedMod own = mod;
+    own.folder = folder / fs::path(std::u8string(reinterpret_cast<const char8_t*>(mod.id.data()), mod.id.size()));
+    std::error_code error;
+    if (!fs::is_directory(own.folder, error) || !galaxy::coop::describe_mod(own) || own.hash != mod.hash) {
+        return std::nullopt;
+    }
+    return own.folder;
+}
+
+// The room's mods are all here (downloaded or the player's own): Nebula starts again with them and joins again. False
+// (and why on the menu) when it doesn't start again now.
+bool restart_for_room_mods(const std::vector<galaxy::coop::SharedMod>& mods, const std::string& address) {
+    if (gCoopStartedRoomMods && galaxy::coop::same_mods(*gCoopStartedRoomMods, mods)) {
+        // Started with these already: they didn't apply as the host plays them.
+        std::fprintf(stderr, "[coop] the room's mods (%s) did not apply\n", galaxy::coop::mods_text(mods).c_str());
+        gCoopMenu.set_message("COULD NOT JOIN: THE ROOM'S MODS DID NOT APPLY (" + galaxy::coop::mods_text(mods) + ")");
+        return false;
+    }
+    const fs::path file = coop_next_join_file();
+    if (file.empty() || !galaxy::coop::write_next_join(file, {address, mods})) {
+        gCoopMenu.set_message("COULD NOT JOIN: THE ROOM'S MODS COULD NOT BE SET UP");
+        return false;
+    }
+    std::fprintf(stderr, "[coop] the room's mods are ready (%s): starting again to join %s\n",
+                 galaxy::coop::mods_text(mods).c_str(), address.c_str());
+    bool restarting = false;
+#if defined(NEBULA_HOST_RENDERER)
+    restarting = galaxy::gx::request_restart();
+#endif
+    gCoopMenu.set_message(restarting ? "NEBULA STARTS AGAIN WITH THE ROOM'S MODS, THEN JOINS"
+                                     : "THE ROOM'S MODS ARE READY: CLOSE NEBULA AND START IT AGAIN TO JOIN");
+    return restarting;
+}
+
 // The player's name as the room shows it: the Player page's, else the save's.
 std::string coop_player_name(const std::string& fallback) {
     const std::string& name = gCoopMenu.room().player_name;
@@ -1988,6 +2069,8 @@ bool open_coop_room(const galaxy::coop::SaveInfo& save) {
     config.name = coop_player_name(save.name);
     config.character = config.room.character;
     config.save = coop_room_save;
+    config.disc = gCoopDisc;
+    config.mods = coop_session_mods();
     listen_coop_snapshots();
     if (!gCoopSession.host(std::move(config))) {
         std::fprintf(stderr, "[coop] the room could not open on port %u\n", static_cast<unsigned>(gCoopMenu.room().port));
@@ -1996,7 +2079,8 @@ bool open_coop_room(const galaxy::coop::SaveInfo& save) {
         return false;
     }
     (void)gCoopSession.take_events();
-    std::fprintf(stderr, "[coop] room open on UDP port %u\n", static_cast<unsigned>(gCoopSession.port()));
+    std::fprintf(stderr, "[coop] room open on UDP port %u, %s, mods: %s\n", static_cast<unsigned>(gCoopSession.port()),
+                 galaxy::coop::disc_text(gCoopDisc).c_str(), galaxy::coop::mods_text(coop_session_mods()).c_str());
     note_coop_room();
     return true;
 }
@@ -2014,6 +2098,11 @@ void start_coop_join() {
     config.game_version = kCoopGameVersion;
     config.name = coop_player_name({});
     config.character = room.character;
+    config.disc = gCoopDisc;
+    config.mods = coop_session_mods();
+    config.mods_cache = coop_mods_cache();
+    config.find_mod = find_own_mod;
+    gCoopDownloadShown = -1;
     std::fprintf(stderr, "[coop] joining %s port %u\n", config.address.c_str(), static_cast<unsigned>(config.port));
     const std::string address = room.join_address;
     listen_coop_snapshots();
@@ -2034,6 +2123,16 @@ bool poll_coop_join() {
     if (!gCoopMenu.joining()) return false;
     using Kind = galaxy::coop::SessionEvent::Kind;
     for (const galaxy::coop::SessionEvent& event : gCoopSession.take_events()) {
+        if (event.kind == Kind::DownloadingMods) {
+            std::fprintf(stderr, "[coop] downloading the room's mods: %s\n", event.text.c_str());
+            continue;
+        }
+        if (event.kind == Kind::ModsReady) {
+            gCoopMenu.set_joining(false);
+            const std::optional<std::vector<galaxy::coop::SharedMod>> mods = gCoopSession.take_room_mods();
+            if (mods) (void)restart_for_room_mods(*mods, gCoopMenu.room().join_address);
+            return false;
+        }
         if (event.kind == Kind::JoinFailed || event.kind == Kind::Closed) {
             gCoopMenu.set_joining(false);
             std::fprintf(stderr, "[coop] the join failed: %s\n", event.text.c_str());
@@ -2064,6 +2163,15 @@ bool poll_coop_join() {
                      save->files.size(), gCoopSession.players().size());
         note_coop_room();
         return true;
+    }
+    // The room's mods downloading: how far, on the Join page.
+    if (const galaxy::coop::DownloadProgress progress = gCoopSession.download_progress(); progress.active) {
+        const int percent = progress.total == 0u ? 100 : static_cast<int>(progress.done * 100u / progress.total);
+        if (percent != gCoopDownloadShown) {
+            gCoopDownloadShown = percent;
+            gCoopMenu.set_message("DOWNLOADING THE ROOM'S MODS: " + std::to_string(percent) + "% (" + progress.mod +
+                                  ")");
+        }
     }
     return false;
 }
@@ -4065,6 +4173,9 @@ int main(int argc, char** argv) {
 #endif
 
     open_pak(pak);
+    gCoopDisc = galaxy::coop::describe_disc(std::span<const uint8_t>(gPak.data, 8u),
+                                            std::span<const uint8_t>(gPak.dol, gPak.dol_size),
+                                            std::span<const uint8_t>(gPak.fst, gPak.fst_size));
     boot_mark("disc opened");
     load_module(module);
     boot_mark("game module loaded");
@@ -4106,6 +4217,21 @@ int main(int argc, char** argv) {
         if (!settings_folder.empty()) {
             fs::create_directories(settings_folder / "mods", error);
             galaxy::mods::set_mods_folder(settings_folder / "mods", settings_folder / "mods.ini", game_id);
+            // A join Nebula started again for: this start plays the room's mods, then joins.
+            if (std::optional<galaxy::coop::NextJoin> join = galaxy::coop::take_next_join(coop_next_join_file())) {
+                std::vector<galaxy::mods::RoomModChoice> room;
+                for (const galaxy::coop::SharedMod& mod : join->mods) {
+                    galaxy::mods::RoomModChoice choice{mod.id, mod.folder, mod.own_text, {}};
+                    for (const auto& [key, selected] : mod.options) choice.options[key] = selected;
+                    room.push_back(std::move(choice));
+                }
+                galaxy::mods::set_room_mods(std::move(room));
+                gCoopAutoStart = CoopAutoStart::Join;
+                gCoopAutoAddress = join->address;
+                std::fprintf(stderr, "[coop] starting with the room's mods (%s) to join %s\n",
+                             galaxy::coop::mods_text(join->mods).c_str(), join->address.c_str());
+                gCoopStartedRoomMods = std::move(join->mods);
+            }
             gMods = galaxy::mods::apply_mods(std::span<const std::uint8_t>(gPak.fst, gPak.fst_size),
                                              std::span<const std::uint8_t>(gPak.dol, gPak.dol_size),
                                              static_cast<uint64_t>(gPak.dol - gPak.data), gPak.data, gPak.size, game_id,
