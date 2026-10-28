@@ -159,6 +159,19 @@ void PowerStar::init(const JMapInfoIter& rIter) {
 void PowerStar::initAfterPlacement() {
 }
 
+#ifdef TARGET_PC
+void PowerStar::showAsHad() {
+    mColorFrame = 4;
+    if (mIsGrandStar) {
+        ::setupColorGrandStar(this, true);
+        ::setupColorGrandStar(mPowerStarModelObj, true);
+    } else {
+        ::setupColor(this, true, 4);
+        ::setupColor(mPowerStarModelObj, true, 4);
+    }
+}
+#endif
+
 void PowerStar::appear() {
     LiveActor::appear();
     MR::invalidateClipping(this);

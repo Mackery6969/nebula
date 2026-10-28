@@ -61,6 +61,13 @@ public:
         return mIsGrandStar;
     }
 
+#ifdef TARGET_PC
+    // Online co-op: another player in the instance took it, so it shows as a star already had (as a finished
+    // mission's star does), still there to take.
+    void showAsHad();
+    bool isShownAsHad() const { return mColorFrame == 4; }
+#endif
+
     /* 0x08C */ s32 mPowerStarId;
     /* 0x090 */ bool mIsInDemo;
     /* 0x094 */ TVec3f mAppearPosition;
