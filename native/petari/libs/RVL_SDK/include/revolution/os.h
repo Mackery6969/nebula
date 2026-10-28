@@ -82,6 +82,11 @@ u32 __NebulaCoopList(struct NebulaCoopListPlayer* players, u32 capacity, u32* ro
 // The other players in the local player's instance, for their copies (NebulaHostServices::coop_remote).
 struct NebulaCoopRemotePlayer;
 u32 __NebulaCoopRemote(struct NebulaCoopRemotePlayer* players, u32 capacity);
+// The online co-op room's shared world: what the game's play did, and what it is told (NebulaHostServices::
+// coop_world_report and coop_world_take, NEBULA_COOP_WORLD_*).
+struct NebulaCoopWorldEvent;
+void __NebulaCoopWorldReport(const struct NebulaCoopWorldEvent* event);
+u32 __NebulaCoopWorldTake(struct NebulaCoopWorldEvent* events, u32 capacity);
 // An achievement the save data meets: 1 when newly unlocked, its name in `name` (NebulaHostServices::achievement).
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity);
 s32 __NebulaAchievementDate(const char* id);

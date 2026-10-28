@@ -22,6 +22,7 @@
 #include "galaxy/coop_saves.h"
 #include "galaxy/coop_session.h"
 #include "galaxy/coop_snapshot.h"
+#include "galaxy/coop_world.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -1812,16 +1813,18 @@ galaxy::coop::RemotePlayers gCoopRemote;
 std::uint32_t gCoopSnapshotSequence = 0u;
 std::chrono::steady_clock::time_point gCoopSnapshotSent{};
 
-// The others' snapshots as they come (on the session's thread). Set before hosting or joining.
+// The shared world (galaxy/coop_world.h): the host's record of each instance and the session's save, which the game
+// reports to and is told from (coop_world_report, coop_world_take).
+galaxy::coop::World gCoopWorld;
+
+// The others' snapshots as they come (on the session's thread), and the world's messages. Set before hosting or
+// joining.
 void listen_coop_snapshots() {
-    gCoopRemote.clear();
-    gCoopSession.on_message(galaxy::coop::kSnapshotMessage,
-                            [](const galaxy::coop::SessionPlayer& from, std::span<const std::uint8_t> data) {
-                                gCoopRemote.receive(from.id, from.index, from.name, from.character, data);
-                            });
+    galaxy::coop::listen_snapshots(gCoopSession, gCoopRemote);
+    gCoopWorld.attach(gCoopSession);
 }
 
-// This player's snapshot to everyone in the room, at most kSnapshotInterval apart: the game's last report of it.
+// This player's snapshot to the others in its instance, at most kSnapshotInterval apart: the game's last report of it.
 void send_coop_snapshot() {
     const auto now = std::chrono::steady_clock::now();
     if (now - gCoopSnapshotSent < galaxy::coop::kSnapshotInterval) return;
@@ -1852,8 +1855,7 @@ void send_coop_snapshot() {
     snapshot.health = local.health;
     snapshot.mode = local.mode;
     snapshot.flags = local.flags;
-    (void)gCoopSession.send(galaxy::coop::kSnapshotMessage, galaxy::net::Channel::Unreliable,
-                            galaxy::coop::encode_snapshot(snapshot));
+    (void)galaxy::coop::send_snapshot(gCoopSession, snapshot);
 }
 
 void set_coop_notice(std::string text) {
@@ -2022,10 +2024,14 @@ void note_coop_place() {
 // takes the player back to the main menu. The host's room settings (the Online page's) reach the others.
 void pump_coop_session() {
     note_coop_place();
-    if (!gCoopSession.active()) return;
+    if (!gCoopSession.active()) {
+        if (gCoopWorld.active()) gCoopWorld.stop();
+        return;
+    }
     const galaxy::coop::SessionState state = gCoopSession.state();
     if (state == galaxy::coop::SessionState::Hosting || state == galaxy::coop::SessionState::Joined) {
         send_coop_snapshot();
+        gCoopWorld.update();
     }
 #if defined(NEBULA_HOST_RENDERER)
     if (gCoopSession.is_host()) gCoopSession.set_room(galaxy::get_runtime_settings().coop);
@@ -2079,6 +2085,7 @@ bool open_coop_room(const galaxy::coop::SaveInfo& save) {
         return false;
     }
     (void)gCoopSession.take_events();
+    gCoopWorld.start();
     std::fprintf(stderr, "[coop] room open on UDP port %u, %s, mods: %s\n", static_cast<unsigned>(gCoopSession.port()),
                  galaxy::coop::disc_text(gCoopDisc).c_str(), galaxy::coop::mods_text(coop_session_mods()).c_str());
     note_coop_room();
@@ -2154,6 +2161,7 @@ bool poll_coop_join() {
             gCoopSaveFolder = folder;
         }
         gCoopSaveFile = save->file;
+        gCoopWorld.start();
         gCoopLuigi.store(gCoopMenu.room().character == galaxy::CoopCharacter::Luigi, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
         galaxy::achievements::set_file(folder / "achievements.ini");
@@ -2524,6 +2532,64 @@ uint32_t svc_coop_list(void*, NebulaCoopListPlayer* players, uint32_t capacity, 
                    (from.host ? NEBULA_COOP_LIST_HOST : 0u) | (from.local ? NEBULA_COOP_LIST_YOU : 0u);
     }
     return static_cast<uint32_t>(list.size());
+}
+
+// What the game is told and hasn't taken yet (coop_world_take), in order.
+std::deque<galaxy::coop::WorldEvent> gCoopWorldWaiting;
+
+// The shared world: what the game's play did (galaxy::coop::World settles it, or sends it to the host to).
+void svc_coop_world_report(void*, const NebulaCoopWorldEvent* event) {
+    if (event == nullptr || !gCoopWorld.active()) return;
+    NebulaCoopWorldEvent copy = *event;
+    copy.name[sizeof(copy.name) - 1] = '\0';
+    using galaxy::coop::SaveKind;
+    switch (copy.kind) {
+    case NEBULA_COOP_WORLD_ENTER:
+        std::fprintf(stderr, "[coop] world: %s, scenario %d placed\n", copy.name, static_cast<int>(copy.scenario));
+        // Nothing waiting from the last scene is for this one (the save comes again whole).
+        gCoopWorldWaiting.clear();
+        gCoopWorld.enter({copy.name, copy.scenario});
+        return;
+    case NEBULA_COOP_WORLD_GONE: gCoopWorld.report_gone({copy.object, copy.value}); return;
+    case NEBULA_COOP_WORLD_STAR: gCoopWorld.report_save({SaveKind::Star, copy.name, copy.scenario, 0u}); return;
+    case NEBULA_COOP_WORLD_FLAG: gCoopWorld.report_save({SaveKind::Flag, copy.name, 0, 0u}); return;
+    case NEBULA_COOP_WORLD_VALUE: gCoopWorld.report_save({SaveKind::Value, copy.name, 0, copy.value}); return;
+    default: return;
+    }
+}
+
+// What the game is told, in order: what it can't take this call waits for the next.
+uint32_t svc_coop_world_take(void*, NebulaCoopWorldEvent* events, uint32_t capacity) {
+    std::deque<galaxy::coop::WorldEvent>& waiting = gCoopWorldWaiting;
+    if (!gCoopWorld.active()) {
+        waiting.clear();
+        return 0u;
+    }
+    for (galaxy::coop::WorldEvent& event : gCoopWorld.take()) waiting.push_back(std::move(event));
+    uint32_t count = 0u;
+    while (events != nullptr && count < capacity && !waiting.empty()) {
+        const galaxy::coop::WorldEvent& from = waiting.front();
+        NebulaCoopWorldEvent& to = events[count++];
+        to = {};
+        using Kind = galaxy::coop::WorldEvent::Kind;
+        if (from.kind == Kind::Ready) {
+            to.kind = NEBULA_COOP_WORLD_READY;
+        } else if (from.kind == Kind::Gone) {
+            to.kind = NEBULA_COOP_WORLD_GONE;
+            to.object = from.gone.object;
+            to.value = from.gone.how;
+        } else {
+            using galaxy::coop::SaveKind;
+            to.kind = from.save.kind == SaveKind::Star   ? NEBULA_COOP_WORLD_STAR
+                      : from.save.kind == SaveKind::Flag ? NEBULA_COOP_WORLD_FLAG
+                                                         : NEBULA_COOP_WORLD_VALUE;
+            to.scenario = from.save.scenario;
+            to.value = from.save.value;
+            std::snprintf(to.name, sizeof(to.name), "%s", from.save.name.c_str());
+        }
+        waiting.pop_front();
+    }
+    return count;
 }
 
 // The other players in this player's instance, for their copies: as they were kSnapshotDelay ago, by number. Who
@@ -4357,6 +4423,8 @@ int main(int argc, char** argv) {
     services.coop_menu = svc_coop_menu;
     services.coop_list = svc_coop_list;
     services.coop_remote = svc_coop_remote;
+    services.coop_world_report = svc_coop_world_report;
+    services.coop_world_take = svc_coop_world_take;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

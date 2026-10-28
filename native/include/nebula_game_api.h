@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 38u
+#define NEBULA_GAME_API_VERSION 39u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -186,6 +186,39 @@ enum {
     NEBULA_COOP_LIST_LUIGI = 1u << 0, /* plays Luigi */
     NEBULA_COOP_LIST_HOST = 1u << 1,  /* the room's host */
     NEBULA_COOP_LIST_YOU = 1u << 2,   /* this player */
+};
+
+/* Online co-op's shared world (coop_world_report and coop_world_take, docs/COOP_PLAN.md "Shared world state"): the
+   server decides it. The game reports what its own play did, and applies what it is told, as sm64coopdx's
+   collect_coin, collect_item and level_area_inform do:
+   - NEBULA_COOP_WORLD_ENTER (game to host): this scene's instance, `name` the stage and `scenario`, is placed. The
+     instance's record follows (GONE for each thing gone from it), then READY.
+   - NEBULA_COOP_WORLD_GONE (both ways): a placed thing is gone from the instance, `object` the game's key for its
+     placement and `value` NEBULA_COOP_GONE_*. What the server says is gone stays gone while anyone is in the
+     instance; an instance nobody else is in starts fresh.
+   - NEBULA_COOP_WORLD_STAR, _FLAG, _VALUE (both ways): the save. A Power Star (`name` the galaxy, `scenario` the
+     star), an event flag on, an event value (`value`). Stars and flags from any player are everyone's; event values
+     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks. */
+typedef struct NebulaCoopWorldEvent {
+    uint32_t kind;     /* NEBULA_COOP_WORLD_* */
+    uint32_t object;   /* GONE */
+    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value */
+    int32_t scenario;  /* ENTER and STAR */
+    char name[48];     /* ENTER and STAR: the stage; FLAG and VALUE: the name (Shift JIS) */
+} NebulaCoopWorldEvent;
+
+enum {
+    NEBULA_COOP_WORLD_ENTER = 1,
+    NEBULA_COOP_WORLD_READY,
+    NEBULA_COOP_WORLD_GONE,
+    NEBULA_COOP_WORLD_STAR,
+    NEBULA_COOP_WORLD_FLAG,
+    NEBULA_COOP_WORLD_VALUE,
+};
+
+enum {
+    NEBULA_COOP_GONE_COIN = 1u << 0,   /* a coin a player took: it counts for everyone in the instance */
+    NEBULA_COOP_GONE_PURPLE = 1u << 1, /* a purple coin a player took: the same, toward the 100 */
 };
 
 /* Nebula options the game follows (option). */
@@ -619,6 +652,11 @@ typedef struct NebulaHostServices {
     /* The other players in the local player's instance, by number, at most `capacity` into `players`: how many there
        are. Called on the simulation thread, each game scene frame. */
     uint32_t (*coop_remote)(void* user, NebulaCoopRemotePlayer* players, uint32_t capacity);
+    /* The shared world (NebulaCoopWorldEvent): what the game's play did, and what it is told, at most `capacity`
+       into `events` (how many there are; the rest wait for the next call). Ignored, and nothing, outside a room.
+       Called on the simulation thread. */
+    void (*coop_world_report)(void* user, const NebulaCoopWorldEvent* event);
+    uint32_t (*coop_world_take)(void* user, NebulaCoopWorldEvent* events, uint32_t capacity);
 } NebulaHostServices;
 
 enum {
