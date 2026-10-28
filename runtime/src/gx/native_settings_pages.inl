@@ -1544,6 +1544,31 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
     return rows;
 }
 
+// The PLAYER page: the player's name and character, theirs in every game they play (the main menu's Host and Join send
+// them). The name is a text, typed in place (start_settings_text); a change applies from the next game hosted or joined.
+std::vector<SettingsRow> player_page(const RuntimeSettings& runtime) {
+    std::vector<SettingsRow> rows;
+    const RuntimeCoopSettings& coop = runtime.coop;
+    SettingsRow name{"NAME",
+                     s_settings_text            ? s_settings_text->shown()
+                     : coop.player_name.empty() ? std::string("PLAYER")
+                                                : coop.player_name,
+                     nullptr,
+                     s_settings_text ? "TYPE YOUR NAME, OR PICK EACH LETTER WITH UP AND DOWN. A OR ENTER KEEPS IT, B OR "
+                                       "ESCAPE DROPS IT"
+                                     : "YOUR NAME OVER YOUR HEAD AND IN THE PLAYER LIST, FROM THE NEXT GAME YOU HOST OR JOIN"};
+    name.names = 2u;
+    name.text = true;
+    rows.push_back(std::move(name));
+    rows.push_back({"CHARACTER", coop.character == CoopCharacter::Luigi ? std::string("LUIGI") : std::string("MARIO"),
+                    [](RenderConfig&, int delta) {
+                        CoopCharacter& character = s_runtime_draft.coop.character;
+                        character = static_cast<CoopCharacter>(settings_step(static_cast<unsigned>(character), 2u, delta));
+                    },
+                    "WHO YOU PLAY AS, IN ANY SAVE. OTHER PLAYERS SEE YOU AS HIM"});
+    return rows;
+}
+
 std::vector<SettingsRow> system_page(const RenderFeatureCaps& caps) {
     std::vector<SettingsRow> rows;
     {
@@ -1575,10 +1600,11 @@ std::vector<SettingsRow> settings_page(unsigned tab, const RenderConfig& draft, 
     switch (tab % kNativeSettingsTabCount) {
     case 0: return display_page(draft);
     case 1: return graphics_page(draft);
-    case 4: return game_page(runtime);
-    case 5: return mods_page(draft);
-    case 6: return system_page(caps);
-    case 7: return online_page(runtime);
+    case kGeneralTab: return game_page(runtime);
+    case kPlayerTab: return player_page(runtime);
+    case kSystemTab: return system_page(caps);
+    case kOnlineTab: return online_page(runtime);
+    case kModsTab: return mods_page(draft);
     default: return {};
     }
 }

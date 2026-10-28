@@ -28,7 +28,6 @@ using namespace NebulaUi;
 namespace {
     // Screen units (NebulaUi::readScreen): 456 high, 810 wide at 16:9.
     const f32 cMargin = 16.0f;     // the window from the screen's edges
-    const f32 cLogoShare = 0.36f;  // the main menu: the screen's height above its window, for the game's logo
     const f32 cMaxWidth = 900.0f;  // a wide screen keeps a window that reads as one
     const f32 cPad = 26.0f;        // the window's inside
     const f32 cTitleSize = 21.0f;
@@ -704,8 +703,6 @@ public:
     bool isPointerOnItem() const { return mHoverButton != nullptr || mHoverTab >= 0 || mHoverRow >= 0; }
     // The D-pad or stick moved the selection: the pointer waits until it moves.
     void takeFromPointer() { mPointerMode = false; }
-    // The room above the main menu's window for the game's logo: its centre's height and its size (screen units).
-    void getLogoRoom(f32* pCentreY, f32* pWidth, f32* pHeight) const;
 
 private:
     bool build();
@@ -852,10 +849,6 @@ private:
     f32 mHintsY;
     f32 mFooterY;
     f32 mValueRight;
-    // The main menu: its window lower and shorter, the room above it the logo's.
-    bool mLogoShape;
-    f32 mLogoRoom;
-    f32 mMenuY;  // the window's centre at rest
 };
 
 namespace {
@@ -866,72 +859,6 @@ namespace {
     bool sMainMenuReading = false;  // the main menu took the pad last frame
     u32 sMainMenuKeys = 0;          // the host's keys held last frame (NEBULA_COOP_KEY_*)
     NebulaMenuFocus::Repeat sMainMenuRepeat = {NebulaMenuFocus::Direction_None, 0};
-    // The game's title logo above the main menu (FileSelector's), and its panes' box as the layout has them.
-    LayoutActor* sLogo = nullptr;
-    bool sLogoMeasured = false;
-    f32 sLogoBox[4];  // left, bottom, right, top
-
-    // The box of `pPane`'s drawn panes (those with a material: pictures, windows, text), from its parent's place
-    // (`x`, `y`) and scale; rotations aside.
-    void measurePanes(const nw4r::lyt::Pane* pPane, f32 x, f32 y, f32 scaleX, f32 scaleY, bool root) {
-        if (!pPane->IsVisible()) {
-            return;
-        }
-        // Its place, then its corners from its base position (0 to 8: left to right, top to bottom).
-        const f32 px = root ? 0.0f : x + pPane->mTranslate.x * scaleX;
-        const f32 py = root ? 0.0f : y + pPane->mTranslate.y * scaleY;
-        const f32 sx = root ? 1.0f : scaleX * pPane->mScale.x;
-        const f32 sy = root ? 1.0f : scaleY * pPane->mScale.y;
-        if (!root && pPane->mpMaterial != nullptr && pPane->mSize.width > 1.0f && pPane->mSize.height > 1.0f) {
-            const f32 w = pPane->mSize.width * __builtin_fabsf(sx);
-            const f32 h = pPane->mSize.height * __builtin_fabsf(sy);
-            const f32 left = px - w * 0.5f * (pPane->mBasePosition % 3);
-            const f32 top = py + h * 0.5f * (pPane->mBasePosition / 3);
-            sLogoBox[0] = left < sLogoBox[0] ? left : sLogoBox[0];
-            sLogoBox[1] = top - h < sLogoBox[1] ? top - h : sLogoBox[1];
-            sLogoBox[2] = left + w > sLogoBox[2] ? left + w : sLogoBox[2];
-            sLogoBox[3] = top > sLogoBox[3] ? top : sLogoBox[3];
-        }
-        for (nw4r::lyt::PaneList::ConstIterator it = pPane->GetChildList().GetBeginIter(); it != pPane->GetChildList().GetEndIter(); ++it) {
-            measurePanes(&*it, px, py, sx, sy, false);
-        }
-    }
-
-    // The logo fitted into the room above the main menu's window: its root pane scaled down to the room, centred in it.
-    void placeLogo() {
-        if (sLogo == nullptr || sLogo->getLayoutManager() == nullptr) {
-            return;
-        }
-        nw4r::lyt::Pane* pRoot = sLogo->getLayoutManager()->getPane(nullptr);
-        if (pRoot == nullptr) {
-            return;
-        }
-        if (!sLogoMeasured) {
-            sLogoBox[0] = sLogoBox[1] = 100000.0f;
-            sLogoBox[2] = sLogoBox[3] = -100000.0f;
-            measurePanes(pRoot, 0.0f, 0.0f, 1.0f, 1.0f, true);
-            sLogoMeasured = true;
-        }
-        f32 centreY;
-        f32 width;
-        f32 height;
-        sScreen->getLogoRoom(&centreY, &width, &height);
-        if (height <= 0.0f) {
-            return;
-        }
-        const f32 boxWidth = sLogoBox[2] - sLogoBox[0];
-        const f32 boxHeight = sLogoBox[3] - sLogoBox[1];
-        f32 scale = 1.0f;
-        if (boxWidth > 1.0f && boxHeight > 1.0f) {
-            scale = height * 0.95f / boxHeight;
-            scale = width * 0.9f / boxWidth < scale ? width * 0.9f / boxWidth : scale;
-            scale = scale > 1.0f ? 1.0f : scale;
-        }
-        const f32 boxX = boxWidth > 1.0f ? (sLogoBox[0] + sLogoBox[2]) * 0.5f : 0.0f;
-        const f32 boxY = boxHeight > 1.0f ? (sLogoBox[1] + sLogoBox[3]) * 0.5f : 0.0f;
-        pRoot->mScale = nw4r::math::VEC2(scale, scale);
-        pRoot->mTranslate = nw4r::math::VEC3(-boxX * scale, centreY - boxY * scale, 0.0f);
-    }
 
     // The main menu's D-pad or stick (a press, then repeats while held: NebulaMenuFocus::readPress, as every Nebula
     // menu), A, B and Minus (Tab and Escape from the host): the game reads them itself (on every platform the keyboard and controllers reach it as
@@ -982,7 +909,7 @@ NebulaSettingsScreen::NebulaSettingsScreen()
       mHoverTab(-1), mPressing(false), mPressRow(-1), mPressY(0.0f), mPressScroll(0.0f), mScrollDrag(false), mDraggedAt(-1), mHoverArrow(0),
       mHoverSlider(false), mHeldArrow(0), mHeldFrames(0), mSliderRow(-1), mHoverRowButton(-1), mHoverButton(nullptr), mScaleX(1.0f), mWidth(0.0f), mHeight(0.0f), mPanelWidth(0.0f),
       mPanelHeight(0.0f), mLeft(0.0f), mRight(0.0f), mTitleY(0.0f), mTabY(0.0f), mListTop(0.0f), mListBottom(0.0f), mStatusY(0.0f),
-      mHintsY(0.0f), mFooterY(0.0f), mValueRight(0.0f), mLogoShape(false), mLogoRoom(0.0f), mMenuY(0.0f) {
+      mHintsY(0.0f), mFooterY(0.0f), mValueRight(0.0f) {
     memset(mTabs, 0, sizeof(mTabs));
     memset(mHalves, 0, sizeof(mHalves));
     memset(mTabWordWidths, 0, sizeof(mTabWordWidths));
@@ -1252,10 +1179,7 @@ void NebulaSettingsScreen::arrange() {
     mRoot->mScale = nw4r::math::VEC2(mScaleX, 1.0f);
     mPanelWidth = mWidth - cMargin * 2.0f;
     mPanelWidth = mPanelWidth > cMaxWidth ? cMaxWidth : mPanelWidth;
-    // The main menu leaves the top of the screen to the game's logo, as the title screen shows it.
-    mLogoRoom = mLogoShape ? mHeight * cLogoShare : 0.0f;
-    mPanelHeight = mHeight - cMargin * 2.0f - mLogoRoom;
-    mMenuY = -mLogoRoom * 0.5f;
+    mPanelHeight = mHeight - cMargin * 2.0f;
     const f32 top = mPanelHeight * 0.5f - cPad;
     mLeft = -mPanelWidth * 0.5f + cPad;
     mRight = mPanelWidth * 0.5f - cPad;
@@ -1280,15 +1204,6 @@ void NebulaSettingsScreen::arrange() {
         mQuestionShadow->mSize = nw4r::lyt::Size(cQuestionWidth, cQuestionHeight);
     }
     mQuestionShadow->mTranslate = nw4r::math::VEC3(6.0f, -6.0f, 0.0f);
-}
-
-// The main menu's shape (arrange): the window's top cMargin under the room, the room's top half a margin under the
-// screen's, whatever shows now (the settings opened over the main menu fill the screen).
-void NebulaSettingsScreen::getLogoRoom(f32* pCentreY, f32* pWidth, f32* pHeight) const {
-    const f32 room = mHeight * cLogoShare;
-    *pCentreY = mHeight * 0.5f - cMargin * 0.5f - room * 0.5f;
-    *pWidth = mWidth * mScaleX;
-    *pHeight = room;
 }
 
 void NebulaSettingsScreen::fillButton(Button& rButton, const char* pWordId) {
@@ -1478,11 +1393,12 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
             key = !under ? -1 : i == 1 ? KeyBack : KeyReset;
             pWord = !under ? nullptr : i == 1 ? "SettingsBack" : "SettingsHintReset";
         }
-        if (mainMenu && rView.editing != 0) {
-            // A text being edited: kept, dropped, a letter deleted.
+        if (rView.editing != 0) {
+            // A text being edited: kept, dropped, a letter deleted (the settings' PLAYER page deletes with X, as it
+            // undoes).
             static const s32 cEditKeys[cHintsMax] = {KeyBind, KeyBack, KeyErase};
             static const char* const cEditWords[cHintsMax] = {"CoopHintDone", "CoopHintCancel", "CoopHintDelete"};
-            key = cEditKeys[i];
+            key = i == 2 && !mainMenu ? KeyUndo : cEditKeys[i];
             pWord = cEditWords[i];
         }
         fillKeyCap(rHint.mKey, key, rView.input, controls);
@@ -1792,7 +1708,7 @@ void NebulaSettingsScreen::clickRow(const NebulaSettingsView& rView, s32 row) {
     mPointerMode = true;
     mPointerRow = row;
     if ((hasButtons(pData) && (mHoverRowButton >= 0 || rRow.mButtonCount == 1)) || (pData->flags & NEBULA_SETTINGS_ROW_TEXT) != 0) {
-        // A main menu text row is edited (or kept, clicked while edited) as A does.
+        // A text row is edited (or kept, clicked while edited) as A does.
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, row);
         __NebulaSettingsInput(NEBULA_SETTINGS_PRESS, mHoverRowButton >= 0 ? mHoverRowButton : 0);
     } else if ((pData->flags & NEBULA_SETTINGS_ROW_CHANGES) != 0 && !hasSlider(*pData)) {
@@ -2399,12 +2315,9 @@ void NebulaSettingsScreen::placeRows(const NebulaSettingsView& rView) {
 // Where each piece is this frame: the drop, the pages' buttons, the rows or the MODS page's lists, the footer, the
 // question.
 void NebulaSettingsScreen::place(const NebulaSettingsView& rView) {
-    // The main menu's sky and logo stay bright around its window.
-    mDim->mAlpha = mLogoShape ? 0 : toAlpha(clamp(mOpen * 1.5f, 0.0f, 1.0f));
+    mDim->mAlpha = toAlpha(clamp(mOpen * 1.5f, 0.0f, 1.0f));
     const f32 dropHeight = mHome ? mQuestionPanel->mSize.height : mPanelHeight;
-    const f32 restY = mHome ? 0.0f : mMenuY;
-    mMenu->mTranslate =
-        nw4r::math::VEC3(0.0f, restY + (1.0f - easeOut(mOpen)) * (mHeight * 0.5f - restY + dropHeight * 0.5f + 16.0f), 0.0f);
+    mMenu->mTranslate = nw4r::math::VEC3(0.0f, (1.0f - easeOut(mOpen)) * (mHeight * 0.5f + dropHeight * 0.5f + 16.0f), 0.0f);
     if (mHome) {
         placeHome();
         return;
@@ -2664,7 +2577,6 @@ void NebulaSettingsScreen::step(const NebulaSettingsView& rView, s32 homeView) {
             }
             mFooter[FooterApply].mChip.mFocusLevel = 0.0f;
             mFooter[FooterBack].mChip.mFocusLevel = 0.0f;
-            mLogoShape = !home && rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
             arrange();
             memcpy(&mShown, &rView, sizeof(rView));
             if (home) {
@@ -2808,9 +2720,6 @@ namespace NebulaSettingsMenu {
         } else {
             sMainMenuReading = false;
         }
-        if (sMainMenuActive) {
-            placeLogo();
-        }
         // The game plays on under the menu, its sound and music with it (docs/COOP_PLAN.md: nothing a player opens
         // stops the world), but without the player's input from the first frame of the drop to the last of the rise:
         // GameSystem holds the remotes once the menu has read them. The HOME Menu holds the game itself
@@ -2848,11 +2757,6 @@ namespace NebulaSettingsMenu {
 
     void setMainMenuActive(bool active) {
         sMainMenuActive = active;
-    }
-
-    void setMainMenuLogo(LayoutActor* pLogo) {
-        sLogo = pLogo;
-        sLogoMeasured = false;
     }
 };  // namespace NebulaSettingsMenu
 #endif

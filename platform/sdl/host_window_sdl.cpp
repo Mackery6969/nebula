@@ -440,9 +440,11 @@ void pump_events(int timeout_ms) noexcept {
         wait_cpu = 0;
         waits = 0;
     }
-    // A main menu text row being edited takes the keyboard's typing (Android: its on-screen keyboard shows).
+    // A main menu text row being edited, or the settings' PLAYER page name, takes the keyboard's typing (Android: its
+    // on-screen keyboard shows).
     static bool s_text_input = false;
-    if (g_window != nullptr && galaxy::gx::coop_text_entry() != s_text_input) {
+    const bool typing = galaxy::gx::coop_text_entry() || galaxy::gx::native_settings_typing();
+    if (g_window != nullptr && typing != s_text_input) {
         s_text_input = !s_text_input;
         if (s_text_input) {
             SDL_StartTextInput(g_window);
@@ -540,7 +542,7 @@ void pump_events(int timeout_ms) noexcept {
                 }
                 break;
             }
-            if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat &&
+            if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat && !galaxy::gx::native_settings_typing() &&
                 galaxy::gx::coop_chat_key(static_cast<std::uint32_t>(virtual_key(event.key.scancode)))) {
                 // T in a co-op game: the chat's line opens (galaxy/coop_chat.h), and the game doesn't see the key.
                 break;
@@ -557,7 +559,9 @@ void pump_events(int timeout_ms) noexcept {
             // Typed characters (UTF-8): the printable ASCII the game's font draws.
             for (const char* text = event.text.text; text != nullptr && *text != '\0'; ++text) {
                 const unsigned char c = static_cast<unsigned char>(*text);
-                if (c >= 0x20u && c < 0x7Fu) galaxy::gx::push_coop_text(static_cast<char32_t>(c));
+                if (c >= 0x20u && c < 0x7Fu && !galaxy::gx::native_settings_type(static_cast<char32_t>(c))) {
+                    galaxy::gx::push_coop_text(static_cast<char32_t>(c));
+                }
             }
             break;
         case SDL_EVENT_GAMEPAD_ADDED:

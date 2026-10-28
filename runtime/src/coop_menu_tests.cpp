@@ -84,12 +84,12 @@ void test_menu(const fs::path& scratch) {
     menu.open();
     galaxy::coop::MenuView view = menu.view();
     expect(view.open && view.page == 0u && view.pages.size() == 1u && view.pages[0] == "PLAY", "one page, open");
-    expect(view.rows.size() == 5u && view.selected == 0u, "five rows, Host selected");
-    expect(view.rows[0].label == "HOST" && view.rows[1].value == "OPEN" && view.rows[2].label == "PLAYER" &&
-               view.rows[3].value == "OPEN",
-           "Host, Join and Player open their pages, Options opens");
+    expect(view.rows.size() == 4u && view.selected == 0u, "four rows, Host selected");
+    expect(view.rows[0].label == "HOST" && view.rows[1].value == "OPEN" && view.rows[2].label == "OPTIONS" &&
+               view.rows[2].value == "OPEN",
+           "Host and Join open their pages, Options opens");
 
-    menu.move(3);
+    menu.move(2);
     menu.press(0u);
     expect(menu.take_command() == MenuCommand::Settings, "Options opens the settings");
     expect(menu.take_command() == MenuCommand::None, "a command is taken once");
@@ -99,9 +99,9 @@ void test_menu(const fs::path& scratch) {
     menu.move(1);
     expect(menu.view().selected == 0u, "down from the last row wraps to the first");
     menu.move(-1);
-    expect(menu.view().selected == 4u, "up from the first row wraps to the last");
+    expect(menu.view().selected == 3u, "up from the first row wraps to the last");
     menu.select_row(9u);
-    expect(menu.view().selected == 4u, "a row past the page is ignored");
+    expect(menu.view().selected == 3u, "a row past the page is ignored");
     menu.press(1u);
     expect(menu.take_command() == MenuCommand::None, "a button the row doesn't have is ignored");
     menu.back();
@@ -109,8 +109,8 @@ void test_menu(const fs::path& scratch) {
 
     MainMenu no_settings(false);
     no_settings.open();
-    expect(no_settings.view().rows[3].value == "-OPEN", "Options unavailable without the in-game settings");
-    no_settings.select_row(3u);
+    expect(no_settings.view().rows[2].value == "-OPEN", "Options unavailable without the in-game settings");
+    no_settings.select_row(2u);
     no_settings.press(0u);
     expect(no_settings.take_command() == MenuCommand::None, "an unavailable Options does nothing");
 
@@ -255,7 +255,7 @@ void test_menu(const fs::path& scratch) {
     expect(host.take_command() == MenuCommand::Play && host.chosen_save() == second, "a save played at once");
 }
 
-void test_join_and_player() {
+void test_join() {
     using galaxy::coop::MainMenu;
     using galaxy::coop::MenuCommand;
     MainMenu menu(true);
@@ -320,31 +320,36 @@ void test_join_and_player() {
     menu.back();
     expect(menu.view().pages[0] == "PLAY" && menu.view().selected == 1u, "back on Join");
 
-    menu.select_row(2u);
-    menu.press(0u);
-    view = menu.view();
-    expect(view.pages[0] == "PLAYER" && view.rows[0].value == "PLAYER" && view.rows[1].value == "MARIO",
-           "the Player page: no name yet, Mario");
-    menu.move(1);
-    menu.change(1);
-    expect(menu.room().character == galaxy::CoopCharacter::Luigi && menu.view().rows[1].value == "LUIGI",
-           "right: Luigi");
-    menu.reset();
-    expect(menu.room().character == galaxy::CoopCharacter::Mario, "Tab: back to Mario");
-    menu.move(-1);
-    menu.press(0u);
-    // Letter by letter, as a controller: up from nothing starts at A.
-    menu.move(-1);
-    menu.move(-1);
-    menu.change(1);
-    menu.move(1);
-    expect(menu.view().rows[0].value == "B[']", "letters picked by a pad: down past the end starts at the last");
-    menu.press(0u);
-    expect(menu.room().player_name.size() == 2u && menu.room().player_name[0] == 'B', "the name is kept");
-    menu.press(0u);
-    for (int i = 0; i < 30; ++i) menu.type(U'x');
-    menu.press(0u);
-    expect(menu.room().player_name.size() == galaxy::coop::kPlayerNameLimit, "a name is cut at its limit");
+}
+
+// A text row's editing, as Options' PLAYER page and the main menu's text rows have it.
+void test_text_edit() {
+    using galaxy::coop::TextEdit;
+    using galaxy::coop::TextKind;
+    TextEdit name(TextKind::PlayerName, {});
+    expect(name.shown() == "_", "an empty text: the cursor where the first letter goes");
+    // Letter by letter, as a controller: up from nothing starts at A, down at the last letter.
+    name.step_letter(1);
+    name.step_letter(1);
+    expect(name.type(galaxy::coop::kTextRight) == TextEdit::Result::Editing, "right moves on");
+    name.step_letter(-1);
+    expect(name.shown() == "B[']", "letters picked by a pad: down past the end starts at the last");
+    name.erase();
+    expect(name.text() == "B" && name.shown() == "B_", "Minus deletes the letter at the cursor");
+    expect(name.type(galaxy::coop::kTextEnter) == TextEdit::Result::Keep && name.text() == "B", "Enter keeps it");
+    for (int i = 0; i < 30; ++i) name.type(U'x');
+    expect(name.text().size() == galaxy::coop::kPlayerNameLimit, "a name is cut at its limit");
+    name.type(galaxy::coop::kTextHome);
+    name.type(galaxy::coop::kTextDelete);
+    expect(name.text().size() == galaxy::coop::kPlayerNameLimit - 1u && name.shown().rfind("[x]", 0) == 0u,
+           "Home, then Delete takes the first letter");
+    expect(name.type(galaxy::coop::kTextEscape) == TextEdit::Result::Drop, "Escape drops it");
+
+    TextEdit port(TextKind::Port, "77");
+    port.type(U'a');
+    port.type(U'7');
+    for (int i = 0; i < 5; ++i) port.type(U'1');
+    expect(port.text() == "77711", "a port takes five digits only");
 }
 
 void test_mods() {
@@ -401,7 +406,8 @@ int main() {
     fs::create_directories(scratch, error);
     test_saves(scratch);
     test_menu(scratch);
-    test_join_and_player();
+    test_join();
+    test_text_edit();
     test_mods();
     fs::remove_all(scratch, error);
 

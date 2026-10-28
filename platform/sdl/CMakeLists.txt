@@ -122,6 +122,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/coop_session.cpp
     ${rt}/coop_chat.cpp
     ${rt}/coop_snapshot.cpp
+    ${rt}/coop_world.cpp
     ${rt}/net/udp.cpp
     ${rt}/net/link.cpp
     ${rt}/net/direct_transport.cpp

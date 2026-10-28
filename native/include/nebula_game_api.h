@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 39u
+#define NEBULA_GAME_API_VERSION 40u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -188,6 +188,39 @@ enum {
     NEBULA_COOP_LIST_YOU = 1u << 2,   /* this player */
 };
 
+/* Online co-op's shared world (coop_world_report and coop_world_take, docs/COOP_PLAN.md "Shared world state"): the
+   server decides it. The game reports what its own play did, and applies what it is told, as sm64coopdx's
+   collect_coin, collect_item and level_area_inform do:
+   - NEBULA_COOP_WORLD_ENTER (game to host): this scene's instance, `name` the stage and `scenario`, is placed. The
+     instance's record follows (GONE for each thing gone from it), then READY.
+   - NEBULA_COOP_WORLD_GONE (both ways): a placed thing is gone from the instance, `object` the game's key for its
+     placement and `value` NEBULA_COOP_GONE_*. What the server says is gone stays gone while anyone is in the
+     instance; an instance nobody else is in starts fresh.
+   - NEBULA_COOP_WORLD_STAR, _FLAG, _VALUE (both ways): the save. A Power Star (`name` the galaxy, `scenario` the
+     star), an event flag on, an event value (`value`). Stars and flags from any player are everyone's; event values
+     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks. */
+typedef struct NebulaCoopWorldEvent {
+    uint32_t kind;     /* NEBULA_COOP_WORLD_* */
+    uint32_t object;   /* GONE */
+    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value */
+    int32_t scenario;  /* ENTER and STAR */
+    char name[48];     /* ENTER and STAR: the stage; FLAG and VALUE: the name (Shift JIS) */
+} NebulaCoopWorldEvent;
+
+enum {
+    NEBULA_COOP_WORLD_ENTER = 1,
+    NEBULA_COOP_WORLD_READY,
+    NEBULA_COOP_WORLD_GONE,
+    NEBULA_COOP_WORLD_STAR,
+    NEBULA_COOP_WORLD_FLAG,
+    NEBULA_COOP_WORLD_VALUE,
+};
+
+enum {
+    NEBULA_COOP_GONE_COIN = 1u << 0,   /* a coin a player took: it counts for everyone in the instance */
+    NEBULA_COOP_GONE_PURPLE = 1u << 1, /* a purple coin a player took: the same, toward the 100 */
+};
+
 /* Nebula options the game follows (option). */
 enum {
     NEBULA_OPTION_TEXT_SPEED = 1, /* 1 to 3: text steps revealed per frame; 4: each page at once */
@@ -251,7 +284,7 @@ typedef struct NebulaFsRequest {
    The host keeps the settings, their pages, the draft and its apply, and takes the keyboard and controllers while the
    menu is open; the game shows it (and takes the pointer, settings_input). Texts are the host's own, in English
    (UTF-8): the game names each in the played language (NebulaSettingsMenu). */
-#define NEBULA_SETTINGS_PAGES 8
+#define NEBULA_SETTINGS_PAGES 9
 #define NEBULA_SETTINGS_ROWS 96
 
 enum {
@@ -269,7 +302,7 @@ enum {
     NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at`;
                                             without CHANGES, a loading bar `slider_at` of `slider_steps` full */
     NEBULA_SETTINGS_ROW_BINDING = 1024,  /* a control's binding: changing it waits for an input */
-    NEBULA_SETTINGS_ROW_TEXT = 2048,     /* the main menu: a text (a name, an address); pressed, it is edited in place */
+    NEBULA_SETTINGS_ROW_TEXT = 2048,     /* a text (a name, an address); pressed, it is edited in place */
 };
 
 /* The game's button icons (its picture font's A, B, C, Z, 1, 2, Plus, Minus, HOME and Control Pad, in this order):
@@ -385,7 +418,7 @@ typedef struct NebulaSettingsView {
     char status_text[160];
     uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
     uint32_t back; /* the main menu: a page under the main one, which B leaves; its rows reset to their defaults */
-    uint32_t editing; /* the main menu: the selected text row is edited (A keeps it, B drops it, Minus deletes) */
+    uint32_t editing; /* the selected text row is edited (A keeps it, B drops it, Minus or X deletes) */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -418,7 +451,7 @@ enum {
    PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
    game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
    for (NEBULA_COOP_KEY_*), outside Nebula's settings menu and the main menu's text rows.
-   NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (the Player page's character as Host played), else 0;
+   NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (Options' PLAYER page's character as Host played), else 0;
    MR::isPlayerLuigi follows it in every save. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
@@ -651,6 +684,11 @@ typedef struct NebulaHostServices {
     /* Online co-op's chat as it shows now (NebulaCoopChatView): nothing outside a room's game. Called on the simulation
        thread, each frame the game shows play. */
     void (*coop_chat)(void* user, NebulaCoopChatView* view);
+    /* The shared world (NebulaCoopWorldEvent): what the game's play did, and what it is told, at most `capacity`
+       into `events` (how many there are; the rest wait for the next call). Ignored, and nothing, outside a room.
+       Called on the simulation thread. */
+    void (*coop_world_report)(void* user, const NebulaCoopWorldEvent* event);
+    uint32_t (*coop_world_take)(void* user, NebulaCoopWorldEvent* events, uint32_t capacity);
 } NebulaHostServices;
 
 enum {

@@ -2,16 +2,17 @@
 // every platform. The game draws it with the settings menu's screen (NebulaSettingsMenu) and sends its input back;
 // what the player chose (play, quit, the settings) waits until the game takes it.
 //
-// The main page: Host, Join, Player, Options, Quit. Host opens the Host page: the save to play (left and right through
-// the saves, then New save), Rename and Erase, the room's port and password, its settings (room(): the coop_* runtime
+// The main page: Host, Join, Options, Quit. Host opens the Host page: the save to play (left and right through the
+// saves, then New save), Rename and Erase, the room's port and password, its settings (room(): the coop_* runtime
 // settings), the mods it plays with (a page of their own) and Host, which plays. Join opens the Join page (the address
-// and password, then Join, which connects; Cancel or B stops it), Player the Player page (the name and character). B or
-// Back returns to the main page. While a join connects, the joining screen takes the Join page's place: what the join
-// waits for, a loading bar and Cancel.
+// and password, then Join, which connects; Cancel or B stops it). B or Back returns to the main page. While a join
+// connects, the joining screen takes the Join page's place: what the join waits for, a loading bar and Cancel. The
+// player's name and character are Options' (its PLAYER page): the menu plays with room()'s, which the host keeps up
+// with them.
 //
-// Text rows (a name, a port, an address, a password) are edited in place: pressed, they take the keyboard's typing
-// (type()) or, letter by letter, a controller's: up and down pick the letter at the cursor, left and right move it,
-// Minus (Tab's reset) deletes, A keeps the text and B drops it.
+// Text rows (a name, a port, an address, a password) are edited in place (TextEdit): pressed, they take the keyboard's
+// typing (type()) or, letter by letter, a controller's: up and down pick the letter at the cursor, left and right move
+// it, Minus (Tab's reset) deletes, A keeps the text and B drops it.
 #pragma once
 
 #include "galaxy/runtime_settings.h"
@@ -75,8 +76,36 @@ enum TextKey : char32_t {
     kTextEnd,
 };
 
-// The longest player name the Player page takes (nametags stay short).
+// The longest player name Options' PLAYER page takes (nametags stay short).
 inline constexpr std::size_t kPlayerNameLimit = 20u;
+
+// What a text row holds: the letters it takes, and how many.
+enum class TextKind { Name, PlayerName, Password, Address, Port };
+
+// A text being edited in place, its cursor on a letter or past the last (where the next one goes). The keyboard types
+// into it (type()); a controller steps the letter at the cursor through the ones its kind takes (step_letter()).
+class TextEdit {
+public:
+    enum class Result { Editing, Keep, Drop };
+
+    TextEdit() = default;
+    TextEdit(TextKind kind, std::string text);
+
+    // A printable character or a TextKey: Enter keeps the text, Escape drops it.
+    Result type(char32_t key);
+    // Up (1) the letter after the one at the cursor, down (-1) the one before; past the last letter, a new one.
+    void step_letter(int delta);
+    // Minus or Tab: the letter at the cursor, or the one before it at the end.
+    void erase();
+    [[nodiscard]] const std::string& text() const noexcept { return text_; }
+    // The text with its cursor: the letter at it in brackets, or a line after the text where the next one goes.
+    [[nodiscard]] std::string shown() const;
+
+private:
+    TextKind kind_ = TextKind::Name;
+    std::string text_;
+    std::size_t cursor_ = 0u;
+};
 
 class MainMenu {
 public:
@@ -138,13 +167,12 @@ public:
     void play(std::string id);
 
 private:
-    enum class Screen { Main, Host, Mods, Join, Player, Joining };
-    enum class Field { None, SaveName, Port, Password, Address, PlayerName };
+    enum class Screen { Main, Host, Mods, Join, Joining };
+    enum class Field { None, SaveName, Port, Password, Address };
     struct Edit {
         Field field = Field::None;
         unsigned row = 0u;
-        std::string text;
-        std::size_t cursor = 0u;
+        TextEdit text;
     };
 
     [[nodiscard]] std::vector<MenuRow> rows() const;
@@ -158,7 +186,6 @@ private:
     void press_mods(unsigned row);
     void start_edit(Field field, unsigned row);
     void finish_edit();
-    void step_letter(int delta);
     void read_mods();
     void toggle_mod(unsigned index);
 

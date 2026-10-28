@@ -5,6 +5,7 @@
 // show as a jump.
 #pragma once
 
+#include "galaxy/coop_session.h"
 #include "galaxy/net/transport.h"
 #include "galaxy/runtime_settings.h"
 
@@ -17,12 +18,16 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace galaxy::coop {
 
 // The session's message type the snapshots go as (galaxy/coop_session.h: the features' first).
 inline constexpr std::uint8_t kSnapshotMessage = 32u;
+// A joiner's snapshot as the host passes it on to the others in its instance (a joiner sends its own to the host
+// alone, which passes it to who should see it): who it is from, then its bytes.
+inline constexpr std::uint8_t kSnapshotRelayMessage = 33u;
 // How often a player sends its own.
 inline constexpr std::chrono::milliseconds kSnapshotInterval{33};
 // How far behind the latest snapshot the others are drawn: a little over two snapshots, so one may be lost.
@@ -57,6 +62,27 @@ inline constexpr std::size_t kSnapshotAnimationLimit = 47u;
 [[nodiscard]] std::vector<std::uint8_t> encode_snapshot(const PlayerSnapshot& snapshot);
 // Nothing when it's cut short or not a snapshot.
 [[nodiscard]] std::optional<PlayerSnapshot> decode_snapshot(std::span<const std::uint8_t> data);
+
+struct RelayedSnapshot {
+    net::PeerId from = net::kNoPeer;
+    std::span<const std::uint8_t> snapshot;
+};
+[[nodiscard]] std::vector<std::uint8_t> encode_relayed_snapshot(net::PeerId from, std::span<const std::uint8_t> snapshot);
+[[nodiscard]] std::optional<RelayedSnapshot> decode_relayed_snapshot(std::span<const std::uint8_t> data);
+
+// Who a snapshot from `sender` in an instance goes to (docs/COOP_PLAN.md "Instances"): the room's other players whose
+// place is that instance, neither the sender nor this player. Players elsewhere get none, so a room's traffic grows
+// with how many share each instance, not with the room's size.
+[[nodiscard]] std::vector<net::PeerId> snapshot_audience(std::span<const SessionPlayer> players,
+                                                         std::string_view stage, int scenario, net::PeerId sender);
+
+class RemotePlayers;
+// The snapshots over a session: `players` gets the others' as they come (a joiner's straight from the host, the other
+// joiners' passed on by it), and a host passes each joiner's on to its audience. Set before hosting or joining.
+void listen_snapshots(Session& session, RemotePlayers& players);
+// This player's snapshot: a host's to each player in its instance, a joiner's to the host alone (it passes it on), so
+// a joiner's upload stays one snapshot however many share its instance. False when not in a room.
+bool send_snapshot(Session& session, const PlayerSnapshot& snapshot);
 
 // Between two snapshots of the same player: positions and directions along the way, angles the short way round, the
 // animation the later one's (its frame moved along when both play the same).

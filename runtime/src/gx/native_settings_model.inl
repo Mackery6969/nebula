@@ -19,6 +19,7 @@ bool dlss_hold_back(RenderConfig& applied, const RenderConfig& live);
 bool dlss_prompt_key(WPARAM key, bool was_down);
 bool mods_restart_key(WPARAM key, bool was_down);
 bool mods_page_key(WPARAM key, bool accept, bool was_down);
+void end_settings_text(bool keep);
 unsigned mods_draft_changes();
 void commit_mods_draft();
 void forget_mods_scan();
@@ -29,8 +30,8 @@ std::string dlss_footer(std::uint64_t now_ms, bool& error);
 NativeSettingsStatus dlss_status(std::uint64_t now_ms);
 constexpr int kDlssDownloadMegabytes = 31;  // NVIDIA's DLSS files, as downloaded
 
-// Settings pages built from rows (DISPLAY, GRAPHICS, GAME, MODS, SYSTEM: settings_page): a label, the
-// value for the draft, how left/right change the draft (none: the row is fixed) and a help line; a
+// Settings pages built from rows (DISPLAY, GRAPHICS, GAME, PLAYER, SYSTEM, ONLINE, MODS: settings_page): a label,
+// the value for the draft, how left/right change the draft (none: the row is fixed) and a help line; a
 // heading starts a section and is never selected. CONTROLS and AUDIO keep their own rows.
 struct SettingsRow {
     std::string label;
@@ -49,6 +50,7 @@ struct SettingsRow {
     // A setting along a range (a slider): its steps from the first value and where it is.
     std::uint16_t slider_steps = 0u;
     std::uint16_t slider_at = 0u;
+    bool text = false;  // a text (the player's name): pressed, it is edited in place
 };
 
 // A row of buttons; its value is their words with '|' between them (NEBULA_SETTINGS_ROW_BUTTONS).
@@ -255,8 +257,14 @@ bool s_settings_leave_asking = false;
 // Apply saved mod changes this session did not start with: the menu asks whether to restart now.
 std::atomic<bool> s_mods_restart_ask{false};
 // The pages, in order.
-constexpr const char* kNativeSettingsTabNames[] = {"DISPLAY", "GRAPHICS", "CONTROLS", "AUDIO", "GENERAL", "MODS", "SYSTEM",
-                                                   "ONLINE"};
+constexpr const char* kNativeSettingsTabNames[] = {"DISPLAY", "GRAPHICS", "CONTROLS", "AUDIO", "GENERAL", "PLAYER",
+                                                   "SYSTEM", "ONLINE", "MODS"};
+// The PLAYER page's name as it is typed (galaxy::coop::TextEdit), into s_runtime_draft once kept; none while no text is
+// edited. Under s_native_settings_mutex; s_settings_typing says whether one is, for the window's typing. A text started
+// with Space drops the space typed with it (s_settings_text_swallow, until then).
+std::optional<galaxy::coop::TextEdit> s_settings_text;
+std::atomic<bool> s_settings_typing{false};
+std::uint64_t s_settings_text_swallow = 0u;
 
 // Settings menu draft. Display and graphics rows edit s_settings_draft, the game's settings (the audio mix, text
 // speed, button icons, language, Discord status) s_runtime_draft; Enter (Y on a controller) applies them, Backspace
@@ -300,7 +308,11 @@ std::vector<MonitorInfo> cached_monitors() {
 // show. A binding row waiting for an input is s_capture_target (kWiiTargetCount: none). Guarded by
 // s_native_settings_mutex.
 constexpr unsigned kControlsTab = 2u;
-constexpr unsigned kModsTab = 5u;
+constexpr unsigned kGeneralTab = 4u;
+constexpr unsigned kPlayerTab = 5u;
+constexpr unsigned kSystemTab = 6u;
+constexpr unsigned kOnlineTab = 7u;
+constexpr unsigned kModsTab = 8u;
 galaxy::input::ControlsConfig s_controls_draft = galaxy::input::default_controls_config();
 RuntimeInputMode s_input_mode_draft = RuntimeInputMode::Auto;
 galaxy::input::ControlScheme s_controls_scheme = galaxy::input::ControlScheme::Keyboard;
@@ -319,7 +331,7 @@ unsigned s_settings_first_row = 0u;
 // The window thread's left/right-resolved code for the key being handled.
 std::uint32_t s_handled_key_normalized = 0u;
 
-constexpr unsigned kNativeSettingsTabCount = 8;
+constexpr unsigned kNativeSettingsTabCount = 9;
 
 // The GENERAL page's languages, in the order LEFT/RIGHT steps through them.
 constexpr GameLanguage kGameLanguages[] = {GameLanguage::English, GameLanguage::French, GameLanguage::Spanish};
@@ -1414,8 +1426,9 @@ void set_native_settings_visible(bool visible) {
         settle_native_settings_row();
     }
     if (!visible) {
-        // Closing discards an unapplied draft, an unconfirmed display and an
+        // Closing discards an unapplied draft, a name being typed, an unconfirmed display and an
         // unanswered DLSS question.
+        end_settings_text(false);
         close_joycon_pairing();
         dlss_dismiss_prompt();
         revert_display_settings();
@@ -1549,6 +1562,67 @@ void press_settings_button(unsigned button) {
     page[row].press(s_settings_draft, button);
 }
 
+// The selected row is a text (the PLAYER page's name).
+bool selected_settings_text() {
+    const unsigned tab = s_native_settings_tab.load(std::memory_order_relaxed) % kNativeSettingsTabCount;
+    const unsigned row = s_native_settings_row.load(std::memory_order_relaxed);
+    if (tab != kPlayerTab) return false;
+    const std::vector<SettingsRow> page = settings_page(tab, s_settings_draft, s_runtime_draft, get_render_feature_caps());
+    return row < page.size() && page[row].text;
+}
+
+// The name starts to be typed: the draft's, the cursor after it.
+void start_settings_text(bool from_space) {
+    s_settings_text.emplace(galaxy::coop::TextKind::PlayerName, s_runtime_draft.coop.player_name);
+    s_settings_text_swallow = from_space ? GetTickCount64() + 250u : 0u;
+    s_settings_typing.store(true, std::memory_order_release);
+}
+
+// The name typed kept in the draft (without the spaces around it; Apply applies it), or dropped.
+void end_settings_text(bool keep) {
+    if (!s_settings_text) return;
+    if (keep) {
+        const std::string& text = s_settings_text->text();
+        const std::size_t begin = text.find_first_not_of(' ');
+        s_runtime_draft.coop.player_name =
+            begin == std::string::npos ? std::string() : text.substr(begin, text.find_last_not_of(' ') - begin + 1u);
+    }
+    s_settings_text.reset();
+    s_settings_typing.store(false, std::memory_order_release);
+}
+
+// A key while the name is typed: A or Enter keeps it, B or Escape drops it, a controller's X deletes the letter at the
+// cursor (Backspace the one before it), the arrows, Home and End as on the main menu's text rows (TextEdit). The rest
+// waits, its character typed (native_settings_type). False for F1, which closes the menu as ever.
+bool settings_text_key(WPARAM key, bool accept, bool was_down, bool from_pad) {
+    if (accept || key == VK_RETURN) {
+        if (!was_down) end_settings_text(true);
+        return true;
+    }
+    galaxy::coop::TextEdit& text = *s_settings_text;
+    switch (key) {
+    case VK_F1: end_settings_text(false); return false;
+    case VK_ESCAPE:
+        if (!was_down) end_settings_text(false);
+        return true;
+    case VK_BACK:
+        if (from_pad) {
+            text.erase();
+        } else {
+            (void)text.type(galaxy::coop::kTextBackspace);
+        }
+        return true;
+    case VK_DELETE: (void)text.type(galaxy::coop::kTextDelete); return true;
+    case VK_LEFT: (void)text.type(galaxy::coop::kTextLeft); return true;
+    case VK_RIGHT: (void)text.type(galaxy::coop::kTextRight); return true;
+    case VK_UP: (void)text.type(galaxy::coop::kTextUp); return true;
+    case VK_DOWN: (void)text.type(galaxy::coop::kTextDown); return true;
+    case VK_HOME: (void)text.type(galaxy::coop::kTextHome); return true;
+    case VK_END: (void)text.type(galaxy::coop::kTextEnd); return true;
+    default: return true;
+    }
+}
+
 // A setting along a range, as its slider shows it: its steps from the first value and the step it is at; no steps for
 // any other row. The mix's volumes run 0 to 200% in fives, the controls' numbers as adjust_native_setting steps them.
 struct SliderPlace {
@@ -1653,6 +1727,10 @@ bool handle_native_settings_key(WPARAM key, bool was_down, bool from_pad = false
     const std::lock_guard<std::recursive_mutex> lock(s_native_settings_mutex);
     if (!from_pad) {
         galaxy::host::note_keyboard_input();
+    }
+    if (s_settings_text && s_native_settings_visible.load(std::memory_order_relaxed) &&
+        settings_text_key(key, accept, was_down, from_pad)) {
+        return true;
     }
     if (key == galaxy::host::kBindingCaptureKey && !s_native_settings_visible.load(std::memory_order_relaxed)) {
         (void)galaxy::host::take_controller_binding_capture();
@@ -1759,6 +1837,11 @@ bool handle_native_settings_key(WPARAM key, bool was_down, bool from_pad = false
     case VK_LEFT:
     case VK_RIGHT:
     case VK_SPACE: {
+        // A text: A, Space or Right starts typing it.
+        if (selected_settings_text()) {
+            if (key != VK_LEFT && !was_down) start_settings_text(key == VK_SPACE);
+            return true;
+        }
         // A row of buttons: left and right move between them, A or Space presses one (Right too when it is the only
         // one); held, only the moves repeat.
         const std::size_t buttons = selected_settings_buttons();

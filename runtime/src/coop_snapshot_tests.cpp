@@ -139,7 +139,7 @@ bool wait_for(const std::function<bool()>& done, std::chrono::milliseconds limit
 }
 
 // Over the loopback: a joiner's snapshots reach the host and, passed on by it, the other joiner, each with who sent
-// them; the host's reach both.
+// them; the host's reach both. Only players in the sender's instance get them.
 void test_session_snapshots() {
     using namespace galaxy::coop;
     Session host_session;
@@ -150,16 +150,11 @@ void test_session_snapshots() {
     host.name = "HOSTY";
     host.save = [] { return RoomSave{}; };
     RemotePlayers at_host, at_mario, at_luigi;
-    const auto listen = [](Session& session, RemotePlayers& players) {
-        session.on_message(kSnapshotMessage, [&players](const SessionPlayer& from, std::span<const std::uint8_t> data) {
-            players.receive(from.id, from.index, from.name, from.character, data);
-        });
-    };
-    listen(host_session, at_host);
+    listen_snapshots(host_session, at_host);
     expect(host_session.host(host), "a room opens");
     Session mario, luigi;
-    listen(mario, at_mario);
-    listen(luigi, at_luigi);
+    listen_snapshots(mario, at_mario);
+    listen_snapshots(luigi, at_luigi);
     expect(mario.join({"127.0.0.1", host_session.port(), "", "test 1", "MARIO", galaxy::CoopCharacter::Mario}) &&
                luigi.join({"127.0.0.1", host_session.port(), "", "test 1", "LUIGI", galaxy::CoopCharacter::Luigi}),
            "two players join");
@@ -169,19 +164,29 @@ void test_session_snapshots() {
                       luigi.players().size() == 3u;
            }),
            "and are in");
+    for (Session* session : {&host_session, &mario, &luigi}) session->set_place("EggStarGalaxy", 1);
+    const auto placed = [](const Session& session, const char* stage) {
+        for (const SessionPlayer& player : session.players()) {
+            if (player.stage != stage) return false;
+        }
+        return true;
+    };
+    expect(wait_for([&] {
+               return placed(host_session, "EggStarGalaxy") && placed(mario, "EggStarGalaxy") &&
+                      placed(luigi, "EggStarGalaxy");
+           }),
+           "everyone knows where everyone plays");
     std::uint32_t sequence = 0u;
-    const auto seen = [](const RemotePlayers& players, const char* name) {
-        for (const RemotePlayer& player : players.sample("EggStarGalaxy", 1, Clock::now() + 200ms)) {
+    const auto seen = [](const RemotePlayers& players, const char* name, const char* stage = "EggStarGalaxy") {
+        for (const RemotePlayer& player : players.sample(stage, 1, Clock::now() + 200ms)) {
             if (player.name == name) return true;
         }
         return false;
     };
     expect(wait_for([&] {
                ++sequence;
-               (void)luigi.send(kSnapshotMessage, galaxy::net::Channel::Unreliable,
-                                encode_snapshot(at(sequence, 1.0f)));
-               (void)host_session.send(kSnapshotMessage, galaxy::net::Channel::Unreliable,
-                                       encode_snapshot(at(sequence, 2.0f)));
+               (void)send_snapshot(luigi, at(sequence, 1.0f));
+               (void)send_snapshot(host_session, at(sequence, 2.0f));
                return seen(at_host, "LUIGI") && seen(at_mario, "LUIGI") && seen(at_mario, "HOSTY") &&
                       seen(at_luigi, "HOSTY");
            }),
@@ -191,6 +196,24 @@ void test_session_snapshots() {
     expect(at_joiner.size() == 2u && at_joiner[0].name == "HOSTY" && at_joiner[0].index == 0u &&
                at_joiner[1].character == galaxy::CoopCharacter::Luigi,
            "by number, with their characters");
+
+    // Mario goes to another galaxy: nobody sends him theirs, his reach the host only (it passes them to nobody).
+    mario.set_place("HeavensDoorGalaxy", 1);
+    expect(wait_for([&] { return !placed(host_session, "EggStarGalaxy") && !placed(luigi, "EggStarGalaxy"); }),
+           "the room hears he moved");
+    at_mario.clear();
+    at_luigi.clear();
+    for (int i = 0; i < 30; ++i) {
+        ++sequence;
+        (void)send_snapshot(luigi, at(sequence, 1.0f));
+        (void)send_snapshot(host_session, at(sequence, 2.0f));
+        (void)send_snapshot(mario, at(sequence, 3.0f, "HeavensDoorGalaxy"));
+        std::this_thread::sleep_for(5ms);
+    }
+    expect(wait_for([&] { return seen(at_host, "MARIO", "HeavensDoorGalaxy"); }), "the host still hears him");
+    expect(!seen(at_mario, "HOSTY") && !seen(at_mario, "LUIGI"), "but he gets nobody's from another instance");
+    expect(!seen(at_luigi, "MARIO", "HeavensDoorGalaxy"), "and nobody gets his");
+    expect(seen(at_luigi, "HOSTY"), "while the others still see each other");
     luigi.leave();
     mario.leave();
     host_session.leave();
