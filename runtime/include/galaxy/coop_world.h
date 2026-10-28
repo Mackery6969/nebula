@@ -20,6 +20,7 @@
 #include <set>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace galaxy::coop {
@@ -32,6 +33,7 @@ inline constexpr std::uint8_t kWorldGoneMessage = 35u;    // player to host: thi
 inline constexpr std::uint8_t kWorldReadyMessage = 36u;   // host to player: the instance's record has all come
 inline constexpr std::uint8_t kSaveChangeMessage = 37u;   // player to host: a save change; host to all: accepted ones
 inline constexpr std::uint8_t kSaveRequestMessage = 38u;  // joiner to host, once let in: the session's save changes
+inline constexpr std::uint8_t kStarGotMessage = 39u;      // player to host: it took a star; host to its instance: the same
 
 // Most things an instance's record keeps, and the most save changes a session keeps: a player can't grow the
 // host's memory past them.
@@ -92,6 +94,9 @@ public:
         std::vector<Player> tell;
     };
     Settled gone(Player player, std::span<const Gone> gone);
+    // A player took a star (its get demo began): the other players in its instance, to tell (sm64coopdx's
+    // collect_star reaching the level). Nobody for a player in no instance.
+    [[nodiscard]] std::vector<Player> star_got(Player player) const;
     // A change to the session's save: true when it is news (a star or flag not had yet, a value changed), now in
     // save_changes() for everyone. Event values are the host's game's alone (`from_host`): each player's game keeps
     // its own count of misses, comets and the like, and the host's is the session's.
@@ -115,12 +120,22 @@ private:
     std::vector<SaveChange> save_;
 };
 
-// What the game is told (World::take): things gone from its instance, the record's end, and save changes.
+// A star another player in the instance took: the star's number in the stage (its scenario) and whether it is a
+// Grand Star (docs/COOP_PLAN.md "Cutscenes and transitions": a Grand Star takes everyone in the instance along).
+struct StarGot {
+    int star = 0;
+    bool grand = false;
+    friend bool operator==(const StarGot&, const StarGot&) = default;
+};
+
+// What the game is told (World::take): things gone from its instance, the record's end, save changes, and stars
+// others in the instance took.
 struct WorldEvent {
-    enum class Kind : std::uint8_t { Gone, Ready, Save };
+    enum class Kind : std::uint8_t { Gone, Ready, Save, StarGot };
     Kind kind = Kind::Gone;
     Gone gone;
     SaveChange save;
+    StarGot star;
 };
 
 // The world over a session, for this player's game. The game's calls (enter, report_gone, report_save, take) come
@@ -141,6 +156,8 @@ public:
     void enter(const Instance& instance);
     void report_gone(const Gone& gone);
     void report_save(const SaveChange& change);
+    // The game's player took a star in the instance it entered: the others there are told.
+    void report_star(const StarGot& star);
     [[nodiscard]] std::vector<WorldEvent> take();
 
     [[nodiscard]] bool active() const;
@@ -155,6 +172,10 @@ private:
     void push_save(const SaveChange& change);
     void host_gone(net::PeerId from, std::span<const Gone> gone);
     void host_save(const SaveChange& change);
+    // The others in `from`'s instance told of its star: the host's own game here, the rest as messages to send once
+    // the lock is let go.
+    [[nodiscard]] std::vector<std::pair<net::PeerId, std::vector<std::uint8_t>>> host_star(net::PeerId from,
+                                                                                           const StarGot& star);
 
     Session* session_ = nullptr;
     mutable std::recursive_mutex lock_;

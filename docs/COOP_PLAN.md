@@ -240,18 +240,32 @@ the game draws what `coop_chat` gives it (`NebulaCoopChat`, the game's window an
 
 ## Cutscenes and transitions
 
-A cutscene or transition that moves the story on runs for every player who reaches it, not once per save. If the save
-already has it, a player arriving later would otherwise be stuck: the opening (Bowser's attack on the Star Festival,
-then waking at the Observatory) is how a player gets from the intro stage into play, so a joiner whose host already
-finished it must still play it to come out where the others are. So:
+As sm64coopdx has them: a cutscene is the player's own, the save's progress reaches everyone without its cutscene,
+and only what ends a chapter takes the others along. Nobody gets stuck, because whatever moves a player on still
+reaches each one.
 
-- Each demo that carries a player from one place to another (the opening, the dome launches, Grand Star returns,
-  the trip to the final battle) is keyed to the player, not the save flag, and plays again for a player who hasn't
-  seen it this session.
-- A player watching one doesn't stop the others; the server keeps the world running, and the demo only moves the
-  player watching it.
-- `native/tools/coop_inventory.py` lists the demo sites (`MR::getPlayerDemoActor`, `startEventDemo`); each is sorted
-  into "plays per player" or "plays once for the room" as Phase 4 reaches it.
+| What | Galaxy | As sm64coopdx |
+|---|---|---|
+| A demo, a talk, a star's appearing | Plays for the player who started it. Nobody else is stopped or moved, and their games keep running | Cutscenes and dialogs are the local player's |
+| The opening (the Star Festival, Bowser's attack, waking in Gateway) | Plays for each player on a save that hasn't passed it. A joiner plays the host's save, so it starts where that save does | The intro plays on a new save |
+| A Power Star taken | Gone for the others in the instance (once it shows, after any appearing demo of theirs). It's theirs in the save, and they play on and leave by the pause menu | `packet_collect_star`: the star is gone for the level, everyone keeps playing |
+| A Grand Star taken | Takes everyone in the instance along: each gets its get sequence and its return to the Observatory (a player dead or in a demo goes once play allows, in the same mission). The last Bowser's sends the instance to the ending together | The Bowser 3 Grand Star puts everyone in the level into its cutscene |
+| A star the room gave, taken later by the player itself | Returns as its first: the story's demos (Rosalina's talks, the domes, the first trip to the Observatory) play for that player, not the short return for a star already had | |
+
+- **Messages.** A star taken is the session's message 39 (`kStarGotMessage`): the taker tells the host, which tells
+  the others in the same instance, each for its current scene. Nothing is kept, so a player arriving later still
+  finds the star and can take it, as in sm64coopdx. Game API 41's `NEBULA_COOP_WORLD_STAR_GOT`.
+- **The game.** `NebulaCoopDemos` (native/petari): `GameScene::stageClear` tells of the local player's star,
+  `GameScene::update` removes the others' Power Stars and plays a Grand Star's get once play allows.
+- **First returns.** The result's demos read the save as the scene started (`getSceneStartGameDataHolder`): a star
+  already had there plays the short return. Stars the room gave this session are noted as they come, and when the
+  player takes one, it is left out of that save just before the result (`GameSequenceProgress::requestGalaxyMove`),
+  so the story's demos for it play. Stars already in the save when the player joined are the save's, as in a game
+  continued alone.
+- **Left as the room's.** Demos tied to the save's star count (the comet lecture at 13 stars, a galaxy appearing)
+  play for the player whose star reaches the count; the others get what they open without the demo. Each player's
+  story progress (`GameDataPlayerStatus`) is its own and isn't synced, so the lectures it gates (the dome, the star
+  bits) still play for each player the first time they get there.
 
 ## Player collisions
 
@@ -368,8 +382,8 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 2: same world
 
-- [ ] The opening and the other transition demos play again for each player who reaches them
-      ([Cutscenes and transitions](#cutscenes-and-transitions)).
+- [x] [Cutscenes and transitions](#cutscenes-and-transitions) as sm64coopdx's: each player's own, a Grand Star takes
+      the instance along, a Power Star taken is gone for the others, and a star the room gave returns as its first.
 - [x] Instances: each client reports its stage and scenario, sees only players in its own instance (snapshots go
       only there), and a player entering an occupied instance gets its state from the server.
 - [x] Collectibles, defeated enemies, Power Stars and save flags sync, with the host authoritative
@@ -387,7 +401,8 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 4: bosses, demos, polish
 
-- [ ] Demos/cutscenes: whoever triggers one plays it, everyone else is frozen or faded out.
+- [ ] Boss and story demos shared by everyone in the instance (the boss is the server's, Phase 3); until then each
+      player's are its own (see [Cutscenes and transitions](#cutscenes-and-transitions)).
 - [ ] Camera and HUD per player; spectate on death.
 - [ ] Discord presence for the lobby (`discord_presence.cpp` already exists), player colours.
 

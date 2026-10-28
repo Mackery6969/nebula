@@ -66,6 +66,10 @@ void test_authority() {
     settled = world.gone(3u, std::vector<Gone>{{12u, 0u}});
     expect(settled.news.size() == 1u && settled.tell.empty(), "with a record of its own");
     expect(world.instance_count() == 2u, "two instances");
+    const std::vector<WorldAuthority::Player> told = world.star_got(2u);
+    expect(told.size() == 1u && told[0] == 1u, "a star got is told to the others in the instance alone");
+    expect(world.star_got(3u).empty(), "alone in an instance, nobody to tell");
+    expect(world.star_got(9u).empty(), "a player in no instance tells nobody");
 
     // Player 1's scene starts over: player 2 is still there, so the record stays.
     expect(world.enter(1u, kEgg1).size() == 3u, "an instance with someone in it keeps its record");
@@ -104,17 +108,20 @@ struct Game {
     std::vector<Gone> gone;
     bool ready = false;
     std::vector<SaveChange> save;
+    std::vector<StarGot> stars;
 
     void pump() {
         for (const WorldEvent& event : world.take()) {
             if (event.kind == WorldEvent::Kind::Gone) gone.push_back(event.gone);
             if (event.kind == WorldEvent::Kind::Ready) ready = true;
             if (event.kind == WorldEvent::Kind::Save) save.push_back(event.save);
+            if (event.kind == WorldEvent::Kind::StarGot) stars.push_back(event.star);
         }
     }
     void enter(const Instance& instance) {
         gone.clear();
         save.clear();
+        stars.clear();
         ready = false;
         world.enter(instance);
     }
@@ -209,6 +216,26 @@ void test_session_world() {
     pump_all();
     expect(at_luigi.gone.empty(), "nothing from an instance he left");
     expect(has(at_host.gone, 102u), "while the host, still there, hears it");
+
+    // A star got: the others in the taker's instance hear it (a Grand Star takes them along), nobody elsewhere.
+    at_mario.world.report_star({3, true});
+    expect(wait_for([&] {
+               pump_all();
+               return !at_host.stars.empty();
+           }),
+           "a joiner's Grand Star reaches the host in its instance");
+    expect(at_host.stars.size() == 1u && at_host.stars[0] == StarGot{3, true}, "with its number and kind");
+    at_host.world.report_star({1, false});
+    expect(wait_for([&] {
+               pump_all();
+               return !at_mario.stars.empty();
+           }),
+           "the host's star reaches the joiner in its instance");
+    expect(at_mario.stars[0] == StarGot{1, false} && at_mario.stars.size() == 1u, "once, and not its own back");
+    std::this_thread::sleep_for(100ms);
+    pump_all();
+    expect(at_luigi.stars.empty(), "nothing for a player in another instance");
+    expect(at_host.stars.size() == 1u, "the host doesn't hear its own");
 
     // Save: a joiner's star is everyone's; a joiner's event value isn't sent; the host's is.
     const SaveChange star{SaveKind::Star, "EggStarGalaxy", 2, 0u};

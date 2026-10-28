@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 40u
+#define NEBULA_GAME_API_VERSION 41u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -198,12 +198,15 @@ enum {
      instance; an instance nobody else is in starts fresh.
    - NEBULA_COOP_WORLD_STAR, _FLAG, _VALUE (both ways): the save. A Power Star (`name` the galaxy, `scenario` the
      star), an event flag on, an event value (`value`). Stars and flags from any player are everyone's; event values
-     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks. */
+     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks.
+   - NEBULA_COOP_WORLD_STAR_GOT (both ways): a player took a star in the instance, `scenario` the star and `value`
+     NEBULA_COOP_STAR_*, as sm64coopdx's collect_star reaches the level. The others there are told (API 41,
+     docs/COOP_PLAN.md "Cutscenes and transitions"). */
 typedef struct NebulaCoopWorldEvent {
     uint32_t kind;     /* NEBULA_COOP_WORLD_* */
     uint32_t object;   /* GONE */
-    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value */
-    int32_t scenario;  /* ENTER and STAR */
+    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value; STAR_GOT: NEBULA_COOP_STAR_* */
+    int32_t scenario;  /* ENTER, STAR and STAR_GOT */
     char name[48];     /* ENTER and STAR: the stage; FLAG and VALUE: the name (Shift JIS) */
 } NebulaCoopWorldEvent;
 
@@ -214,6 +217,11 @@ enum {
     NEBULA_COOP_WORLD_STAR,
     NEBULA_COOP_WORLD_FLAG,
     NEBULA_COOP_WORLD_VALUE,
+    NEBULA_COOP_WORLD_STAR_GOT,
+};
+
+enum {
+    NEBULA_COOP_STAR_GRAND = 1u << 0, /* a Grand Star: it takes everyone in the instance along */
 };
 
 enum {

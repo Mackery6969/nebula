@@ -2632,6 +2632,9 @@ void svc_coop_world_report(void*, const NebulaCoopWorldEvent* event) {
     case NEBULA_COOP_WORLD_STAR: gCoopWorld.report_save({SaveKind::Star, copy.name, copy.scenario, 0u}); return;
     case NEBULA_COOP_WORLD_FLAG: gCoopWorld.report_save({SaveKind::Flag, copy.name, 0, 0u}); return;
     case NEBULA_COOP_WORLD_VALUE: gCoopWorld.report_save({SaveKind::Value, copy.name, 0, copy.value}); return;
+    case NEBULA_COOP_WORLD_STAR_GOT:
+        gCoopWorld.report_star({copy.scenario, (copy.value & NEBULA_COOP_STAR_GRAND) != 0u});
+        return;
     default: return;
     }
 }
@@ -2656,6 +2659,10 @@ uint32_t svc_coop_world_take(void*, NebulaCoopWorldEvent* events, uint32_t capac
             to.kind = NEBULA_COOP_WORLD_GONE;
             to.object = from.gone.object;
             to.value = from.gone.how;
+        } else if (from.kind == Kind::StarGot) {
+            to.kind = NEBULA_COOP_WORLD_STAR_GOT;
+            to.scenario = from.star.star;
+            to.value = from.star.grand ? NEBULA_COOP_STAR_GRAND : 0u;
         } else {
             using galaxy::coop::SaveKind;
             to.kind = from.save.kind == SaveKind::Star   ? NEBULA_COOP_WORLD_STAR

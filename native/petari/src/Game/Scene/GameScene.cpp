@@ -78,6 +78,7 @@
 #include "Game/Screen/NebulaCoopChat.hpp"
 #include "Game/Screen/NebulaPlayerList.hpp"
 #include "Game/System/NebulaAchievements.hpp"
+#include "Game/System/NebulaCoopDemos.hpp"
 #include "Game/System/NebulaCoopWorld.hpp"
 #include "Game/Util/MessageUtil.hpp"
 #endif
@@ -307,6 +308,15 @@ void GameScene::update() {
 #ifdef TARGET_PC
     reportCoopPlayer();
     NebulaCoopWorld::update();
+    // Online co-op: a Grand Star another player in this instance took takes this player along (sm64coopdx's Bowser 3
+    // Grand Star): its get sequence, as the star itself starts it, once play allows.
+    if (isNerve(GET_NERVE(GameScene, GameSceneAction)) && !MR::isDemoActive() && !MR::isPlayerDead()) {
+        s32 pulledStar = 0;
+        if (NebulaCoopDemos::updateInPlay(&pulledStar)) {
+            MR::sendStageResultSequenceParam(pulledStar);
+            MR::requestGrandStarGetDemo();
+        }
+    }
     NebulaRemotePlayer::updateAll();
     NebulaAchievements::update();
     if (sTestBoard && MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementBoard != nullptr) {
@@ -954,6 +964,12 @@ void GameScene::stageClear() {
         // The star just collected (PowerStar sent it with the get sequence's request) unlocks what it completes now,
         // while its get sequence plays, not when the hub records it.
         NebulaAchievements::evaluate();
+        // Online co-op: the others in the instance hear of it.
+        if (GameSequenceFunction::hasStageResultSequence() &&
+            MR::isEqualString(GameSequenceFunction::getClearedStageName(), MR::getCurrentStageName())) {
+            NebulaCoopDemos::noticeStarGot(GameSequenceFunction::getClearedPowerStarId(),
+                                           isNerve(GET_NERVE(GameScene, GameSceneGrandStarGet)));
+        }
 #endif
         if (isNerve(GET_NERVE(GameScene, GameScenePowerStarGet))) {
             mStageClearSeq->startPowerStarGetDemo();
