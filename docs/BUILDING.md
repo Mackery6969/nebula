@@ -45,7 +45,14 @@ Builds `build\game\smg_game.dll` with clang and Ninja.
 
 ## 4. Run
 
-Put `NebulaNative.exe` and `smg_game.dll` in one folder, then:
+Put `NebulaNative.exe` and `smg_game.dll` in one folder with the `content` folder from step 1, then:
+
+```powershell
+.\NebulaNative.exe
+```
+
+With no arguments it finds `content\game.pak` next to it (or in the current folder) and uses the launcher's saves,
+`%LOCALAPPDATA%\Nebula\saves`. `--pak <game.pak>` and `--nand <folder>` name others:
 
 ```powershell
 .\NebulaNative.exe --pak D:\nebula\content\game.pak --nand "$env:LOCALAPPDATA\Nebula\saves"
