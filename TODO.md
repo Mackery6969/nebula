@@ -43,7 +43,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] The server decides everything except the visuals: save, collectibles, objects, enemies
 - [x] Cutscenes and transitions as sm64coopdx has them: each player's own, a Grand Star takes everyone in its
       mission along, and a star the room gave returns as its first when the player takes it, so nobody gets stuck
-- [ ] An achievement unlocked in a save is every player's who plays in it
+- [x] An achievement unlocked in a save is every player's who plays in it
 - [x] Player collisions with sm64coopdx's options (non-solid, solid, friendly fire, knockback, PvP mode)
 
 ## Later (Phases 3 and 4)
