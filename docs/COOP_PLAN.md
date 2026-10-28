@@ -89,8 +89,9 @@ The title screen and the file select go. In their place is a co-op main menu lik
 
 - **Where.** The `FileSelect` stage stays for its backdrop and music, but its `FileSelector` skips the title
   (`exeTitle`) and the six file bubbles and shows the menu instead. Boot goes from the logos straight to it.
-- **The game's look.** It keeps Super Mario Galaxy's feel: the file select's space backdrop and music, the game's
-  title logo above the menu as on the title screen, and the game's own windows, buttons and font.
+- **The game's look.** It keeps Super Mario Galaxy's feel: the file select's space backdrop and music, and the
+  game's own windows, buttons and font. The menu's window fills the screen as the settings menu's does (the title
+  logo above it took too much room).
 - **How it's drawn.** With Nebula's settings menu machinery: pages and rows kept by the host
   (`NebulaSettingsView`), drawn by the game in its own windows and font (`NebulaSettingsMenu`). The main menu is a new
   set of pages. Text rows (address, name, password) are new: typed on a keyboard, or picked letter by letter on a
@@ -99,11 +100,10 @@ The title screen and the file select go. In their place is a co-op main menu lik
 
   | Page | Rows |
   |---|---|
-  | Main | The game's logo, then Host, Join, Player, Options, Quit; Nebula's version in a corner |
+  | Main | Host, Join, Options, Quit; Nebula's version in a corner |
   | Host | Save (any number, each with its name and Power Stars; New, Rename and Erase), port, password, max players, Player Interaction, Knockback Strength, PvP Mode, Cheats, then Host and Back |
   | Join | Address (`host[:port]`), password, then Join; the last address is remembered. No public or private lobbies: there's no relay |
-  | Player | Name, character (Mario or Luigi, as sm64coopdx's player options pick a model) |
-  | Options | Nebula's settings pages as they are today |
+  | Options | Nebula's settings pages, with PLAYER in the MODS page's old place: name, character (Mario or Luigi, as sm64coopdx's player options pick a model). MODS is the last page |
   | Quit | "Quit to desktop?" yes or no |
 
 - **Saves: any number, no characters.** The game's own format (`GameData.bin`: six user files, each with a Mario
@@ -117,14 +117,14 @@ The title screen and the file select go. In their place is a co-op main menu lik
 - **Achievements: the save's.** Each save keeps its own `achievements.ini`; an achievement unlocked in a save is
   every player's who plays in it. The old shared `achievements.ini` is copied into each converted save.
 - **Character: the player's, not the save's.** `MR::isPlayerLuigi()` (today `!isDataMario()`, the save's half)
-  follows the Player page's character (`coop_character`, `mario` or `luigi`) instead, so the same save plays as
+  follows Options' PLAYER page's character (`coop_character`, `mario` or `luigi`) instead, so the same save plays as
   either. Remote players show each player's own character (`NEBULA_COOP_PLAYER_LUIGI`).
 - **Starting.** Host loads the chosen save through the file select's own path (`FileSelector::exeDemo`) and opens
   the session. With nobody joining it's single player, as in sm64coopdx. Join needs Phase 1: a joining player plays
   the host's save, sent at join (sm64coopdx's `packet_save_file`), so their own saves stay untouched.
 - **Dropped with the file select:** its six files, the Mario and Luigi halves, copying files, and Miis, which only
   ever named and pictured files: the file icons, Nebula's Mii import (Settings > GENERAL > IMPORT MIIS, the `miis`
-  folder) and the wait for the Mii data before a file starts. The player's name is the Player page's.
+  folder) and the wait for the Mii data before a file starts. The player's name is Options' PLAYER page's.
 - **Portable.** The menu's model (pages, rows, saves, keys) is host code shared by every host
   (`runtime/src/coop_menu.cpp`), not the Windows window's, as the settings menu's model is now too
   (`runtime/src/gx/native_settings_*.inl`, shared by the Windows window and the SDL host). The game draws it with
@@ -317,8 +317,9 @@ Each phase ships on its own and leaves the game playable.
       (`coop_cheats`), Host and Back.
 - [x] The pause menu and Nebula's menus (settings, achievement board) leave the game running, without the
       player's input; a miss or a demo closes the pause menu.
-- [x] The game's logo above the menu, as on the title screen.
-- [x] The Player page: name and character per player (`coop_character`), not per save.
+- [x] ~~The game's logo above the menu, as on the title screen.~~ Dropped: it took too much room.
+- [x] The Player page: name and character per player (`coop_character`), not per save; in Options (its PLAYER
+      page, where MODS was), not on the main menu.
 - [x] Text rows (name, address, password; the keyboard, or letter by letter on a controller); the Host page's port
       and password; the Join page's address (`coop_join_address`); renaming a save.
 - [x] Mods as a room setting: the Host page picks them (a restart when the disc's mods change); the MODS page only

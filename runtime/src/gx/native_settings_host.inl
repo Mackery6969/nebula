@@ -132,6 +132,7 @@ NativeSettingsView build_native_settings_view() {
             shown.mod_list = page[row].list;
             shown.held = page[row].held;
             shown.buttons = !page[row].buttons.empty();
+            shown.text = page[row].text;
             if (row == view.selected) view.help = page[row].help;
         } else {
             shown.label = native_settings_row_text(tab, row, row_render, row_runtime, row_caps);
@@ -140,8 +141,9 @@ NativeSettingsView build_native_settings_view() {
                 shown.label.resize(colon);
             }
         }
-        shown.name = shown.name || (tab == 0u && shown.label == "MONITOR") || (tab == 6u && shown.label == "GRAPHICS CARD") ||
-                     (tab == 4u && (shown.label == "GALAXY" || shown.label == "STAR"));
+        shown.name = shown.name || (tab == 0u && shown.label == "MONITOR") ||
+                     (tab == kSystemTab && shown.label == "GRAPHICS CARD") ||
+                     (tab == kGeneralTab && (shown.label == "GALAXY" || shown.label == "STAR"));
         if (tab == kControlsTab) {
             // The controller being set up by its own name (the overlay's row has it in capitals), and the bindings as
             // lists of inputs.
@@ -170,6 +172,7 @@ NativeSettingsView build_native_settings_view() {
         view.rows.push_back(std::move(shown));
     }
     view.selected_button = view.selected < view.rows.size() && view.rows[view.selected].buttons ? selected_settings_button() : 0u;
+    view.editing = s_settings_text.has_value();
     for (unsigned row = 0; row < view.rows.size(); ++row) {
         const SliderPlace place = settings_slider(tab, row, page);
         view.rows[row].slider_steps = place.steps;
@@ -218,11 +221,11 @@ NativeSettingsView build_native_settings_view() {
         view.status_number = static_cast<int>(pending);
     } else if (s_settings_applied_ms != 0u && now_ms - s_settings_applied_ms < 2500u) {
         view.status = NativeSettingsStatus::Applied;
-    } else if (GameLanguage running{}; tab == 4u && running_game_language(running) && running != row_runtime.language) {
+    } else if (GameLanguage running{}; tab == kGeneralTab && running_game_language(running) && running != row_runtime.language) {
         view.status = NativeSettingsStatus::LanguageRestart;
-    } else if (tab == 5u && mods_restart_pending()) {
+    } else if (tab == kModsTab && mods_restart_pending()) {
         view.status = NativeSettingsStatus::ModsRestart;
-    } else if (tab == 6u && gpu_change_pending(row_render, row_caps)) {
+    } else if (tab == kSystemTab && gpu_change_pending(row_render, row_caps)) {
         view.status = NativeSettingsStatus::GpuRestart;
     }
     return view;

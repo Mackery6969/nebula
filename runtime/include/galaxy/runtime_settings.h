@@ -55,7 +55,7 @@ enum class CoopPlayerInteraction : std::uint8_t { NonSolid, Solid, FriendlyFire 
 // Friendly fire's rules: sm64coopdx's original ones, or its revamped ones (which attacks beat which, the knockback
 // each gives).
 enum class CoopPvpMode : std::uint8_t { Classic, Revamped };
-// The player's character (the main menu's Player page): the player's own, whatever save they play in.
+// The player's character (Options' PLAYER page): the player's own, whatever save they play in.
 enum class CoopCharacter : std::uint8_t { Mario, Luigi };
 // Knockback strength, 0 to 255; the menu's choices are weak, normal and too much (sm64coopdx's values).
 inline constexpr unsigned kCoopKnockbackWeak = 10u, kCoopKnockbackNormal = 25u, kCoopKnockbackTooMuch = 60u;

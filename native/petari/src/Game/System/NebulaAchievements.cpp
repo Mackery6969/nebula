@@ -353,7 +353,7 @@ namespace NebulaAchievements {
             return;
         }
         const s32 queuedBefore = sQueued;
-        // The player's character (the Player page's, else the file's half).
+        // The player's character (Options' PLAYER page's, else the file's half).
         const bool mario = !MR::isPlayerLuigi();
 
         // The story, in the order it is played.

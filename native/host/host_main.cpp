@@ -1784,7 +1784,7 @@ std::vector<galaxy::coop::RoomMod> coop_room_mods();
 std::optional<galaxy::coop::SaveStore> gCoopSaves;
 unsigned gCoopSaveFile = 1u;  // the user file the played save plays
 
-// The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): the Player page's, as Host left the menu.
+// The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): Options' PLAYER page's, as Host left the menu.
 std::atomic<bool> gCoopLuigi{false};
 
 // The room's chat (galaxy/coop_chat.h), over the session below (which goes first, its thread giving the chat lines).
@@ -2217,6 +2217,14 @@ bool poll_coop_join() {
 void keep_coop_settings() {
 #if defined(NEBULA_HOST_RENDERER)
     galaxy::RuntimeSettings settings = galaxy::get_runtime_settings();
+    // The player's name and character are Options' (its PLAYER page): the menu takes them, never gives them back.
+    if (gCoopMenu.room().player_name != settings.coop.player_name ||
+        gCoopMenu.room().character != settings.coop.character) {
+        galaxy::RuntimeCoopSettings room = gCoopMenu.room();
+        room.player_name = settings.coop.player_name;
+        room.character = settings.coop.character;
+        gCoopMenu.set_room(room);
+    }
     if (settings.coop == gCoopMenu.room()) return;
     settings.coop = gCoopMenu.room();
     galaxy::set_runtime_settings(settings);
@@ -2408,12 +2416,14 @@ void svc_settings_view(void*, NebulaSettingsView* view) {
                               (row.mod_list == 1u ? NEBULA_SETTINGS_ROW_MOD_OFF : 0u) |
                               (row.mod_list == 2u ? NEBULA_SETTINGS_ROW_MOD_ON : 0u) | (row.held ? NEBULA_SETTINGS_ROW_HELD : 0u) |
                               (row.slider_steps != 0u ? NEBULA_SETTINGS_ROW_SLIDER : 0u) |
-                              (row.inputs ? NEBULA_SETTINGS_ROW_BINDING : 0u);
+                              (row.inputs ? NEBULA_SETTINGS_ROW_BINDING : 0u) |
+                              (row.text ? NEBULA_SETTINGS_ROW_TEXT : 0u);
         view->rows[i].slider_steps = static_cast<uint16_t>(row.slider_steps);
         view->rows[i].slider_at = static_cast<uint16_t>(row.slider_at);
     }
     view->selected = static_cast<uint32_t>(selected);
     view->selected_button = source.selected_button;
+    view->editing = source.editing ? 1u : 0u;
     for (std::size_t r = 0; r < total; ++r) {
         const galaxy::gx::NativeSettingsViewRow& row = source.rows[r];
         if (row.mod_list == 0u || row.mod_list > 2u || row.heading) continue;
