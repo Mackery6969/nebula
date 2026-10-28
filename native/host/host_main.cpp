@@ -2602,6 +2602,13 @@ int32_t svc_coop_menu(void*, uint32_t what) {
         return 0;
     case NEBULA_COOP_MENU_CHARACTER: return gCoopLuigi.load(std::memory_order_relaxed) ? 1 : 0;
     case NEBULA_COOP_MENU_JOINED: return gCoopSession.active() && !gCoopSession.is_host() ? 1 : 0;
+    case NEBULA_COOP_MENU_TITLE: {
+        // The title once, as Nebula starts; not in front of a room the menu starts by itself as it opens.
+        static bool shown = false;
+        if (std::exchange(shown, true)) return 0;
+        const bool starting = gCoopAutoStart != CoopAutoStart::None || (gCoopSaves && gCoopSaves->has_next_start());
+        return starting ? 0 : 1;
+    }
     case NEBULA_COOP_MENU_POLL:
         // What the player changed is kept as they change it, a text once kept.
         if (!gCoopMenu.editing()) keep_coop_settings();
