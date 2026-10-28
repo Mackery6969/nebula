@@ -2587,10 +2587,27 @@ uint32_t svc_coop_list(void*, NebulaCoopListPlayer* players, uint32_t capacity, 
         to.scenario = from.scenario;
         to.number = from.index + 1u;
         to.ping_ms = from.ping_ms;
+        to.stars = from.stars;
         to.flags = (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_LIST_LUIGI : 0u) |
                    (from.host ? NEBULA_COOP_LIST_HOST : 0u) | (from.local ? NEBULA_COOP_LIST_YOU : 0u);
     }
     return static_cast<uint32_t>(list.size());
+}
+
+// The Personal Star Counter (sm64coopdx's mod): a Power Star the local player got, new to the save, counts for them in
+// the room and is told to everyone there.
+void svc_coop_star_get(void*, const char* stage, int32_t star) {
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return;
+    gCoopSession.count_star();
+    std::fprintf(stderr, "[coop] star %d of %s got: %u this room\n", static_cast<int>(star),
+                 stage != nullptr ? stage : "?", gCoopSession.stars());
+}
+
+int32_t svc_coop_star_count(void*) {
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return -1;
+    return static_cast<int32_t>(gCoopSession.stars());
 }
 
 // The other players in this player's instance, for their copies: as they were kSnapshotDelay ago, by number. Who
@@ -4428,6 +4445,8 @@ int main(int argc, char** argv) {
     gCoopChat.attach(gCoopSession);
     services.coop_list = svc_coop_list;
     services.coop_remote = svc_coop_remote;
+    services.coop_star_get = svc_coop_star_get;
+    services.coop_star_count = svc_coop_star_count;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

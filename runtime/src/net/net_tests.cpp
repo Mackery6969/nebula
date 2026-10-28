@@ -531,6 +531,27 @@ void test_session() {
     expect(std::all_of(seen.begin(), seen.end(), [](const SessionPlayer& p) { return !p.local || p.ping_ms == 0u; }),
            "and this player has no round trip of its own");
 
+    // Each player's Power Stars this room (the Personal Star Counter): told to everyone as they go up.
+    const auto stars_of = [](const Session& session, unsigned index) {
+        for (const SessionPlayer& player : session.players()) {
+            if (player.index == index) return static_cast<int>(player.stars);
+        }
+        return -1;
+    };
+    expect(host_session.stars() == 0u && joiner.stars() == 0u && stars_of(third, 1u) == 0, "a room starts with no stars");
+    Session idle;
+    idle.count_star();
+    expect(idle.stars() == 0u, "and outside a room nothing counts");
+    joiner.count_star();
+    joiner.count_star();
+    host_session.count_star();
+    expect(joiner.stars() == 2u && host_session.stars() == 1u, "a player's stars count up");
+    expect(wait_for([&] {
+               return stars_of(third, 1u) == 2 && stars_of(third, 0u) == 1 && stars_of(host_session, 1u) == 2 &&
+                      stars_of(joiner, 0u) == 1 && stars_of(joiner, 2u) == 0;
+           }),
+           "and reach everyone");
+
     // Full: the room holds three.
     Session fourth;
     (void)fourth.join({"127.0.0.1", port, "pw", "test 1", "FOURTH", galaxy::CoopCharacter::Mario});
@@ -556,6 +577,8 @@ void test_session() {
            "a player joins later");
     expect(place_of(late, 0u) == "AstroGalaxy/0" && place_of(late, 1u) == "EggStarGalaxy/2",
            "and gets everyone's place with the room");
+    expect(stars_of(late, 0u) == 1 && stars_of(late, 1u) == 2 && late.stars() == 0u,
+           "and everyone's stars, starting from none itself");
     late.leave();
     expect(wait_for([&] { return host_session.players().size() == 2u; }), "and leaves");
     host_session.leave();

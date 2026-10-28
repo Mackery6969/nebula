@@ -217,7 +217,8 @@ enemies.
   the list instead of pausing, and Plus (Start) pauses. Each player tells the room where it plays as that changes
   (the session's own message, sent with the room to who joins later), so the list has every player's place before
   remote players exist; the game names the galaxy and star in the played language (`NebulaPlayerList`,
-  `coop_list`). The round trip to each player shows beside them.
+  `coop_list`). The round trip to each player shows beside them, and the Power Stars they got in the room before it
+  ([Personal Star Counter](#personal-star-counter)).
 
 ## Chat
 
@@ -231,6 +232,24 @@ The host keeps it (`runtime/src/coop_chat.cpp`): a line is a session message hol
 at most 100 characters), so its sender's name is the session's and can't be faked. A player's lines past five in three
 seconds are dropped. The window layers send T to it while the host allows it (a room's game with no menu over it), and
 the game draws what `coop_chat` gives it (`NebulaCoopChat`, the game's window and message font).
+
+## Personal Star Counter
+
+sm64coopdx's Personal Star Counter mod (`personal-starcount-ex.lua`), built in. Galaxy's HUD shows the save's Power
+Stars when the player stands still (`StarCounter`, with the coins and Star Bits); two more counters come in under it
+with it, the same layout with the star tinted as the mod's (`NebulaStarCounter`, from `CounterLayoutController`):
+
+- **Red: this room's.** The Power Stars this player got since they hosted or joined. Only in a room.
+- **Green: every one.** All the Power Stars this player ever got, kept across saves with Nebula's other all-time
+  counts (`power_stars` in `stats.ini`); the achievement board's stats page lists it too.
+
+As in the mod, a star counts only when it's new to the save (the mod counts when the save's star count goes up), so a
+star the room already has counts for nobody again; a Grand Star counts too. The game tells the host as a star's get
+sequence starts (`coop_star_get`, from `NebulaAchievements::onStarGet`). Each player's room count is theirs to tell,
+as the mod's `gPlayerSyncTable` entry is: the session sends it to everyone as it goes up (`Session::count_star`, a
+session message of two bytes) and with the room to who joins later. The player list shows each player's beside their
+round trip, as the mod puts it in sm64coopdx's player list. Once the host decides which stars a player got (Phase
+2's server authority), the count moves there: the host counts a star for the player it grants it to.
 
 ## Cutscenes and transitions
 
@@ -342,6 +361,8 @@ Each phase ships on its own and leaves the game playable.
 - [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
       (see [Mods](#mods-the-rooms-not-the-players)).
 - [x] [Chat](#chat), keyboard only; controllers read it.
+- [x] The [Personal Star Counter](#personal-star-counter): each player's stars this room and all time, on the HUD and
+      in the player list (API version 40).
 
 ### Phase 2: same world
 

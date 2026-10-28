@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 39u
+#define NEBULA_GAME_API_VERSION 40u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -180,6 +180,7 @@ typedef struct NebulaCoopListPlayer {
     uint32_t number;   /* 1 the host, then 2, 3... as they joined */
     uint32_t ping_ms;  /* the round trip to them, 0 for this player or when unknown */
     uint32_t flags;    /* NEBULA_COOP_LIST_* */
+    uint32_t stars;    /* the Power Stars they got in this room, new to its save (coop_star_get) */
 } NebulaCoopListPlayer;
 
 enum {
@@ -650,6 +651,12 @@ typedef struct NebulaHostServices {
     /* Online co-op's chat as it shows now (NebulaCoopChatView): nothing outside a room's game. Called on the simulation
        thread, each frame the game shows play. */
     void (*coop_chat)(void* user, NebulaCoopChatView* view);
+    /* The local player got Power Star `star` of `stage` (a Grand Star too), new to the save: online co-op's Personal
+       Star Counter counts it for them in the room. Called on the simulation thread as its get sequence starts. */
+    void (*coop_star_get)(void* user, const char* stage, int32_t star);
+    /* The Power Stars the local player got in this room (coop_star_get's), or -1 when there is no room. Called on the
+       simulation thread. */
+    int32_t (*coop_star_count)(void* user);
 } NebulaHostServices;
 
 enum {

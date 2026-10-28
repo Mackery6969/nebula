@@ -28,6 +28,7 @@ StatPurpleCoins	Purple Coin Stars		Étoiles des pièces violettes	Étoiles des p
 StatHidden	Hidden Stars		Étoiles cachées	Étoiles cachées	Estrellas ocultas	Estrellas ocultas	Versteckte Sterne	Stelle nascoste	Verborgen sterren	Estrelas escondidas	かくされたスター	숨겨진 스타	隐藏的星星	隱藏的星星
 StatGreenStars	Green Stars		Étoiles Vertes	Étoiles vertes	Estrellas Verdes	Estrellas verdes	Grünsterne	Superstelle Verdi	Groene sterren	Estrelas verdes	グリーンスター	초록파워스타	绿色星星	綠星星
 StatLumas	Hungry Lumas Fed		Goinfres Chiko nourris	Goinfres Luma nourris	Destellos glotones alimentados	Destellos glotones alimentados	Gefütterte Gourmet-Lumas	Sfavillotti Ghiotti nutriti	Gevoerde Snoep-Luma's	Lumas fominhas alimentados	満腹にしたハラペコチコ	배부르게 한 꼬르륵치코	喂饱的贪吃琪琪	餵飽的貪吃奇可
+StatPowerStarsCollected	Power Stars Collected		Super Étoiles récoltées	Super Étoiles récoltées	Superestrellas recogidas	Superestrellas recogidas	Gesammelte Power-Sterne	Superstelle raccolte	Verzamelde krachtsterren	Estrelas do Poder coletadas	集めたパワースター	모은 파워스타	收集的力量之星	收集的力量之星
 StatJumps	Jumps		Sauts	Sauts	Saltos	Saltos	Sprünge	Salti	Sprongen	Pulos	ジャンプした回数	점프 횟수	跳跃次数	跳躍次數
 StatSpins	Spins		Toupies	Toupies	Giros	Giros	Drehattacken	Piroette	Draaiaanvallen	Giros	スピンした回数	스핀 횟수	旋转次数	旋轉次數
 StatCoins	Coins Collected		Pièces récoltées	Pièces récoltées	Monedas recogidas	Monedas recogidas	Gesammelte Münzen	Monete raccolte	Verzamelde munten	Moedas coletadas	集めたコイン	모은 코인	收集的金币	收集的金幣
