@@ -150,10 +150,17 @@ void test_room() {
     host.name = "HOSTY";
     host.save = [] { return RoomSave{}; };
     expect(host_session.host(host), "a room opens");
-    expect(joiner.join({"127.0.0.1", host_session.port(), "", "chat test", "LUIGI FAN", galaxy::CoopCharacter::Luigi}),
-           "a player joins");
-    expect(third.join({"127.0.0.1", host_session.port(), "", "chat test", "THIRD", galaxy::CoopCharacter::Mario}),
-           "another joins");
+    const auto join = [&](const char* name, galaxy::CoopCharacter character) {
+        JoinConfig config;
+        config.address = "127.0.0.1";
+        config.port = host_session.port();
+        config.game_version = "chat test";
+        config.name = name;
+        config.character = character;
+        return config;
+    };
+    expect(joiner.join(join("LUIGI FAN", galaxy::CoopCharacter::Luigi)), "a player joins");
+    expect(third.join(join("THIRD", galaxy::CoopCharacter::Mario)), "another joins");
     expect(wait_for([&] {
                return joiner.state() == SessionState::Joined && third.state() == SessionState::Joined &&
                       joiner.players().size() == 3u && third.players().size() == 3u;

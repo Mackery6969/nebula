@@ -543,10 +543,60 @@ bool importing() {
     return ok;
 }
 
+// An online room's mods (set_room_mods): played in place of the player's own that change the game, the player's
+// texture packs kept, for one start.
+bool room_mods() {
+    bool ok = true;
+    const fs::path root = fs::temp_directory_path() / "nebula_mods_room";
+    std::error_code ec;
+    fs::remove_all(root, ec);
+    const fs::path mods = root / "mods";
+    write(mods / "Own" / "StageData" / "A.arc", "OWN");
+    write(mods / "Pack" / "RMGE01" / "tex1_8x8_0123456789abcdef_1.png", "png");
+    write(root / "coop_mods" / "0123456789abcdef" / "StageData" / "A.arc", "ROOM");
+    write(root / "coop_mods" / "0123456789abcdef" / "StageData" / "B.arc", "RB");
+    write(mods / "Shared" / "StageData" / "B.arc", "SHARED");
+    galaxy::mods::set_mods_folder(mods, root / "mods.ini", "RMGE01");
+    Partition p;
+    // The room: a downloaded mod on top, then one the player has.
+    galaxy::mods::set_room_mods({{"Room Mod", root / "coop_mods" / "0123456789abcdef", true, {}},
+                                 {"Shared", mods / "Shared", true, {}}});
+    const auto room = galaxy::mods::apply_mods(p.fst, std::span(p.bytes.data() + p.dol, p.dol_size), p.dol,
+                                               p.bytes.data(), p.bytes.size(), "RMGE01", 0, 0);
+    ok &= expect(room != nullptr, "the room's mods applied");
+    if (room) {
+        ok &= expect(read_file(room->disc, room->fst, p.bytes.data(), "/StageData/A.arc") == "ROOM" &&
+                         read_file(room->disc, room->fst, p.bytes.data(), "/StageData/B.arc") == "RB",
+                     "the room's in its order, the player's own game mod left out");
+        ok &= expect(room->texture_folders.size() == 1u && room->texture_folders[0] == mods / "Pack",
+                     "the player's texture pack kept");
+        ok &= expect(room->active.size() == 3u && room->active.back() == "Room Mod", "the room's on top");
+    }
+    const galaxy::mods::SessionMods session = galaxy::mods::session_mods();
+    ok &= expect(session.room, "the session knows it played a room's mods");
+    const std::vector<galaxy::mods::ModInfo> own = galaxy::mods::scan_mods();
+    ok &= expect(own.size() == 3u && own[0].id == "Own", "the player's own mods stay theirs");
+    ok &= expect(galaxy::mods::mods_differ_from_session(own), "and take a restart to play again");
+    // Once: the next start is the player's own again.
+    const auto next = galaxy::mods::apply_mods(p.fst, std::span(p.bytes.data() + p.dol, p.dol_size), p.dol,
+                                               p.bytes.data(), p.bytes.size(), "RMGE01", 0, 0);
+    ok &= expect(next != nullptr && read_file(next->disc, next->fst, p.bytes.data(), "/StageData/A.arc") == "OWN" &&
+                     !galaxy::mods::session_mods().room,
+                 "a room's mods play for one start");
+    // A room of the player's own mods, the same way: no restart needed after.
+    galaxy::mods::set_room_mods({{"Own", mods / "Own", true, {}}, {"Shared", mods / "Shared", true, {}}});
+    (void)galaxy::mods::apply_mods(p.fst, std::span(p.bytes.data() + p.dol, p.dol_size), p.dol, p.bytes.data(),
+                                   p.bytes.size(), "RMGE01", 0, 0);
+    ok &= expect(!galaxy::mods::mods_differ_from_session(galaxy::mods::scan_mods()),
+                 "a room playing the player's own mods their way takes no restart");
+    fs::remove_all(root, ec);
+    return ok;
+}
+
 }  // namespace
 
 int main() {
-    const bool ok = xml() & disc() & riivolution() & layouts() & importing();
+    const bool ok = xml() & disc() & riivolution() & layouts() & room_mods() & importing();
     std::cout << (ok ? "mods tests passed" : "mods tests FAILED") << '\n';
     return ok ? 0 : 1;
 }

@@ -1,6 +1,7 @@
 // Online co-op's network layer: the channels (galaxy/net/link.h) over a line that loses, repeats and reorders
 // datagrams, the direct transport's lobby (galaxy/net/direct_transport.h) and the session over it
-// (galaxy/coop_session.h), both over the loopback.
+// (galaxy/coop_session.h), both over the loopback, with the join's checks and the room's mods (galaxy/coop_mods.h).
+#include "galaxy/coop_mods.h"
 #include "galaxy/coop_session.h"
 #include "galaxy/net/bytes.h"
 #include "galaxy/net/direct_transport.h"
@@ -11,6 +12,8 @@
 #include <chrono>
 #include <cstdio>
 #include <deque>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <random>
 #include <string>
@@ -286,6 +289,137 @@ void test_transport_lobby() {
            "a join nobody answers fails");
 }
 
+namespace fs = std::filesystem;
+
+// A folder of its own for a test's files, removed after.
+struct TempFolder {
+    fs::path path;
+    explicit TempFolder(const char* name) {
+        path = fs::temp_directory_path() / (std::string("nebula_") + name + "_" +
+                                            std::to_string(Clock::now().time_since_epoch().count()));
+        fs::create_directories(path);
+    }
+    ~TempFolder() {
+        std::error_code error;
+        fs::remove_all(path, error);
+    }
+};
+
+void write_file(const fs::path& path, const std::vector<std::uint8_t>& bytes) {
+    fs::create_directories(path.parent_path());
+    std::ofstream out(path, std::ios::binary);
+    out.write(reinterpret_cast<const char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+}
+
+std::vector<std::uint8_t> read_file(const fs::path& path) {
+    std::ifstream in(path, std::ios::binary);
+    return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+}
+
+std::vector<std::uint8_t> pattern(std::size_t size, unsigned seed) {
+    std::vector<std::uint8_t> bytes(size);
+    std::mt19937 random{seed};
+    for (std::uint8_t& b : bytes) b = static_cast<std::uint8_t>(random());
+    return bytes;
+}
+
+std::uint64_t hash_of(std::string_view text) {
+    galaxy::coop::ContentHash hash;
+    hash.update(text);
+    return hash.finish();
+}
+
+void test_coop_mods() {
+    using namespace galaxy::coop;
+    // XXH64's own test values (python-xxhash), whole and a piece at a time.
+    expect(hash_of("") == 0xef46db3751d8e999ull, "the hash of nothing");
+    expect(hash_of("abc") == 0x44bc2cf5ad770999ull, "the hash of 3 bytes");
+    expect(hash_of("Nobody inspects the spammish repetition") == 0xfbcea83c8a378bf1ull, "the hash of 39 bytes");
+    const std::vector<std::uint8_t> long_bytes = pattern(1000u, 7u);
+    ContentHash whole;
+    whole.update(long_bytes);
+    ContentHash pieces;
+    for (std::size_t at = 0; at < long_bytes.size();) {
+        const std::size_t take = std::min<std::size_t>(1u + at % 37u, long_bytes.size() - at);
+        pieces.update(std::span<const std::uint8_t>(long_bytes.data() + at, take));
+        at += take;
+    }
+    expect(whole.finish() == pieces.finish(), "the hash fed in pieces is the hash of the whole");
+
+    expect(safe_mod_path("riivolution/mod.xml") && safe_mod_path("Mario.arc"), "a mod's paths");
+    expect(!safe_mod_path("../x") && !safe_mod_path("a/../b") && !safe_mod_path("/abs") && !safe_mod_path("a//b") &&
+               !safe_mod_path("c:/x") && !safe_mod_path("a\\b") && !safe_mod_path("") && !safe_mod_path("a/"),
+           "and none that leave the mod's folder");
+
+    TempFolder temp("coop_mods");
+    const fs::path mod_folder = temp.path / "My Mod";
+    write_file(mod_folder / "riivolution" / "mod.xml", bytes_of("<wiidisc/>"));
+    write_file(mod_folder / "files" / "StageData" / "Big.arc", pattern(200000u, 1u));
+    write_file(mod_folder / "empty.txt", {});
+    write_file(mod_folder / "Thumbs.db", bytes_of("system"));
+    write_file(mod_folder / ".hidden" / "x", bytes_of("system"));
+    SharedMod mod;
+    mod.id = "My Mod";
+    mod.folder = mod_folder;
+    mod.options = {{"key", 2u}};
+    expect(describe_mod(mod), "a mod's folder is read");
+    expect(mod.files.size() == 3u && mod.files[0].path == "empty.txt" &&
+               mod.files[1].path == "files/StageData/Big.arc" && mod.files[2].path == "riivolution/mod.xml" &&
+               mod.size() == 200010u,
+           "its files by path, the system's own left out");
+    const fs::path copy_folder = temp.path / "copy";
+    fs::copy(mod_folder, copy_folder, fs::copy_options::recursive);
+    fs::remove(copy_folder / "Thumbs.db");
+    SharedMod copy = mod;
+    copy.folder = copy_folder;
+    expect(describe_mod(copy) && copy.hash == mod.hash && copy.plays_like(mod), "a copy has the same hash");
+    write_file(copy_folder / "empty.txt", bytes_of("!"));
+    expect(describe_mod(copy) && copy.hash != mod.hash, "a changed copy doesn't");
+    SharedMod other_choice = mod;
+    other_choice.options = {{"key", 1u}};
+    expect(!other_choice.plays_like(mod), "another choice plays otherwise");
+
+    galaxy::net::ByteWriter out;
+    write_mods(out, std::vector<SharedMod>{mod}, true);
+    galaxy::net::ByteReader in(out.bytes());
+    const std::optional<std::vector<SharedMod>> back = read_mods(in, true);
+    expect(back && back->size() == 1u && (*back)[0].plays_like(mod) && (*back)[0].files == mod.files,
+           "a list of mods is read back");
+    SharedMod bad = mod;
+    bad.files[0].path = "../escape";
+    galaxy::net::ByteWriter bad_out;
+    write_mods(bad_out, std::vector<SharedMod>{bad}, true);
+    galaxy::net::ByteReader bad_in(bad_out.bytes());
+    expect(!read_mods(bad_in, true), "and refused when a path leaves the mod's folder");
+
+    // The cache: a download is kept only when it is the mod.
+    const ModCache cache(temp.path / "cache");
+    expect(!cache.find(mod), "an empty cache has no mod");
+    const fs::path part = cache.begin(mod);
+    expect(!part.empty(), "a download starts");
+    fs::copy(mod_folder, part, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    const std::optional<fs::path> kept = cache.finish(mod);
+    expect(kept && cache.find(mod) == kept, "a whole download is kept");
+    const fs::path part2 = cache.begin(other_choice);
+    write_file(part2 / "wrong.bin", bytes_of("wrong"));
+    SharedMod broken = mod;
+    broken.hash ^= 1u;
+    const fs::path part3 = cache.begin(broken);
+    fs::copy(mod_folder, part3, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
+    expect(!cache.finish(broken) && !fs::exists(part3), "a damaged one is dropped");
+
+    NextJoin join;
+    join.address = "example.org:7777";
+    join.mods = {mod};
+    const fs::path next = temp.path / "next_join";
+    expect(write_next_join(next, join), "a join for the next start is written");
+    const std::optional<NextJoin> got = take_next_join(next);
+    expect(got && got->address == join.address && got->mods.size() == 1u && got->mods[0].plays_like(mod) &&
+               got->mods[0].folder == mod_folder,
+           "and read back");
+    expect(!take_next_join(next), "once");
+}
+
 // Until `done` or the time passes, the session's thread doing the work.
 bool wait_for(const std::function<bool()>& done, std::chrono::milliseconds limit = 15000ms) {
     const Clock::time_point until = Clock::now() + limit;
@@ -433,6 +567,150 @@ void test_session() {
     expect(joiner.state() == SessionState::Idle, "who are back to no session");
 }
 
+// The join's checks and the room's mods: another disc is refused; a joiner without the room's mods downloads them
+// from the host, and with them is let in.
+void test_session_mods() {
+    using namespace galaxy::coop;
+    using Kind = SessionEvent::Kind;
+    TempFolder temp("session_mods");
+    const fs::path host_mod = temp.path / "host" / "Big Mod";
+    write_file(host_mod / "files" / "StageData" / "Big.arc", pattern(700000u, 3u));
+    write_file(host_mod / "riivolution" / "big.xml", bytes_of("<wiidisc/>"));
+    write_file(host_mod / "empty.bin", {});
+    const fs::path small_mod = temp.path / "host" / "Small";
+    write_file(small_mod / "Mario.arc", pattern(3000u, 4u));
+    std::vector<SharedMod> room_mods(2u);
+    room_mods[0].id = "Big Mod";
+    room_mods[0].folder = host_mod;
+    room_mods[0].options = {{"Big option", 1u}};
+    room_mods[1].id = "Small";
+    room_mods[1].folder = small_mod;
+    expect(describe_mod(room_mods[0]) && describe_mod(room_mods[1]), "the host's mods are read");
+
+    DiscInfo disc{"RMGE01", 0u, 0x1234u};
+    Session host_session;
+    HostConfig host;
+    host.port = 0u;
+    host.game_version = "test 1";
+    host.name = "HOSTY";
+    host.disc = disc;
+    host.mods = room_mods;
+    expect(host_session.host(host), "a room with mods opens");
+    const std::uint16_t port = host_session.port();
+
+    const auto join_events = [](Session& session, Kind until, std::vector<SessionEvent>& events,
+                                std::chrono::milliseconds limit = 5000ms) {
+        return wait_for(
+            [&] {
+                for (auto& e : session.take_events()) events.push_back(e);
+                return has_event(events, until) || has_event(events, Kind::JoinFailed);
+            },
+            limit);
+    };
+
+    // Another disc.
+    {
+        Session other;
+        JoinConfig config{"127.0.0.1", port, "", "test 1", "PAL", galaxy::CoopCharacter::Mario};
+        config.disc = {"RMGP01", 0u, 0x9999u};
+        config.mods = room_mods;
+        expect(other.join(config), "a player with another disc joins");
+        std::vector<SessionEvent> events;
+        expect(join_events(other, Kind::Joined, events) && has_event(events, Kind::JoinFailed) &&
+                   events.back().text.find("ANOTHER DISC (RMGE01 REVISION 0)") != std::string::npos,
+               "and is refused for it");
+    }
+    // The same release, another image.
+    {
+        Session other;
+        JoinConfig config{"127.0.0.1", port, "", "test 1", "BAD DUMP", galaxy::CoopCharacter::Mario};
+        config.disc = {"RMGE01", 0u, 0x9999u};
+        config.mods = room_mods;
+        expect(other.join(config), "a player with a changed disc joins");
+        std::vector<SessionEvent> events;
+        expect(join_events(other, Kind::Joined, events) && has_event(events, Kind::JoinFailed) &&
+                   events.back().text.find("ISN'T THE SAME") != std::string::npos,
+               "and is refused for it");
+    }
+
+    // No mods: the room's download, then the session ends for Nebula to start again with them.
+    const fs::path cache = temp.path / "joiner" / "coop_mods";
+    const fs::path own_small = temp.path / "joiner" / "mods" / "Small";
+    fs::create_directories(own_small.parent_path());
+    fs::copy(small_mod, own_small, fs::copy_options::recursive);
+    std::vector<SharedMod> ready;
+    {
+        Session joiner;
+        JoinConfig config{"127.0.0.1", port, "", "test 1", "NEW", galaxy::CoopCharacter::Luigi};
+        config.disc = disc;
+        config.mods_cache = cache;
+        // The player's own copy of Small.
+        config.find_mod = [&](const SharedMod& mod) -> std::optional<fs::path> {
+            SharedMod own = mod;
+            own.folder = temp.path / "joiner" / "mods" / mod.id;
+            if (describe_mod(own) && own.hash == mod.hash) return own.folder;
+            return std::nullopt;
+        };
+        expect(joiner.join(config), "a player without the room's mods joins");
+        std::vector<SessionEvent> events;
+        bool progressed = false;
+        expect(wait_for(
+                   [&] {
+                       const DownloadProgress progress = joiner.download_progress();
+                       if (progress.active && progress.total == room_mods[0].size() && progress.mod == "Big Mod") {
+                           progressed = true;
+                       }
+                       for (auto& e : joiner.take_events()) events.push_back(e);
+                       return has_event(events, Kind::ModsReady) || has_event(events, Kind::JoinFailed);
+                   },
+                   15000ms),
+               "the room's mods arrive");
+        expect(has_event(events, Kind::DownloadingMods) && has_event(events, Kind::ModsReady), "as a download");
+        expect(progressed, "whose progress shows");
+        expect(joiner.state() == SessionState::Idle && host_session.players().size() == 1u,
+               "the joiner was never a player");
+        std::optional<std::vector<SharedMod>> got = joiner.take_room_mods();
+        expect(got && same_mods(*got, room_mods), "the room's mods, in its order");
+        if (got && got->size() == 2u) {
+            expect((*got)[1].folder == own_small, "a mod the player has is theirs");
+            expect((*got)[0].folder.parent_path() == cache &&
+                       read_file((*got)[0].folder / "files" / "StageData" / "Big.arc") == pattern(700000u, 3u) &&
+                       fs::is_regular_file((*got)[0].folder / "empty.bin"),
+                   "a downloaded one is in the cache, whole");
+            ready = *got;
+        }
+    }
+    // With them (as Nebula started again): let in.
+    {
+        Session joiner;
+        JoinConfig config{"127.0.0.1", port, "", "test 1", "NEW", galaxy::CoopCharacter::Luigi};
+        config.disc = disc;
+        config.mods = ready;
+        config.mods_cache = cache;
+        expect(joiner.join(config), "the player joins again with the room's mods");
+        std::vector<SessionEvent> events;
+        expect(join_events(joiner, Kind::Joined, events) && has_event(events, Kind::Joined), "and is let in");
+        joiner.leave();
+    }
+    // With the room's mods in another order: the cache has them, so they're ready at once.
+    {
+        Session joiner;
+        JoinConfig config{"127.0.0.1", port, "", "test 1", "SWAP", galaxy::CoopCharacter::Mario};
+        config.disc = disc;
+        config.mods = {ready[1], ready[0]};
+        config.mods_cache = cache;
+        config.find_mod = [&](const SharedMod& mod) -> std::optional<fs::path> {
+            return mod.id == "Small" ? std::optional<fs::path>(own_small) : std::nullopt;
+        };
+        expect(joiner.join(config), "a player with the room's mods in another order joins");
+        std::vector<SessionEvent> events;
+        expect(join_events(joiner, Kind::ModsReady, events) && has_event(events, Kind::ModsReady) &&
+                   !has_event(events, Kind::DownloadingMods),
+               "and needs no download to play them the room's way");
+    }
+    host_session.leave();
+}
+
 }  // namespace
 
 int main() {
@@ -444,6 +722,8 @@ int main() {
     test_addresses();
     test_transport_lobby();
     test_session();
+    test_coop_mods();
+    test_session_mods();
     if (s_failures == 0) std::printf("net tests passed\n");
     return s_failures == 0 ? 0 : 1;
 }

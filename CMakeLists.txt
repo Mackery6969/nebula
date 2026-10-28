@@ -99,15 +99,16 @@ target_link_libraries(galaxy_runtime_settings PUBLIC galaxy_runtime_abi galaxy_a
 galaxy_host_options(galaxy_runtime_settings)
 
 # Online co-op's network layer (runtime/src/net, docs/COOP_PLAN.md "Phase 1"): UDP sockets, the reliable and ordered
-# channels, the CoopNet-shaped direct transport and the session over it.
+# channels, the CoopNet-shaped direct transport and the session over it, with the join's checks and the room's mods.
 add_library(galaxy_net STATIC
     runtime/src/net/udp.cpp
     runtime/src/net/link.cpp
     runtime/src/net/direct_transport.cpp
+    runtime/src/coop_mods.cpp
     runtime/src/coop_session.cpp
     runtime/src/coop_chat.cpp
     runtime/src/coop_snapshot.cpp)
-target_link_libraries(galaxy_net PUBLIC galaxy_runtime_abi ws2_32)
+target_link_libraries(galaxy_net PUBLIC galaxy_runtime_abi galaxy_atomic_file ws2_32)
 galaxy_host_options(galaxy_net)
 
 add_library(galaxy_frame_cadence_diagnostics STATIC runtime/src/frame_cadence_diagnostics.cpp)

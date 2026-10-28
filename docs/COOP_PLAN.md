@@ -145,13 +145,27 @@ setting, not each player's own.
 - **Joiners get the host's.** On joining, a player receives the room's mod list. Mods they already have (same name
   and hash) are used as they are; the rest are downloaded from the host into a cache before the game starts, and
   turned off again when they leave. A player's own enabled mods don't apply in someone else's room.
+- **Only what changes the game is the room's.** Riivolution mods, game files and loose files are shared; texture
+  packs and HD movies stay each player's own (sm64coopdx keeps its DynOS model and texture packs per player too), so
+  nobody downloads gigabytes of textures to join. A mod with both is shared whole.
 - **No mods page outside a room.** The settings menu's MODS page and the launcher's Mods tab stop turning mods on
   for every game: importing and removing mods stays, choosing them moves to the Host page.
 - **Mods apply at the start.** Nebula applies mods when the game starts (the virtual disc), so a room's mods are
   set before the joiner's game loads the galaxy, and changing them means restarting the room.
 
-Open: whether purely cosmetic packs (texture packs, HD movies) should stay each player's own choice, as
-sm64coopdx keeps model and texture packs (DynOS) per player.
+How a join goes (`galaxy/coop_mods.h`, `galaxy/coop_session.h`), as sm64coopdx's mod list and downloads do:
+
+1. The joiner asks to be let in with its game version, its disc (boot.bin's game id and revision, and a hash of
+   main.dol and the file table) and the mods it plays now (each one's id, a hash of its files and its choices).
+2. Another version or another disc is refused with the host's (`THE HOST PLAYS ANOTHER DISC (RMGE01 REVISION 0)`;
+   the same release with another hash is a changed or bad dump).
+3. Other mods: the host sends the room's list with each mod's files. The joiner uses its own copy of a mod with the
+   same files, else one already in its cache (`coop_mods/<hash>/` beside the mods folder), and downloads the rest from
+   the host a piece at a time (60 KiB, four ahead, on the ordered channel), checked against the mod's hash before it
+   is kept. It isn't a player while it downloads, so nobody sees it; the Join page shows how far it is.
+4. With every mod here, Nebula starts again with exactly the room's mods (`mods::set_room_mods`, for one start; the
+   player's own texture packs stay) and joins again by itself. This time the mods match and the player is let in.
+   Leaving the room and hosting later starts Nebula again with the player's own mods.
 
 ## The Online tab
 
@@ -309,7 +323,9 @@ Each phase ships on its own and leaves the game playable.
       and password; the Join page's address (`coop_join_address`); renaming a save.
 - [x] Mods as a room setting: the Host page picks them (a restart when the disc's mods change); the MODS page only
       imports and removes.
-- [ ] Joiners download the host's mods (with online play); the launcher's Mods tab only imports and removes.
+- [x] Joiners download the host's mods (with online play): the ones that change the game, checked by hash, then
+      Nebula starts again with them and joins.
+- [ ] The launcher's Mods tab only imports and removes.
 - [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
       only with the room's cheats on (`coop_cheats`). On every host, as the in-game settings menu is.
 
@@ -323,7 +339,8 @@ Each phase ships on its own and leaves the game playable.
 - [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
 - [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
-- [ ] Version and `main.dol` hash handshake. Clients with a different build or different mods are refused.
+- [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
+      (see [Mods](#mods-the-rooms-not-the-players)).
 - [x] [Chat](#chat), keyboard only; controllers read it.
 
 ### Phase 2: same world
@@ -368,7 +385,8 @@ tests in `runtime/src/net/net_tests.cpp`:
   port and passes their messages on, so only the host's port needs forwarding. A relay that joins by a code would be
   another `Transport`, with nothing above it changing.
 - **Session** (`galaxy/coop_session.h`): the room as the game sees it, on a thread of its own. A joiner asks to be let
-  in with the game's version, their name and character; the host answers with the player's number, the room's
+  in with the game's version, its disc and mods, their name and character (a joiner with other mods gets the room's
+  first: see [Mods](#mods-the-rooms-not-the-players)); the host answers with the player's number, the room's
   settings, its save (sm64coopdx's `packet_join` and `packet_save_file`) and who is playing, and tells everyone else.
   The joiner plays the host's save from `coop_joined/` under the NAND folder, so their own saves stay untouched.
   Later features send their own message types with `Session::send` and `Session::on_message`.
