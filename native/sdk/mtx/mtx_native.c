@@ -276,9 +276,12 @@ void C_QUATSlerp(const Quaternion* p, const Quaternion* q, Quaternion* r, f32 t)
         theta = (f32)acos(cos_th);
         sin_th = (f32)sin(theta);
         tp = 1.0f - t;
-        sin_1mtth = (f32)sin(tp * theta);
+        /* The angles are single-precision products, as the console's fmuls rounds them, before sin widens them. */
+        const f32 tp_theta = tp * theta;
+        const f32 t_theta = t * theta;
+        sin_1mtth = (f32)sin(tp_theta);
         tp = sin_1mtth / sin_th;
-        sin_tth = (f32)sin(t * theta);
+        sin_tth = (f32)sin(t_theta);
         tq *= sin_tth / sin_th;
     } else {
         tp = 1.0f - t;
