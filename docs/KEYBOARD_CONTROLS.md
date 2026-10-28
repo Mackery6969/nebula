@@ -329,7 +329,9 @@ Graphics page.
 
 On Switch controllers the menu uses the console's meaning: A changes, B closes. PlayStation: Cross changes, Circle
 closes, Square clears, Triangle applies. Pages: Display, Graphics, Controls, Audio, General (text speed, button
-icons, language, Discord, Miis), Mods and System. Every change waits for Apply, the mix and text speed included;
+icons, language, Discord, Miis), Player (your name and Mario or Luigi), System, Online and Mods. The name is typed in
+place: Space, Right, A or a click starts it, then type it or pick each letter with Up and Down (Left and Right move,
+X or Backspace deletes); Enter or A keeps it, Escape or B drops it. Every change waits for Apply, the mix and text speed included;
 closing the menu or Undo drops what was not applied. A new language applies when Nebula next starts, as the game
 reads it once at boot. Settings files are written through flushed sibling temporaries
 and atomically replaced; a failed save stays dirty and is retried on the next

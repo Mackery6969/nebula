@@ -72,8 +72,8 @@ namespace NebulaAchievements {
     bool isShownLocked(s32 index);
     // GameScene: a Grand Star touched (Cosmic Immortal: the rematch with Bowser).
     void onGrandStarGet();
-    // GameScene: a star's get sequence starts. One new to the save counts for this player: all time
-    // (NebulaStat_PowerStars), and in an online co-op room for the Personal Star Counter (__NebulaCoopStarGet).
+    // GameScene: a star's get sequence starts. One new to the save counts for this player all time
+    // (NebulaStat_PowerStars, the Personal Star Counter's green count).
     void onStarGet();
     const NebulaAchievementIcon* getIcon(s32 index);
 

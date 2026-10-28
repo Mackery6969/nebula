@@ -108,6 +108,23 @@ bool native_settings_handle_window_key(
         was_down);
 }
 
+bool native_settings_typing() noexcept {
+    return s_settings_typing.load(std::memory_order_acquire);
+}
+
+bool native_settings_type(char32_t character) {
+    const std::lock_guard<std::recursive_mutex> lock(s_native_settings_mutex);
+    if (!s_settings_text) return false;
+    if (s_settings_text_swallow != 0u) {
+        // The space that started the typing comes right after its key.
+        const bool fresh = GetTickCount64() < s_settings_text_swallow;
+        s_settings_text_swallow = 0u;
+        if (fresh && character == U' ') return true;
+    }
+    if (character >= 0x20u && character < 0x7Fu) (void)s_settings_text->type(character);
+    return true;
+}
+
 NativeSettingsView native_settings_view() {
     s_settings_drawn_by_game.store(true, std::memory_order_release);
     return host_window::build_native_settings_view();
@@ -116,6 +133,18 @@ NativeSettingsView native_settings_view() {
 void native_settings_input(NativeSettingsInput input, int arg) {
     const std::lock_guard<std::recursive_mutex> lock(s_native_settings_mutex);
     const bool visible = s_native_settings_visible.load(std::memory_order_relaxed);
+    if (visible && s_settings_text) {
+        // The name being typed: a press (A, a click) or Apply keeps it, Close drops it, Revert deletes the letter at
+        // the cursor; the rest waits until it is kept or dropped.
+        switch (input) {
+        case NativeSettingsInput::Press:
+        case NativeSettingsInput::Apply: end_settings_text(true); break;
+        case NativeSettingsInput::Close: end_settings_text(false); break;
+        case NativeSettingsInput::Revert: s_settings_text->erase(); break;
+        default: break;
+        }
+        return;
+    }
     switch (input) {
     case NativeSettingsInput::Open:
         set_native_settings_visible(true);
@@ -173,7 +202,9 @@ void native_settings_input(NativeSettingsInput input, int arg) {
         }
         return;
     case NativeSettingsInput::Press:
-        if (arg >= 0 && static_cast<std::size_t>(arg) < selected_settings_buttons()) {
+        if (selected_settings_text()) {
+            start_settings_text(false);
+        } else if (arg >= 0 && static_cast<std::size_t>(arg) < selected_settings_buttons()) {
             press_settings_button(static_cast<unsigned>(arg));
         }
         return;

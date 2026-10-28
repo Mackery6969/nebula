@@ -14,8 +14,9 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] The Online tab greyed out when opened from the main menu
 - [x] Tab (a controller's Back) resets the selected Host page setting to its default; Escape or B goes back
 - [x] No page tabs or page hint on the main menu's one-page screens
-- [x] The game's logo above the main menu, as on the title screen
-- [x] Player page: name and character (Mario or Luigi), the character per player instead of per save
+- [x] ~~The game's logo above the main menu, as on the title screen~~ (dropped: it took too much room)
+- [x] Player page: name and character (Mario or Luigi), the character per player instead of per save; in Options
+      in the MODS page's place (MODS moved to the end)
 - [x] Text entry (keyboard, or letter by letter on a controller), then: renaming a save, the Host page's port and
       password, the Join page's address
 - [x] Mods as a room setting: the Host page picks them; the MODS page only imports and removes
@@ -27,7 +28,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Network layer (UDP, reliable and ordered channels) on every platform
 - [x] Host opens the room; Join connects to `address:port`; Leave game closes or leaves it
 - [x] Other players drawn as remote Marios and Luigis from their snapshots
-- [ ] Nametags over each player's head
+- [x] Nametags over each player's head
 - [x] Player list while Tab (keyboard) or Share (controller) is held
 - [x] Version, mods and disc check when a player joins
 - [x] Mod sharing as sm64coopdx's: joiners download the room's mods they don't have from the host
@@ -37,8 +38,8 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 
 ## Same world (Phase 2)
 
-- [ ] Instances per galaxy and mission: players only see others on the same mission
-- [ ] The server decides everything except the visuals: save, collectibles, objects, enemies
+- [x] Instances per galaxy and mission: players only see others on the same mission
+- [x] The server decides everything except the visuals: save, collectibles, objects, enemies
 - [ ] Cutscenes and transitions that move a player along (the Bowser opening, dome launches, Grand Star returns)
       play again for each player, so nobody gets stuck
 - [ ] An achievement unlocked in a save is every player's who plays in it

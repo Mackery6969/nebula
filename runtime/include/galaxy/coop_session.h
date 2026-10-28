@@ -49,7 +49,7 @@ struct SessionPlayer {
     // Where they play (set_place): the stage's name and its scenario; empty until they reach one.
     std::string stage;
     int scenario = 0;
-    // The Power Stars they got in this room, new to its save (count_star): sm64coopdx's Personal Star Counter.
+    // The Power Stars they got in this room, new to its save (credit_star): sm64coopdx's Personal Star Counter.
     unsigned stars = 0u;
     // The round trip to them (to the host, for a joiner's view of the others), 0 for this player or when unknown.
     unsigned ping_ms = 0u;
@@ -157,9 +157,9 @@ public:
     // Where this player plays (the player list's galaxy and star), told to everyone as it changes. Kept while there
     // is no room too: a room opened or joined later starts with it.
     void set_place(const std::string& stage, int scenario);
-    // This player got a Power Star new to the room's save: their count goes up and everyone is told. Nothing outside
-    // a room; each room starts from 0 (hosting or joining again).
-    void count_star();
+    // The host: `player` got a Power Star new to the room's save (the shared world settled it): their count goes up
+    // and everyone is told. Nothing for a joiner or outside a room; each room starts from 0.
+    void credit_star(net::PeerId player);
     // This player's Power Stars in this room (0 outside one).
     [[nodiscard]] unsigned stars() const;
 

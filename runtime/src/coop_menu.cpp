@@ -12,7 +12,7 @@ namespace galaxy::coop {
 
 namespace {
 
-enum MainRow : unsigned { RowHost, RowJoin, RowPlayer, RowOptions, RowQuit, MainRowCount };
+enum MainRow : unsigned { RowHost, RowJoin, RowOptions, RowQuit, MainRowCount };
 enum HostRow : unsigned {
     RowSave,
     RowSaveEdit,
@@ -29,7 +29,6 @@ enum HostRow : unsigned {
     HostRowCount
 };
 enum JoinRow : unsigned { RowAddress, RowJoinPassword, RowJoinStart, RowJoinBack, JoinRowCount };
-enum PlayerRow : unsigned { RowName, RowCharacter, RowPlayerBack, PlayerRowCount };
 
 constexpr unsigned kKnockbacks[] = {kCoopKnockbackWeak, kCoopKnockbackNormal, kCoopKnockbackTooMuch};
 
@@ -39,6 +38,24 @@ constexpr std::string_view kPasswordLetters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!?#$%&*+=@";
 constexpr std::string_view kAddressLetters = "0123456789.:abcdefghijklmnopqrstuvwxyz-[]";
 constexpr std::string_view kPortLetters = "0123456789";
+
+std::string_view kind_letters(TextKind kind) {
+    switch (kind) {
+    case TextKind::Port: return kPortLetters;
+    case TextKind::Password: return kPasswordLetters;
+    case TextKind::Address: return kAddressLetters;
+    default: return kNameLetters;
+    }
+}
+
+std::size_t kind_limit(TextKind kind) {
+    switch (kind) {
+    case TextKind::Port: return 5u;
+    case TextKind::Address: return kCoopAddressLimit;
+    case TextKind::PlayerName: return kPlayerNameLimit;
+    default: return kCoopTextLimit;
+    }
+}
 
 constexpr const char* kEditHelp =
     "TYPE IT, OR UP AND DOWN PICK A LETTER AND LEFT AND RIGHT MOVE. A OR ENTER KEEPS IT, B OR ESCAPE DROPS IT";
@@ -99,6 +116,63 @@ unsigned mods_on(const std::vector<RoomMod>& mods) {
 
 }  // namespace
 
+TextEdit::TextEdit(TextKind kind, std::string text) : kind_(kind), text_(std::move(text)), cursor_(text_.size()) {}
+
+std::string TextEdit::shown() const {
+    if (cursor_ >= text_.size()) return text_ + "_";
+    return text_.substr(0u, cursor_) + "[" + text_[cursor_] + "]" + text_.substr(cursor_ + 1u);
+}
+
+void TextEdit::step_letter(int delta) {
+    const std::string_view letters = kind_letters(kind_);
+    if (cursor_ >= text_.size()) {
+        // Past the end: a new letter, the first (up) or the last (down).
+        if (text_.size() >= kind_limit(kind_)) return;
+        text_.push_back(delta > 0 ? letters.front() : letters.back());
+        return;
+    }
+    const std::size_t at = letters.find(text_[cursor_]);
+    const std::size_t count = letters.size();
+    const std::size_t from = at == std::string_view::npos ? (delta > 0 ? count - 1u : 0u) : at;
+    text_[cursor_] = letters[(from + (delta > 0 ? 1u : count - 1u)) % count];
+}
+
+void TextEdit::erase() {
+    (void)type(cursor_ < text_.size() ? kTextDelete : kTextBackspace);
+}
+
+TextEdit::Result TextEdit::type(char32_t key) {
+    switch (key) {
+    case kTextEnter: return Result::Keep;
+    case kTextEscape: return Result::Drop;
+    case kTextBackspace:
+        if (cursor_ > 0u) text_.erase(--cursor_, 1u);
+        return Result::Editing;
+    case kTextDelete:
+        if (cursor_ < text_.size()) text_.erase(cursor_, 1u);
+        return Result::Editing;
+    case kTextLeft:
+        if (cursor_ > 0u) --cursor_;
+        return Result::Editing;
+    case kTextRight:
+        // Past the last letter onto the place a new one goes.
+        if (cursor_ < text_.size()) ++cursor_;
+        return Result::Editing;
+    case kTextUp: step_letter(1); return Result::Editing;
+    case kTextDown: step_letter(-1); return Result::Editing;
+    case kTextHome: cursor_ = 0u; return Result::Editing;
+    case kTextEnd: cursor_ = text_.size(); return Result::Editing;
+    default: break;
+    }
+    if (key < 0x20 || key >= 0x7F) return Result::Editing;  // the game's font draws printable ASCII
+    const char letter = static_cast<char>(key);
+    bool allowed = true;
+    if (kind_ == TextKind::Port) allowed = letter >= '0' && letter <= '9';
+    if (kind_ == TextKind::Address) allowed = letter != ' ' && letter != '/';
+    if (allowed && text_.size() < kind_limit(kind_)) text_.insert(cursor_++, 1u, letter);
+    return Result::Editing;
+}
+
 MainMenu::MainMenu(bool settings, SaveStore* saves) : settings_(settings), saves_(saves) {}
 
 void MainMenu::open() {
@@ -149,17 +223,13 @@ unsigned MainMenu::row_count() const {
     case Screen::Host: return HostRowCount;
     case Screen::Mods: return static_cast<unsigned>(std::max<std::size_t>(mods_.size(), 1u)) + 1u;
     case Screen::Join: return JoinRowCount;
-    case Screen::Player: return PlayerRowCount;
     }
     return 0u;
 }
 
 std::string MainMenu::text_value(Field field, unsigned row, std::string value) const {
     if (edit_.field != field || edit_.row != row) return value;
-    // The letter at the cursor in brackets, or a line after the text where the next one goes.
-    const std::string& text = edit_.text;
-    if (edit_.cursor >= text.size()) return text + "_";
-    return text.substr(0u, edit_.cursor) + "[" + text[edit_.cursor] + "]" + text.substr(edit_.cursor + 1u);
+    return edit_.text.shown();
 }
 
 std::vector<MenuRow> MainMenu::rows() const {
@@ -168,9 +238,9 @@ std::vector<MenuRow> MainMenu::rows() const {
         std::vector<MenuRow> rows(MainRowCount);
         rows[RowHost] = {"HOST", "OPEN", "PICK A SAVE AND THE ROOM'S SETTINGS, THEN PLAY", true};
         rows[RowJoin] = {"JOIN", "OPEN", "THE ADDRESS OF ANOTHER PLAYER'S GAME", true};
-        rows[RowPlayer] = {"PLAYER", "OPEN", "YOUR NAME AND CHARACTER, IN EVERY GAME YOU PLAY", true};
         rows[RowOptions] = settings_
-            ? MenuRow{"OPTIONS", "OPEN", "NEBULA'S SETTINGS: DISPLAY, GRAPHICS, CONTROLS, AUDIO", true}
+            ? MenuRow{"OPTIONS", "OPEN", "YOUR NAME AND CHARACTER, AND NEBULA'S SETTINGS: DISPLAY, GRAPHICS, AUDIO",
+                      true}
             : MenuRow{"OPTIONS", "-OPEN", "NEBULA'S IN-GAME SETTINGS AREN'T ON THIS SYSTEM YET", true};
         rows[RowQuit] = {"QUIT", "QUIT TO DESKTOP", "CLOSES NEBULA", true};
         return rows;
@@ -262,21 +332,6 @@ std::vector<MenuRow> MainMenu::rows() const {
         if (editing()) rows[edit_.row].help = kEditHelp;
         return rows;
     }
-    case Screen::Player: {
-        const RuntimeCoopSettings& coop = room_;
-        std::vector<MenuRow> rows(PlayerRowCount);
-        rows[RowName] = {"NAME",
-                         edit_.field == Field::PlayerName ? text_value(Field::PlayerName, RowName, {})
-                         : coop.player_name.empty()       ? "PLAYER"
-                                                          : coop.player_name,
-                         "YOUR NAME OVER YOUR HEAD AND IN THE PLAYER LIST", false, false,
-                         !coop.player_name.empty() || edit_.field == Field::PlayerName, true};
-        rows[RowCharacter] = {"CHARACTER", coop.character == CoopCharacter::Luigi ? "LUIGI" : "MARIO",
-                              "WHO YOU PLAY AS, IN ANY SAVE. OTHER PLAYERS SEE YOU AS HIM", false, true};
-        rows[RowPlayerBack] = {"BACK", "BACK", "BACK TO THE MAIN MENU", true};
-        if (editing()) rows[edit_.row].help = kEditHelp;
-        return rows;
-    }
     }
     return {};
 }
@@ -288,7 +343,7 @@ unsigned MainMenu::button_count(unsigned row) const {
 }
 
 MenuView MainMenu::view() const {
-    static const char* const titles[] = {"PLAY", "HOST", "MODS", "JOIN", "PLAYER"};
+    static const char* const titles[] = {"PLAY", "HOST", "MODS", "JOIN"};
     MenuView view;
     view.open = open_;
     view.page = 0u;
@@ -319,7 +374,7 @@ void MainMenu::move(int delta) {
     if (delta == 0) return;
     if (editing()) {
         // Up the next letter, down the one before.
-        step_letter(delta < 0 ? 1 : -1);
+        edit_.text.step_letter(delta < 0 ? 1 : -1);
         return;
     }
     const int count = static_cast<int>(row_count());
@@ -358,9 +413,6 @@ void MainMenu::change(int delta) {
         case RowCheats: coop.cheats = step(coop.cheats ? 1u : 0u, delta, 2u) == 1u; break;
         default: break;
         }
-    } else if (screen_ == Screen::Player && selected_ == RowCharacter) {
-        room_.character =
-            static_cast<CoopCharacter>(step(static_cast<unsigned>(room_.character), delta, 2u));
     } else if (screen_ == Screen::Mods && selected_ < mods_.size()) {
         // Off to on and back: left and right both turn it over, as a click does.
         toggle_mod(selected_);
@@ -404,7 +456,6 @@ void MainMenu::press(unsigned button) {
         switch (screen_) {
         case Screen::Host: start_edit(selected_ == RowPort ? Field::Port : Field::Password, selected_); break;
         case Screen::Join: start_edit(selected_ == RowAddress ? Field::Address : Field::Password, selected_); break;
-        case Screen::Player: start_edit(Field::PlayerName, selected_); break;
         default: break;
         }
         return;
@@ -427,9 +478,6 @@ void MainMenu::press(unsigned button) {
         if (selected_ == RowJoinStart) command_ = joining_ ? MenuCommand::CancelJoin : MenuCommand::Join;
         if (selected_ == RowJoinBack) back();
         return;
-    case Screen::Player:
-        if (selected_ == RowPlayerBack) back();
-        return;
     }
 }
 
@@ -437,7 +485,6 @@ void MainMenu::press_main(unsigned row) {
     switch (row) {
     case RowHost: show(Screen::Host); break;
     case RowJoin: show(Screen::Join); break;
-    case RowPlayer: show(Screen::Player); break;
     case RowOptions: command_ = MenuCommand::Settings; break;
     case RowQuit: command_ = MenuCommand::Quit; break;
     default: break;
@@ -482,19 +529,19 @@ void MainMenu::start_edit(Field field, unsigned row) {
     edit_.field = field;
     edit_.row = row;
     switch (field) {
-    case Field::SaveName: edit_.text = save_ < save_names_.size() ? save_names_[save_] : std::string(); break;
-    case Field::Port: edit_.text = std::to_string(room_.port); break;
-    case Field::Password: edit_.text = room_.password; break;
-    case Field::Address: edit_.text = room_.join_address; break;
-    case Field::PlayerName: edit_.text = room_.player_name; break;
+    case Field::SaveName:
+        edit_.text = TextEdit(TextKind::Name, save_ < save_names_.size() ? save_names_[save_] : std::string());
+        break;
+    case Field::Port: edit_.text = TextEdit(TextKind::Port, std::to_string(room_.port)); break;
+    case Field::Password: edit_.text = TextEdit(TextKind::Password, room_.password); break;
+    case Field::Address: edit_.text = TextEdit(TextKind::Address, room_.join_address); break;
     case Field::None: break;
     }
-    edit_.cursor = edit_.text.size();
 }
 
 // The text edited kept, when it makes sense for its row; else it stays open, saying why.
 void MainMenu::finish_edit() {
-    const std::string text = trimmed(edit_.text);
+    const std::string text = trimmed(edit_.text.text());
     switch (edit_.field) {
     case Field::SaveName:
         if (text.empty()) {
@@ -525,85 +572,19 @@ void MainMenu::finish_edit() {
         room_.join_address = text;
         break;
     }
-    case Field::PlayerName: room_.player_name = text; break;
     case Field::None: return;
     }
     edit_ = {};
 }
 
-void MainMenu::step_letter(int delta) {
-    std::string_view letters = kNameLetters;
-    std::size_t limit = kCoopTextLimit;
-    switch (edit_.field) {
-    case Field::Port:
-        letters = kPortLetters;
-        limit = 5u;
-        break;
-    case Field::Password: letters = kPasswordLetters; break;
-    case Field::Address:
-        letters = kAddressLetters;
-        limit = kCoopAddressLimit;
-        break;
-    case Field::PlayerName: limit = kPlayerNameLimit; break;
-    default: break;
-    }
-    std::string& text = edit_.text;
-    if (edit_.cursor >= text.size()) {
-        // Past the end: a new letter, the first (up) or the last (down).
-        if (text.size() >= limit) return;
-        text.push_back(delta > 0 ? letters.front() : letters.back());
-        return;
-    }
-    const std::size_t at = letters.find(text[edit_.cursor]);
-    const std::size_t count = letters.size();
-    const std::size_t from = at == std::string_view::npos ? (delta > 0 ? count - 1u : 0u) : at;
-    text[edit_.cursor] = letters[(from + (delta > 0 ? 1u : count - 1u)) % count];
-}
-
 bool MainMenu::type(char32_t key) {
     if (!editing()) return false;
-    std::string& text = edit_.text;
-    std::size_t& cursor = edit_.cursor;
     message_.clear();
-    switch (key) {
-    case kTextEnter: finish_edit(); return true;
-    case kTextEscape: edit_ = {}; return true;
-    case kTextBackspace:
-        if (cursor > 0u) text.erase(--cursor, 1u);
-        return true;
-    case kTextDelete:
-        if (cursor < text.size()) text.erase(cursor, 1u);
-        return true;
-    case kTextLeft:
-        if (cursor > 0u) --cursor;
-        return true;
-    case kTextRight:
-        // Past the last letter onto the place a new one goes.
-        if (cursor < text.size()) ++cursor;
-        return true;
-    case kTextUp: step_letter(1); return true;
-    case kTextDown: step_letter(-1); return true;
-    case kTextHome: cursor = 0u; return true;
-    case kTextEnd: cursor = text.size(); return true;
-    default: break;
+    switch (edit_.text.type(key)) {
+    case TextEdit::Result::Keep: finish_edit(); break;
+    case TextEdit::Result::Drop: edit_ = {}; break;
+    case TextEdit::Result::Editing: break;
     }
-    if (key < 0x20 || key >= 0x7F) return true;  // the game's font draws printable ASCII
-    const char letter = static_cast<char>(key);
-    std::size_t limit = kCoopTextLimit;
-    bool allowed = true;
-    switch (edit_.field) {
-    case Field::Port:
-        limit = 5u;
-        allowed = letter >= '0' && letter <= '9';
-        break;
-    case Field::Address:
-        limit = kCoopAddressLimit;
-        allowed = letter != ' ' && letter != '/';
-        break;
-    case Field::PlayerName: limit = kPlayerNameLimit; break;
-    default: break;
-    }
-    if (allowed && text.size() < limit) text.insert(cursor++, 1u, letter);
     return true;
 }
 
@@ -611,16 +592,10 @@ void MainMenu::reset() {
     if (!open_) return;
     message_.clear();
     if (editing()) {
-        // Minus or Tab deletes: the letter at the cursor, or the one before it at the end.
-        type(edit_.cursor < edit_.text.size() ? kTextDelete : kTextBackspace);
+        edit_.text.erase();
         return;
     }
     const RuntimeCoopSettings defaults{};
-    if (screen_ == Screen::Player) {
-        if (selected_ == RowName) room_.player_name.clear();
-        if (selected_ == RowCharacter) room_.character = defaults.character;
-        return;
-    }
     if (screen_ == Screen::Join) {
         if (selected_ == RowAddress) room_.join_address.clear();
         if (selected_ == RowJoinPassword) room_.password.clear();
@@ -658,7 +633,6 @@ void MainMenu::back() {
         if (joining_) command_ = MenuCommand::CancelJoin;
         show(Screen::Main, RowJoin);
         return;
-    case Screen::Player: show(Screen::Main, RowPlayer); return;
     }
 }
 

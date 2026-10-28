@@ -127,7 +127,7 @@ int main() {
     passed &= expect(!snapshot.visible, "overlay starts hidden");
     passed &= expect(!snapshot.dirty, "overlay starts clean");
     passed &= expect(!snapshot.save_error, "overlay starts without a save error");
-    passed &= expect(snapshot.tab_count == 8u, "display/graphics/controls/audio/game/mods/system/online tabs exist");
+    passed &= expect(snapshot.tab_count == 9u, "display/graphics/controls/audio/game/player/system/online/mods tabs exist");
     passed &= expect(snapshot.tab == 0u && snapshot.row == 1u, "the first setting row (below its heading) is selected");
     passed &= expect(
         snapshot.row_count == 9u,
@@ -559,9 +559,44 @@ int main() {
                      "right turns it back on when applied");
     passed &= expect(key(VK_UP) && key(VK_UP) && key(VK_UP) && galaxy::gx::native_settings_overlay_snapshot().row == 0u,
                      "up returns to text speed");
-    passed &= expect(key(VK_TAB), "Tab enters the mods page");
+    passed &= expect(key(VK_TAB), "Tab enters the player page");
     snapshot = galaxy::gx::native_settings_overlay_snapshot();
-    passed &= expect(snapshot.tab == 5u && snapshot.row_count >= 2u, "mods page has its list and its buttons");
+    passed &= expect(snapshot.tab == 5u && snapshot.row_count == 2u && snapshot.row == 0u,
+                     "player page has the name and the character, the name selected");
+    {
+        // The name is typed in place: Space starts it (its own space dropped), Enter keeps it in the draft.
+        const std::string name = galaxy::get_runtime_settings().coop.player_name;
+        galaxy::gx::NativeSettingsView player = galaxy::gx::native_settings_view();
+        passed &= expect(player.rows.size() == 2u && player.rows[0].text && player.rows[0].name && !player.editing &&
+                             player.rows[1].label == "CHARACTER" && player.rows[1].changes,
+                         "the name is a text, the character a choice");
+        passed &= expect(key(VK_SPACE) && galaxy::gx::native_settings_typing() &&
+                             galaxy::gx::native_settings_view().editing,
+                         "Space starts typing the name");
+        passed &= expect(galaxy::gx::native_settings_type(U' ') && galaxy::gx::native_settings_type(U'M') &&
+                             galaxy::gx::native_settings_type(U'o'),
+                         "the typing goes to the name");
+        passed &= expect(key(VK_LEFT) && key(VK_UP) && galaxy::gx::native_settings_view().rows[0].value == name + "M[p]",
+                         "the arrows move the cursor and pick its letter");
+        passed &= expect(key(VK_TAB) && galaxy::gx::native_settings_overlay_snapshot().tab == 5u,
+                         "the pages wait while the name is typed");
+        passed &= expect(key(VK_RETURN) && !galaxy::gx::native_settings_typing() &&
+                             galaxy::gx::native_settings_view().rows[0].value == name + "Mp" &&
+                             galaxy::gx::native_settings_overlay_snapshot().pending_changes == 1u &&
+                             galaxy::get_runtime_settings().coop.player_name == name,
+                         "Enter keeps it in the draft, waiting for apply");
+        passed &= expect(!galaxy::gx::native_settings_type(U'x'), "nothing is typed once it is kept");
+        passed &= expect(key(VK_RIGHT) && key(VK_BACK) && key(VK_ESCAPE) && !galaxy::gx::native_settings_typing() &&
+                             galaxy::gx::native_settings_view().rows[0].value == name + "Mp",
+                         "Escape drops what was typed since");
+        passed &= expect(key(VK_BACK) && galaxy::gx::native_settings_overlay_snapshot().pending_changes == 0u,
+                         "Backspace undoes the new name");
+        passed &= expect(key(VK_DOWN) && key(VK_RIGHT) &&
+                             galaxy::gx::native_settings_view().rows[1].value == "LUIGI" && key(VK_BACK) &&
+                             galaxy::gx::native_settings_view().rows[1].value == "MARIO",
+                         "right picks Luigi, Backspace undoes it");
+        (void)key(VK_UP);
+    }
     passed &= expect(key(VK_TAB), "Tab enters the system page");
     snapshot = galaxy::gx::native_settings_overlay_snapshot();
     passed &= expect(snapshot.tab == 6u && snapshot.row_count == 7u, "system page has the graphics card and six status rows");
@@ -573,12 +608,15 @@ int main() {
     passed &= expect(snapshot.tab == 7u && snapshot.row_count == 13u,
                      "online page has the room (its heading, players, five settings and Leave game) and the cheats "
                      "(their heading, galaxy, star and two buttons)");
+    passed &= expect(key(VK_TAB), "Tab enters the mods page");
+    snapshot = galaxy::gx::native_settings_overlay_snapshot();
+    passed &= expect(snapshot.tab == 8u && snapshot.row_count >= 2u, "mods page has its list and its buttons");
     passed &= expect(key(VK_TAB), "Tab navigation wraps");
     passed &= expect(
         galaxy::gx::native_settings_overlay_snapshot().tab == 0u,
         "Tab wraps back to video");
     passed &= expect(
-        key(VK_PRIOR) && galaxy::gx::native_settings_overlay_snapshot().tab == 7u,
+        key(VK_PRIOR) && galaxy::gx::native_settings_overlay_snapshot().tab == 8u,
         "Page Up (controller LB) selects the previous page, wrapping");
     passed &= expect(
         key(VK_NEXT) && galaxy::gx::native_settings_overlay_snapshot().tab == 0u,
@@ -717,8 +755,9 @@ int main() {
         // The view: every page, rows split into label and value, headings, and the pointer's choices.
         passed &= expect(key(VK_F1), "the menu opens for the view checks");
         galaxy::gx::NativeSettingsView view = galaxy::gx::native_settings_view();
-        passed &= expect(view.open && view.pages.size() == 8u && view.pages[0] == "DISPLAY" && view.controls_page == 2u,
-                         "the view lists the seven pages and the controls page");
+        passed &= expect(view.open && view.pages.size() == 9u && view.pages[0] == "DISPLAY" && view.pages[5] == "PLAYER" &&
+                             view.pages[8] == "MODS" && view.controls_page == 2u,
+                         "the view lists the nine pages and the controls page");
         passed &= expect(!view.rows.empty() && view.rows[0].heading && !view.rows[view.selected].heading,
                          "a page starts with a heading; the selection is never one");
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectRow, 0);
@@ -741,7 +780,7 @@ int main() {
         // A row of buttons (the MODS page's, under its mods): Left and Right move between them (none past either end),
         // Space and the pointer press one, the row starts at its first when selected again. RESCAN only: the others
         // open a file picker or a folder, or act on a mod.
-        galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 5);
+        galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 8);
         int buttons = -1;
         view = galaxy::gx::native_settings_view();
         for (unsigned i = 0; i < view.rows.size(); ++i) {
@@ -768,7 +807,7 @@ int main() {
         galaxy::gx::native_settings_input(NativeSettingsInput::Press, 6);
         passed &= expect(galaxy::gx::native_settings_view().selected_button == 5u, "a press past the row's buttons does nothing");
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 4);
-        galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 5);
+        galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, 8);
         galaxy::gx::native_settings_input(NativeSettingsInput::SelectRow, buttons);
         passed &= expect(galaxy::gx::native_settings_view().selected_button == 0u, "selected again, the row starts at its first");
 
@@ -911,7 +950,8 @@ int main() {
         };
         galaxy::gx::native_settings_set_controllers_for_tests(every_controller, DeviceKey{ControlScheme::Xbox, 0});
         passed &= expect(key(VK_F1), "the menu opens for the text checks");
-        for (unsigned page = 0; page < 7u; ++page) {
+        for (unsigned page = 0; page < 9u; ++page) {
+            if (page == 7u) continue;  // ONLINE
             galaxy::gx::native_settings_input(NativeSettingsInput::SelectPage, static_cast<int>(page));
             check_view();
             std::vector<std::string> labels;

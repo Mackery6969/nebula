@@ -333,11 +333,11 @@ static void decode_floats(
     std::size_t count)
 {
     assert(count <= 3);
+    std::uint32_t words[3];
+    // Unaligned and alias-safe.
+    std::memcpy(words, src, count * sizeof(std::uint32_t));
     for (std::size_t i = 0; i < count; ++i) {
-        std::uint32_t word;
-        // Unaligned and alias-safe.
-        std::memcpy(&word, src + i * sizeof(word), sizeof(word));
-        dst[i] = std::bit_cast<float>(galaxy::byte_swap_u32(word));
+        dst[i] = std::bit_cast<float>(galaxy::byte_swap_u32(words[i]));
     }
 }
 
@@ -678,7 +678,7 @@ PreparedVertexInputs prepare_vertex_inputs(
             size = attr_direct_size_pos(attribute);
         } else if (attr == 1u) {
             inputs.normal_vector_bytes = static_cast<std::uint32_t>(normal_elem_size(attribute));
-            size = inputs.normal_vector_bytes * (attribute.count != 0u ? 3u : 1u);
+            size = std::size_t{inputs.normal_vector_bytes} * (attribute.count != 0u ? 3u : 1u);
         } else if (attr < 4u) {
             size = color_byte_size(attribute.format);
         } else {

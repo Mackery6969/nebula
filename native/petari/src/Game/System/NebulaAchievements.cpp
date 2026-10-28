@@ -353,7 +353,7 @@ namespace NebulaAchievements {
             return;
         }
         const s32 queuedBefore = sQueued;
-        // The player's character (the Player page's, else the file's half).
+        // The player's character (Options' PLAYER page's, else the file's half).
         const bool mario = !MR::isPlayerLuigi();
 
         // The story, in the order it is played.
@@ -515,13 +515,12 @@ namespace NebulaAchievements {
 
     void onStarGet() {
         // Only a star new to the save, as sm64coopdx's Personal Star Counter counts one only when the star count goes
-        // up: in co-op a star the room already has counts for nobody again.
+        // up: in co-op a star the room already has counts for nobody again. (The room's own count is the host's.)
         readPendingStar();
         if (sPendingGalaxy == nullptr) {
             return;
         }
         countStat(NebulaStat_PowerStars, 1);
-        __NebulaCoopStarGet(sPendingGalaxy, sPendingStar);
     }
 
     void onGrandStarGet() {

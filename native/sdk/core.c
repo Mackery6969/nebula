@@ -115,8 +115,12 @@ u32 __NebulaCoopRemote(struct NebulaCoopRemotePlayer* players, u32 capacity) {
     return sHost->coop_remote(sHost->user, players, capacity);
 }
 
-void __NebulaCoopStarGet(const char* stage, s32 star) {
-    sHost->coop_star_get(sHost->user, stage, star);
+void __NebulaCoopWorldReport(const struct NebulaCoopWorldEvent* event) {
+    sHost->coop_world_report(sHost->user, event);
+}
+
+u32 __NebulaCoopWorldTake(struct NebulaCoopWorldEvent* events, u32 capacity) {
+    return sHost->coop_world_take(sHost->user, events, capacity);
 }
 
 s32 __NebulaCoopStarCount(void) {

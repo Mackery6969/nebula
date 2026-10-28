@@ -78,6 +78,7 @@
 #include "Game/Screen/NebulaCoopChat.hpp"
 #include "Game/Screen/NebulaPlayerList.hpp"
 #include "Game/System/NebulaAchievements.hpp"
+#include "Game/System/NebulaCoopWorld.hpp"
 #include "Game/Util/MessageUtil.hpp"
 #endif
 #include "Game/Util/ScreenUtil.hpp"
@@ -125,6 +126,7 @@ GameScene::~GameScene() {
 void GameScene::init() {
 #ifdef TARGET_PC
     NebulaRemotePlayer::forgetAll();
+    NebulaCoopWorld::startScene();
 #endif
     SceneFunction::createHioBasicNode(this);
     SceneFunction::startStageFileLoad();
@@ -200,6 +202,10 @@ void GameScene::init() {
         MR::setInitializeStateAfterPlacement();
         MR::callMethodAllSceneNameObj(&NameObj::initAfterPlacement);
         SleepControlFunc::initSyncSleepController();
+#ifdef TARGET_PC
+        // Online co-op: the instance's record is asked for while the scene still loads.
+        NebulaCoopWorld::endPlacement();
+#endif
 
         while (!GameSceneFunction::isLoadDoneScenarioWaveData()) {
 #ifdef TARGET_PC
@@ -300,6 +306,7 @@ void GameScene::update() {
     updateNerve();
 #ifdef TARGET_PC
     reportCoopPlayer();
+    NebulaCoopWorld::update();
     NebulaRemotePlayer::updateAll();
     NebulaAchievements::update();
     if (sTestBoard && MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementBoard != nullptr) {

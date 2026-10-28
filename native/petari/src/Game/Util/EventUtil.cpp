@@ -163,7 +163,7 @@ namespace MR {
 
     bool isPlayerLuigi() {
 #ifdef TARGET_PC
-        // Online co-op: the player's own character (the main menu's Player page), whatever save they play in; a
+        // Online co-op: the player's own character (Options' PLAYER page), whatever save they play in; a
         // file's Luigi half still plays Luigi.
         if (__NebulaCoopMenu(NEBULA_COOP_MENU_CHARACTER) == 1) {
             return true;
