@@ -1791,7 +1791,8 @@ std::atomic<bool> gCoopLuigi{false};
 // The room's chat (galaxy/coop_chat.h), over the session below (which goes first, its thread giving the chat lines).
 galaxy::coop::Chat gCoopChat;
 // Online play (galaxy/coop_session.h): the room this player hosts or joined. Host opens it as its save starts; Join
-// connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
+// connects from the main menu and plays the host's save once let in; the pause menu's Quit (back at the main menu)
+// leaves it.
 galaxy::coop::Session gCoopSession;
 void keep_coop_settings();
 // The game as online play compares it: a player with another is refused, as is one with another disc
@@ -2558,6 +2559,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
 #endif
         return 0;
     case NEBULA_COOP_MENU_CHARACTER: return gCoopLuigi.load(std::memory_order_relaxed) ? 1 : 0;
+    case NEBULA_COOP_MENU_JOINED: return gCoopSession.active() && !gCoopSession.is_host() ? 1 : 0;
     case NEBULA_COOP_MENU_POLL:
         // What the player changed is kept as they change it, a text once kept.
         if (!gCoopMenu.editing()) keep_coop_settings();
@@ -3795,8 +3797,8 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
     ++scene_frames;
     gSceneFrames.store(scene_frames, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
-    // The settings' Online page: Leave game, and its cheats' galaxy select: a travel the player asked for, through the game's own stage change,
-    // and the Grand Stars with the Observatory they power.
+    // The settings' Online page's cheats: the galaxy select's travel the player asked for, through the game's own stage
+    // change, and the Grand Stars with the Observatory they power; and the room ending under a joiner.
     {
         std::size_t stage = 0u;
         std::uint32_t star = 0u;
@@ -3809,7 +3811,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
         pump_coop_session();
         pump_coop_chat();
         if (galaxy::gx::take_leave_game()) {
-            // Leave game: out of the room (closing it, for its host), then the main menu.
+            // The room ended (the host quit, or this player was let go): out of it, then the main menu.
             if (gCoopSession.active()) {
                 std::fprintf(stderr, "[coop] leaving the room\n");
                 gCoopSession.leave();

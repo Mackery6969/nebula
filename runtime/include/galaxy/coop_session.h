@@ -1,7 +1,8 @@
 // Online co-op's session (docs/COOP_PLAN.md, "Hosting"): the room as the game sees it, over a transport
 // (galaxy/net/transport.h). Host opens it on a port; Join connects to address:port, asks the host to let this player
-// in and gets the room (its settings, the host's save and who is playing); Leave game leaves it, or closes it for
-// everyone when the host leaves. As in sm64coopdx, the host is player 0 and the others get the lowest free number.
+// in and gets the room (its settings, the host's save and who is playing); the pause menu's Quit leaves it, or closes
+// it for everyone when the host leaves. As in sm64coopdx, the host is player 0 and the others get the lowest free
+// number.
 //
 // A session runs on a thread of its own (the network keeps going while the game loads or a menu is open). Everything
 // here may be called from any thread; what happened (a player joined, the join refused, the room closed) waits in

@@ -47,7 +47,7 @@ inline constexpr const char* kObservatoryName = "COMET OBSERVATORY";
 
 void request_galaxy_travel(std::size_t stage, std::uint32_t star) noexcept;
 void request_grand_stars() noexcept;
-// The Online page's Leave game: the game starts again at the main menu.
+// The room ended under a joiner (its host quit): the game starts again at the main menu.
 void request_leave_game() noexcept;
 // A save is being played (Host left the main menu): the Online page works only then.
 void set_coop_in_game(bool in_game) noexcept;
