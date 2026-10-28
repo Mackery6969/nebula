@@ -35,6 +35,12 @@ void ScenePlayingResult::incCoin(int num) {
     ::requestOneUpIfNeed(prevNum, currNum, COIN_STEP_NUM);
 }
 
+#ifdef TARGET_PC
+void ScenePlayingResult::incCoinOfOtherPlayer(int num) {
+    mCoinNum = MR::clamp(mCoinNum + num, COIN_NUM_MIN, COIN_NUM_MAX);
+}
+#endif
+
 s32 ScenePlayingResult::getCoinNum() const {
     return MR::clamp(mCoinNum, COIN_NUM_MIN, COIN_NUM_MAX);
 }

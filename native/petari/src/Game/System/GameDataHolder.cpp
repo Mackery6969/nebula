@@ -1,4 +1,7 @@
 #include "Game/System/GameDataHolder.hpp"
+#ifdef TARGET_PC
+#include "Game/System/NebulaCoopWorld.hpp"
+#endif
 #include "Game/System/GameDataGalaxyStorage.hpp"
 #include "Game/System/GameDataPlayerStatus.hpp"
 #include "Game/System/GameEventFlagChecker.hpp"
@@ -72,7 +75,16 @@ bool GameDataHolder::isOnGameEventFlag(const char* pFlagName) const {
 }
 
 void GameDataHolder::tryOnGameEventFlag(const char* pFlagName) {
+#ifdef TARGET_PC
+    const bool wasOn = mEventFlagChecker->isOn(pFlagName);
+#endif
     mEventFlagChecker->tryOn(pFlagName);
+#ifdef TARGET_PC
+    // Online co-op: the session's save is every player's.
+    if (!wasOn && mEventFlagChecker->isOn(pFlagName)) {
+        NebulaCoopWorld::noticeEventFlag(this, pFlagName);
+    }
+#endif
 }
 
 s32 GameDataHolder::getGameEventValue(const char* pName) const {
@@ -82,7 +94,15 @@ s32 GameDataHolder::getGameEventValue(const char* pName) const {
 }
 
 void GameDataHolder::setGameEventValue(const char* pName, u16 value) {
+#ifdef TARGET_PC
+    const bool changed = mEventValueChecker->getValue(pName) != value;
+#endif
     mEventValueChecker->setValue(pName, value);
+#ifdef TARGET_PC
+    if (changed) {
+        NebulaCoopWorld::noticeEventValue(this, pName, value);
+    }
+#endif
 }
 
 bool GameDataHolder::isOnGameEventValueForBit(const char* pName, int bit) const {
@@ -188,7 +208,15 @@ bool GameDataHolder::hasGrandStar(int index) const {
 }
 
 void GameDataHolder::setPowerStar(const char* pGalaxyName, s32 scenarioNum, bool set) {
+#ifdef TARGET_PC
+    const bool isNew = set && !hasPowerStar(pGalaxyName, scenarioNum);
+#endif
     makeGalaxyScenarioAccessor(pGalaxyName, scenarioNum).setPowerStarFlag(set);
+#ifdef TARGET_PC
+    if (isNew) {
+        NebulaCoopWorld::noticePowerStar(this, pGalaxyName, scenarioNum);
+    }
+#endif
 }
 
 s32 GameDataHolder::getPowerStarNumOwned(const char* pGalaxyName) const {

@@ -387,6 +387,12 @@ namespace MR {
         ::getScenePlayingResult()->incPurpleCoin();
     }
 
+#ifdef TARGET_PC
+    void incCoinOfOtherPlayer(int term) {
+        ::getScenePlayingResult()->incCoinOfOtherPlayer(term);
+    }
+#endif
+
     s32 getCoinNum() {
         return ::getScenePlayingResult()->getCoinNum();
     }
