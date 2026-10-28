@@ -35,6 +35,8 @@ public:
 private:
     // What it counts now; -1 for the room's outside a room (the counter stays hidden).
     s32 getCount() const;
+    // False while the player turned the Personal Star Counter off (the Player tab).
+    bool isWanted() const;
     // The screen's units from one counter to the next below: the layout's tallest part.
     f32 getLineStep() const;
 

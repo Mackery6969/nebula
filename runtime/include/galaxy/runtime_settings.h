@@ -73,6 +73,8 @@ struct RuntimeCoopSettings {
     CoopPvpMode pvp_mode = CoopPvpMode::Classic;
     // The room's cheats (the Online tab's Cheats): off, they do nothing for anyone in it.
     bool cheats = false;
+    // This player's own: the Personal Star Counter's two counters under the save's star count (the Player tab).
+    bool star_counter = true;
 
     friend bool operator==(const RuntimeCoopSettings&, const RuntimeCoopSettings&) = default;
 };
