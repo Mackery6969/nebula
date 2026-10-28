@@ -20,6 +20,7 @@
 #include "galaxy/coop_menu.h"
 #include "galaxy/coop_saves.h"
 #include "galaxy/coop_session.h"
+#include "galaxy/coop_snapshot.h"
 #include "galaxy/crash_report.h"
 #include "galaxy/discord_presence.h"
 #include "galaxy/mods.h"
@@ -1568,6 +1569,7 @@ void svc_coop_player(void*, const NebulaCoopPlayer* player) {
     NebulaCoopPlayer copy = *player;
     copy.stage[sizeof(copy.stage) - 1] = '\0';
     copy.animation[sizeof(copy.animation) - 1] = '\0';
+    copy.group[sizeof(copy.group) - 1] = '\0';
     bool moved = false;
     {
         const std::lock_guard<std::mutex> lock(gCoopLock);
@@ -1797,6 +1799,56 @@ CoopAutoStart gCoopAutoStart = CoopAutoStart::None;
 std::uint16_t gCoopAutoPort = 0u;
 std::string gCoopAutoAddress;
 
+// The other players' snapshots (galaxy/coop_snapshot.h), for their copies in this player's instance; and this
+// player's, sent 30 times a second.
+galaxy::coop::RemotePlayers gCoopRemote;
+std::uint32_t gCoopSnapshotSequence = 0u;
+std::chrono::steady_clock::time_point gCoopSnapshotSent{};
+
+// The others' snapshots as they come (on the session's thread). Set before hosting or joining.
+void listen_coop_snapshots() {
+    gCoopRemote.clear();
+    gCoopSession.on_message(galaxy::coop::kSnapshotMessage,
+                            [](const galaxy::coop::SessionPlayer& from, std::span<const std::uint8_t> data) {
+                                gCoopRemote.receive(from.id, from.index, from.name, from.character, data);
+                            });
+}
+
+// This player's snapshot to everyone in the room, at most kSnapshotInterval apart: the game's last report of it.
+void send_coop_snapshot() {
+    const auto now = std::chrono::steady_clock::now();
+    if (now - gCoopSnapshotSent < galaxy::coop::kSnapshotInterval) return;
+    NebulaCoopPlayer local{};
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        if (!gCoopLocalValid) return;
+        local = gCoopLocal;
+    }
+    gCoopSnapshotSent = now;
+    galaxy::coop::PlayerSnapshot snapshot;
+    snapshot.sequence = ++gCoopSnapshotSequence;
+    snapshot.stage = local.stage;
+    snapshot.scenario = local.scenario;
+    for (std::size_t i = 0; i < 3u; ++i) {
+        snapshot.position[i] = local.position[i];
+        snapshot.rotation[i] = local.rotation[i];
+        snapshot.front[i] = local.front[i];
+        snapshot.up[i] = local.up[i];
+        snapshot.gravity[i] = local.gravity[i];
+        snapshot.velocity[i] = local.velocity[i];
+    }
+    snapshot.group = local.group;
+    snapshot.animation = local.animation;
+    snapshot.frame = local.animation_frame;
+    snapshot.rate = local.animation_rate;
+    for (std::size_t i = 0; i < snapshot.weights.size(); ++i) snapshot.weights[i] = local.track_weights[i];
+    snapshot.health = local.health;
+    snapshot.mode = local.mode;
+    snapshot.flags = local.flags;
+    (void)gCoopSession.send(galaxy::coop::kSnapshotMessage, galaxy::net::Channel::Unreliable,
+                            galaxy::coop::encode_snapshot(snapshot));
+}
+
 void set_coop_notice(std::string text) {
     const std::lock_guard<std::mutex> lock(gCoopNoticeLock);
     gCoopNotice = std::move(text);
@@ -1890,6 +1942,10 @@ void note_coop_place() {
 void pump_coop_session() {
     note_coop_place();
     if (!gCoopSession.active()) return;
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state == galaxy::coop::SessionState::Hosting || state == galaxy::coop::SessionState::Joined) {
+        send_coop_snapshot();
+    }
 #if defined(NEBULA_HOST_RENDERER)
     if (gCoopSession.is_host()) gCoopSession.set_room(galaxy::get_runtime_settings().coop);
 #endif
@@ -1932,6 +1988,7 @@ bool open_coop_room(const galaxy::coop::SaveInfo& save) {
     config.name = coop_player_name(save.name);
     config.character = config.room.character;
     config.save = coop_room_save;
+    listen_coop_snapshots();
     if (!gCoopSession.host(std::move(config))) {
         std::fprintf(stderr, "[coop] the room could not open on port %u\n", static_cast<unsigned>(gCoopMenu.room().port));
         gCoopMenu.set_message("PORT " + std::to_string(gCoopMenu.room().port) +
@@ -1959,6 +2016,7 @@ void start_coop_join() {
     config.character = room.character;
     std::fprintf(stderr, "[coop] joining %s port %u\n", config.address.c_str(), static_cast<unsigned>(config.port));
     const std::string address = room.join_address;
+    listen_coop_snapshots();
     if (!gCoopSession.join(std::move(config))) {
         std::string why = "THE ADDRESS COULD NOT BE REACHED";
         for (const galaxy::coop::SessionEvent& event : gCoopSession.take_events()) {
@@ -2358,6 +2416,61 @@ uint32_t svc_coop_list(void*, NebulaCoopListPlayer* players, uint32_t capacity, 
                    (from.host ? NEBULA_COOP_LIST_HOST : 0u) | (from.local ? NEBULA_COOP_LIST_YOU : 0u);
     }
     return static_cast<uint32_t>(list.size());
+}
+
+// The other players in this player's instance, for their copies: as they were kSnapshotDelay ago, by number. Who
+// left the room is forgotten.
+uint32_t svc_coop_remote(void*, NebulaCoopRemotePlayer* players, uint32_t capacity) {
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return 0u;
+    std::string stage;
+    int scenario = 0;
+    {
+        const std::lock_guard<std::mutex> lock(gCoopLock);
+        if (!gCoopLocalValid) return 0u;
+        stage = gCoopLocal.stage;
+        scenario = gCoopLocal.scenario;
+    }
+    const std::vector<galaxy::coop::SessionPlayer> room = gCoopSession.players();
+    std::vector<galaxy::coop::RemotePlayer> remote = gCoopRemote.sample(stage, scenario);
+    std::erase_if(remote, [&](const galaxy::coop::RemotePlayer& player) {
+        const bool here = std::any_of(room.begin(), room.end(), [&](const galaxy::coop::SessionPlayer& in) {
+            return in.id == player.id && !in.local;
+        });
+        if (!here) gCoopRemote.remove(player.id);
+        return !here;
+    });
+    const std::size_t count = std::min<std::size_t>(remote.size(), players != nullptr ? capacity : 0u);
+    for (std::size_t i = 0; i < count; ++i) {
+        const galaxy::coop::RemotePlayer& from = remote[i];
+        const galaxy::coop::PlayerSnapshot& snapshot = from.snapshot;
+        NebulaCoopRemotePlayer& to = players[i];
+        to = {};
+        std::snprintf(to.name, sizeof(to.name), "%s", from.name.c_str());
+        to.number = from.index + 1u;
+        NebulaCoopPlayer& player = to.player;
+        std::snprintf(player.stage, sizeof(player.stage), "%s", snapshot.stage.c_str());
+        player.scenario = snapshot.scenario;
+        for (std::size_t j = 0; j < 3u; ++j) {
+            player.position[j] = snapshot.position[j];
+            player.rotation[j] = snapshot.rotation[j];
+            player.front[j] = snapshot.front[j];
+            player.up[j] = snapshot.up[j];
+            player.gravity[j] = snapshot.gravity[j];
+            player.velocity[j] = snapshot.velocity[j];
+        }
+        std::snprintf(player.animation, sizeof(player.animation), "%s", snapshot.animation.c_str());
+        std::snprintf(player.group, sizeof(player.group), "%s", snapshot.group.c_str());
+        player.animation_frame = snapshot.frame;
+        player.animation_rate = snapshot.rate;
+        for (std::size_t j = 0; j < 4u; ++j) player.track_weights[j] = snapshot.weights[j];
+        player.health = snapshot.health;
+        player.mode = snapshot.mode;
+        // The character is the room's: what they picked as they joined.
+        player.flags = (snapshot.flags & ~static_cast<uint32_t>(NEBULA_COOP_PLAYER_LUIGI)) |
+                       (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_PLAYER_LUIGI : 0u);
+    }
+    return static_cast<uint32_t>(remote.size());
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -4117,6 +4230,7 @@ int main(int argc, char** argv) {
     services.coop_player = svc_coop_player;
     services.coop_menu = svc_coop_menu;
     services.coop_list = svc_coop_list;
+    services.coop_remote = svc_coop_remote;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
     // reads its frame art from the game files.

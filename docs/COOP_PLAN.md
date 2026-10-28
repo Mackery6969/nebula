@@ -179,6 +179,22 @@ plays whatever animation the network names, at the position, rotation and gravit
 packets. It has no physics or state machine of its own. Later phases give it collision with the local Mario and with
 enemies.
 
+- **Snapshots** (`galaxy/coop_snapshot.h`). Each player sends its own (the game's `coop_player` report) 30 times a
+  second on the unreliable channel, as the session's message 32, to everyone in the room (the host passes a joiner's
+  on). It holds the instance, the position, the model's facing and up (its base matrix, the true turn on any planet),
+  gravity, velocity, and the animation: its group as Mario's `XanimePlayer` names it, the bck, the frame, the speed
+  and the group's track weights (walking into running). An older snapshot than the last is dropped.
+- **Drawn 100 ms behind.** The host keeps the last second of each player's snapshots and gives the game
+  (`coop_remote`, each scene frame) the others in its own instance as they were 100 ms ago, between the two snapshots
+  either side: one lost snapshot doesn't show. A player not heard from for a second isn't drawn.
+- **The copies** (`NebulaRemotePlayer`, `native/petari/src/Game/Player`). As a scene starts in a room, it makes one
+  copy of Mario and one of Luigi for each other player the room may have (15 of each at most). Each is Mario's or
+  Luigi's own model (the other character's loads into the scene) with Mario's animations, played as `GhostPlayer`
+  plays the cosmic ghost's. Each player keeps their copy while they stay; unused copies are hidden.
+- **Not yet:** the power-up forms (Bee, Boo, Fire...: the copy is the plain model), the upper-body animations
+  (holding a shell), sounds and effects. The copies share the model with a local player of the same character, so a
+  form's colours on the local player can show on them.
+
 - **Nametags.** Each remote player's name over their head, in the game's font, hidden when they're behind a wall or
   far away (sm64coopdx's nametags).
 - **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
@@ -298,8 +314,8 @@ Each phase ships on its own and leaves the game playable.
       [The network layer](#the-network-layer).
 - [x] Host and Join (`address:port`) on the main menu and on the command line (`--host <port>`, `--join
       <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
-- [ ] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
-      (a "ghost").
+- [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
+      (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
 - [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
 - [ ] Version and `main.dol` hash handshake. Clients with a different build or different mods are refused.
 

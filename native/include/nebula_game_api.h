@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 37u
+#define NEBULA_GAME_API_VERSION 38u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -150,12 +150,27 @@ typedef struct NebulaCoopPlayer {
     uint32_t health;       /* MarioActor::mHealth */
     uint32_t mode;         /* MarioActor::mPlayerMode: the power-up form (Bee, Boo, Fire, Ice, Spring, Rainbow...) */
     uint32_t flags;        /* NEBULA_COOP_PLAYER_* */
+    char group[48];        /* the animation as Mario's XanimePlayer names it (getCurrentAnimationName: the group the
+                              bck plays in, Shift JIS), "" when none */
+    float animation_rate;  /* its speed (XanimePlayer::getRate) */
+    float track_weights[4]; /* the group's tracks' weights (XanimePlayer::mWeights: walking into running...) */
+    float front[3];        /* where the model faces and its up: its base matrix's Z and Y (the true turn, on any
+                              planet; `rotation` is the actor's own) */
+    float up[3];
 } NebulaCoopPlayer;
 
 enum {
     NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
     NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
 };
+
+/* Another player in the same instance (the stage and the scenario) as the local one, for its copy to draw
+   (coop_remote, docs/COOP_PLAN.md "Remote players"): a little in the past, between two of their snapshots. */
+typedef struct NebulaCoopRemotePlayer {
+    char name[32];           /* printable ASCII */
+    uint32_t number;         /* 1 the host, then 2, 3... as they joined: the same player keeps theirs */
+    NebulaCoopPlayer player; /* their NEBULA_COOP_PLAYER_LUIGI is their character */
+} NebulaCoopRemotePlayer;
 
 /* A player in the online co-op room, for the player list (coop_list, docs/COOP_PLAN.md "Player list"). */
 typedef struct NebulaCoopListPlayer {
@@ -601,6 +616,9 @@ typedef struct NebulaHostServices {
     /* The online co-op room's players by number, at most `capacity` into `players`, and the room's size in
        `room_size`: how many there are, 0 when there is no room. Called on the simulation thread. */
     uint32_t (*coop_list)(void* user, NebulaCoopListPlayer* players, uint32_t capacity, uint32_t* room_size);
+    /* The other players in the local player's instance, by number, at most `capacity` into `players`: how many there
+       are. Called on the simulation thread, each game scene frame. */
+    uint32_t (*coop_remote)(void* user, NebulaCoopRemotePlayer* players, uint32_t capacity);
 } NebulaHostServices;
 
 enum {
