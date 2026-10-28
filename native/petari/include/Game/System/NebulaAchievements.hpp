@@ -42,6 +42,7 @@ enum NebulaStat {
     NebulaStat_GameOvers,
     NebulaStat_OneUps,
     NebulaStat_PlaySeconds,
+    NebulaStat_PowerStars,  // Power and Grand Stars new to the save, got by this player (the Personal Star Counter)
     NebulaStat_Num
 };
 
@@ -71,6 +72,9 @@ namespace NebulaAchievements {
     bool isShownLocked(s32 index);
     // GameScene: a Grand Star touched (Cosmic Immortal: the rematch with Bowser).
     void onGrandStarGet();
+    // GameScene: a star's get sequence starts. One new to the save counts for this player all time
+    // (NebulaStat_PowerStars, the Personal Star Counter's green count).
+    void onStarGet();
     const NebulaAchievementIcon* getIcon(s32 index);
 
     // The textures the icons use, each once (the pop-up loads them when its scene starts).

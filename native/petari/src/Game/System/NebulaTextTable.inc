@@ -67,6 +67,8 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Green Stars", nullptr, L"\u00C9toiles Vertes", L"\u00C9toiles vertes", L"Estrellas Verdes", L"Estrellas verdes", L"Gr\u00FCnsterne", L"Superstelle Verdi", L"Groene sterren", L"Estrelas verdes", L"\u30B0\u30EA\u30FC\u30F3\u30B9\u30BF\u30FC", L"\uCD08\uB85D\uD30C\uC6CC\uC2A4\uD0C0", L"\u7EFF\u8272\u661F\u661F", L"\u7DA0\u661F\u661F"}},
     {"StatLumas",
      {L"Hungry Lumas Fed", nullptr, L"Goinfres Chiko nourris", L"Goinfres Luma nourris", L"Destellos glotones alimentados", L"Destellos glotones alimentados", L"Gef\u00FCtterte Gourmet-Lumas", L"Sfavillotti Ghiotti nutriti", L"Gevoerde Snoep-Luma's", L"Lumas fominhas alimentados", L"\u6E80\u8179\u306B\u3057\u305F\u30CF\u30E9\u30DA\u30B3\u30C1\u30B3", L"\uBC30\uBD80\uB974\uAC8C \uD55C \uAF2C\uB974\uB975\uCE58\uCF54", L"\u5582\u9971\u7684\u8D2A\u5403\u742A\u742A", L"\u9935\u98FD\u7684\u8CAA\u5403\u5947\u53EF"}},
+    {"StatPowerStarsCollected",
+     {L"Power Stars Collected", nullptr, L"Super \u00C9toiles r\u00E9colt\u00E9es", L"Super \u00C9toiles r\u00E9colt\u00E9es", L"Superestrellas recogidas", L"Superestrellas recogidas", L"Gesammelte Power-Sterne", L"Superstelle raccolte", L"Verzamelde krachtsterren", L"Estrelas do Poder coletadas", L"\u96C6\u3081\u305F\u30D1\u30EF\u30FC\u30B9\u30BF\u30FC", L"\uBAA8\uC740 \uD30C\uC6CC\uC2A4\uD0C0", L"\u6536\u96C6\u7684\u529B\u91CF\u4E4B\u661F", L"\u6536\u96C6\u7684\u529B\u91CF\u4E4B\u661F"}},
     {"StatJumps",
      {L"Jumps", nullptr, L"Sauts", L"Sauts", L"Saltos", L"Saltos", L"Spr\u00FCnge", L"Salti", L"Sprongen", L"Pulos", L"\u30B8\u30E3\u30F3\u30D7\u3057\u305F\u56DE\u6570", L"\uC810\uD504 \uD69F\uC218", L"\u8DF3\u8DC3\u6B21\u6570", L"\u8DF3\u8E8D\u6B21\u6578"}},
     {"StatSpins",

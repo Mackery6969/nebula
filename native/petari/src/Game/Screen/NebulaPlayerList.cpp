@@ -10,6 +10,7 @@
 #include "Game/Util/GamePadUtil.hpp"
 #include "Game/Util/LayoutUtil.hpp"
 #include "Game/Util/MessageUtil.hpp"
+#include "Game/Util/StringUtil.hpp"
 #include <cstdio>
 #include <cstring>
 #include <nebula_game_api.h>
@@ -34,6 +35,7 @@ namespace {
     const f32 cRowInset = 8.0f;      // a row's text from its frame's sides
     const f32 cNumberWidth = 22.0f;  // the player's number, before the name
     const f32 cPingWidth = 52.0f;    // the round trip, at the row's right
+    const f32 cStarsWidth = 44.0f;   // the Power Stars they got in this room, before it
     const f32 cColumnGap = 10.0f;
     const f32 cTitleSize = 17.0f;
     const f32 cTextSize = 14.0f;
@@ -60,6 +62,7 @@ namespace {
     const u32 cPingGood = 0x9CE6A4FF;
     const u32 cPingFair = 0xFFD860FF;
     const u32 cPingPoor = 0xFF8A7AFF;
+    const s32 cGlyphPowerStar = '7';  // the picture font's Power Star (MR::addPictureFontTag)
 
     struct Row {
         Pane* mRoot;
@@ -68,6 +71,7 @@ namespace {
         TextBox* mName;
         TextBox* mTag;  // Host
         TextBox* mPlace;
+        TextBox* mStars;
         TextBox* mPing;
         f32 mNameWidth;
         f32 mTagWidth;
@@ -111,7 +115,7 @@ namespace {
 
     bool isSamePlayer(const NebulaCoopListPlayer& rA, const NebulaCoopListPlayer& rB) {
         return strcmp(rA.name, rB.name) == 0 && strcmp(rA.stage, rB.stage) == 0 && rA.scenario == rB.scenario &&
-               rA.number == rB.number && rA.flags == rB.flags;
+               rA.number == rB.number && rA.flags == rB.flags && rA.stars == rB.stars;
     }
 };  // namespace
 
@@ -174,6 +178,12 @@ namespace {
             setText(rRow.mPlace, text);
             const u32 placeColor = rPlayer.stage[0] != 0 ? cSubText : cDimText;
             setTextColor(rRow.mPlace, placeColor, placeColor);
+            // The Personal Star Counter: a Power Star and how many they got here, as sm64coopdx's list shows them.
+            char stars[12];
+            snprintf(stars, sizeof(stars), "%u", rPlayer.stars > 9999u ? 9999u : rPlayer.stars);
+            appendAscii(MR::addPictureFontTag(text, cGlyphPowerStar), text + 16, stars);
+            setText(rRow.mStars, text);
+            setTextColor(rRow.mStars, rPlayer.stars != 0 ? cWhite : cDimText, rPlayer.stars != 0 ? cWhite : cDimText);
 
             f32 width, height;
             rRow.mPlace->mScale = nw4r::math::VEC2(1.0f, 1.0f);
@@ -181,6 +191,7 @@ namespace {
             measure(rRow.mName, 4000.0f, &rRow.mNameWidth, &height);
             measure(rRow.mTag, 4000.0f, &rRow.mTagWidth, &height);
             measure(rRow.mPlace, 4000.0f, &rRow.mPlaceWidth, &height);
+            measure(rRow.mStars, 4000.0f, &width, &height);
             if (!rRow.mTag->IsVisible()) {
                 rRow.mTagWidth = 0.0f;
             }
@@ -260,7 +271,8 @@ namespace {
             shape(rRow.mFrame, 0.0f, 0.0f, right - left, cRowHeight, cRowRadius);
             paint(rRow.mFrame, you ? cYouFill : cRowFill, you ? cYouRing : cRowRing);
 
-            // Number, name and Host from the left; the round trip at the right, the place before it, narrowed to fit.
+            // Number, name and Host from the left; the round trip at the right, the stars and the place before it,
+            // the place narrowed to fit.
             f32 x = left + cRowInset;
             rRow.mNumber->mTranslate = nw4r::math::VEC3(x, textCentre(0.0f, cSmallSize), 0.0f);
             x += cNumberWidth;
@@ -273,7 +285,9 @@ namespace {
             }
             const f32 pingRight = right - cRowInset;
             rRow.mPing->mTranslate = nw4r::math::VEC3(pingRight, textCentre(0.0f, cSmallSize), 0.0f);
-            const f32 placeRight = pingRight - cPingWidth - cColumnGap;
+            const f32 starsRight = pingRight - cPingWidth - cColumnGap;
+            rRow.mStars->mTranslate = nw4r::math::VEC3(starsRight, textCentre(0.0f, cSmallSize), 0.0f);
+            const f32 placeRight = starsRight - cStarsWidth - cColumnGap;
             const f32 room = placeRight - (x + cColumnGap);
             const f32 squeeze = rRow.mPlaceWidth > room && rRow.mPlaceWidth > 0.0f ? (room > 0.0f ? room : 0.0f) / rRow.mPlaceWidth : 1.0f;
             rRow.mPlace->mScale = nw4r::math::VEC2(squeeze, 1.0f);
@@ -349,10 +363,12 @@ void NebulaPlayerList::init(const JMapInfoIter& rIter) {
         rRow.mTag = makeText(kits, rRow.mRoot, name, 32);
         snprintf(name, sizeof(name), "NbPlPlace%d", i);
         rRow.mPlace = makeText(kits, rRow.mRoot, name, 160);
+        snprintf(name, sizeof(name), "NbPlStar%d", i);
+        rRow.mStars = makeText(kits, rRow.mRoot, name, 16);
         snprintf(name, sizeof(name), "NbPlPing%d", i);
         rRow.mPing = makeText(kits, rRow.mRoot, name, 16);
         if (rRow.mFrame == nullptr || rRow.mNumber == nullptr || rRow.mName == nullptr || rRow.mTag == nullptr ||
-            rRow.mPlace == nullptr || rRow.mPing == nullptr) {
+            rRow.mPlace == nullptr || rRow.mStars == nullptr || rRow.mPing == nullptr) {
             rRow.mRoot = nullptr;
             return;
         }
@@ -360,6 +376,7 @@ void NebulaPlayerList::init(const JMapInfoIter& rIter) {
         setTextStyle(rRow.mName, cTextSize, cMario, cMario, 3);
         setTextStyle(rRow.mTag, cSmallSize, cGold, cGold, 3);
         setTextStyle(rRow.mPlace, cSmallSize, cSubText, cSubText, 5);
+        setTextStyle(rRow.mStars, cSmallSize, cWhite, cWhite, 5);
         setTextStyle(rRow.mPing, cSmallSize, cPingGood, cPingGood, 5);
         rRow.mRoot->SetVisible(false);
     }

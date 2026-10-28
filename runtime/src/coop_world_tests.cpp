@@ -230,6 +230,22 @@ void test_session_world() {
         }
     }
 
+    // The Personal Star Counter: each star new to the save counts for who got it, as the host settles it.
+    at_mario.world.report_save(star);
+    const auto stars_of = [](const Session& session, const char* name) {
+        for (const SessionPlayer& player : session.players()) {
+            if (player.name == name) return static_cast<int>(player.stars);
+        }
+        return -1;
+    };
+    expect(wait_for([&] {
+               pump_all();
+               return luigi.stars() == 1u && stars_of(mario, "LUIGI") == 1 && stars_of(luigi, "HOSTY") == 1;
+           }),
+           "a star counts for who got it, and everyone hears");
+    expect(host_session.stars() == 1u && mario.stars() == 0u && stars_of(host_session, "MARIO") == 0,
+           "a star the room already had counts for nobody");
+
     // Mario leaves the room: the host forgets him, and his instance keeps the host in it.
     mario.leave();
     expect(wait_for([&] {
