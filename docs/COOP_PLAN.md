@@ -210,7 +210,9 @@ enemies.
   form's colours on the local player can show on them.
 
 - **Nametags.** Each remote player's name over their head, in the game's font, hidden when they're behind a wall or
-  far away (sm64coopdx's nametags).
+  far away (sm64coopdx's nametags). `NebulaNametags`, drawn with the HUD: the name in the character's colour on a
+  small see-through window 200 units up the copy's up; it shrinks past 1200 units (to 0.6 of its size), and fades out
+  past 6000, off the screen, behind the map (a line from the camera to the head) and in the game's cutscenes.
 - **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
   room, their character, and the galaxy and star they're on, as sm64coopdx's player list. It shows over play and
   doesn't stop it. The controller's button is the Wii Remote's Minus (Share's default binding): in a room Minus holds
@@ -338,7 +340,7 @@ Each phase ships on its own and leaves the game playable.
       <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
 - [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
-- [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
+- [x] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
 - [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
       (see [Mods](#mods-the-rooms-not-the-players)).
 - [x] [Chat](#chat), keyboard only; controllers read it.

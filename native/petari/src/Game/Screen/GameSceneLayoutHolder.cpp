@@ -11,6 +11,7 @@
 #include "Game/Screen/NebulaAchievementBoard.hpp"
 #include "Game/Screen/NebulaAchievementToast.hpp"
 #include "Game/Screen/NebulaCoopChat.hpp"
+#include "Game/Screen/NebulaNametags.hpp"
 #include "Game/Screen/NebulaPlayerList.hpp"
 #include "Game/Screen/NoteCounter.hpp"
 #include "Game/Screen/OneUpBoard.hpp"
@@ -63,6 +64,8 @@ GameSceneLayoutHolder::GameSceneLayoutHolder()
     mCoopChat->initWithoutIter();
     mPlayerList = new NebulaPlayerList();
     mPlayerList->initWithoutIter();
+    mNametags = new NebulaNametags();
+    mNametags->initWithoutIter();
     mAchievementBoard = nullptr;
     if (NebulaAchievementLuma::isHere()) {
         mAchievementBoard = new NebulaAchievementBoard();
