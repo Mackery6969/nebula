@@ -259,6 +259,7 @@ namespace {
         StatHidden,
         StatGreenStars,
         StatLumas,
+        StatPowerStarsCollected,
         StatJumps,
         StatSpins,
         StatCoins,
@@ -268,12 +269,12 @@ namespace {
         StatOneUps,
         StatPlayTime,
         StatNum,
-        StatFirstAllTime = StatJumps,
+        StatFirstAllTime = StatPowerStarsCollected,
     };
 
     const char* const cStatLabels[StatNum] = {
         "StatPowerStars", "StatStarBits", "StatLives", "StatChapters", "StatComets", "StatPurpleCoins",
-        "StatHidden", "StatGreenStars", "StatLumas", "StatJumps", "StatSpins", "StatCoins",
+        "StatHidden", "StatGreenStars", "StatLumas", "StatPowerStarsCollected", "StatJumps", "StatSpins", "StatCoins",
         "StatStarBitsCollected", "StatLivesLost", "StatGameOvers", "StatOneUps", "StatPlayTime",
     };
 
@@ -1526,6 +1527,9 @@ void NebulaAchievementBoard::open() {
             break;
         case StatLumas:
             current = file.mLumasFed, goal = file.mLumasFedMax, glyph = 'c';
+            break;
+        case StatPowerStarsCollected:
+            count = NebulaAchievements::getStat(NebulaStat_PowerStars), glyph = '7';
             break;
         case StatJumps:
             count = NebulaAchievements::getStat(NebulaStat_Jumps);

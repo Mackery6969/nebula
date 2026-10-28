@@ -119,7 +119,7 @@ namespace {
 
     // galaxy::stats' names, in NebulaStat's order.
     const char* const cStatNames[NebulaStat_Num] = {
-        "jumps", "spins", "coins", "star_bits", "lives_lost", "game_overs", "one_ups", "play_seconds",
+        "jumps", "spins", "coins", "star_bits", "lives_lost", "game_overs", "one_ups", "play_seconds", "power_stars",
     };
     u32 sStatWaiting[NebulaStat_Num];
     bool sFileInPlay = false;  // the stage is not the title and file select
@@ -532,6 +532,16 @@ namespace NebulaAchievements {
         default:
             return true;
         }
+    }
+
+    void onStarGet() {
+        // Only a star new to the save, as sm64coopdx's Personal Star Counter counts one only when the star count goes
+        // up: in co-op a star the room already has counts for nobody again. (The room's own count is the host's.)
+        readPendingStar();
+        if (sPendingGalaxy == nullptr) {
+            return;
+        }
+        countStat(NebulaStat_PowerStars, 1);
     }
 
     void onGrandStarGet() {

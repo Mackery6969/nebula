@@ -32,6 +32,7 @@ enum Message : std::uint8_t {
     kJoinMods = 7,      // host: the joiner plays other mods; the room's, with their files
     kModRequest = 8,    // joiner: a piece of a room mod's file: the mod, the file, where, how long
     kModPiece = 9,      // host: the mod, the file, where, then the bytes
+    kPlayerStars = 10,  // host, to everyone: a player and the Power Stars they got in this room
 };
 
 // A joiner that doesn't ask to be let in this soon is removed; a join that isn't let in this soon fails.
@@ -49,6 +50,8 @@ constexpr unsigned kModPiecesAhead = 4u;
 constexpr auto kDownloadIdle = std::chrono::seconds(30);
 // A stage's name: the game's are at most 47 characters (NebulaCoopPlayer).
 constexpr std::size_t kStageNameLimit = 47u;
+// A player's star count travels in 16 bits.
+constexpr unsigned kStarsLimit = 0xffffu;
 
 // A stage's name as the game names them (letters, digits and underscores, cut): nothing else reaches the game.
 std::string clean_stage(std::string_view stage) {
@@ -86,7 +89,8 @@ void write_player(ByteWriter& out, const SessionPlayer& player) {
         .u8(static_cast<std::uint8_t>(player.character))
         .u8(player.host ? 1u : 0u)
         .str(player.stage)
-        .u8(static_cast<std::uint8_t>(std::clamp(player.scenario, 0, 255)));
+        .u8(static_cast<std::uint8_t>(std::clamp(player.scenario, 0, 255)))
+        .u16(static_cast<std::uint16_t>(std::min(player.stars, kStarsLimit)));
 }
 
 SessionPlayer read_player(ByteReader& in) {
@@ -98,6 +102,7 @@ SessionPlayer read_player(ByteReader& in) {
     player.host = in.u8() != 0u;
     player.stage = clean_stage(in.str(256u));
     player.scenario = in.u8();
+    player.stars = in.u16();
     return player;
 }
 
@@ -246,7 +251,7 @@ struct Session::State {
         while (std::any_of(players.begin(), players.end(), [index](const auto& p) { return p.index == index; })) {
             ++index;
         }
-        SessionPlayer joined{from, index, name, character, false, false, {}, 0};
+        SessionPlayer joined{from, index, name, character, false, false, {}, 0, 0u};
         waiting.erase(from);
 
         RoomSave room_save;
@@ -507,6 +512,7 @@ struct Session::State {
             if (player.local) {
                 player.stage = stage;
                 player.scenario = scenario;
+                player.stars = 0u;
             }
         }
         players = std::move(list);
@@ -533,6 +539,24 @@ struct Session::State {
         if (!in.ok() || sender == nullptr || sender->local) return;
         sender->stage = std::move(got);
         sender->scenario = got_scenario;
+    }
+
+    // A host's: a player's star count to everyone in the room, as it changes.
+    void send_stars(const SessionPlayer& counted) {
+        ByteWriter body;
+        body.u64(counted.id).u16(static_cast<std::uint16_t>(std::min(counted.stars, kStarsLimit)));
+        for (const SessionPlayer& other : players) {
+            if (!other.local) send(other.id, kPlayerStars, body);
+        }
+    }
+
+    // A joiner's, from the host (only the host counts stars).
+    void receive_stars(ByteReader& in) {
+        const PeerId id = in.u64();
+        const unsigned got = in.u16();
+        SessionPlayer* counted = player(id);
+        if (!in.ok() || counted == nullptr) return;
+        counted->stars = got;
     }
 
     void receive(PeerId from, Channel channel, std::span<const std::uint8_t> data) {
@@ -566,6 +590,9 @@ struct Session::State {
         case kJoinAccept: join_receive_accept(in); return;
         case kJoinMods: join_receive_mods(in); return;
         case kModPiece: join_receive_piece(in); return;
+        case kPlayerStars:
+            if (state == SessionState::Joined) receive_stars(in);
+            return;
         case kJoinRefuse: {
             const std::string why = in.str(256u);
             end(SessionEvent::Kind::JoinFailed, why.empty() ? std::string("THE HOST REFUSED") : why);
@@ -576,9 +603,11 @@ struct Session::State {
             if (!in.ok() || state != SessionState::Joined) return;
             joined.local = joined.id == transport->self();
             if (SessionPlayer* known = player(joined.id)) {
-                // Its place comes from the player itself (kPlayerPlace), never older from the host.
+                // Its place comes from the player itself (kPlayerPlace) and its stars as they change
+                // (kPlayerStars), never older with its info.
                 joined.stage = known->stage;
                 joined.scenario = known->scenario;
+                joined.stars = known->stars;
                 *known = joined;
                 return;
             }
@@ -658,7 +687,7 @@ Session::Session(std::unique_ptr<net::Transport> transport) : state_(std::make_u
         if (s->host) {
             s->state = SessionState::Hosting;
             s->players = {SessionPlayer{self, 0u, clean_name(s->host_config.name), s->host_config.character, true,
-                                        true, s->stage, s->scenario}};
+                                        true, s->stage, s->scenario, 0u}};
             s->event(SessionEvent::Kind::Hosting, {}, std::to_string(s->transport->port()));
             return;
         }
@@ -831,6 +860,24 @@ void Session::set_place(const std::string& stage, int scenario) {
         }
     }
     state_->send_place();
+}
+
+void Session::credit_star(net::PeerId player) {
+    const std::lock_guard<std::recursive_mutex> lock(lock_);
+    if (state_->state != SessionState::Hosting) return;
+    SessionPlayer* counted = state_->player(player);
+    if (counted == nullptr) return;
+    if (counted->stars < kStarsLimit) ++counted->stars;
+    state_->send_stars(*counted);
+}
+
+unsigned Session::stars() const {
+    const std::lock_guard<std::recursive_mutex> lock(lock_);
+    if (state_->state != SessionState::Hosting && state_->state != SessionState::Joined) return 0u;
+    for (const SessionPlayer& player : state_->players) {
+        if (player.local) return player.stars;
+    }
+    return 0u;
 }
 
 std::vector<SessionEvent> Session::take_events() {

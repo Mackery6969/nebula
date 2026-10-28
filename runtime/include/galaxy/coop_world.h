@@ -161,7 +161,7 @@ private:
     void remember_save(const SaveChange& change);
     void push_save(const SaveChange& change);
     void host_gone(net::PeerId from, std::span<const Gone> gone);
-    void host_save(const SaveChange& change);
+    void host_save(net::PeerId from, const SaveChange& change);
 
     Session* session_ = nullptr;
     mutable std::recursive_mutex lock_;

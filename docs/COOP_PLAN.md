@@ -226,7 +226,8 @@ enemies.
   the list instead of pausing, and Plus (Start) pauses. Each player tells the room where it plays as that changes
   (the session's own message, sent with the room to who joins later), so the list has every player's place before
   remote players exist; the game names the galaxy and star in the played language (`NebulaPlayerList`,
-  `coop_list`). The round trip to each player shows beside them.
+  `coop_list`). The round trip to each player shows beside them, and the Power Stars they got in the room before it
+  ([Personal Star Counter](#personal-star-counter)).
 
 ## Chat
 
@@ -240,6 +241,25 @@ The host keeps it (`runtime/src/coop_chat.cpp`): a line is a session message hol
 at most 100 characters), so its sender's name is the session's and can't be faked. A player's lines past five in three
 seconds are dropped. The window layers send T to it while the host allows it (a room's game with no menu over it), and
 the game draws what `coop_chat` gives it (`NebulaCoopChat`, the game's window and message font).
+
+## Personal Star Counter
+
+sm64coopdx's Personal Star Counter mod (`personal-starcount-ex.lua`), built in. Galaxy's HUD shows the save's Power
+Stars when the player stands still (`StarCounter`, with the coins and Star Bits); two more counters come in under it
+with it, the same layout with the star tinted as the mod's (`NebulaStarCounter`, from `CounterLayoutController`):
+
+- **Red: this room's.** The Power Stars this player got since they hosted or joined. Only in a room.
+- **Green: every one.** All the Power Stars this player ever got, kept across saves with Nebula's other all-time
+  counts (`power_stars` in `stats.ini`); the achievement board's stats page lists it too.
+
+As in the mod, a star counts only when it's new to the save (the mod counts when the save's star count goes up), so a
+star the room already has counts for nobody again; a Grand Star counts too. The host counts them, as it decides the
+save ([Shared world state](#shared-world-state)): a Power Star a player's game puts in its save comes to the host's
+`galaxy::coop::World`, and one that is news to the session's save counts for the player who sent it
+(`Session::credit_star`). The host tells everyone the new count (a session message of ten bytes, only as a count
+changes) and sends everyone's with the room to who joins later; the game reads its own with `coop_star_count`. The
+player list shows each player's beside their round trip, as the mod puts it in sm64coopdx's player list. The green
+count is this player's game's own (`NebulaAchievements::onStarGet`, as a star new to its save starts its get sequence).
 
 ## Cutscenes and transitions
 
@@ -314,7 +334,7 @@ and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's 
   shows what the save has and nothing pops up for it. While the room plays, an achievement any player's game unlocks
   goes to the server as a save change (`SaveKind::Achievement`, with when); the server keeps the first and tells every
   player. Each player's host unlocks it in its copy of the save's achievements on that day, and the game shows its
-  pop-up (game API 41's `coop_achievement_take`); the goal met later in that player's own game shows nothing again.
+  pop-up (game API 42's `coop_achievement_take`); the goal met later in that player's own game shows nothing again.
   Achievements are the host process's, not the game's: a scene start doesn't give them again. The headless host keeps
   none.
 - **Later (Phase 3).** Objects' movement and state (enemies walking, platforms, switches) and which player each enemy
@@ -376,6 +396,8 @@ Each phase ships on its own and leaves the game playable.
 - [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
       (see [Mods](#mods-the-rooms-not-the-players)).
 - [x] [Chat](#chat), keyboard only; controllers read it.
+- [x] The [Personal Star Counter](#personal-star-counter): each player's stars this room and all time, on the HUD and
+      in the player list (API version 41).
 
 ### Phase 2: same world
 
