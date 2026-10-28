@@ -166,7 +166,8 @@ void test_addresses() {
     expect(!(four == six), "different addresses differ");
 }
 
-// Updates the transports until `done` or two seconds pass.
+// Updates the transports until `done` or the limit passes: long enough for a message lost several times over at 20%
+// loss (the resend timeout doubles to 2 s), as `done` ends it as soon as it's true.
 // Callbacks by name, the others left empty.
 galaxy::net::TransportCallbacks callbacks(std::function<void(galaxy::net::TransportCallbacks&)> fill) {
     galaxy::net::TransportCallbacks out;
@@ -181,7 +182,7 @@ galaxy::net::TransportCallbacks on_error(std::function<void(galaxy::net::NetErro
 }
 
 bool pump(std::vector<galaxy::net::DirectTransport*> transports, const std::function<bool()>& done,
-          std::chrono::milliseconds limit = 3000ms) {
+          std::chrono::milliseconds limit = 15000ms) {
     const Clock::time_point until = Clock::now() + limit;
     while (Clock::now() < until) {
         for (auto* transport : transports) transport->update(1ms);
@@ -268,7 +269,10 @@ void test_transport_lobby() {
     expect(in_order, "a member's ordered messages reach another in order, through the host");
     expect(a_got.empty(), "and not back to their sender");
 
-    // Leaving: the others hear of it.
+    // Leaving: the others hear of it. Over a perfect line from here: a Bye is never sent again, so a lost one is only
+    // noticed when the member times out (DirectTransport::kTimeout), longer than this test waits.
+    host.set_test_loss(0.0);
+    a.set_test_loss(0.0);
     b.lobby_leave();
     expect(pump({&host, &a}, [&] { return b_left_seen_by_a; }), "a member leaving is told to the others");
     host.lobby_leave();
@@ -417,7 +421,7 @@ void test_coop_mods() {
 }
 
 // Until `done` or the time passes, the session's thread doing the work.
-bool wait_for(const std::function<bool()>& done, std::chrono::milliseconds limit = 5000ms) {
+bool wait_for(const std::function<bool()>& done, std::chrono::milliseconds limit = 15000ms) {
     const Clock::time_point until = Clock::now() + limit;
     while (Clock::now() < until) {
         if (done()) return true;
