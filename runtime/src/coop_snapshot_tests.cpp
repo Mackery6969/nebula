@@ -201,8 +201,9 @@ void test_session_snapshots() {
     mario.set_place("HeavensDoorGalaxy", 1);
     expect(wait_for([&] { return !placed(host_session, "EggStarGalaxy") && !placed(luigi, "EggStarGalaxy"); }),
            "the room hears he moved");
-    // What was on its way before the room heard lands first (a slow runner's session threads lag behind the test).
-    std::this_thread::sleep_for(250ms);
+    // Snapshots sent to him before he moved may still wait in his socket (a slow runner's session thread drains it
+    // late): let them land before forgetting them.
+    std::this_thread::sleep_for(200ms);
     at_mario.clear();
     at_luigi.clear();
     for (int i = 0; i < 30; ++i) {
