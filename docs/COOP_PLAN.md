@@ -90,11 +90,15 @@ don't. The Comet Observatory (and the other hub/demo stages) is an instance too,
 
 ## Main menu
 
-The title screen and the file select go. In their place is a co-op main menu like sm64coopdx's (its
-`djui_panel_main.c`, `djui_panel_host.c`, `djui_panel_join_direct.c`), over the file select's space backdrop.
+The file select goes. In its place is a co-op main menu like sm64coopdx's (its `djui_panel_main.c`,
+`djui_panel_host.c`, `djui_panel_join_direct.c`), over the file select's space backdrop. The title screen stays in
+front of it, as its own screen.
 
-- **Where.** The `FileSelect` stage stays for its backdrop and music, but its `FileSelector` skips the title
-  (`exeTitle`) and the six file bubbles and shows the menu instead. Boot goes from the logos straight to it.
+- **Where.** The `FileSelect` stage stays for its backdrop and music, but its `FileSelector` skips the six file
+  bubbles and shows the menu instead. Boot goes from the logos to the game's title (`exeTitle`: its logo, music and
+  Press A and B), then to the menu, without the Mii windows. The title shows once, as Nebula starts (game API 43's
+  `NEBULA_COOP_MENU_TITLE`): back from a room the menu opens at once, and so does a menu that starts a room by itself
+  (`--host`, `--join`, a restart for the room's mods).
 - **The game's look.** It keeps Super Mario Galaxy's feel: the file select's space backdrop and music, and the
   game's own windows, buttons and font. The menu's window fills the screen as the settings menu's does (the title
   logo above it took too much room).
@@ -137,7 +141,7 @@ The title screen and the file select go. In their place is a co-op main menu lik
   the settings menu's screen and turns the remote's buttons into its input, so it works with whatever controls the
   player has on every platform.
 
-Order: first the menu shell (Main, Host with a save file, Options, Quit) replacing the title and file select, so the
+Order: first the menu shell (Main, Host with a save file, Options, Quit) replacing the file select, so the
 game plays as before through it; then text rows, the Player page and the Host page's server rows; then Join with
 Phase 1.
 
@@ -376,8 +380,9 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 0.5: main menu
 
-- [x] The [main menu](#main-menu) shell replaces the title screen and the file select: Main, Host, Options, Quit,
-      over the file select's space backdrop, with the pointer, D-pad, stick, A and B.
+- [x] The [main menu](#main-menu) shell replaces the file select: Main, Host, Options, Quit, over the file
+      select's space backdrop, with the pointer, D-pad, stick, A and B.
+- [x] The title screen before the main menu, as its own screen, once as Nebula starts.
 - [x] Saves: any number, each a folder of its own, with its own achievements; New and Erase on the Host page; the
       existing `GameData.bin` converted; Rename on the Host page.
 - [x] The Host page: the save, max players, Player Interaction, Knockback Strength, PvP Mode and Cheats
