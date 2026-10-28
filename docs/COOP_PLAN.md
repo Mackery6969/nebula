@@ -85,6 +85,9 @@ don't. The Comet Observatory (and the other hub/demo stages) is an instance too,
   alone, while one with company finds them as the others left them.
 - **Free movement.** Nobody is pulled along to another galaxy. Each player picks galaxies and stars from their own
   dome and star select, and leaves an instance by finishing, dying out or exiting.
+- **Who is where.** The dome's galaxy select names the other players in each galaxy under its miniature, and the star
+  select names those on each star under it (`NebulaSelectPlayers`, from `coop_list`), as sm64coopdx's act select puts
+  a player's head over the act they play. Up to three names in their character's colour, then how many more.
 - **Zones.** A galaxy's zones are loaded into the same scene, so the whole galaxy is one instance, with no
   sub-instance per zone or planet.
 
@@ -420,6 +423,7 @@ Each phase ships on its own and leaves the game playable.
       the instance along, a Power Star taken shows as had for the others, and a star the room gave returns as its first.
 - [x] Instances: each client reports its stage and scenario, sees only players in its own instance (snapshots go
       only there), and a player entering an occupied instance gets its state from the server.
+- [x] The galaxy select and the star select show who plays in each galaxy and star ([Instances](#instances-one-per-galaxy-and-mission)).
 - [x] Collectibles, defeated enemies, Power Stars and save flags sync, with the host authoritative
       ([Shared world state](#shared-world-state)).
 - [x] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
