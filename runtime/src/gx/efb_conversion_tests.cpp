@@ -254,7 +254,7 @@ bool test_generated_mip_uniform_alpha() {
         const auto dest_height = std::max(1u, height / 2u);
         galaxy::gx::detail::generate_rgba8_mip_level(
             source, width, height, actual, dest_width, dest_height);
-        if (!expect(actual.size() == dest_width * dest_height,
+        if (!expect(actual.size() == std::size_t{dest_width} * dest_height,
                     "generated mip retains exact output extent")) return false;
         // Oracle: the general premultiplied-alpha rule (thin and empty footprints, integer rounding), with no
         // uniform-alpha shortcut.
@@ -305,7 +305,7 @@ bool test_generated_mip_uniform_alpha() {
     }
     constexpr std::array<std::uint32_t, 9> dimensions{0u, 1u, 2u, 3u, 4u, 5u, 7u, 8u, 17u};
     for (const auto width : dimensions) for (const auto height : dimensions) {
-        std::vector<RGBA8> source(width * height);
+        std::vector<RGBA8> source(std::size_t{width} * height);
         for (std::uint32_t pattern = 0u; pattern < 4u; ++pattern) {
             for (std::size_t i = 0u; i < source.size(); ++i) {
                 source[i] = {static_cast<std::uint8_t>(i * 73u + 29u),
