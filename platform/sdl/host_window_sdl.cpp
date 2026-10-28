@@ -540,6 +540,11 @@ void pump_events(int timeout_ms) noexcept {
                 }
                 break;
             }
+            if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat &&
+                galaxy::gx::coop_chat_key(static_cast<std::uint32_t>(virtual_key(event.key.scancode)))) {
+                // T in a co-op game: the chat's line opens (galaxy/coop_chat.h), and the game doesn't see the key.
+                break;
+            }
             if (event.type == SDL_EVENT_KEY_DOWN && galaxy::gx::native_settings_handle_window_key(
                                                        static_cast<std::uintptr_t>(virtual_key(event.key.scancode)),
                                                        event.key.repeat)) {

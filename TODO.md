@@ -31,7 +31,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Player list while Tab (keyboard) or Share (controller) is held
 - [x] Version, mods and disc check when a player joins
 - [x] Mod sharing as sm64coopdx's: joiners download the room's mods they don't have from the host
-- [ ] Chat (keyboard only; controllers read it)
+- [x] Chat (keyboard only; controllers read it): T opens a line, Enter sends it, Escape drops it
 
 ## Same world (Phase 2)
 

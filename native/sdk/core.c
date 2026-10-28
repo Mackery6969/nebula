@@ -103,6 +103,10 @@ s32 __NebulaCoopMenu(u32 what) {
     return sHost->coop_menu(sHost->user, what);
 }
 
+void __NebulaCoopChat(struct NebulaCoopChatView* view) {
+    sHost->coop_chat(sHost->user, view);
+}
+
 u32 __NebulaCoopList(struct NebulaCoopListPlayer* players, u32 capacity, u32* room_size) {
     return sHost->coop_list(sHost->user, players, capacity, room_size);
 }

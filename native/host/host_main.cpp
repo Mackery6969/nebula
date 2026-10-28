@@ -17,6 +17,7 @@
 #include <nebula_game_api.h>
 
 #include "galaxy/atomic_file.h"
+#include "galaxy/coop_chat.h"
 #include "galaxy/coop_menu.h"
 #include "galaxy/coop_mods.h"
 #include "galaxy/coop_saves.h"
@@ -1785,6 +1786,8 @@ unsigned gCoopSaveFile = 1u;  // the user file the played save plays
 // The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): the Player page's, as Host left the menu.
 std::atomic<bool> gCoopLuigi{false};
 
+// The room's chat (galaxy/coop_chat.h), over the session below (which goes first, its thread giving the chat lines).
+galaxy::coop::Chat gCoopChat;
 // Online play (galaxy/coop_session.h): the room this player hosts or joined. Host opens it as its save starts; Join
 // connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
 galaxy::coop::Session gCoopSession;
@@ -2036,16 +2039,19 @@ void pump_coop_session() {
         switch (event.kind) {
         case Kind::PlayerJoined:
             std::fprintf(stderr, "[coop] %s joined\n", event.name.c_str());
+            gCoopChat.notice(galaxy::coop::ChatLine::Kind::Joined, event.name, galaxy::coop::chat_clock_ms());
             changed = true;
             break;
         case Kind::PlayerLeft:
             std::fprintf(stderr, "[coop] %s left%s%s\n", event.name.c_str(), event.text.empty() ? "" : ": ",
                          event.text.c_str());
+            gCoopChat.notice(galaxy::coop::ChatLine::Kind::Left, event.name, galaxy::coop::chat_clock_ms());
             changed = true;
             break;
         case Kind::RoomChanged: changed = true; break;
         case Kind::Closed:
             std::fprintf(stderr, "[coop] the room ended: %s\n", event.text.empty() ? "left" : event.text.c_str());
+            gCoopChat.clear();
             if (!event.text.empty()) {
                 set_coop_notice(event.text);
 #if defined(NEBULA_HOST_RENDERER)
@@ -2059,6 +2065,36 @@ void pump_coop_session() {
     }
     if (changed) note_coop_room();
 }
+
+#if defined(NEBULA_HOST_RENDERER)
+bool host_settings_open();
+
+// The chat's line, each scene frame: T opens it while a room's game shows with no menu over it (the window takes the
+// key, galaxy/gx/galaxy_select.h), the keyboard's typing goes to it, and it closes as it is sent or dropped, or when
+// a menu comes over the game.
+void pump_coop_chat() {
+    const bool available = gCoopSession.active() && galaxy::gx::coop_in_game() && !host_settings_open() &&
+                           !gCoopMenu.is_open();
+    galaxy::gx::set_coop_chat_available(available);
+    // Whether the window's typing is the chat's (the main menu's text rows have it otherwise).
+    static bool s_typing_here = false;
+    if (galaxy::gx::take_coop_chat_open()) {
+        s_typing_here = true;
+        if (available) (void)gCoopChat.open();
+    }
+    if (!available) {
+        gCoopChat.close();
+    } else if (gCoopChat.typing()) {
+        const std::uint64_t now = galaxy::coop::chat_clock_ms();
+        for (const char32_t key : galaxy::gx::take_coop_text_input()) gCoopChat.type(key, now);
+    }
+    // Sent, dropped, or ended with the room: the keys play again.
+    if (s_typing_here && !gCoopChat.typing()) {
+        galaxy::gx::set_coop_text_entry(false);
+        s_typing_here = false;
+    }
+}
+#endif
 
 // Host: the room opens on the Host page's port as the save starts. False (and why on the menu) when it can't.
 bool open_coop_room(const galaxy::coop::SaveInfo& save) {
@@ -2416,6 +2452,36 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
 #endif
 }
 
+// The chat as the game draws it: the lines showing now and the line typed, only in a room's game.
+void svc_coop_chat(void*, NebulaCoopChatView* view) {
+    std::memset(view, 0, sizeof(*view));
+#if defined(NEBULA_HOST_RENDERER)
+    if (!gCoopSession.active() || !galaxy::gx::coop_in_game()) return;
+#endif
+    const galaxy::coop::ChatView chat = gCoopChat.view(galaxy::coop::chat_clock_ms());
+    const auto copy = [](char* out, std::size_t size, const std::string& text) {
+        std::snprintf(out, size, "%s", text.c_str());
+    };
+    for (const galaxy::coop::ChatView::Line& shown : chat.lines) {
+        if (view->line_count >= NEBULA_COOP_CHAT_LINES) break;
+        NebulaCoopChatLine& line = view->lines[view->line_count++];
+        line.id = shown.line.id;
+        switch (shown.line.kind) {
+        case galaxy::coop::ChatLine::Kind::Joined: line.kind = NEBULA_COOP_CHAT_JOINED; break;
+        case galaxy::coop::ChatLine::Kind::Left: line.kind = NEBULA_COOP_CHAT_LEFT; break;
+        default: line.kind = NEBULA_COOP_CHAT_MESSAGE; break;
+        }
+        line.character = shown.line.character == galaxy::CoopCharacter::Luigi ? 1u : 0u;
+        line.alpha = static_cast<uint32_t>(std::clamp(shown.alpha, 0.0f, 1.0f) * 255.0f + 0.5f);
+        copy(line.name, sizeof(line.name), shown.line.name);
+        copy(line.text, sizeof(line.text), shown.line.text);
+    }
+    view->typing = chat.typing ? 1u : 0u;
+    view->input_serial = chat.input_serial;
+    view->cursor = static_cast<uint32_t>(std::min<std::size_t>(chat.cursor, sizeof(view->input) - 1u));
+    copy(view->input, sizeof(view->input), chat.input);
+}
+
 int32_t svc_coop_menu(void*, uint32_t what) {
     switch (what) {
     case NEBULA_COOP_MENU_OPEN:
@@ -2427,6 +2493,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
             // Back at the main menu: the game ended, and with it the room.
             if (gCoopSession.active()) gCoopSession.leave();
             (void)gCoopSession.take_events();
+            gCoopChat.clear();
             {
                 const std::lock_guard<std::mutex> lock(gCoopLock);
                 gCoopLocalValid = false;
@@ -3646,6 +3713,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
             return 1;
         }
         pump_coop_session();
+        pump_coop_chat();
         if (galaxy::gx::take_leave_game()) {
             // Leave game: out of the room (closing it, for its host), then the main menu.
             if (gCoopSession.active()) {
@@ -3654,6 +3722,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
                 (void)gCoopSession.take_events();
                 note_coop_room();
             }
+            gCoopChat.clear();
             action->kind = NEBULA_TEST_LEAVE_GAME;
             return 1;
         }
@@ -4355,6 +4424,8 @@ int main(int argc, char** argv) {
     services.traced_sun = svc_traced_sun;
     services.coop_player = svc_coop_player;
     services.coop_menu = svc_coop_menu;
+    services.coop_chat = svc_coop_chat;
+    gCoopChat.attach(gCoopSession);
     services.coop_list = svc_coop_list;
     services.coop_remote = svc_coop_remote;
 #if defined(NEBULA_HOST_RENDERER)

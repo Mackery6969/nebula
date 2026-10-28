@@ -75,6 +75,7 @@
 #include "Game/NPC/NebulaAchievementLuma.hpp"
 #include "Game/Screen/NebulaAchievementBoard.hpp"
 #include "Game/Screen/NebulaAchievementToast.hpp"
+#include "Game/Screen/NebulaCoopChat.hpp"
 #include "Game/Screen/NebulaPlayerList.hpp"
 #include "Game/System/NebulaAchievements.hpp"
 #include "Game/Util/MessageUtil.hpp"
@@ -314,6 +315,10 @@ void GameScene::update() {
     // alike (the settings menu and the HOME Menu hold the whole scene, the pop-up with it).
     if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementToast != nullptr) {
         MR::getGameSceneLayoutHolder()->mAchievementToast->update();
+    }
+    // Online co-op's chat, likewise everywhere in the scene (the host sends nothing outside a room's game).
+    if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mCoopChat != nullptr) {
+        MR::getGameSceneLayoutHolder()->mCoopChat->update();
     }
     // Online co-op's player list while Tab or the controller's Share is held, over whatever the scene is doing.
     if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mPlayerList != nullptr) {
@@ -782,6 +787,9 @@ void GameScene::draw2D() const {
 void GameScene::drawOverlay() const {
     if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementToast != nullptr) {
         MR::getGameSceneLayoutHolder()->mAchievementToast->drawOnTop();
+    }
+    if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mCoopChat != nullptr) {
+        MR::getGameSceneLayoutHolder()->mCoopChat->drawOnTop();
     }
     if (MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mPlayerList != nullptr) {
         MR::getGameSceneLayoutHolder()->mPlayerList->drawOnTop();
