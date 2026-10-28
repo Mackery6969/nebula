@@ -113,6 +113,7 @@ inline int64_t perf_hint_retrace() noexcept { return 0; }
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
+#include "galaxy/platform_paths.h"
 
 namespace fs = std::filesystem;
 
@@ -4144,6 +4145,37 @@ int run_mods_tool() {
 }  // namespace
 #endif
 
+namespace {
+
+// The disc when --pak is not given: content/game.pak (as nebula-import and Setup write it) or game.pak, next to the
+// program, in the current folder, or in the install root above it (versions/<version>/, the launcher's layout).
+// Empty when none of them has one.
+fs::path find_default_pak(const fs::path& program) {
+    std::vector<fs::path> folders;
+    std::error_code error;
+    if (!program.empty()) folders.push_back(program);
+    if (fs::path current = fs::current_path(error); !error) folders.push_back(std::move(current));
+    if (program.parent_path().filename() == "versions") folders.push_back(program.parent_path().parent_path());
+    for (const fs::path& folder : folders) {
+        for (const fs::path& pak : {folder / "content" / "game.pak", folder / "game.pak"}) {
+            if (fs::is_regular_file(pak, error)) return pak;
+        }
+    }
+    return {};
+}
+
+// The saves when --nand is not given: a saves folder already next to the program or in the current folder (a test
+// build run as docs/TEST_BUILDS.md says), else the launcher's (saves in Nebula's data folder, by the settings).
+fs::path default_nand(const fs::path& program) {
+    std::error_code error;
+    if (!program.empty() && fs::is_directory(program / "saves", error)) return program / "saves";
+    if (fs::is_directory("saves", error)) return fs::absolute("saves", error);
+    if (const fs::path data = galaxy::nebula_data_directory(); !data.empty()) return data / "saves";
+    return program.empty() ? fs::path("saves") : program / "saves";
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
 #if defined(NEBULA_HOST_RENDERER) && defined(_WIN32)
     if (argc >= 3 && std::strcmp(argv[1], "--crash-report") == 0) {
@@ -4190,23 +4222,39 @@ int main(int argc, char** argv) {
     boot_mark("main");
     fs::path pak, nand, module;
     double seconds = 0;
-    for (int i = 1; i + 1 < argc; i += 2) {
+    std::error_code error;
+    for (int i = 1; i < argc; ++i) {
         const std::string key = argv[i];
+        // Each option takes the argument after it, but --host's port may be left out.
+        const char* value = i + 1 < argc && std::strncmp(argv[i + 1], "--", 2) != 0 ? argv[i + 1] : nullptr;
+        if (value != nullptr) {
+            ++i;
+        }
+#if defined(NEBULA_HOST_RENDERER)
+        if (key == "--host" && value == nullptr) {
+            gCoopAutoStart = CoopAutoStart::Host;
+            gCoopAutoPort = galaxy::kCoopDefaultPort;
+            continue;
+        }
+#endif
+        if (value == nullptr) {
+            die("%s takes a value", key.c_str());
+        }
         if (key == "--pak") {
-            pak = argv[i + 1];
+            pak = value;
         } else if (key == "--nand") {
-            nand = argv[i + 1];
+            nand = value;
         } else if (key == "--module") {
-            module = argv[i + 1];
+            module = value;
         } else if (key == "--seconds") {
-            seconds = std::atof(argv[i + 1]);
+            seconds = std::atof(value);
 #if defined(NEBULA_HOST_RENDERER)
         } else if (key == "--host") {
             // Online co-op (docs/COOP_PLAN.md): as the main menu opens, Host plays the last played save on this port.
             std::string ignored;
             std::uint16_t port = 0u;
-            if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port) ||
-                std::string(argv[i + 1]).find_first_not_of("0123456789") != std::string::npos) {
+            if (!galaxy::parse_coop_endpoint(std::string("host:") + value, ignored, port) ||
+                std::string(value).find_first_not_of("0123456789") != std::string::npos) {
                 die("--host takes a port, 1 to 65535");
             }
             gCoopAutoStart = CoopAutoStart::Host;
@@ -4215,33 +4263,46 @@ int main(int argc, char** argv) {
             // As the main menu opens, Join connects to the address.
             std::string address;
             std::uint16_t port = 0u;
-            if (!galaxy::parse_coop_endpoint(argv[i + 1], address, port)) {
+            if (!galaxy::parse_coop_endpoint(value, address, port)) {
                 die("--join takes an address, address:port or [IPv6]:port");
             }
             gCoopAutoStart = CoopAutoStart::Join;
-            gCoopAutoAddress = argv[i + 1];
+            gCoopAutoAddress = value;
 #endif
         } else {
             die("unknown option %s", key.c_str());
         }
     }
-    if (pak.empty() || nand.empty()) {
-        die("usage: nebula_native_host --pak <game.pak> --nand <dir> [--module <smg_game.dll>] [--seconds N]");
+    // Without --pak and --nand, the disc and saves are found as find_default_pak and default_nand say, so the
+    // program starts with no arguments from a folder that holds content/game.pak.
+    fs::path program = galaxy::program_directory();
+    if (program.empty()) {
+        program = fs::absolute(fs::path(argv[0]), error).parent_path();
     }
+    if (pak.empty()) {
+        pak = find_default_pak(program);
+        if (pak.empty()) {
+            die("no game.pak: pack your disc with nebula-import into a content folder next to the program, or name it: "
+                "--pak <game.pak> [--nand <saves folder>] [--module <smg_game.dll>] [--seconds N]");
+        }
+    }
+    if (nand.empty()) {
+        nand = default_nand(program);
+    }
+    log_line("paths:", ("disc " + pak.string() + ", saves " + nand.string()).c_str());
     if (module.empty()) {
 #if defined(_WIN32)
-        module = fs::path(argv[0]).parent_path() / "smg_game.dll";
+        module = program / "smg_game.dll";
 #elif defined(__APPLE__)
-        module = fs::path(argv[0]).parent_path() / "libsmg_game.dylib";
+        module = program / "libsmg_game.dylib";
 #else
-        module = fs::path(argv[0]).parent_path() / "libsmg_game.so";
+        module = program / "libsmg_game.so";
 #endif
     }
     gNandRoot = nand;
     gCoopSaves.emplace(gNandRoot / "coop_saves");
     gCoopMenu.set_saves(&*gCoopSaves);
     gCoopMenu.set_mods_source(coop_room_mods);
-    std::error_code error;
     fs::create_directories(gNandRoot / "title/00010000/524d4745/data", error);
     fs::create_directories(gNandRoot / "tmp", error);  // where saves stage their banner before moving it
 #if defined(NEBULA_HOST_RENDERER)
