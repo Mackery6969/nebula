@@ -480,6 +480,9 @@ tests in `runtime/src/net/net_tests.cpp`:
   first: see [Mods](#mods-the-rooms-not-the-players)); the host answers with the player's number, the room's
   settings, its save (sm64coopdx's `packet_join` and `packet_save_file`) and who is playing, and tells everyone else.
   The joiner plays the host's save from `coop_joined/` under the NAND folder, so their own saves stay untouched.
+  A player who renames themselves on Options' PLAYER page while in a room tells it at once (a joiner's new name goes
+  to the host as the session's message 11, and the host passes it on to everyone), so the player list, nametags and
+  new chat lines show it, as sm64coopdx's player settings do. The character stays the one they joined with.
   Later features send their own message types with `Session::send` and `Session::on_message`.
 
 ## Licensing
