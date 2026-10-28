@@ -253,6 +253,11 @@ with it, the same layout with the star tinted as the mod's (`NebulaStarCounter`,
 - **Green: every one.** All the Power Stars this player ever got, kept across saves with Nebula's other all-time
   counts (`power_stars` in `stats.ini`); the achievement board's stats page lists it too.
 
+They're on unless the player turns them off: the settings' Player tab has Personal Star Counter (`coop_star_counter=0`
+in `runtime_settings.ini`, this player's own, as the mod's `/psc off`). The game asks with
+`NEBULA_OPTION_STAR_COUNTER` as the counters come in, and once a second while they show, so turning it off takes them
+away at once; the player list still shows everyone's counts.
+
 As in the mod, a star counts only when it's new to the save (the mod counts when the save's star count goes up), so a
 star the room already has counts for nobody again; a Grand Star counts too. The host counts them, as it decides the
 save ([Shared world state](#shared-world-state)): a Power Star a player's game puts in its save comes to the host's

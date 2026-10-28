@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 42u
+#define NEBULA_GAME_API_VERSION 43u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -273,6 +273,8 @@ enum {
                                         (__NebulaGXBloomMarker): 0 not at all (their copy chains, as the console's), 1
                                         their own chains with the scene they work over kept and restored by it (in the
                                         EFB's own format), 2 it draws the bloom from their values */
+    NEBULA_OPTION_STAR_COUNTER,      /* 1 while the player wants the Personal Star Counter's two counters on the HUD
+                                        (NebulaStarCounter; the Player tab's setting), 0 not */
 };
 
 /* game_light: the game's lights, from the objects that own them; `values` per kind. */

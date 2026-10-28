@@ -3287,6 +3287,8 @@ uint32_t svc_option(void*, uint32_t what) {
 #else
         return 0;
 #endif
+    case NEBULA_OPTION_STAR_COUNTER:
+        return galaxy::get_runtime_settings().coop.star_counter ? 1u : 0u;
     case NEBULA_OPTION_TEST_DUMP_LAYOUTS: {
         static const bool dump = [] {
             const char* value = std::getenv("GALAXY_TEST_DUMP_LAYOUTS");
