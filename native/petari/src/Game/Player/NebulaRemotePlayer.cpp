@@ -143,6 +143,19 @@ void NebulaRemotePlayer::tryCreate() {
     OSReport("[coop] %d copies for the other players\n", sCopyNum);
 }
 
+s32 NebulaRemotePlayer::getCopyNum() {
+    return sCopyNum;
+}
+
+const NebulaRemotePlayer* NebulaRemotePlayer::getCopy(s32 index) {
+    return index >= 0 && index < sCopyNum ? sCopies[index] : nullptr;
+}
+
+TVec3f NebulaRemotePlayer::getNametagPos() const {
+    // Mario stands about 160 tall: the name a little over his cap.
+    return TVec3f(mPosition.x + mUp.x * 200.0f, mPosition.y + mUp.y * 200.0f, mPosition.z + mUp.z * 200.0f);
+}
+
 void NebulaRemotePlayer::updateAll() {
     if (sCopyNum == 0) {
         return;

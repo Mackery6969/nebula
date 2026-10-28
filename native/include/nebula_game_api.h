@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 41u
+#define NEBULA_GAME_API_VERSION 42u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -207,6 +207,7 @@ typedef struct NebulaCoopListPlayer {
     uint32_t number;   /* 1 the host, then 2, 3... as they joined */
     uint32_t ping_ms;  /* the round trip to them, 0 for this player or when unknown */
     uint32_t flags;    /* NEBULA_COOP_LIST_* */
+    uint32_t stars;    /* the Power Stars they got in this room, new to its save (coop_star_count) */
 } NebulaCoopListPlayer;
 
 enum {
@@ -326,7 +327,8 @@ enum {
     NEBULA_SETTINGS_ROW_MOD_OFF = 64,    /* the MODS page: a mod in the list of mods off (with HEADING: its title) */
     NEBULA_SETTINGS_ROW_MOD_ON = 128,    /* a mod in the list of mods on, the higher one winning (with HEADING: its title) */
     NEBULA_SETTINGS_ROW_HELD = 256,      /* the mod picked up to move: the arrows move it */
-    NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at` */
+    NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at`;
+                                            without CHANGES, a loading bar `slider_at` of `slider_steps` full */
     NEBULA_SETTINGS_ROW_BINDING = 1024,  /* a control's binding: changing it waits for an input */
     NEBULA_SETTINGS_ROW_TEXT = 2048,     /* a text (a name, an address); pressed, it is edited in place */
 };
@@ -715,6 +717,10 @@ typedef struct NebulaHostServices {
        Called on the simulation thread. */
     void (*coop_world_report)(void* user, const NebulaCoopWorldEvent* event);
     uint32_t (*coop_world_take)(void* user, NebulaCoopWorldEvent* events, uint32_t capacity);
+    /* Online co-op's Personal Star Counter: the Power Stars the local player got in this room, new to its save (the
+       host counts each star coop_world_report brings it for who got it), or -1 when there is no room. Called on the
+       simulation thread. */
+    int32_t (*coop_star_count)(void* user);
     /* The room's player collision options (NebulaCoopRules): non-solid outside a room. Called on the simulation
        thread, each game scene frame. */
     void (*coop_rules)(void* user, NebulaCoopRules* rules);

@@ -90,6 +90,8 @@ u32 __NebulaCoopRemote(struct NebulaCoopRemotePlayer* players, u32 capacity);
 struct NebulaCoopWorldEvent;
 void __NebulaCoopWorldReport(const struct NebulaCoopWorldEvent* event);
 u32 __NebulaCoopWorldTake(struct NebulaCoopWorldEvent* events, u32 capacity);
+// The Power Stars the local player got in this online co-op room, -1 with none (NebulaHostServices::coop_star_count).
+s32 __NebulaCoopStarCount(void);
 // The room's player collision options (NebulaHostServices::coop_rules).
 struct NebulaCoopRules;
 void __NebulaCoopRules(struct NebulaCoopRules* rules);

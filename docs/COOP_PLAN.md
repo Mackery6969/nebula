@@ -216,14 +216,17 @@ packets. It has no physics or state machine of its own. It collides with the loc
   form's colours on the local player can show on them.
 
 - **Nametags.** Each remote player's name over their head, in the game's font, hidden when they're behind a wall or
-  far away (sm64coopdx's nametags).
+  far away (sm64coopdx's nametags). `NebulaNametags`, drawn with the HUD: the name in the character's colour on a
+  small see-through window 200 units up the copy's up; it shrinks past 1200 units (to 0.6 of its size), and fades out
+  past 6000, off the screen, behind the map (a line from the camera to the head) and in the game's cutscenes.
 - **Player list.** Held Tab on a keyboard, or the controller's Share (Back/Select/View) button: every player in the
   room, their character, and the galaxy and star they're on, as sm64coopdx's player list. It shows over play and
   doesn't stop it. The controller's button is the Wii Remote's Minus (Share's default binding): in a room Minus holds
   the list instead of pausing, and Plus (Start) pauses. Each player tells the room where it plays as that changes
   (the session's own message, sent with the room to who joins later), so the list has every player's place before
   remote players exist; the game names the galaxy and star in the played language (`NebulaPlayerList`,
-  `coop_list`). The round trip to each player shows beside them.
+  `coop_list`). The round trip to each player shows beside them, and the Power Stars they got in the room before it
+  ([Personal Star Counter](#personal-star-counter)).
 
 ## Chat
 
@@ -237,6 +240,25 @@ The host keeps it (`runtime/src/coop_chat.cpp`): a line is a session message hol
 at most 100 characters), so its sender's name is the session's and can't be faked. A player's lines past five in three
 seconds are dropped. The window layers send T to it while the host allows it (a room's game with no menu over it), and
 the game draws what `coop_chat` gives it (`NebulaCoopChat`, the game's window and message font).
+
+## Personal Star Counter
+
+sm64coopdx's Personal Star Counter mod (`personal-starcount-ex.lua`), built in. Galaxy's HUD shows the save's Power
+Stars when the player stands still (`StarCounter`, with the coins and Star Bits); two more counters come in under it
+with it, the same layout with the star tinted as the mod's (`NebulaStarCounter`, from `CounterLayoutController`):
+
+- **Red: this room's.** The Power Stars this player got since they hosted or joined. Only in a room.
+- **Green: every one.** All the Power Stars this player ever got, kept across saves with Nebula's other all-time
+  counts (`power_stars` in `stats.ini`); the achievement board's stats page lists it too.
+
+As in the mod, a star counts only when it's new to the save (the mod counts when the save's star count goes up), so a
+star the room already has counts for nobody again; a Grand Star counts too. The host counts them, as it decides the
+save ([Shared world state](#shared-world-state)): a Power Star a player's game puts in its save comes to the host's
+`galaxy::coop::World`, and one that is news to the session's save counts for the player who sent it
+(`Session::credit_star`). The host tells everyone the new count (a session message of ten bytes, only as a count
+changes) and sends everyone's with the room to who joins later; the game reads its own with `coop_star_count`. The
+player list shows each player's beside their round trip, as the mod puts it in sm64coopdx's player list. The green
+count is this player's game's own (`NebulaAchievements::onStarGet`, as a star new to its save starts its get sequence).
 
 ## Cutscenes and transitions
 
@@ -264,7 +286,7 @@ The host's choice is the session's and is sent to each player as they join, as s
 | Knockback Strength (`coop_knockback_strength`) | 0-255; the menu offers Weak 10, Normal 25, Too much 60 | 25 |
 | PvP Mode (`coop_pvp_mode`) | `classic` or `revamped`: the rules for which attack beats which, and how far each one throws | `classic` |
 
-The rules carried over, with SMG's equivalents (`NebulaRemotePlayer`, game API 41's `coop_rules`):
+The rules carried over, with SMG's equivalents (`NebulaRemotePlayer`, game API 42's `coop_rules`):
 
 - **No contact** in a player's first 60 frames in an instance, or while either player is intangible: dead, in a demo,
   bound to something (a Launch Star, a bubble...), a Boo, hidden or out of the player's control
@@ -367,10 +389,12 @@ Each phase ships on its own and leaves the game playable.
       <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
 - [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
-- [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
+- [x] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
 - [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
       (see [Mods](#mods-the-rooms-not-the-players)).
 - [x] [Chat](#chat), keyboard only; controllers read it.
+- [x] The [Personal Star Counter](#personal-star-counter): each player's stars this room and all time, on the HUD and
+      in the player list (API version 41).
 
 ### Phase 2: same world
 
