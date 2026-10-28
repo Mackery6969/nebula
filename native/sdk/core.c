@@ -111,6 +111,10 @@ u32 __NebulaCoopList(struct NebulaCoopListPlayer* players, u32 capacity, u32* ro
     return sHost->coop_list(sHost->user, players, capacity, room_size);
 }
 
+u32 __NebulaCoopRemote(struct NebulaCoopRemotePlayer* players, u32 capacity) {
+    return sHost->coop_remote(sHost->user, players, capacity);
+}
+
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity) {
     return sHost->achievement(sHost->user, id, name, capacity);
 }
