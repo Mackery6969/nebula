@@ -1,5 +1,6 @@
 #ifdef TARGET_PC
 #include "Game/System/NebulaCoopWorld.hpp"
+#include "Game/System/NebulaCoopDemos.hpp"
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/MapObj/Coin.hpp"
 #include "Game/MapObj/CoinGroup.hpp"
@@ -211,6 +212,7 @@ namespace {
                 !pHolder->hasPowerStar(rEvent.name, rEvent.scenario)) {
                 OSReport("[coop] the room's star: %s %d\n", rEvent.name, static_cast< int >(rEvent.scenario));
                 pHolder->setPowerStar(rEvent.name, rEvent.scenario, true);
+                NebulaCoopDemos::noticeRoomStar(rEvent.name, rEvent.scenario);
             }
         } else if (rEvent.kind == NEBULA_COOP_WORLD_FLAG) {
             if (GameEventFlagTable::isExist(rEvent.name) && !pHolder->isOnGameEventFlag(rEvent.name)) {
@@ -234,6 +236,8 @@ namespace {
                 events[i].name[sizeof(events[i].name) - 1] = '\0';
                 if (events[i].kind == NEBULA_COOP_WORLD_GONE) {
                     applyGone(events[i].object, events[i].value);
+                } else if (events[i].kind == NEBULA_COOP_WORLD_STAR_GOT) {
+                    NebulaCoopDemos::applyStarGot(events[i].scenario, (events[i].value & NEBULA_COOP_STAR_GRAND) != 0);
                 } else if (events[i].kind != NEBULA_COOP_WORLD_READY) {
                     applySave(events[i]);
                 }
@@ -259,6 +263,7 @@ namespace NebulaCoopWorld {
         u32 roomSize = 0;
         __NebulaCoopList(nullptr, 0, &roomSize);
         sInRoom = roomSize != 0;
+        NebulaCoopDemos::startScene(sInRoom);
     }
 
     void notePlaced(const char* pName, NameObj* pObj, const JMapInfoIter& rIter) {

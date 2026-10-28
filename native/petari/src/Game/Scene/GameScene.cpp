@@ -78,6 +78,7 @@
 #include "Game/Screen/NebulaCoopChat.hpp"
 #include "Game/Screen/NebulaPlayerList.hpp"
 #include "Game/System/NebulaAchievements.hpp"
+#include "Game/System/NebulaCoopDemos.hpp"
 #include "Game/System/NebulaCoopWorld.hpp"
 #include "Game/Util/MessageUtil.hpp"
 #endif
@@ -276,6 +277,19 @@ namespace {
         player.health = pActor->mHealth;
         player.mode = pActor->mPlayerMode;
         player.flags = (MR::isPlayerLuigi() ? NEBULA_COOP_PLAYER_LUIGI : 0u) | (MR::isPlayerDead() ? NEBULA_COOP_PLAYER_DEAD : 0u);
+        // What the others' games need for player collisions: the attacks, and when nothing touches this player.
+        if (MR::isPlayerSwingAction()) {
+            player.flags |= NEBULA_COOP_PLAYER_SPIN;
+        }
+        if (MR::isPlayerHipDropFalling()) {
+            player.flags |= NEBULA_COOP_PLAYER_HIP_DROP;
+        }
+        if (MR::isPlayerHipDropLand()) {
+            player.flags |= NEBULA_COOP_PLAYER_HIP_DROP_LAND;
+        }
+        if (NebulaRemotePlayer::isLocalIntangible()) {
+            player.flags |= NEBULA_COOP_PLAYER_INTANGIBLE;
+        }
         __NebulaCoopPlayer(&player);
     }
 };  // namespace
@@ -307,6 +321,15 @@ void GameScene::update() {
 #ifdef TARGET_PC
     reportCoopPlayer();
     NebulaCoopWorld::update();
+    // Online co-op: a Grand Star another player in this instance took takes this player along (sm64coopdx's Bowser 3
+    // Grand Star): its get sequence, as the star itself starts it, once play allows.
+    if (isNerve(GET_NERVE(GameScene, GameSceneAction)) && !MR::isDemoActive() && !MR::isPlayerDead()) {
+        s32 pulledStar = 0;
+        if (NebulaCoopDemos::updateInPlay(&pulledStar)) {
+            MR::sendStageResultSequenceParam(pulledStar);
+            MR::requestGrandStarGetDemo();
+        }
+    }
     NebulaRemotePlayer::updateAll();
     NebulaAchievements::update();
     if (sTestBoard && MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementBoard != nullptr) {
@@ -955,6 +978,12 @@ void GameScene::stageClear() {
         // while its get sequence plays, not when the hub records it.
         NebulaAchievements::evaluate();
         NebulaAchievements::onStarGet();
+        // Online co-op: the others in the instance hear of it.
+        if (GameSequenceFunction::hasStageResultSequence() &&
+            MR::isEqualString(GameSequenceFunction::getClearedStageName(), MR::getCurrentStageName())) {
+            NebulaCoopDemos::noticeStarGot(GameSequenceFunction::getClearedPowerStarId(),
+                                           isNerve(GET_NERVE(GameScene, GameSceneGrandStarGet)));
+        }
 #endif
         if (isNerve(GET_NERVE(GameScene, GameScenePowerStarGet))) {
             mStageClearSeq->startPowerStarGetDemo();

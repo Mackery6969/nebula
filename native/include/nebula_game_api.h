@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 42u
+#define NEBULA_GAME_API_VERSION 43u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -123,7 +123,7 @@ enum {
     NEBULA_TEST_SET_EVENT_FLAG,   /* the save's event flag named `stage` on (GameDataFunction::onGameEventFlag) */
     NEBULA_TEST_SHAKE_CAMERA,     /* the screen shakes until the scene ends (MR::shakeCameraInfinity, Dodoryu's quake) */
     NEBULA_TEST_KILL_ACTOR,       /* the live actors whose model is `stage` killed (their kill(): what they leave behind) */
-    NEBULA_TEST_LEAVE_GAME,       /* the settings' Leave game: the game starts again, back at the co-op main menu */
+    NEBULA_TEST_LEAVE_GAME,       /* the room ended under a joiner: the game starts again at the co-op main menu */
 };
 
 /* The picture's shape as the game draws it (__NebulaDisplay), from the output's shape the host latches at each retrace
@@ -162,6 +162,12 @@ typedef struct NebulaCoopPlayer {
 enum {
     NEBULA_COOP_PLAYER_LUIGI = 1u << 0, /* the file plays Luigi */
     NEBULA_COOP_PLAYER_DEAD = 1u << 1,  /* MR::isPlayerDead: a miss in progress */
+    /* What player collisions (coop_rules) need of them: */
+    NEBULA_COOP_PLAYER_SPIN = 1u << 2,           /* MR::isPlayerSwingAction: a spin */
+    NEBULA_COOP_PLAYER_HIP_DROP = 1u << 3,       /* MR::isPlayerHipDropFalling: a ground pound on its way down */
+    NEBULA_COOP_PLAYER_HIP_DROP_LAND = 1u << 4,  /* MR::isPlayerHipDropLand: its landing */
+    NEBULA_COOP_PLAYER_INTANGIBLE = 1u << 5,     /* nothing touches them: dead, in a demo, bound (a Launch Star,
+                                                    a bubble...), a Boo, or out of the player's control */
 };
 
 /* Another player in the same instance (the stage and the scenario) as the local one, for its copy to draw
@@ -170,7 +176,28 @@ typedef struct NebulaCoopRemotePlayer {
     char name[32];           /* printable ASCII */
     uint32_t number;         /* 1 the host, then 2, 3... as they joined: the same player keeps theirs */
     NebulaCoopPlayer player; /* their NEBULA_COOP_PLAYER_LUIGI is their character */
+    uint32_t rewind_ms;      /* how long ago the local player was where this player saw them as they did what
+                                `player` shows: the round trip between the two and both ways' drawing delay
+                                (sm64coopdx's lag compensation) */
 } NebulaCoopRemotePlayer;
+
+/* Player collisions (coop_rules, docs/COOP_PLAN.md "Player collisions"): the room's options, the host's. */
+typedef struct NebulaCoopRules {
+    uint32_t interaction; /* NEBULA_COOP_INTERACTION_* */
+    uint32_t knockback;   /* the knockback strength, 0-255 (sm64coopdx's: Weak 10, Normal 25, Too much 60) */
+    uint32_t pvp;         /* NEBULA_COOP_PVP_* */
+} NebulaCoopRules;
+
+enum {
+    NEBULA_COOP_INTERACTION_NONSOLID = 0, /* players pass through each other (and outside a room) */
+    NEBULA_COOP_INTERACTION_SOLID,        /* they push apart, bounce on heads and knock each other back */
+    NEBULA_COOP_INTERACTION_FRIENDLY_FIRE /* solid, and attacks cost health */
+};
+
+enum {
+    NEBULA_COOP_PVP_CLASSIC = 0,
+    NEBULA_COOP_PVP_REVAMPED,
+};
 
 /* A player in the online co-op room, for the player list (coop_list, docs/COOP_PLAN.md "Player list"). */
 typedef struct NebulaCoopListPlayer {
@@ -199,12 +226,15 @@ enum {
      instance; an instance nobody else is in starts fresh.
    - NEBULA_COOP_WORLD_STAR, _FLAG, _VALUE (both ways): the save. A Power Star (`name` the galaxy, `scenario` the
      star), an event flag on, an event value (`value`). Stars and flags from any player are everyone's; event values
-     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks. */
+     are the host's game's. The host gives the whole save again after each ENTER, for the game to apply what it lacks.
+   - NEBULA_COOP_WORLD_STAR_GOT (both ways): a player took a star in the instance, `scenario` the star and `value`
+     NEBULA_COOP_STAR_*, as sm64coopdx's collect_star reaches the level. The others there are told (API 42,
+     docs/COOP_PLAN.md "Cutscenes and transitions"). */
 typedef struct NebulaCoopWorldEvent {
     uint32_t kind;     /* NEBULA_COOP_WORLD_* */
     uint32_t object;   /* GONE */
-    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value */
-    int32_t scenario;  /* ENTER and STAR */
+    uint32_t value;    /* GONE: NEBULA_COOP_GONE_*; VALUE: the value; STAR_GOT: NEBULA_COOP_STAR_* */
+    int32_t scenario;  /* ENTER, STAR and STAR_GOT */
     char name[48];     /* ENTER and STAR: the stage; FLAG and VALUE: the name (Shift JIS) */
 } NebulaCoopWorldEvent;
 
@@ -215,6 +245,11 @@ enum {
     NEBULA_COOP_WORLD_STAR,
     NEBULA_COOP_WORLD_FLAG,
     NEBULA_COOP_WORLD_VALUE,
+    NEBULA_COOP_WORLD_STAR_GOT,
+};
+
+enum {
+    NEBULA_COOP_STAR_GRAND = 1u << 0, /* a Grand Star: it takes everyone in the instance along */
 };
 
 enum {
@@ -453,7 +488,8 @@ enum {
    game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
    for (NEBULA_COOP_KEY_*), outside Nebula's settings menu and the main menu's text rows.
    NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (Options' PLAYER page's character as Host played), else 0;
-   MR::isPlayerLuigi follows it in every save. */
+   MR::isPlayerLuigi follows it in every save. NEBULA_COOP_MENU_JOINED: 1 when the player joined another's room, so
+   the save played is the host's (the pause menu's Quit then doesn't write it), else 0. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
     NEBULA_COOP_MENU_POLL,
@@ -462,6 +498,7 @@ enum {
     NEBULA_COOP_MENU_SAVE_FILE,
     NEBULA_COOP_MENU_KEYS,
     NEBULA_COOP_MENU_CHARACTER,
+    NEBULA_COOP_MENU_JOINED,
 };
 enum {
     NEBULA_COOP_KEY_TAB = 1u << 0,    /* the main menu's reset (as the controller's Back, the Wii Remote's Minus) */
@@ -694,6 +731,9 @@ typedef struct NebulaHostServices {
        host counts each star coop_world_report brings it for who got it), or -1 when there is no room. Called on the
        simulation thread. */
     int32_t (*coop_star_count)(void* user);
+    /* The room's player collision options (NebulaCoopRules): non-solid outside a room. Called on the simulation
+       thread, each game scene frame. */
+    void (*coop_rules)(void* user, NebulaCoopRules* rules);
     /* Online co-op: an achievement another player unlocked in the room's save (achievement then says 0 for it), for
        its pop-up: 1 with its id (galaxy::achievements', at most `capacity` bytes into `id`), 0 when none waits.
        Called on the simulation thread. */

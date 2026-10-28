@@ -10,7 +10,8 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Host page: pick a save (left and right, or New save), Erase, room settings, Host and Back
 - [x] Unlimited saves, each a folder under `coop_saves/`; the old save's files converted once
 - [x] Achievements belong to the save: each save keeps its own
-- [x] Settings: ADVANCED renamed ONLINE, with room settings, Leave game and cheats that need the room's cheats on
+- [x] Settings: ADVANCED renamed ONLINE, with room settings and cheats that need the room's cheats on
+- [x] No Leave game on the Online tab: the pause menu's Quit leaves the room, and saves only for the host
 - [x] The Online tab greyed out when opened from the main menu
 - [x] Tab (a controller's Back) resets the selected Host page setting to its default; Escape or B goes back
 - [x] No page tabs or page hint on the main menu's one-page screens
@@ -26,7 +27,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 ## Playing together (Phase 1)
 
 - [x] Network layer (UDP, reliable and ordered channels) on every platform
-- [x] Host opens the room; Join connects to `address:port`; Leave game closes or leaves it
+- [x] Host opens the room; Join connects to `address:port`; the pause menu's Quit closes or leaves it
 - [x] Other players drawn as remote Marios and Luigis from their snapshots
 - [x] Nametags over each player's head
 - [x] Player list while Tab (keyboard) or Share (controller) is held
@@ -40,10 +41,10 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 
 - [x] Instances per galaxy and mission: players only see others on the same mission
 - [x] The server decides everything except the visuals: save, collectibles, objects, enemies
-- [ ] Cutscenes and transitions that move a player along (the Bowser opening, dome launches, Grand Star returns)
-      play again for each player, so nobody gets stuck
+- [x] Cutscenes and transitions as sm64coopdx has them: each player's own, a Grand Star takes everyone in its
+      mission along, and a star the room gave returns as its first when the player takes it, so nobody gets stuck
 - [x] An achievement unlocked in a save is every player's who plays in it
-- [ ] Player collisions with sm64coopdx's options (non-solid, solid, friendly fire, knockback, PvP mode)
+- [x] Player collisions with sm64coopdx's options (non-solid, solid, friendly fire, knockback, PvP mode)
 
 ## Later (Phases 3 and 4)
 

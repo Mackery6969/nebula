@@ -180,9 +180,11 @@ Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, 
 
 - **Room.** The session's settings: Player Interaction, Knockback Strength, PvP Mode, Cheats and the player list.
   The host changes them for everyone, like sm64coopdx's in-game host settings; other players see them.
-- **Leave game.** The only way out of an online game apart from closing the window: it ends the session (the host
-  closes the room, a joiner disconnects) and returns to the main menu. The pause menu's own ways out of a galaxy
-  stay, but none of them leaves the session.
+- **No Leave game.** The way out of an online game is the game's own: the pause menu's Quit (in the Observatory, or
+  before it opens) returns to the main menu, and back there the session ends (the host closes the room, a joiner
+  disconnects). Only the host's Quit writes the save first: a joiner plays the host's save, the room's, which only
+  the host's game writes. A joiner whose host quits is brought back to the main menu with a notice. Closing the
+  window also leaves.
 - **Cheats.** Today's ADVANCED rows (Galaxy Select: travel to any galaxy and star; Grand Stars: give the save Grand
   Stars 1-6) move here under a Cheats heading. They work only while the room has cheats on (`coop_cheats`, the
   host's choice, off by default), and are shown greyed out otherwise. A host playing alone turns cheats on for
@@ -197,8 +199,8 @@ the Online tab is on every platform.
 
 A `RemotePlayer` is a `LiveActor` that loads Mario's or Luigi's model and animations (`MarioAnimator`'s resources) and
 plays whatever animation the network names, at the position, rotation and gravity it received, interpolated between
-packets. It has no physics or state machine of its own. Later phases give it collision with the local Mario and with
-enemies.
+packets. It has no physics or state machine of its own. It collides with the local Mario as the room's
+[player collision](#player-collisions) options say; collision with enemies comes later.
 
 - **Snapshots** (`galaxy/coop_snapshot.h`). Each player sends its own (the game's `coop_player` report) 30 times a
   second on the unreliable channel, as the session's message 32, to the players in its instance (a joiner's through
@@ -263,18 +265,33 @@ count is this player's game's own (`NebulaAchievements::onStarGet`, as a star ne
 
 ## Cutscenes and transitions
 
-A cutscene or transition that moves the story on runs for every player who reaches it, not once per save. If the save
-already has it, a player arriving later would otherwise be stuck: the opening (Bowser's attack on the Star Festival,
-then waking at the Observatory) is how a player gets from the intro stage into play, so a joiner whose host already
-finished it must still play it to come out where the others are. So:
+As sm64coopdx has them: a cutscene is the player's own, the save's progress reaches everyone without its cutscene,
+and only what ends a chapter takes the others along. Nobody gets stuck, because whatever moves a player on still
+reaches each one.
 
-- Each demo that carries a player from one place to another (the opening, the dome launches, Grand Star returns,
-  the trip to the final battle) is keyed to the player, not the save flag, and plays again for a player who hasn't
-  seen it this session.
-- A player watching one doesn't stop the others; the server keeps the world running, and the demo only moves the
-  player watching it.
-- `native/tools/coop_inventory.py` lists the demo sites (`MR::getPlayerDemoActor`, `startEventDemo`); each is sorted
-  into "plays per player" or "plays once for the room" as Phase 4 reaches it.
+| What | Galaxy | As sm64coopdx |
+|---|---|---|
+| A demo, a talk, a star's appearing | Plays for the player who started it. Nobody else is stopped or moved, and their games keep running | Cutscenes and dialogs are the local player's |
+| The opening (the Star Festival, Bowser's attack, waking in Gateway) | Plays for each player on a save that hasn't passed it. A joiner plays the host's save, so it starts where that save does | The intro plays on a new save |
+| A Power Star taken | Shows for the others in the instance as a star already had, as a finished mission's star does. It's theirs in the save; they play on, and can still take it for its get and return | `packet_collect_star`: the star is the save's for everyone, who keep playing |
+| A Grand Star taken | Takes everyone in the instance along: each gets its get sequence and its return to the Observatory (a player dead or in a demo goes once play allows, in the same mission). The last Bowser's sends the instance to the ending together | The Bowser 3 Grand Star puts everyone in the level into its cutscene |
+| A star the room gave, taken later by the player itself | Returns as its first: the story's demos (Rosalina's talks, the domes, the first trip to the Observatory) play for that player, not the short return for a star already had | |
+
+- **Messages.** A star taken is the session's message 39 (`kStarGotMessage`): the taker tells the host, which tells
+  the others in the same instance, each for its current scene. Nothing is kept, so a player arriving later still
+  finds the star and can take it, as in sm64coopdx. Game API 42's `NEBULA_COOP_WORLD_STAR_GOT`.
+- **The game.** `NebulaCoopDemos` (native/petari): `GameScene::stageClear` tells of the local player's star,
+  `GameScene::update` shows the others' Power Stars as had (`PowerStar::showAsHad`) and plays a Grand Star's get once
+  play allows.
+- **First returns.** The result's demos read the save as the scene started (`getSceneStartGameDataHolder`): a star
+  already had there plays the short return. Stars the room gave this session are noted as they come, and when the
+  player takes one, it is left out of that save just before the result (`GameSequenceProgress::requestGalaxyMove`),
+  so the story's demos for it play. Stars already in the save when the player joined are the save's, as in a game
+  continued alone.
+- **Left as the room's.** Demos tied to the save's star count (the comet lecture at 13 stars, a galaxy appearing)
+  play for the player whose star reaches the count; the others get what they open without the demo. Each player's
+  story progress (`GameDataPlayerStatus`) is its own and isn't synced, so the lectures it gates (the dome, the star
+  bits) still play for each player the first time they get there.
 
 ## Player collisions
 
@@ -287,20 +304,26 @@ The host's choice is the session's and is sent to each player as they join, as s
 | Knockback Strength (`coop_knockback_strength`) | 0-255; the menu offers Weak 10, Normal 25, Too much 60 | 25 |
 | PvP Mode (`coop_pvp_mode`) | `classic` or `revamped`: the rules for which attack beats which, and how far each one throws | `classic` |
 
-The rules carried over, with SMG's equivalents:
+The rules carried over, with SMG's equivalents (`NebulaRemotePlayer`, game API 42's `coop_rules`):
 
-- **No contact** in a player's first 60 frames in an instance, or while either player is intangible (Boo Mario,
-  Rainbow Mario passing through, a demo or a star get) or not drawn.
-- **Solid.** Overlapping players push apart. One landing on another's head bounces off, and the one below is
-  squashed for a few frames (sm64coopdx's `bounceSquishTimer`), with no damage.
-- **Attacks (solid and friendly fire).** A spin, a stomp, a ground pound, a punch or a Fire Mario fireball that reaches
-  another player knocks them back by the knockback strength times the attack's scale (sm64coopdx's `scaler`), facing
-  away from the attacker. Plain jumps, falls and ledge grabs aren't attacks, and a player already being knocked back
-  can't be hit again until it ends. Only friendly fire costs the victim health. Revamped changes the scales and which
-  attacks win, for example a ground pound beats a slide.
-- **Who decides.** The attacker's client detects the hit against the victim's lag-compensated position (sm64coopdx's
-  `lag_compensation.c`) and sends it. The victim's client applies the knockback and damage to its own Mario, so each
-  player's Mario is only ever moved by its own game.
+- **No contact** in a player's first 60 frames in an instance, or while either player is intangible: dead, in a demo,
+  bound to something (a Launch Star, a bubble...), a Boo, hidden or out of the player's control
+  (`NEBULA_COOP_PLAYER_INTANGIBLE` in the snapshot). Non-solid turns the copies' body sensors off, so they cost nothing.
+- **Solid.** Each copy has a body sensor, as the cosmic ghost has, that pushes the local Mario out of it. His stomp on
+  a copy bounces him off, as off an enemy. A player landing on the local Mario's head squashes him a moment (the
+  no-damage flinch, sm64coopdx's `bounceSquishTimer`), with no damage.
+- **Attacks (solid and friendly fire).** A spin or a ground pound that reaches another player throws them away from
+  the attacker by the knockback strength times the attack's scale (sm64coopdx's `scaler`: a ground pound 2 as its
+  kick, a spin 1 as its punch; a Rainbow Star's player throws whoever they touch at 2). Galaxy runs at 60 frames a
+  second, so the strength is halved into Galaxy's speeds. Solid throws without harm (Galaxy's no-damage flip); friendly
+  fire is an enemy's hit and costs health. A player already being knocked back, or invincible, isn't hit again until
+  it ends. Revamped: a spin staggers a player on the ground on the spot (its punch), two spins meeting cancel out, a
+  ground pound throws at 1.9 and its landing reaches 1.3 times as far round.
+- **Who decides.** As sm64coopdx: the victim's game. Each snapshot says whether its player spins or ground pounds; the
+  victim's game checks that against where its own Mario was when the attacker saw him (`rewind_ms`: the round trip
+  between the two and both ways' drawing delay, sm64coopdx's `lag_compensation_get_local_state`) and moves only its
+  own Mario. No message is sent for a hit, so collisions add nothing to a room's traffic.
+- Not yet: a Fire Mario's fireballs and other thrown things, which other players' games don't draw.
 
 ## Shared world state
 
@@ -334,7 +357,7 @@ and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's 
   shows what the save has and nothing pops up for it. While the room plays, an achievement any player's game unlocks
   goes to the server as a save change (`SaveKind::Achievement`, with when); the server keeps the first and tells every
   player. Each player's host unlocks it in its copy of the save's achievements on that day, and the game shows its
-  pop-up (game API 42's `coop_achievement_take`); the goal met later in that player's own game shows nothing again.
+  pop-up (game API 43's `coop_achievement_take`); the goal met later in that player's own game shows nothing again.
   Achievements are the host process's, not the game's: a scene start doesn't give them again. The headless host keeps
   none.
 - **Later (Phase 3).** Objects' movement and state (enemies walking, platforms, switches) and which player each enemy
@@ -380,7 +403,7 @@ Each phase ships on its own and leaves the game playable.
 - [x] Joiners download the host's mods (with online play): the ones that change the game, checked by hash, then
       Nebula starts again with them and joins.
 - [ ] The launcher's Mods tab only imports and removes.
-- [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
+- [x] Settings: ADVANCED becomes ONLINE (room settings, Cheats); Galaxy Select and Grand Stars work
       only with the room's cheats on (`coop_cheats`). On every host, as the in-game settings menu is.
 
 ### Phase 1: ghosts
@@ -389,7 +412,8 @@ Each phase ships on its own and leaves the game playable.
       channels on top. sm64coopdx's `packet_reliable.c` / `packet_ordered.c` are a reference for the design. See
       [The network layer](#the-network-layer).
 - [x] Host and Join (`address:port`) on the main menu and on the command line (`--host <port>`, `--join
-      <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
+      <address[:port]>`); an optional password. The pause menu's Quit leaves the room, or closes it for everyone as
+      its host (only the host's Quit saves).
 - [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
 - [x] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
@@ -401,14 +425,14 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 2: same world
 
-- [ ] The opening and the other transition demos play again for each player who reaches them
-      ([Cutscenes and transitions](#cutscenes-and-transitions)).
+- [x] [Cutscenes and transitions](#cutscenes-and-transitions) as sm64coopdx's: each player's own, a Grand Star takes
+      the instance along, a Power Star taken shows as had for the others, and a star the room gave returns as its first.
 - [x] Instances: each client reports its stage and scenario, sees only players in its own instance (snapshots go
       only there), and a player entering an occupied instance gets its state from the server.
 - [x] Collectibles, defeated enemies, Power Stars and save flags sync, with the host authoritative
       ([Shared world state](#shared-world-state)).
-- [ ] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
-      with lag compensation. The options are already read from `runtime_settings.ini`.
+- [x] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
+      with lag compensation.
 - [ ] Remote players stomp, spin and touch objects. Hits are sent as events to the client that owns the object.
 
 ### Phase 3: shared enemies and objects
@@ -420,7 +444,8 @@ Each phase ships on its own and leaves the game playable.
 
 ### Phase 4: bosses, demos, polish
 
-- [ ] Demos/cutscenes: whoever triggers one plays it, everyone else is frozen or faded out.
+- [ ] Boss and story demos shared by everyone in the instance (the boss is the server's, Phase 3); until then each
+      player's are its own (see [Cutscenes and transitions](#cutscenes-and-transitions)).
 - [ ] Camera and HUD per player; spectate on death.
 - [ ] Discord presence for the lobby (`discord_presence.cpp` already exists), player colours.
 

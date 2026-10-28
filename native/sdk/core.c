@@ -127,6 +127,10 @@ s32 __NebulaCoopStarCount(void) {
     return sHost->coop_star_count(sHost->user);
 }
 
+void __NebulaCoopRules(struct NebulaCoopRules* rules) {
+    sHost->coop_rules(sHost->user, rules);
+}
+
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity) {
     return sHost->achievement(sHost->user, id, name, capacity);
 }

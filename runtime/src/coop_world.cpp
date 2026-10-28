@@ -112,6 +112,19 @@ std::optional<std::vector<SaveChange>> read_changes(ByteReader& in) {
     return changes;
 }
 
+// A star got: its number (1 to 255) and whether it is a Grand Star.
+void write_star(ByteWriter& out, const StarGot& star) {
+    out.u8(static_cast<std::uint8_t>(std::clamp(star.star, 0, 255))).u8(star.grand ? 1u : 0u);
+}
+
+std::optional<StarGot> read_star(ByteReader& in) {
+    StarGot star;
+    star.star = in.u8();
+    star.grand = in.u8() != 0u;
+    if (!in.ok() || star.star < 1) return std::nullopt;
+    return star;
+}
+
 // Something to send once the world's lock is let go (the session's own lock comes first on its thread).
 struct Outgoing {
     std::uint8_t type = 0u;
@@ -227,6 +240,14 @@ WorldAuthority::Settled WorldAuthority::gone(Player player, std::span<const Gone
     return settled;
 }
 
+std::vector<WorldAuthority::Player> WorldAuthority::star_got(Player player) const {
+    const auto it = where_.find(player);
+    if (it == where_.end()) return {};
+    std::vector<Player> tell = players_in(it->second);
+    tell.erase(std::remove(tell.begin(), tell.end(), player), tell.end());
+    return tell;
+}
+
 bool WorldAuthority::save(const SaveChange& change, bool from_host) {
     if (!valid_change(change)) return false;
     if (change.kind == SaveKind::Value && !from_host) return false;
@@ -318,6 +339,26 @@ void World::attach(Session& session) {
         }
         if (!from.host) return;
         for (const SaveChange& change : *changes) push_save(change);
+    });
+    // A star got: a joiner's (host), or one taken in this player's instance (joiner).
+    session.on_message(kStarGotMessage, [this](const SessionPlayer& from, std::span<const std::uint8_t> data) {
+        ByteReader in(data);
+        const std::uint16_t epoch = in.u16();
+        const std::optional<StarGot> star = read_star(in);
+        if (!star) return;
+        std::vector<Outgoing> out;
+        {
+            const std::lock_guard<std::recursive_mutex> lock(lock_);
+            if (!active_) return;
+            if (!host_) {
+                if (from.host && epoch == epoch_) push({WorldEvent::Kind::StarGot, {}, {}, *star});
+                return;
+            }
+            const auto it = epochs_.find(from.id);
+            if (it == epochs_.end() || it->second != epoch) return;
+            for (auto& [to, bytes] : host_star(from.id, *star)) out.push_back({kStarGotMessage, to, std::move(bytes)});
+        }
+        flush(session_, out);
     });
     session.on_message(kSaveRequestMessage, [this](const SessionPlayer& from, std::span<const std::uint8_t>) {
         std::vector<Outgoing> out;
@@ -473,6 +514,26 @@ void World::report_save(const SaveChange& change) {
     if (star && session_ != nullptr) session_->credit_star(self_peer());
 }
 
+void World::report_star(const StarGot& star) {
+    const PeerId self = self_peer();
+    const PeerId host = host_peer();
+    if (star.star < 1 || star.star > 255) return;
+    std::vector<Outgoing> out;
+    {
+        const std::lock_guard<std::recursive_mutex> lock(lock_);
+        if (!active_ || !entered_) return;
+        if (host_) {
+            for (auto& [to, bytes] : host_star(self, star)) out.push_back({kStarGotMessage, to, std::move(bytes)});
+        } else {
+            ByteWriter body;
+            body.u16(epoch_);
+            write_star(body, star);
+            out.push_back({kStarGotMessage, host, body.take()});
+        }
+    }
+    flush(session_, out);
+}
+
 std::vector<WorldEvent> World::take() {
     const std::lock_guard<std::recursive_mutex> lock(lock_);
     return std::exchange(events_, {});
@@ -542,6 +603,25 @@ void World::host_gone(PeerId from, std::span<const Gone> gone) {
         out.push_back({kWorldGoneMessage, to, body.take()});
     }
     flush(session_, out);
+}
+
+// The world's lock held: the others in the taker's instance told, each for its own scene.
+std::vector<std::pair<PeerId, std::vector<std::uint8_t>>> World::host_star(PeerId from, const StarGot& star) {
+    const PeerId self = self_peer();
+    std::vector<std::pair<PeerId, std::vector<std::uint8_t>>> out;
+    for (const PeerId to : authority_.star_got(from)) {
+        if (to == self) {
+            push({WorldEvent::Kind::StarGot, {}, {}, star});
+            continue;
+        }
+        const auto it = epochs_.find(to);
+        if (it == epochs_.end()) continue;
+        ByteWriter body;
+        body.u16(it->second);
+        write_star(body, star);
+        out.emplace_back(to, body.take());
+    }
+    return out;
 }
 
 void World::host_save(PeerId from, const SaveChange& change) {

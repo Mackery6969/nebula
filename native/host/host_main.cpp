@@ -1795,7 +1795,8 @@ std::atomic<bool> gCoopLuigi{false};
 // The room's chat (galaxy/coop_chat.h), over the session below (which goes first, its thread giving the chat lines).
 galaxy::coop::Chat gCoopChat;
 // Online play (galaxy/coop_session.h): the room this player hosts or joined. Host opens it as its save starts; Join
-// connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
+// connects from the main menu and plays the host's save once let in; the pause menu's Quit (back at the main menu)
+// leaves it.
 galaxy::coop::Session gCoopSession;
 void keep_coop_settings();
 // The game as online play compares it: a player with another is refused, as is one with another disc
@@ -2600,6 +2601,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
 #endif
         return 0;
     case NEBULA_COOP_MENU_CHARACTER: return gCoopLuigi.load(std::memory_order_relaxed) ? 1 : 0;
+    case NEBULA_COOP_MENU_JOINED: return gCoopSession.active() && !gCoopSession.is_host() ? 1 : 0;
     case NEBULA_COOP_MENU_POLL:
         // What the player changed is kept as they change it, a text once kept.
         if (!gCoopMenu.editing()) keep_coop_settings();
@@ -2683,6 +2685,9 @@ void svc_coop_world_report(void*, const NebulaCoopWorldEvent* event) {
     case NEBULA_COOP_WORLD_STAR: gCoopWorld.report_save({SaveKind::Star, copy.name, copy.scenario, 0u}); return;
     case NEBULA_COOP_WORLD_FLAG: gCoopWorld.report_save({SaveKind::Flag, copy.name, 0, 0u}); return;
     case NEBULA_COOP_WORLD_VALUE: gCoopWorld.report_save({SaveKind::Value, copy.name, 0, copy.value}); return;
+    case NEBULA_COOP_WORLD_STAR_GOT:
+        gCoopWorld.report_star({copy.scenario, (copy.value & NEBULA_COOP_STAR_GRAND) != 0u});
+        return;
     default: return;
     }
 }
@@ -2707,6 +2712,10 @@ uint32_t svc_coop_world_take(void*, NebulaCoopWorldEvent* events, uint32_t capac
             to.kind = NEBULA_COOP_WORLD_GONE;
             to.object = from.gone.object;
             to.value = from.gone.how;
+        } else if (from.kind == Kind::StarGot) {
+            to.kind = NEBULA_COOP_WORLD_STAR_GOT;
+            to.scenario = from.star.star;
+            to.value = from.star.grand ? NEBULA_COOP_STAR_GRAND : 0u;
         } else {
             using galaxy::coop::SaveKind;
             to.kind = from.save.kind == SaveKind::Star   ? NEBULA_COOP_WORLD_STAR
@@ -2788,8 +2797,30 @@ uint32_t svc_coop_remote(void*, NebulaCoopRemotePlayer* players, uint32_t capaci
         // The character is the room's: what they picked as they joined.
         player.flags = (snapshot.flags & ~static_cast<uint32_t>(NEBULA_COOP_PLAYER_LUIGI)) |
                        (from.character == galaxy::CoopCharacter::Luigi ? NEBULA_COOP_PLAYER_LUIGI : 0u);
+        // Their snapshot came half a round trip ago and shows kSnapshotDelay late; what they saw of this player had
+        // come and shown as late. Two joiners reach each other through the host: each one's ping is to it.
+        const auto them = std::find_if(room.begin(), room.end(),
+                                       [&](const galaxy::coop::SessionPlayer& in) { return in.id == from.id; });
+        const bool both_joiners = !gCoopSession.is_host() && them != room.end() && !them->host;
+        const unsigned round_trip = them != room.end() ? them->ping_ms * (both_joiners ? 2u : 1u) : 0u;
+        to.rewind_ms = round_trip + 2u * static_cast<unsigned>(galaxy::coop::kSnapshotDelay.count());
     }
     return static_cast<uint32_t>(remote.size());
+}
+
+// The room's player collision options, the host's as every player has them.
+void svc_coop_rules(void*, NebulaCoopRules* rules) {
+    if (rules == nullptr) return;
+    *rules = {};
+    const galaxy::coop::SessionState state = gCoopSession.state();
+    if (state != galaxy::coop::SessionState::Hosting && state != galaxy::coop::SessionState::Joined) return;
+    const galaxy::RuntimeCoopSettings room = gCoopSession.room();
+    static_assert(static_cast<unsigned>(galaxy::CoopPlayerInteraction::Solid) == NEBULA_COOP_INTERACTION_SOLID &&
+                  static_cast<unsigned>(galaxy::CoopPlayerInteraction::FriendlyFire) == NEBULA_COOP_INTERACTION_FRIENDLY_FIRE &&
+                  static_cast<unsigned>(galaxy::CoopPvpMode::Revamped) == NEBULA_COOP_PVP_REVAMPED);
+    rules->interaction = static_cast<uint32_t>(room.player_interaction);
+    rules->knockback = room.knockback_strength;
+    rules->pvp = static_cast<uint32_t>(room.pvp_mode);
 }
 
 // Nebula's screens with small text (sharp_2d): the 2D layer at the window's resolution while they show.
@@ -3845,8 +3876,8 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
     ++scene_frames;
     gSceneFrames.store(scene_frames, std::memory_order_relaxed);
 #if defined(NEBULA_HOST_RENDERER)
-    // The settings' Online page: Leave game, and its cheats' galaxy select: a travel the player asked for, through the game's own stage change,
-    // and the Grand Stars with the Observatory they power.
+    // The settings' Online page's cheats: the galaxy select's travel the player asked for, through the game's own stage
+    // change, and the Grand Stars with the Observatory they power; and the room ending under a joiner.
     {
         std::size_t stage = 0u;
         std::uint32_t star = 0u;
@@ -3859,7 +3890,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
         pump_coop_session();
         pump_coop_chat();
         if (galaxy::gx::take_leave_game()) {
-            // Leave game: out of the room (closing it, for its host), then the main menu.
+            // The room ended (the host quit, or this player was let go): out of it, then the main menu.
             if (gCoopSession.active()) {
                 std::fprintf(stderr, "[coop] leaving the room\n");
                 gCoopSession.leave();
@@ -4635,6 +4666,7 @@ int main(int argc, char** argv) {
     services.coop_world_report = svc_coop_world_report;
     services.coop_world_take = svc_coop_world_take;
     services.coop_star_count = svc_coop_star_count;
+    services.coop_rules = svc_coop_rules;
     services.coop_achievement_take = svc_coop_achievement_take;
 #if defined(NEBULA_HOST_RENDERER)
     // The display configuration (GALAXY_RENDER_CONFIG_PATH in tests), loaded before the window; the settings overlay
