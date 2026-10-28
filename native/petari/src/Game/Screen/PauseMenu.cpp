@@ -17,6 +17,8 @@
 #ifdef TARGET_PC
 #include "Game/Screen/NebulaPauseSettingsButton.hpp"
 #include "Game/Screen/NebulaSettingsMenu.hpp"
+#include <nebula_game_api.h>
+#include <revolution/os.h>
 #endif
 
 namespace {
@@ -24,6 +26,17 @@ namespace {
 
     bool isInvalidBackAstroDome() {
         return !MR::isOnGameEventFlagUseAstroDome() || (MR::isStageAstroLocation() && !MR::isEqualStageName("HeavensDoorGalaxy"));
+    }
+
+    // Quit Game writes the save first. A player who joined another's online co-op room plays the host's save (the
+    // room's, which the host's game writes), so their Quit leaves without writing it.
+    bool isEndGameSave() {
+#ifdef TARGET_PC
+        if (__NebulaCoopMenu(NEBULA_COOP_MENU_JOINED) == 1) {
+            return false;
+        }
+#endif
+        return true;
     }
 
     bool isStageHideScenarioTitle() {
@@ -348,7 +361,7 @@ void PauseMenu::exeDecided() {
         }
 
         if (_24->isDecidedWait()) {
-            if (::isInvalidBackAstroDome()) {
+            if (::isInvalidBackAstroDome() && ::isEndGameSave()) {
                 setNerve(GET_NERVE(PauseMenu, PauseMenuNrvGameDataSave));
             } else {
                 setNerve(GET_NERVE(PauseMenu, PauseMenuNrvConfirm));
@@ -426,6 +439,7 @@ void PauseMenu::exeConfirm() {
             MR::closeSystemWipeFadeWithCaptureScreen(::cBackSequenceFadeFrame);
 
             if (::isInvalidBackAstroDome()) {
+                // Online co-op: back at the main menu, the player leaves the room (its host closes it for everyone).
                 MR::requestChangeSceneTitle();
             } else {
                 MR::requestChangeStageGoBackAstroDome();

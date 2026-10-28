@@ -1403,9 +1403,9 @@ bool coop_room_cheats() {
     return status.joined ? status.room.cheats : galaxy::get_runtime_settings().coop.cheats;
 }
 
-// ONLINE (docs/COOP_PLAN.md, "The Online tab"): the room's settings, Leave game, and the cheats, which work only while
-// the room has them on (coop_cheats, applied): any galaxy and star, entered with the game's own stage change (names
-// in its own words), and the Grand Stars that power the Observatory.
+// ONLINE (docs/COOP_PLAN.md, "The Online tab"): the room's settings and the cheats, which work only while the room
+// has them on (coop_cheats, applied): any galaxy and star, entered with the game's own stage change (names in its own
+// words), and the Grand Stars that power the Observatory. The way out of the room is the pause menu's Quit.
 std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
     std::vector<SettingsRow> rows;
     // A player who joined sees the host's room, which only the host changes.
@@ -1455,18 +1455,10 @@ std::vector<SettingsRow> online_page(const RuntimeSettings& runtime) {
                         s_runtime_draft.coop.cheats = !s_runtime_draft.coop.cheats;
                     },
                     "ON: EVERYONE IN THE ROOM MAY USE THE CHEATS BELOW, ONCE APPLIED. OFF: THEY DO NOTHING"});
-    rows.push_back(button_row("LEAVE GAME", {"LEAVE"},
-                    [](RenderConfig&, unsigned) {
-                        galaxy::gx::request_leave_game();
-                        std::cerr << "[settings] leave game\n";
-                        set_native_settings_visible(false);
-                    },
-                    "BACK TO THE MAIN MENU. PROGRESS SINCE THE LAST SAVE IS LOST"));
 
     // A player who joined: the room's rows show the host's settings, unchanged.
     if (status.joined) {
         for (std::size_t r = first_room_row; r < rows.size(); ++r) {
-            if (!rows[r].buttons.empty()) continue;  // Leave game
             rows[r].change = nullptr;
             rows[r].help = "THE HOST'S SETTING: ONLY THE HOST CHANGES THE ROOM";
         }

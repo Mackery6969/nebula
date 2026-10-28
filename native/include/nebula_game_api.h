@@ -123,7 +123,7 @@ enum {
     NEBULA_TEST_SET_EVENT_FLAG,   /* the save's event flag named `stage` on (GameDataFunction::onGameEventFlag) */
     NEBULA_TEST_SHAKE_CAMERA,     /* the screen shakes until the scene ends (MR::shakeCameraInfinity, Dodoryu's quake) */
     NEBULA_TEST_KILL_ACTOR,       /* the live actors whose model is `stage` killed (their kill(): what they leave behind) */
-    NEBULA_TEST_LEAVE_GAME,       /* the settings' Leave game: the game starts again, back at the co-op main menu */
+    NEBULA_TEST_LEAVE_GAME,       /* the room ended under a joiner: the game starts again at the co-op main menu */
 };
 
 /* The picture's shape as the game draws it (__NebulaDisplay), from the output's shape the host latches at each retrace
@@ -488,7 +488,8 @@ enum {
    game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
    for (NEBULA_COOP_KEY_*), outside Nebula's settings menu and the main menu's text rows.
    NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (Options' PLAYER page's character as Host played), else 0;
-   MR::isPlayerLuigi follows it in every save. */
+   MR::isPlayerLuigi follows it in every save. NEBULA_COOP_MENU_JOINED: 1 when the player joined another's room, so
+   the save played is the host's (the pause menu's Quit then doesn't write it), else 0. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,
     NEBULA_COOP_MENU_POLL,
@@ -497,6 +498,7 @@ enum {
     NEBULA_COOP_MENU_SAVE_FILE,
     NEBULA_COOP_MENU_KEYS,
     NEBULA_COOP_MENU_CHARACTER,
+    NEBULA_COOP_MENU_JOINED,
 };
 enum {
     NEBULA_COOP_KEY_TAB = 1u << 0,    /* the main menu's reset (as the controller's Back, the Wii Remote's Minus) */

@@ -179,9 +179,11 @@ Nebula's in-game settings menu (F1, the pause menu's Settings) keeps its pages, 
 
 - **Room.** The session's settings: Player Interaction, Knockback Strength, PvP Mode, Cheats and the player list.
   The host changes them for everyone, like sm64coopdx's in-game host settings; other players see them.
-- **Leave game.** The only way out of an online game apart from closing the window: it ends the session (the host
-  closes the room, a joiner disconnects) and returns to the main menu. The pause menu's own ways out of a galaxy
-  stay, but none of them leaves the session.
+- **No Leave game.** The way out of an online game is the game's own: the pause menu's Quit (in the Observatory, or
+  before it opens) returns to the main menu, and back there the session ends (the host closes the room, a joiner
+  disconnects). Only the host's Quit writes the save first: a joiner plays the host's save, the room's, which only
+  the host's game writes. A joiner whose host quits is brought back to the main menu with a notice. Closing the
+  window also leaves.
 - **Cheats.** Today's ADVANCED rows (Galaxy Select: travel to any galaxy and star; Grand Stars: give the save Grand
   Stars 1-6) move here under a Cheats heading. They work only while the room has cheats on (`coop_cheats`, the
   host's choice, off by default), and are shown greyed out otherwise. A host playing alone turns cheats on for
@@ -392,7 +394,7 @@ Each phase ships on its own and leaves the game playable.
 - [x] Joiners download the host's mods (with online play): the ones that change the game, checked by hash, then
       Nebula starts again with them and joins.
 - [ ] The launcher's Mods tab only imports and removes.
-- [x] Settings: ADVANCED becomes ONLINE (room settings, Leave game, Cheats); Galaxy Select and Grand Stars work
+- [x] Settings: ADVANCED becomes ONLINE (room settings, Cheats); Galaxy Select and Grand Stars work
       only with the room's cheats on (`coop_cheats`). On every host, as the in-game settings menu is.
 
 ### Phase 1: ghosts
@@ -401,7 +403,8 @@ Each phase ships on its own and leaves the game playable.
       channels on top. sm64coopdx's `packet_reliable.c` / `packet_ordered.c` are a reference for the design. See
       [The network layer](#the-network-layer).
 - [x] Host and Join (`address:port`) on the main menu and on the command line (`--host <port>`, `--join
-      <address[:port]>`); an optional password. Leave game leaves the room, or closes it for everyone as its host.
+      <address[:port]>`); an optional password. The pause menu's Quit leaves the room, or closes it for everyone as
+      its host (only the host's Quit saves).
 - [x] Each client sends its player snapshot at 30 Hz. Others draw it as a `RemotePlayer` with no collision
       (a "ghost"): `NebulaRemotePlayer`, from `coop_remote` (API version 38).
 - [x] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
