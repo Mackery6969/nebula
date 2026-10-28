@@ -13,6 +13,7 @@ class NebulaAchievementBoard;
 class NebulaAchievementToast;
 class NebulaCoopChat;
 class NebulaPlayerList;
+class NebulaNametags;
 #endif
 class NoteCounter;
 class OneUpBoard;
@@ -66,6 +67,7 @@ public:
     NebulaCoopChat* mCoopChat;
     // Online co-op's player list (Tab or the controller's Share held): GameScene runs and draws it over everything.
     NebulaPlayerList* mPlayerList;
+    NebulaNametags* mNametags;
 #endif
 };
 

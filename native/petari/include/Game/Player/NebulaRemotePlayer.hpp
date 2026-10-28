@@ -22,6 +22,11 @@ public:
     // Each game scene frame: the others in this instance as the host has them, each onto a copy of their character
     // (the same one while they stay), the copies nobody uses hidden.
     static void updateAll();
+    // The copies this scene has (shown or not), for their nametags (NebulaNametags).
+    static s32 getCopyNum();
+    static const NebulaRemotePlayer* getCopy(s32 index);
+    // Where its name goes: above its head, along its up.
+    TVec3f getNametagPos() const;
 
     virtual void init(const JMapInfoIter& rIter);
     virtual void control();
