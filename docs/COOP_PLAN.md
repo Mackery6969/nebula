@@ -67,16 +67,22 @@ keyed by the stage name and the scenario (`MR::getCurrentStageName()`, `MR::getC
 Good Egg Galaxy on "Dino Piranha" share an instance; one on "Dino Piranha" and one on "A Snack of Cosmic Proportions"
 don't. The Comet Observatory (and the other hub/demo stages) is an instance too, keyed the same way.
 
-- **Visibility.** A client draws remote players, and receives their snapshots, only for its own instance. Players in
+- **Visibility.** A client draws remote players, and receives their snapshots, only for its own instance. A joiner
+  sends its snapshot to the host alone, which passes it on (the session's message 33) only to the players whose place
+  is the same instance; the host sends its own the same way. So a room's traffic grows with how many players share
+  each instance, not with the room's size, and a joiner uploads one snapshot however many are with it. Players in
   other instances don't appear, can't be touched and don't touch anything. They still show in the player list with
   the galaxy and star they're on.
-- **Authority.** The server settles every instance's shared state, the ones it has no player in included (it runs
-  them without drawing them), as well as the session (joins, kicks, the save). This replaces the earlier idea of the
-  instance's lowest-index player settling it (sm64coopdx's `get_network_player_smallest_global()`).
-- **Joining an instance.** A player who enters an instance others are already in asks the owner for its current
-  state (objects killed, coins and star bits taken, switches pressed) before their local copy runs, like
-  sm64coopdx's `packet_level_area_request` / `packet_level_area_inform`. An empty instance starts fresh from the stage
-  files.
+- **Authority.** The server (the host, later a dedicated server) keeps every instance's record and settles it, as
+  well as the session (joins, kicks, the save): what a player's game reports is news only once the server takes it
+  (first come wins), and the server tells it to who it concerns. This replaces sm64coopdx's way of the level's
+  lowest-index player settling it (`get_network_player_smallest_global()`). The server keeps the record of an
+  instance only while someone is in it; running an instance nobody plays in is the dedicated server's later work.
+- **Joining an instance.** As a player's scene is placed it tells the server its instance and gets the instance's
+  record (what is gone from it) while the scene still loads, like sm64coopdx's `packet_level_area_request` /
+  `packet_level_area_inform`. An instance nobody else is in starts fresh from the stage files, as sm64coopdx's level
+  does once everyone left; so a player alone whose scene starts over (a miss) finds its coins back, as in the game
+  alone, while one with company finds them as the others left them.
 - **Free movement.** Nobody is pulled along to another galaxy. Each player picks galaxies and stars from their own
   dome and star select, and leaves an instance by finishing, dying out or exiting.
 - **Zones.** A galaxy's zones are loaded into the same scene, so the whole galaxy is one instance, with no
@@ -194,8 +200,8 @@ packets. It has no physics or state machine of its own. Later phases give it col
 enemies.
 
 - **Snapshots** (`galaxy/coop_snapshot.h`). Each player sends its own (the game's `coop_player` report) 30 times a
-  second on the unreliable channel, as the session's message 32, to everyone in the room (the host passes a joiner's
-  on). It holds the instance, the position, the model's facing and up (its base matrix, the true turn on any planet),
+  second on the unreliable channel, as the session's message 32, to the players in its instance (a joiner's through
+  the host, which passes it on as message 33). It holds the instance, the position, the model's facing and up (its base matrix, the true turn on any planet),
   gravity, velocity, and the animation: its group as Mario's `XanimePlayer` names it, the bck, the frame, the speed
   and the group's track weights (walking into running). An older snapshot than the last is dropped.
 - **Drawn 100 ms behind.** The host keeps the last second of each player's snapshots and gives the game
@@ -275,17 +281,33 @@ The rules carried over, with SMG's equivalents:
 
 ## Shared world state
 
-Each instance's owner is authoritative for that instance, and the session host for the save. Rough order of what to
-sync, from cheapest to hardest:
+The server decides everything but the visuals (`galaxy/coop_world.h`, the game's `NebulaCoopWorld`, game API 40's
+`coop_world_report` and `coop_world_take`). Each player's game reports what its own play did; the server settles it
+and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's things in place of SM64's:
 
-1. Which instance each player is in, sent on every scene change. This is sm64coopdx's `currLevelNum` /
-   `currActNum` on each network player.
-2. Collected stars, Grand Stars, star bits, coins, 1-Ups and save flags (`GameDataFunction`). Comparable to
-   `packet_collect_*` and `packet_save_set_flag`.
-3. Object deaths and state, through a sync-object registry keyed by placement ID (`JMapInfo` link IDs), like
-   `sync_object.c`/`packet_object.c`.
-4. Bosses and scripted demos. These are the hardest: `MR::getPlayerDemoActor` and cutscenes assume one player. One
-   way through is that the player who starts a demo plays it and the others wait for it to end.
+| What | Who it reaches | As sm64coopdx |
+|---|---|---|
+| A coin taken | Gone for everyone in the instance, and counted for each of them (without the life or 1-Up it gives its taker) | `packet_collect_coin` |
+| A purple coin taken | Gone for everyone in the instance, and counted toward the 100 for each of them, so the star appears for all | `packet_collect_coin` |
+| A star bit, a 1-Up or Life Mushroom, a Rainbow Star taken | Gone for everyone in the instance; what it gives is its taker's | `packet_collect_item` |
+| A plain enemy defeated | Gone for everyone in the instance, its dead switch turned on in each game (a star waiting on it appears for all), without its drops | an object's death in `packet_object.c`, kept by `packet_level_respawn_info` |
+| A Power Star got, an event flag on | The session's save, for every player | `packet_collect_star`, `packet_save_set_flag` |
+| An event value set (comets, the like) | The host's game's are the session's, for every player; each joiner's stay its own | |
+
+- **What is followed.** The things placed from the stage's files that these name: coins and purple coins, alone or in
+  rail and circle groups; star bits alone or in groups; 1-Up and Life Mushrooms and Rainbow Stars; the plain enemies
+  (`cEnemyNames` in `NebulaCoopWorld.cpp`: not launchers or generators, bosses, or enemies that come back by
+  themselves). Each has a key from its placement (zone, name, link id and place), the same in every player's game;
+  things spawned while playing (an enemy's coins) aren't followed.
+- **Gone stays gone.** A thing the server says is gone is made dead quietly in each game and kept dead if the game
+  brings it back, while anyone is in the instance (sm64coopdx's respawn info). A scene's first half second isn't
+  reported: the stage's own setup kills things then.
+- **The save.** The save each joiner plays from (sent at the join, galaxy/coop_session.h) is brought up to date with
+  the session's changes, which the server keeps; each scene start gives them all to the game again, which applies
+  what it lacks (a scene started over may have dropped what came during it). The host's save on disk is written as its
+  game saves.
+- **Later (Phase 3).** Objects' movement and state (enemies walking, platforms, switches) and which player each enemy
+  targets: sync objects as sm64coopdx's `sync_object.c`, each owned by the server.
 
 ## Phases
 
@@ -348,17 +370,18 @@ Each phase ships on its own and leaves the game playable.
 
 - [ ] The opening and the other transition demos play again for each player who reaches them
       ([Cutscenes and transitions](#cutscenes-and-transitions)).
-- [ ] Instances: each client reports its stage and scenario, sees only players in its own instance, and a player
-      entering an occupied instance gets its state from the server.
-- [ ] Collectibles and save flags sync, with the host authoritative.
+- [x] Instances: each client reports its stage and scenario, sees only players in its own instance (snapshots go
+      only there), and a player entering an occupied instance gets its state from the server.
+- [x] Collectibles, defeated enemies, Power Stars and save flags sync, with the host authoritative
+      ([Shared world state](#shared-world-state)).
 - [ ] [Player collisions](#player-collisions): non-solid, solid and friendly fire, knockback strength and PvP mode,
       with lag compensation. The options are already read from `runtime_settings.ini`.
 - [ ] Remote players stomp, spin and touch objects. Hits are sent as events to the client that owns the object.
 
 ### Phase 3: shared enemies and objects
 
-- [ ] Sync-object registry and per-object packets. Begin with simple enemies (Goomba/Kuribo, Octoomba), then platforms
-      and switches.
+- [ ] Per-object packets on top of Phase 2's placement keys (`NebulaCoopWorld`), each object owned by the server.
+      Begin with simple enemies (Goomba/Kuribo, Octoomba), then platforms and switches.
 - [ ] Each enemy targets the *nearest* player instead of `MR::getPlayerPos`. This is where the call-site inventory
       gets used: route `MR::getPlayer*` through a "player relevant to this actor" helper, one subsystem at a time.
 

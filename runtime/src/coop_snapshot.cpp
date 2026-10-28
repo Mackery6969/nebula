@@ -103,6 +103,77 @@ std::optional<PlayerSnapshot> decode_snapshot(std::span<const std::uint8_t> data
     return snapshot;
 }
 
+std::vector<std::uint8_t> encode_relayed_snapshot(net::PeerId from, std::span<const std::uint8_t> snapshot) {
+    net::ByteWriter out;
+    out.u64(from).raw(snapshot);
+    return out.take();
+}
+
+std::optional<RelayedSnapshot> decode_relayed_snapshot(std::span<const std::uint8_t> data) {
+    net::ByteReader in(data);
+    RelayedSnapshot relayed;
+    relayed.from = in.u64();
+    if (!in.ok()) return std::nullopt;
+    relayed.snapshot = in.rest();
+    return relayed;
+}
+
+std::vector<net::PeerId> snapshot_audience(std::span<const SessionPlayer> players, std::string_view stage,
+                                           int scenario, net::PeerId sender) {
+    std::vector<net::PeerId> audience;
+    if (stage.empty()) return audience;
+    for (const SessionPlayer& player : players) {
+        if (player.local || player.id == sender || player.scenario != scenario || player.stage != stage) continue;
+        audience.push_back(player.id);
+    }
+    return audience;
+}
+
+void listen_snapshots(Session& session, RemotePlayers& players) {
+    players.clear();
+    session.on_message(kSnapshotMessage, [&session, &players](const SessionPlayer& from,
+                                                               std::span<const std::uint8_t> data) {
+        players.receive(from.id, from.index, from.name, from.character, data);
+        if (!session.is_host()) return;
+        // A joiner's, for the others in its instance.
+        const std::optional<PlayerSnapshot> snapshot = decode_snapshot(data);
+        if (!snapshot) return;
+        const std::vector<SessionPlayer> room = session.players();
+        const std::vector<net::PeerId> audience = snapshot_audience(room, snapshot->stage, snapshot->scenario, from.id);
+        if (audience.empty()) return;
+        const std::vector<std::uint8_t> relayed = encode_relayed_snapshot(from.id, data);
+        for (const net::PeerId to : audience) {
+            (void)session.send(kSnapshotRelayMessage, net::Channel::Unreliable, relayed, to);
+        }
+    });
+    session.on_message(kSnapshotRelayMessage, [&session, &players](const SessionPlayer& from,
+                                                                    std::span<const std::uint8_t> data) {
+        const std::optional<RelayedSnapshot> relayed = decode_relayed_snapshot(data);
+        if (!from.host || !relayed) return;
+        for (const SessionPlayer& player : session.players()) {
+            if (player.id != relayed->from || player.local) continue;
+            players.receive(player.id, player.index, player.name, player.character, relayed->snapshot);
+            return;
+        }
+    });
+}
+
+bool send_snapshot(Session& session, const PlayerSnapshot& snapshot) {
+    const std::vector<std::uint8_t> bytes = encode_snapshot(snapshot);
+    const std::vector<SessionPlayer> room = session.players();
+    if (!session.is_host()) {
+        for (const SessionPlayer& player : room) {
+            if (player.host) return session.send(kSnapshotMessage, net::Channel::Unreliable, bytes, player.id);
+        }
+        return false;
+    }
+    bool sent = true;
+    for (const net::PeerId to : snapshot_audience(room, snapshot.stage, snapshot.scenario, net::kNoPeer)) {
+        sent = session.send(kSnapshotMessage, net::Channel::Unreliable, bytes, to) && sent;
+    }
+    return sent;
+}
+
 PlayerSnapshot blend_snapshots(const PlayerSnapshot& from, const PlayerSnapshot& to, float t) {
     t = std::clamp(t, 0.0f, 1.0f);
     PlayerSnapshot out = to;
