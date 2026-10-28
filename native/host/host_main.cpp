@@ -2024,7 +2024,8 @@ void note_coop_place() {
 }
 
 // What happened in the room since the last call, on the game's thread: logged, and a room that ended while playing
-// takes the player back to the main menu. The host's room settings (the Online page's) reach the others.
+// takes the player back to the main menu. The host's room settings (the Online page's) and the player's name (Options'
+// PLAYER page's) reach the others as they change.
 void pump_coop_session() {
     note_coop_place();
     if (!gCoopSession.active()) {
@@ -2039,7 +2040,9 @@ void pump_coop_session() {
         gCoopWorld.update();
     }
 #if defined(NEBULA_HOST_RENDERER)
-    if (gCoopSession.is_host()) gCoopSession.set_room(galaxy::get_runtime_settings().coop);
+    const galaxy::RuntimeCoopSettings settings = galaxy::get_runtime_settings().coop;
+    if (gCoopSession.is_host()) gCoopSession.set_room(settings);
+    gCoopSession.set_name(settings.player_name);
 #endif
     using Kind = galaxy::coop::SessionEvent::Kind;
     bool changed = false;
