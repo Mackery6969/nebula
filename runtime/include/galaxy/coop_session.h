@@ -116,6 +116,14 @@ struct JoinConfig {
     std::function<std::optional<std::filesystem::path>(const SharedMod&)> find_mod;
 };
 
+// How far a join is (Session::join_step), for the joining screen.
+enum class JoinStep : std::uint8_t {
+    None,             // not joining
+    Reaching,         // reaching the host's lobby
+    Asking,           // in its lobby, waiting for the host to let this player in
+    DownloadingMods,  // getting the room's mods it lacks (download_progress())
+};
+
 // A joiner's download of the room's mods.
 struct DownloadProgress {
     bool active = false;
@@ -159,6 +167,8 @@ public:
     [[nodiscard]] std::vector<SessionEvent> take_events();
     // Once, after Joined: the host's save.
     [[nodiscard]] std::optional<RoomSave> take_room_save();
+    // While a joiner connects: what it waits for.
+    [[nodiscard]] JoinStep join_step() const;
     // While a joiner downloads the room's mods: how far.
     [[nodiscard]] DownloadProgress download_progress() const;
     // Once, after ModsReady: the room's mods, in its order, each with its folder here.
