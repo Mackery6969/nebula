@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 40u
+#define NEBULA_GAME_API_VERSION 41u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -688,6 +688,10 @@ typedef struct NebulaHostServices {
        Called on the simulation thread. */
     void (*coop_world_report)(void* user, const NebulaCoopWorldEvent* event);
     uint32_t (*coop_world_take)(void* user, NebulaCoopWorldEvent* events, uint32_t capacity);
+    /* Online co-op: an achievement another player unlocked in the room's save (achievement then says 0 for it), for
+       its pop-up: 1 with its id (galaxy::achievements', at most `capacity` bytes into `id`), 0 when none waits.
+       Called on the simulation thread. */
+    int (*coop_achievement_take)(void* user, char* id, uint32_t capacity);
 } NebulaHostServices;
 
 enum {

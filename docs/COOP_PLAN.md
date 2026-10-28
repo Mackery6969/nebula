@@ -121,7 +121,8 @@ The title screen and the file select go. In their place is a co-op main menu lik
   made first when new. A new save plays user file 1. On the first start, the old `GameData.bin`'s used files
   become saves of their own (`FILE 1`, `FILE 3`, ...), each playing its old file; the old folder stays as it was.
 - **Achievements: the save's.** Each save keeps its own `achievements.ini`; an achievement unlocked in a save is
-  every player's who plays in it. The old shared `achievements.ini` is copied into each converted save.
+  every player's who plays in it ([Shared world state](#shared-world-state)). The old shared `achievements.ini` is
+  copied into each converted save.
 - **Character: the player's, not the save's.** `MR::isPlayerLuigi()` (today `!isDataMario()`, the save's half)
   follows Options' PLAYER page's character (`coop_character`, `mario` or `luigi`) instead, so the same save plays as
   either. Remote players show each player's own character (`NEBULA_COOP_PLAYER_LUIGI`).
@@ -293,6 +294,7 @@ and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's 
 | A plain enemy defeated | Gone for everyone in the instance, its dead switch turned on in each game (a star waiting on it appears for all), without its drops | an object's death in `packet_object.c`, kept by `packet_level_respawn_info` |
 | A Power Star got, an event flag on | The session's save, for every player | `packet_collect_star`, `packet_save_set_flag` |
 | An event value set (comets, the like) | The host's game's are the session's, for every player; each joiner's stay its own | |
+| An achievement unlocked | The save's: kept in the host's `achievements.ini` on the day it was first unlocked, and every player's, each with its pop-up | |
 
 - **What is followed.** The things placed from the stage's files that these name: coins and purple coins, alone or in
   rail and circle groups; star bits alone or in groups; 1-Up and Life Mushrooms and Rainbow Stars; the plain enemies
@@ -306,6 +308,13 @@ and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's 
   the session's changes, which the server keeps; each scene start gives them all to the game again, which applies
   what it lacks (a scene started over may have dropped what came during it). The host's save on disk is written as its
   game saves.
+- **Achievements.** A joiner gets the save's `achievements.ini` with the rest of the save as it joins, so the board
+  shows what the save has and nothing pops up for it. While the room plays, an achievement any player's game unlocks
+  goes to the server as a save change (`SaveKind::Achievement`, with when); the server keeps the first and tells every
+  player. Each player's host unlocks it in its copy of the save's achievements on that day, and the game shows its
+  pop-up (game API 41's `coop_achievement_take`); the goal met later in that player's own game shows nothing again.
+  Achievements are the host process's, not the game's: a scene start doesn't give them again. The headless host keeps
+  none.
 - **Later (Phase 3).** Objects' movement and state (enemies walking, platforms, switches) and which player each enemy
   targets: sync objects as sm64coopdx's `sync_object.c`, each owned by the server.
 
