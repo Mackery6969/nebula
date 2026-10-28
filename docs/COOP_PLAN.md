@@ -227,10 +227,16 @@ enemies.
 
 ## Chat
 
-A text chat as sm64coopdx's, keyboard only: Enter (or T) opens a line at the screen's bottom left, Enter sends it to
-everyone in the room, Escape drops it. The last few messages fade in over play and out after a few seconds, each with
-the sender's name in their colour; joins and leaves show there too. It doesn't stop the game, and while the line is
-open the keyboard types instead of playing. A controller has no way to type, so it only reads the chat.
+A text chat as sm64coopdx's, keyboard only: T opens a line at the screen's bottom left (not Enter, which is the
+keyboard's A), Enter sends it to everyone in the room, Escape drops it. The last few messages show over play and fade
+after ten seconds, each with the sender's name in their character's colour; joins and leaves show there too. It
+doesn't stop the game, and while the line is open the keyboard types instead of playing. A controller has no way to
+type, so it only reads the chat.
+
+The host keeps it (`runtime/src/coop_chat.cpp`): a line is a session message holding only its text (printable ASCII,
+at most 100 characters), so its sender's name is the session's and can't be faked. A player's lines past five in three
+seconds are dropped. The window layers send T to it while the host allows it (a room's game with no menu over it), and
+the game draws what `coop_chat` gives it (`NebulaCoopChat`, the game's window and message font).
 
 ## Cutscenes and transitions
 
@@ -275,7 +281,7 @@ The rules carried over, with SMG's equivalents:
 
 ## Shared world state
 
-The server decides everything but the visuals (`galaxy/coop_world.h`, the game's `NebulaCoopWorld`, game API 39's
+The server decides everything but the visuals (`galaxy/coop_world.h`, the game's `NebulaCoopWorld`, game API 40's
 `coop_world_report` and `coop_world_take`). Each player's game reports what its own play did; the server settles it
 and tells the players it concerns. It follows sm64coopdx's rules, with Galaxy's things in place of SM64's:
 
@@ -357,6 +363,7 @@ Each phase ships on its own and leaves the game playable.
 - [ ] Each player's name over their head (nametags); the player list held on Tab or the controller's Share button.
 - [x] Version, disc and mods check as a player joins: another version or disc is refused; other mods get the room's
       (see [Mods](#mods-the-rooms-not-the-players)).
+- [x] [Chat](#chat), keyboard only; controllers read it.
 
 ### Phase 2: same world
 
@@ -381,7 +388,7 @@ Each phase ships on its own and leaves the game playable.
 
 - [ ] Demos/cutscenes: whoever triggers one plays it, everyone else is frozen or faded out.
 - [ ] Camera and HUD per player; spectate on death.
-- [ ] Chat, Discord presence for the lobby (`discord_presence.cpp` already exists), player colours.
+- [ ] Discord presence for the lobby (`discord_presence.cpp` already exists), player colours.
 
 ## The network layer
 

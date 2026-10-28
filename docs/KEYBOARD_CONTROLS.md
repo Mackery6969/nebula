@@ -335,6 +335,13 @@ reads it once at boot. Settings files are written through flushed sibling tempor
 and atomically replaced; a failed save stays dirty and is retried on the next
 close or at shutdown.
 
+## Online co-op chat
+
+In a room's game, `T` opens a line at the screen's bottom left (whatever `T` is bound to; it isn't by default). While
+it is open the keyboard types into it and the game gets no keys: `Enter` sends it to everyone in the room, `Esc` drops
+it, `Backspace`, `Delete`, the arrows, `Home` and `End` edit it. A controller can't type: the room's lines show over
+play for ten seconds whatever is played with. Nebula's settings menu or the main menu coming up closes the line.
+
 ## HOME Menu
 
 Home (`H`; Home on Switch, PS on PlayStation, Steam on Steam controllers) opens the HOME Menu over the paused game:

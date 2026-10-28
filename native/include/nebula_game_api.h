@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 39u
+#define NEBULA_GAME_API_VERSION 40u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -471,6 +471,34 @@ enum {
     NEBULA_COOP_MENU_QUIT, /* Quit to desktop */
 };
 
+/* Online co-op's chat (coop_chat, docs/COOP_PLAN.md "Chat") as the game draws it over play: the room's newest lines,
+   and the line the keyboard types (T opens it, Enter sends it, Escape drops it; the host takes the keys). Its texts
+   are printable ASCII. A line keeps its words (`id` names it), so the game sets them once; its `alpha` falls as it
+   fades. Controllers read the chat, they don't type. */
+#define NEBULA_COOP_CHAT_LINES 8
+#define NEBULA_COOP_CHAT_TEXT 104 /* a message's longest (100) and its terminator */
+enum {
+    NEBULA_COOP_CHAT_MESSAGE = 0, /* `name` said `text` */
+    NEBULA_COOP_CHAT_JOINED,      /* `name` joined the room */
+    NEBULA_COOP_CHAT_LEFT,        /* `name` left it */
+};
+typedef struct NebulaCoopChatLine {
+    uint32_t id;
+    uint32_t kind;      /* NEBULA_COOP_CHAT_* */
+    uint32_t character; /* a message's sender's: 0 Mario, 1 Luigi (their name's colour) */
+    uint32_t alpha;     /* 0 to 255 */
+    char name[24];
+    char text[NEBULA_COOP_CHAT_TEXT];
+} NebulaCoopChatLine;
+typedef struct NebulaCoopChatView {
+    uint32_t line_count; /* oldest first */
+    NebulaCoopChatLine lines[NEBULA_COOP_CHAT_LINES];
+    uint32_t typing;       /* 1 while the keyboard types a line */
+    uint32_t input_serial; /* changes with the typed text, its cursor or the typing starting */
+    uint32_t cursor;       /* in `input` */
+    char input[NEBULA_COOP_CHAT_TEXT];
+} NebulaCoopChatView;
+
 typedef struct NebulaHostServices {
     uint32_t version;
     uint32_t size;
@@ -652,6 +680,9 @@ typedef struct NebulaHostServices {
     /* The other players in the local player's instance, by number, at most `capacity` into `players`: how many there
        are. Called on the simulation thread, each game scene frame. */
     uint32_t (*coop_remote)(void* user, NebulaCoopRemotePlayer* players, uint32_t capacity);
+    /* Online co-op's chat as it shows now (NebulaCoopChatView): nothing outside a room's game. Called on the simulation
+       thread, each frame the game shows play. */
+    void (*coop_chat)(void* user, NebulaCoopChatView* view);
     /* The shared world (NebulaCoopWorldEvent): what the game's play did, and what it is told, at most `capacity`
        into `events` (how many there are; the rest wait for the next call). Ignored, and nothing, outside a room.
        Called on the simulation thread. */

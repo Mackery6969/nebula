@@ -724,6 +724,10 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         if (native_settings_handle_window_key(wp, was_down)) {
             return 0;
         }
+        // T in a co-op game: the chat's line opens (galaxy/coop_chat.h), and the game doesn't see the key.
+        if (!was_down && coop_chat_key(static_cast<std::uint32_t>(wp))) {
+            return 0;
+        }
         // A main menu text row being edited: the editing keys go to it (characters come as WM_CHAR), nothing to the
         // game.
         if (coop_text_entry()) {

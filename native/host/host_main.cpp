@@ -17,6 +17,7 @@
 #include <nebula_game_api.h>
 
 #include "galaxy/atomic_file.h"
+#include "galaxy/coop_chat.h"
 #include "galaxy/coop_menu.h"
 #include "galaxy/coop_mods.h"
 #include "galaxy/coop_saves.h"
@@ -113,6 +114,7 @@ inline int64_t perf_hint_retrace() noexcept { return 0; }
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
+#include "galaxy/platform_paths.h"
 
 namespace fs = std::filesystem;
 
@@ -1786,6 +1788,8 @@ unsigned gCoopSaveFile = 1u;  // the user file the played save plays
 // The character the played save plays as (NEBULA_COOP_MENU_CHARACTER): the Player page's, as Host left the menu.
 std::atomic<bool> gCoopLuigi{false};
 
+// The room's chat (galaxy/coop_chat.h), over the session below (which goes first, its thread giving the chat lines).
+galaxy::coop::Chat gCoopChat;
 // Online play (galaxy/coop_session.h): the room this player hosts or joined. Host opens it as its save starts; Join
 // connects from the main menu and plays the host's save once let in; Leave game, or the main menu again, leaves it.
 galaxy::coop::Session gCoopSession;
@@ -2042,16 +2046,19 @@ void pump_coop_session() {
         switch (event.kind) {
         case Kind::PlayerJoined:
             std::fprintf(stderr, "[coop] %s joined\n", event.name.c_str());
+            gCoopChat.notice(galaxy::coop::ChatLine::Kind::Joined, event.name, galaxy::coop::chat_clock_ms());
             changed = true;
             break;
         case Kind::PlayerLeft:
             std::fprintf(stderr, "[coop] %s left%s%s\n", event.name.c_str(), event.text.empty() ? "" : ": ",
                          event.text.c_str());
+            gCoopChat.notice(galaxy::coop::ChatLine::Kind::Left, event.name, galaxy::coop::chat_clock_ms());
             changed = true;
             break;
         case Kind::RoomChanged: changed = true; break;
         case Kind::Closed:
             std::fprintf(stderr, "[coop] the room ended: %s\n", event.text.empty() ? "left" : event.text.c_str());
+            gCoopChat.clear();
             if (!event.text.empty()) {
                 set_coop_notice(event.text);
 #if defined(NEBULA_HOST_RENDERER)
@@ -2065,6 +2072,36 @@ void pump_coop_session() {
     }
     if (changed) note_coop_room();
 }
+
+#if defined(NEBULA_HOST_RENDERER)
+bool host_settings_open();
+
+// The chat's line, each scene frame: T opens it while a room's game shows with no menu over it (the window takes the
+// key, galaxy/gx/galaxy_select.h), the keyboard's typing goes to it, and it closes as it is sent or dropped, or when
+// a menu comes over the game.
+void pump_coop_chat() {
+    const bool available = gCoopSession.active() && galaxy::gx::coop_in_game() && !host_settings_open() &&
+                           !gCoopMenu.is_open();
+    galaxy::gx::set_coop_chat_available(available);
+    // Whether the window's typing is the chat's (the main menu's text rows have it otherwise).
+    static bool s_typing_here = false;
+    if (galaxy::gx::take_coop_chat_open()) {
+        s_typing_here = true;
+        if (available) (void)gCoopChat.open();
+    }
+    if (!available) {
+        gCoopChat.close();
+    } else if (gCoopChat.typing()) {
+        const std::uint64_t now = galaxy::coop::chat_clock_ms();
+        for (const char32_t key : galaxy::gx::take_coop_text_input()) gCoopChat.type(key, now);
+    }
+    // Sent, dropped, or ended with the room: the keys play again.
+    if (s_typing_here && !gCoopChat.typing()) {
+        galaxy::gx::set_coop_text_entry(false);
+        s_typing_here = false;
+    }
+}
+#endif
 
 // Host: the room opens on the Host page's port as the save starts. False (and why on the menu) when it can't.
 bool open_coop_room(const galaxy::coop::SaveInfo& save) {
@@ -2424,6 +2461,36 @@ void svc_settings_input(void*, uint32_t action, int32_t arg) {
 #endif
 }
 
+// The chat as the game draws it: the lines showing now and the line typed, only in a room's game.
+void svc_coop_chat(void*, NebulaCoopChatView* view) {
+    std::memset(view, 0, sizeof(*view));
+#if defined(NEBULA_HOST_RENDERER)
+    if (!gCoopSession.active() || !galaxy::gx::coop_in_game()) return;
+#endif
+    const galaxy::coop::ChatView chat = gCoopChat.view(galaxy::coop::chat_clock_ms());
+    const auto copy = [](char* out, std::size_t size, const std::string& text) {
+        std::snprintf(out, size, "%s", text.c_str());
+    };
+    for (const galaxy::coop::ChatView::Line& shown : chat.lines) {
+        if (view->line_count >= NEBULA_COOP_CHAT_LINES) break;
+        NebulaCoopChatLine& line = view->lines[view->line_count++];
+        line.id = shown.line.id;
+        switch (shown.line.kind) {
+        case galaxy::coop::ChatLine::Kind::Joined: line.kind = NEBULA_COOP_CHAT_JOINED; break;
+        case galaxy::coop::ChatLine::Kind::Left: line.kind = NEBULA_COOP_CHAT_LEFT; break;
+        default: line.kind = NEBULA_COOP_CHAT_MESSAGE; break;
+        }
+        line.character = shown.line.character == galaxy::CoopCharacter::Luigi ? 1u : 0u;
+        line.alpha = static_cast<uint32_t>(std::clamp(shown.alpha, 0.0f, 1.0f) * 255.0f + 0.5f);
+        copy(line.name, sizeof(line.name), shown.line.name);
+        copy(line.text, sizeof(line.text), shown.line.text);
+    }
+    view->typing = chat.typing ? 1u : 0u;
+    view->input_serial = chat.input_serial;
+    view->cursor = static_cast<uint32_t>(std::min<std::size_t>(chat.cursor, sizeof(view->input) - 1u));
+    copy(view->input, sizeof(view->input), chat.input);
+}
+
 int32_t svc_coop_menu(void*, uint32_t what) {
     switch (what) {
     case NEBULA_COOP_MENU_OPEN:
@@ -2435,6 +2502,7 @@ int32_t svc_coop_menu(void*, uint32_t what) {
             // Back at the main menu: the game ended, and with it the room.
             if (gCoopSession.active()) gCoopSession.leave();
             (void)gCoopSession.take_events();
+            gCoopChat.clear();
             {
                 const std::lock_guard<std::mutex> lock(gCoopLock);
                 gCoopLocalValid = false;
@@ -3712,6 +3780,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
             return 1;
         }
         pump_coop_session();
+        pump_coop_chat();
         if (galaxy::gx::take_leave_game()) {
             // Leave game: out of the room (closing it, for its host), then the main menu.
             if (gCoopSession.active()) {
@@ -3720,6 +3789,7 @@ int svc_test_scene_frame(void*, NebulaTestAction* action) {
                 (void)gCoopSession.take_events();
                 note_coop_room();
             }
+            gCoopChat.clear();
             action->kind = NEBULA_TEST_LEAVE_GAME;
             return 1;
         }
@@ -4124,6 +4194,37 @@ int run_mods_tool() {
 }  // namespace
 #endif
 
+namespace {
+
+// The disc when --pak is not given: content/game.pak (as nebula-import and Setup write it) or game.pak, next to the
+// program, in the current folder, or in the install root above it (versions/<version>/, the launcher's layout).
+// Empty when none of them has one.
+fs::path find_default_pak(const fs::path& program) {
+    std::vector<fs::path> folders;
+    std::error_code error;
+    if (!program.empty()) folders.push_back(program);
+    if (fs::path current = fs::current_path(error); !error) folders.push_back(std::move(current));
+    if (program.parent_path().filename() == "versions") folders.push_back(program.parent_path().parent_path());
+    for (const fs::path& folder : folders) {
+        for (const fs::path& pak : {folder / "content" / "game.pak", folder / "game.pak"}) {
+            if (fs::is_regular_file(pak, error)) return pak;
+        }
+    }
+    return {};
+}
+
+// The saves when --nand is not given: a saves folder already next to the program or in the current folder (a test
+// build run as docs/TEST_BUILDS.md says), else the launcher's (saves in Nebula's data folder, by the settings).
+fs::path default_nand(const fs::path& program) {
+    std::error_code error;
+    if (!program.empty() && fs::is_directory(program / "saves", error)) return program / "saves";
+    if (fs::is_directory("saves", error)) return fs::absolute("saves", error);
+    if (const fs::path data = galaxy::nebula_data_directory(); !data.empty()) return data / "saves";
+    return program.empty() ? fs::path("saves") : program / "saves";
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
 #if defined(NEBULA_HOST_RENDERER) && defined(_WIN32)
     if (argc >= 3 && std::strcmp(argv[1], "--crash-report") == 0) {
@@ -4170,23 +4271,39 @@ int main(int argc, char** argv) {
     boot_mark("main");
     fs::path pak, nand, module;
     double seconds = 0;
-    for (int i = 1; i + 1 < argc; i += 2) {
+    std::error_code error;
+    for (int i = 1; i < argc; ++i) {
         const std::string key = argv[i];
+        // Each option takes the argument after it, but --host's port may be left out.
+        const char* value = i + 1 < argc && std::strncmp(argv[i + 1], "--", 2) != 0 ? argv[i + 1] : nullptr;
+        if (value != nullptr) {
+            ++i;
+        }
+#if defined(NEBULA_HOST_RENDERER)
+        if (key == "--host" && value == nullptr) {
+            gCoopAutoStart = CoopAutoStart::Host;
+            gCoopAutoPort = galaxy::kCoopDefaultPort;
+            continue;
+        }
+#endif
+        if (value == nullptr) {
+            die("%s takes a value", key.c_str());
+        }
         if (key == "--pak") {
-            pak = argv[i + 1];
+            pak = value;
         } else if (key == "--nand") {
-            nand = argv[i + 1];
+            nand = value;
         } else if (key == "--module") {
-            module = argv[i + 1];
+            module = value;
         } else if (key == "--seconds") {
-            seconds = std::atof(argv[i + 1]);
+            seconds = std::atof(value);
 #if defined(NEBULA_HOST_RENDERER)
         } else if (key == "--host") {
             // Online co-op (docs/COOP_PLAN.md): as the main menu opens, Host plays the last played save on this port.
             std::string ignored;
             std::uint16_t port = 0u;
-            if (!galaxy::parse_coop_endpoint(std::string("host:") + argv[i + 1], ignored, port) ||
-                std::string(argv[i + 1]).find_first_not_of("0123456789") != std::string::npos) {
+            if (!galaxy::parse_coop_endpoint(std::string("host:") + value, ignored, port) ||
+                std::string(value).find_first_not_of("0123456789") != std::string::npos) {
                 die("--host takes a port, 1 to 65535");
             }
             gCoopAutoStart = CoopAutoStart::Host;
@@ -4195,33 +4312,46 @@ int main(int argc, char** argv) {
             // As the main menu opens, Join connects to the address.
             std::string address;
             std::uint16_t port = 0u;
-            if (!galaxy::parse_coop_endpoint(argv[i + 1], address, port)) {
+            if (!galaxy::parse_coop_endpoint(value, address, port)) {
                 die("--join takes an address, address:port or [IPv6]:port");
             }
             gCoopAutoStart = CoopAutoStart::Join;
-            gCoopAutoAddress = argv[i + 1];
+            gCoopAutoAddress = value;
 #endif
         } else {
             die("unknown option %s", key.c_str());
         }
     }
-    if (pak.empty() || nand.empty()) {
-        die("usage: nebula_native_host --pak <game.pak> --nand <dir> [--module <smg_game.dll>] [--seconds N]");
+    // Without --pak and --nand, the disc and saves are found as find_default_pak and default_nand say, so the
+    // program starts with no arguments from a folder that holds content/game.pak.
+    fs::path program = galaxy::program_directory();
+    if (program.empty()) {
+        program = fs::absolute(fs::path(argv[0]), error).parent_path();
     }
+    if (pak.empty()) {
+        pak = find_default_pak(program);
+        if (pak.empty()) {
+            die("no game.pak: pack your disc with nebula-import into a content folder next to the program, or name it: "
+                "--pak <game.pak> [--nand <saves folder>] [--module <smg_game.dll>] [--seconds N]");
+        }
+    }
+    if (nand.empty()) {
+        nand = default_nand(program);
+    }
+    log_line("paths:", ("disc " + pak.string() + ", saves " + nand.string()).c_str());
     if (module.empty()) {
 #if defined(_WIN32)
-        module = fs::path(argv[0]).parent_path() / "smg_game.dll";
+        module = program / "smg_game.dll";
 #elif defined(__APPLE__)
-        module = fs::path(argv[0]).parent_path() / "libsmg_game.dylib";
+        module = program / "libsmg_game.dylib";
 #else
-        module = fs::path(argv[0]).parent_path() / "libsmg_game.so";
+        module = program / "libsmg_game.so";
 #endif
     }
     gNandRoot = nand;
     gCoopSaves.emplace(gNandRoot / "coop_saves");
     gCoopMenu.set_saves(&*gCoopSaves);
     gCoopMenu.set_mods_source(coop_room_mods);
-    std::error_code error;
     fs::create_directories(gNandRoot / "title/00010000/524d4745/data", error);
     fs::create_directories(gNandRoot / "tmp", error);  // where saves stage their banner before moving it
 #if defined(NEBULA_HOST_RENDERER)
@@ -4421,6 +4551,8 @@ int main(int argc, char** argv) {
     services.traced_sun = svc_traced_sun;
     services.coop_player = svc_coop_player;
     services.coop_menu = svc_coop_menu;
+    services.coop_chat = svc_coop_chat;
+    gCoopChat.attach(gCoopSession);
     services.coop_list = svc_coop_list;
     services.coop_remote = svc_coop_remote;
     services.coop_world_report = svc_coop_world_report;
