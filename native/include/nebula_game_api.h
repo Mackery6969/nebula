@@ -23,7 +23,7 @@ extern "C" {
 #define NEBULA_GAME_API __attribute__((visibility("default")))
 #endif
 
-#define NEBULA_GAME_API_VERSION 39u
+#define NEBULA_GAME_API_VERSION 40u
 
 /* A physical range of the game's memory and where it is in the host process: what the GPU's addresses resolve to. */
 typedef struct NebulaGameMemoryRegion {
@@ -251,7 +251,7 @@ typedef struct NebulaFsRequest {
    The host keeps the settings, their pages, the draft and its apply, and takes the keyboard and controllers while the
    menu is open; the game shows it (and takes the pointer, settings_input). Texts are the host's own, in English
    (UTF-8): the game names each in the played language (NebulaSettingsMenu). */
-#define NEBULA_SETTINGS_PAGES 8
+#define NEBULA_SETTINGS_PAGES 9
 #define NEBULA_SETTINGS_ROWS 96
 
 enum {
@@ -268,7 +268,7 @@ enum {
     NEBULA_SETTINGS_ROW_HELD = 256,      /* the mod picked up to move: the arrows move it */
     NEBULA_SETTINGS_ROW_SLIDER = 512,    /* a setting along a range: `slider_steps` from its first value, at `slider_at` */
     NEBULA_SETTINGS_ROW_BINDING = 1024,  /* a control's binding: changing it waits for an input */
-    NEBULA_SETTINGS_ROW_TEXT = 2048,     /* the main menu: a text (a name, an address); pressed, it is edited in place */
+    NEBULA_SETTINGS_ROW_TEXT = 2048,     /* a text (a name, an address); pressed, it is edited in place */
 };
 
 /* The game's button icons (its picture font's A, B, C, Z, 1, 2, Plus, Minus, HOME and Control Pad, in this order):
@@ -384,7 +384,7 @@ typedef struct NebulaSettingsView {
     char status_text[160];
     uint32_t kind; /* NEBULA_SETTINGS_KIND_* */
     uint32_t back; /* the main menu: a page under the main one, which B leaves; its rows reset to their defaults */
-    uint32_t editing; /* the main menu: the selected text row is edited (A keeps it, B drops it, Minus deletes) */
+    uint32_t editing; /* the selected text row is edited (A keeps it, B drops it, Minus or X deletes) */
 } NebulaSettingsView;
 
 /* The player's input to the settings menu (settings_input); the keyboard and controllers reach it through the host. */
@@ -417,7 +417,7 @@ enum {
    PLAY: the user file (1 to 6) the chosen save plays; its save data is then the game's NAND save folder, which the
    game reads again (empty for a new save). NEBULA_COOP_MENU_KEYS: the keys held that the Wii Remote has no button
    for (NEBULA_COOP_KEY_*), outside Nebula's settings menu and the main menu's text rows.
-   NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (the Player page's character as Host played), else 0;
+   NEBULA_COOP_MENU_CHARACTER: 1 when the player plays Luigi (Options' PLAYER page's character as Host played), else 0;
    MR::isPlayerLuigi follows it in every save. */
 enum {
     NEBULA_COOP_MENU_OPEN = 1,

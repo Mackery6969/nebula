@@ -14,8 +14,9 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] The Online tab greyed out when opened from the main menu
 - [x] Tab (a controller's Back) resets the selected Host page setting to its default; Escape or B goes back
 - [x] No page tabs or page hint on the main menu's one-page screens
-- [x] The game's logo above the main menu, as on the title screen
-- [x] Player page: name and character (Mario or Luigi), the character per player instead of per save
+- [x] ~~The game's logo above the main menu, as on the title screen~~ (dropped: it took too much room)
+- [x] Player page: name and character (Mario or Luigi), the character per player instead of per save; in Options
+      in the MODS page's place (MODS moved to the end)
 - [x] Text entry (keyboard, or letter by letter on a controller), then: renaming a save, the Host page's port and
       password, the Join page's address
 - [x] Mods as a room setting: the Host page picks them; the MODS page only imports and removes

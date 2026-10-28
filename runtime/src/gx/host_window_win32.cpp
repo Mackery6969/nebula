@@ -616,7 +616,7 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         DragFinish(drop);
         if (!mods.empty()) {
             run_mod_imports(std::move(mods));
-            s_native_settings_tab.store(5u, std::memory_order_relaxed);
+            s_native_settings_tab.store(kModsTab, std::memory_order_relaxed);
             s_native_settings_row.store(1u, std::memory_order_relaxed);
             set_native_settings_visible(true);
         }
@@ -763,6 +763,10 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             }
             galaxy::host::publish_native_window_key_state(normalized, true);
         }
+    }
+    if (msg == WM_CHAR && native_settings_type(static_cast<char32_t>(wp))) {
+        // Typed into the settings' PLAYER page name (its keys are the menu's).
+        return 0;
     }
     if (msg == WM_CHAR && coop_text_entry()) {
         // Typed into the main menu's text row (Backspace, Enter and Escape come as their keys).

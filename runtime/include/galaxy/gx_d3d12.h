@@ -340,6 +340,11 @@ void native_settings_set_controllers_for_tests(std::span<const input::Controller
 [[nodiscard]] RenderConfig native_settings_draft_for_tests();
 // Delivers an overlay key to the window thread (controller navigation).
 void native_settings_post_key(std::uintptr_t virtual_key) noexcept;
+// The PLAYER page's name is being typed: the window's typing goes to it (native_settings_type), and its keys to the
+// menu (native_settings_handle_window_key).
+[[nodiscard]] bool native_settings_typing() noexcept;
+// A character typed (WM_CHAR, SDL's text input) into the name being typed; false when none is.
+bool native_settings_type(char32_t character);
 
 // The settings menu as it stands, for the native game's own menu (NebulaSettingsMenu) and the overlay alike: the
 // pages, the open page's rows (the overlay's English), the selection and what the line under the page says.
@@ -357,6 +362,7 @@ struct NativeSettingsViewRow {
     bool held = false;        // a mod picked up to move
     unsigned slider_steps = 0u;  // a setting along a range: its steps, and the one it is at
     unsigned slider_at = 0u;
+    bool text = false;           // a text (the player's name): pressed, it is edited in place
 };
 enum class NativeSettingsStatus : unsigned {
     Help,             // the selected row's description
@@ -395,6 +401,7 @@ struct NativeSettingsView {
     std::vector<NativeSettingsViewRow> rows;
     unsigned selected = 0u;
     unsigned selected_button = 0u;  // the selected row's, when it has buttons
+    bool editing = false;           // the selected row's text is being typed (A or Enter keeps it, B or Escape drops it)
     std::string help;
     NativeSettingsStatus status = NativeSettingsStatus::Help;
     int status_number = 0;

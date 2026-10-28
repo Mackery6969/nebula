@@ -27,14 +27,6 @@ public:
     void exeLogoDisplay();
     void exeDecide();
     void exeDead();
-#ifdef TARGET_PC
-    // The logo alone over the co-op main menu, as the title shows it (no music, no Press A and B): it appears, then
-    // waits with its lights; updateLogo each frame while it shows.
-    void appearLogo();
-    void updateLogo();
-    void killLogo();
-    LayoutActor* getLogo() const;
-#endif
 
 private:
     /* 0x08 */ TitleSequenceProductSub::LogoLayout* mLogoLayout;
@@ -43,9 +35,6 @@ private:
     /* 0x14 */ TriggerChecker* mAButtonChecker;
     /* 0x18 */ TriggerChecker* mBButtonChecker;
     /* 0x1C */ bool mIsDisplayEncouragePal60Window;
-#ifdef TARGET_PC
-    bool mIsLogoWaiting;  // the main menu's logo past its Appear
-#endif
 };
 
 namespace TitleSequenceProductSub {
