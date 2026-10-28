@@ -281,12 +281,40 @@ void test_join_and_player() {
     menu.press(0u);
     expect(menu.take_command() == MenuCommand::Join, "and joins");
     menu.set_joining(true);
-    expect(menu.view().rows[2].value == "CANCEL", "while connecting it reads Cancel");
+    view = menu.view();
+    expect(view.pages[0] == "JOINING" && view.rows.size() == 3u && view.rows[0].value == "[::1]:7778" &&
+               view.rows[1].bar_steps == 100u && view.rows[1].bar_at == 0u && view.rows[2].value == "CANCEL" &&
+               view.selected == 2u,
+           "while connecting, the joining screen: the address, an empty loading bar and Cancel");
+    menu.move(-1);
+    menu.select_row(0u);
+    expect(menu.view().selected == 2u, "which keeps the selection on Cancel");
+    menu.set_join_status("DOWNLOADING THE ROOM'S MODS: 50%", "SomeMod", 60u);
+    view = menu.view();
+    expect(view.rows[0].label == "DOWNLOADING THE ROOM'S MODS: 50%" && view.rows[1].label == "SomeMod" &&
+               view.rows[1].label_name && view.rows[1].bar_at == 60u && view.rows[1].value == "60%",
+           "the join's step and how far it is");
     menu.press(0u);
-    expect(menu.take_command() == MenuCommand::CancelJoin, "which stops the join");
+    expect(menu.take_command() == MenuCommand::CancelJoin, "Cancel stops the join");
     menu.back();
     expect(menu.take_command() == MenuCommand::CancelJoin, "as B does");
     menu.set_joining(false);
+    view = menu.view();
+    expect(view.pages[0] == "JOIN" && view.selected == 2u && view.rows[2].value == "JOIN",
+           "stopped, the Join page again");
+    menu.set_joining(true);
+    menu.finish_join("JOINED!");
+    view = menu.view();
+    expect(!menu.joining() && view.pages[0] == "JOINING" && view.rows[0].label == "JOINED!" &&
+               view.rows[1].bar_at == 100u && view.rows[2].value == "-CANCEL",
+           "joined: the joining screen stays full, with nothing to cancel");
+    menu.press(0u);
+    menu.back();
+    expect(menu.take_command() == MenuCommand::None, "and Cancel and B do nothing");
+    menu.set_joining(false);
+    expect(menu.view().pages[0] == "JOINING", "until the menu closes");
+    menu.close();
+    menu.open();
     menu.select_row(1u);
     menu.press(0u);
     menu.back();

@@ -30,6 +30,7 @@ enum HostRow : unsigned {
 };
 enum JoinRow : unsigned { RowAddress, RowJoinPassword, RowJoinStart, RowJoinBack, JoinRowCount };
 enum PlayerRow : unsigned { RowName, RowCharacter, RowPlayerBack, PlayerRowCount };
+enum JoiningRow : unsigned { RowJoinStep, RowJoinBar, RowJoinCancel, JoiningRowCount };
 
 constexpr unsigned kKnockbacks[] = {kCoopKnockbackWeak, kCoopKnockbackNormal, kCoopKnockbackTooMuch};
 
@@ -105,7 +106,33 @@ void MainMenu::open() {
     if (open_) return;
     open_ = true;
     command_ = MenuCommand::None;
+    join_done_ = false;
     show(Screen::Main);
+}
+
+void MainMenu::set_joining(bool joining) {
+    joining_ = joining;
+    if (joining) {
+        join_step_ = "CONNECTING TO THE HOST...";
+        join_detail_.clear();
+        join_percent_ = 0u;
+        join_done_ = false;
+        show(Screen::Joining, RowJoinCancel);
+    } else if (screen_ == Screen::Joining && !join_done_) {
+        show(Screen::Join, RowJoinStart);
+    }
+}
+
+void MainMenu::set_join_status(std::string step, std::string detail, unsigned percent) {
+    join_step_ = std::move(step);
+    join_detail_ = std::move(detail);
+    join_percent_ = std::min(percent, 100u);
+}
+
+void MainMenu::finish_join(std::string step) {
+    joining_ = false;
+    join_done_ = true;
+    set_join_status(std::move(step), {}, 100u);
 }
 
 void MainMenu::close() {
@@ -150,6 +177,7 @@ unsigned MainMenu::row_count() const {
     case Screen::Mods: return static_cast<unsigned>(std::max<std::size_t>(mods_.size(), 1u)) + 1u;
     case Screen::Join: return JoinRowCount;
     case Screen::Player: return PlayerRowCount;
+    case Screen::Joining: return JoiningRowCount;
     }
     return 0u;
 }
@@ -277,6 +305,17 @@ std::vector<MenuRow> MainMenu::rows() const {
         if (editing()) rows[edit_.row].help = kEditHelp;
         return rows;
     }
+    case Screen::Joining: {
+        std::vector<MenuRow> rows(JoiningRowCount);
+        rows[RowJoinStep] = {join_step_, room_.join_address, {}, false, false, true};
+        rows[RowJoinBar] = {join_detail_, std::to_string(join_percent_) + "%", {}};
+        rows[RowJoinBar].label_name = !join_detail_.empty();
+        rows[RowJoinBar].bar_steps = 100u;
+        rows[RowJoinBar].bar_at = join_percent_;
+        rows[RowJoinCancel] = join_done_ ? MenuRow{"", "-CANCEL", "", true}
+                                         : MenuRow{"", "CANCEL", "STOPS JOINING, BACK TO THE JOIN PAGE", true};
+        return rows;
+    }
     }
     return {};
 }
@@ -288,7 +327,7 @@ unsigned MainMenu::button_count(unsigned row) const {
 }
 
 MenuView MainMenu::view() const {
-    static const char* const titles[] = {"PLAY", "HOST", "MODS", "JOIN", "PLAYER"};
+    static const char* const titles[] = {"PLAY", "HOST", "MODS", "JOIN", "PLAYER", "JOINING"};
     MenuView view;
     view.open = open_;
     view.page = 0u;
@@ -307,8 +346,9 @@ void MainMenu::select_page(unsigned) {
 }
 
 void MainMenu::select_row(unsigned row) {
-    // The row being edited keeps the selection until its text is kept or dropped.
-    if (editing() || row >= row_count() || row == selected_) return;
+    // The row being edited keeps the selection until its text is kept or dropped; the joining screen keeps it on
+    // Cancel.
+    if (editing() || row >= row_count() || row == selected_ || screen_ == Screen::Joining) return;
     selected_ = row;
     selected_button_ = 0u;
     erase_armed_ = false;
@@ -323,7 +363,7 @@ void MainMenu::move(int delta) {
         return;
     }
     const int count = static_cast<int>(row_count());
-    if (count <= 0) return;
+    if (count <= 0 || screen_ == Screen::Joining) return;
     const int next = ((static_cast<int>(selected_) + delta) % count + count) % count;
     select_row(static_cast<unsigned>(next));
 }
@@ -429,6 +469,9 @@ void MainMenu::press(unsigned button) {
         return;
     case Screen::Player:
         if (selected_ == RowPlayerBack) back();
+        return;
+    case Screen::Joining:
+        if (selected_ == RowJoinCancel && joining_) command_ = MenuCommand::CancelJoin;
         return;
     }
 }
@@ -659,6 +702,10 @@ void MainMenu::back() {
         show(Screen::Main, RowJoin);
         return;
     case Screen::Player: show(Screen::Main, RowPlayer); return;
+    case Screen::Joining:
+        // The host stops the join and shows the Join page again (set_joining).
+        if (joining_) command_ = MenuCommand::CancelJoin;
+        return;
     }
 }
 

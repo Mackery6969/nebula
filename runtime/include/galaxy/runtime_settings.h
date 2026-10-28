@@ -63,7 +63,7 @@ inline constexpr unsigned kCoopKnockbackWeak = 10u, kCoopKnockbackNormal = 25u, 
 struct RuntimeCoopSettings {
     std::uint16_t port = kCoopDefaultPort;
     unsigned max_players = 8u;  // 2 to kCoopMaxPlayersLimit, the host included
-    std::string player_name;    // empty: the save file's name
+    std::string player_name;    // empty: PLAYER
     CoopCharacter character = CoopCharacter::Mario;
     std::string password;       // a host's: joining needs it; a joiner's: sent to the host. Empty: none
     std::string join_address;   // the Join page's last address, "host[:port]" (empty: none yet)

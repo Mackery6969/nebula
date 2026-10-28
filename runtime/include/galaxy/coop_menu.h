@@ -6,7 +6,8 @@
 // the saves, then New save), Rename and Erase, the room's port and password, its settings (room(): the coop_* runtime
 // settings), the mods it plays with (a page of their own) and Host, which plays. Join opens the Join page (the address
 // and password, then Join, which connects; Cancel or B stops it), Player the Player page (the name and character). B or
-// Back returns to the main page.
+// Back returns to the main page. While a join connects, the joining screen takes the Join page's place: what the join
+// waits for, a loading bar and Cancel.
 //
 // Text rows (a name, a port, an address, a password) are edited in place: pressed, they take the keyboard's typing
 // (type()) or, letter by letter, a controller's: up and down pick the letter at the cursor, left and right move it,
@@ -32,6 +33,9 @@ struct MenuRow {
     bool name = false;        // its value is a name (a save's, a player's, typed text), shown as is
     bool text = false;        // a text row: pressing it edits its value
     bool label_name = false;  // its label is a name (a mod's), shown as is
+    // A loading bar: `bar_at` of `bar_steps` filled (no steps: none).
+    unsigned bar_steps = 0u;
+    unsigned bar_at = 0u;
 };
 
 struct MenuView {
@@ -117,9 +121,14 @@ public:
 
     // A line under the page in place of the selected row's help, until the player moves on.
     void set_message(std::string message) { message_ = std::move(message); }
-    // While a join connects: the Join page's Join reads Cancel.
-    void set_joining(bool joining) noexcept { joining_ = joining; }
+    // While a join connects: the joining screen shows in the Join page's place (Cancel or B stops the join); after,
+    // the Join page again.
+    void set_joining(bool joining);
     [[nodiscard]] bool joining() const noexcept { return joining_; }
+    // The joining screen: what the join waits for, what it gets (a mod's name, or nothing) and how far it is, 0 to 100.
+    void set_join_status(std::string step, std::string detail, unsigned percent);
+    // The join is in (or done for a restart): the joining screen stays, full and saying `step`, until the menu closes.
+    void finish_join(std::string step);
 
     // The last choice, once: None after it was taken.
     [[nodiscard]] MenuCommand take_command() noexcept;
@@ -129,7 +138,7 @@ public:
     void play(std::string id);
 
 private:
-    enum class Screen { Main, Host, Mods, Join, Player };
+    enum class Screen { Main, Host, Mods, Join, Player, Joining };
     enum class Field { None, SaveName, Port, Password, Address, PlayerName };
     struct Edit {
         Field field = Field::None;
@@ -163,6 +172,11 @@ private:
     unsigned selected_button_ = 0u;
     MenuCommand command_ = MenuCommand::None;
     bool joining_ = false;
+    // The joining screen: its step, detail and percent, and whether the join finished (Cancel unavailable).
+    std::string join_step_;
+    std::string join_detail_;
+    unsigned join_percent_ = 0u;
+    bool join_done_ = false;
     // The Host page: the saves (their ids) as it opened, the one picked (their count: a new save), and Erase asked
     // once.
     std::vector<std::string> save_ids_;

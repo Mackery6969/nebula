@@ -626,6 +626,12 @@ namespace {
                rRow.slider_steps > 0;
     }
 
+    // A loading bar (the main menu's joining screen): a slider that doesn't change, without a knob.
+    bool hasProgress(const NebulaSettingsRow& rRow) {
+        return (rRow.flags & (NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_SLIDER)) == NEBULA_SETTINGS_ROW_SLIDER &&
+               rRow.slider_steps > 0;
+    }
+
     // A setting with a list of values: its arrows step through them (a binding waits for an input instead).
     bool hasArrows(const NebulaSettingsRow& rRow) {
         return (rRow.flags & (NEBULA_SETTINGS_ROW_HEADING | NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_BUTTONS |
@@ -2347,6 +2353,22 @@ void NebulaSettingsScreen::placeRows(const NebulaSettingsView& rView) {
             rRow.mValue->mScale = nw4r::math::VEC2(squeeze, 1.0f);
             rRow.mValue->mTranslate = nw4r::math::VEC3(mValueRight, textCentre(cEdgeDrop * 0.5f, cTextSize), 0.0f);
             labelRoom = start - labelX - 12.0f;
+        } else if (hasProgress(rData)) {
+            // From after its label (at most where a slider starts) to its value, filled as far as it is.
+            const f32 sliderLeft = start + cKnobSize * 0.5f - cSliderHeight * 0.5f;
+            const f32 afterLabel = labelX + (rRow.mLabelWidth > 0.0f ? rRow.mLabelWidth + 24.0f : 0.0f);
+            const f32 left = afterLabel < sliderLeft ? afterLabel : sliderLeft;
+            const f32 right = mValueRight - cSliderValue - 12.0f + cSliderHeight * 0.5f;
+            const f32 at = clamp(static_cast< f32 >(rData.slider_at) / static_cast< f32 >(rData.slider_steps), 0.0f, 1.0f);
+            const f32 filled = cSliderHeight + (right - left - cSliderHeight) * at;
+            shape(rRow.mSliderTrack, (left + right) * 0.5f, 0.0f, right - left, cSliderHeight, cSliderHeight * 0.5f);
+            shape(rRow.mSliderFill, left + filled * 0.5f, 0.0f, filled, cSliderHeight, cSliderHeight * 0.5f);
+            rRow.mSliderTrack->SetVisible(true);
+            rRow.mSliderFill->SetVisible(rData.slider_at > 0);
+            const f32 squeeze = rRow.mValueWidth > cSliderValue && rRow.mValueWidth > 0.0f ? clamp(cSliderValue / rRow.mValueWidth, 0.55f, 1.0f) : 1.0f;
+            rRow.mValue->mScale = nw4r::math::VEC2(squeeze, 1.0f);
+            rRow.mValue->mTranslate = nw4r::math::VEC3(mValueRight, textCentre(0.0f, cTextSize), 0.0f);
+            labelRoom = left - labelX - 12.0f;
         } else {
             // A value too long for the room its label leaves is narrowed to fit.
             const f32 room = mValueRight - labelX - rRow.mLabelWidth - 24.0f;
