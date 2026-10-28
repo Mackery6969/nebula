@@ -26,7 +26,7 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 
 - [x] Network layer (UDP, reliable and ordered channels) on every platform
 - [x] Host opens the room; Join connects to `address:port`; Leave game closes or leaves it
-- [ ] Other players drawn as remote Marios and Luigis from their snapshots
+- [x] Other players drawn as remote Marios and Luigis from their snapshots
 - [ ] Nametags over each player's head
 - [x] Player list while Tab (keyboard) or Share (controller) is held
 - [ ] Version, mods and disc check when a player joins

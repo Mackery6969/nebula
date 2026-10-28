@@ -58,6 +58,9 @@
 #include "Game/Util/DrawUtil.hpp"
 #include "Game/Util/EventUtil.hpp"
 #include "Game/Player/MarioActor.hpp"
+#include "Game/Player/NebulaRemotePlayer.hpp"
+#include "Game/Util/ModelUtil.hpp"
+#include "Game/Animation/XanimePlayer.hpp"
 #include "Game/Player/MarioAnimator.hpp"
 #include "Game/Player/MarioHolder.hpp"
 #include "Game/Util/FileUtil.hpp"
@@ -119,6 +122,9 @@ GameScene::~GameScene() {
 }
 
 void GameScene::init() {
+#ifdef TARGET_PC
+    NebulaRemotePlayer::forgetAll();
+#endif
     SceneFunction::createHioBasicNode(this);
     SceneFunction::startStageFileLoad();
     MR::requestChangeArchivePlayer(MR::isPlayerLuigi() == false);
@@ -181,6 +187,8 @@ void GameScene::init() {
 #ifdef TARGET_PC
         // Nebula's Achievement Luma joins the Observatory's own actors.
         NebulaAchievementLuma::tryCreate();
+        // Online co-op: copies of the other players, when in a room.
+        NebulaRemotePlayer::tryCreate();
 #endif
         GameSceneFunction::loadScenarioWaveData();
         MR::createStarPiece();
@@ -245,6 +253,19 @@ namespace {
         const char* pAnimation = MR::getPlayerCurrentBckName();
         snprintf(player.animation, sizeof(player.animation), "%s", pAnimation != nullptr ? pAnimation : "");
         player.animation_frame = pActor->mMarioAnim->getFrame();
+        if (XanimePlayer* pXanime = pActor->mMarioAnim->mXanimePlayer) {
+            snprintf(player.group, sizeof(player.group), "%s", pXanime->getCurrentAnimationName());
+            player.animation_rate = pXanime->getFrameCtrl() != nullptr ? pXanime->getRate() : 1.0f;
+            for (u32 i = 0; i < 4; i++) {
+                player.track_weights[i] = pXanime->mWeights[i];
+            }
+        }
+        // The model's turn: its base matrix's Z (front) and Y (up) columns.
+        MtxPtr pBase = MR::getJ3DModel(const_cast< MarioActor* >(pActor))->getBaseTRMtx();
+        for (u32 i = 0; i < 3; i++) {
+            player.front[i] = pBase[i][2];
+            player.up[i] = pBase[i][1];
+        }
         player.health = pActor->mHealth;
         player.mode = pActor->mPlayerMode;
         player.flags = (MR::isPlayerLuigi() ? NEBULA_COOP_PLAYER_LUIGI : 0u) | (MR::isPlayerDead() ? NEBULA_COOP_PLAYER_DEAD : 0u);
@@ -278,6 +299,7 @@ void GameScene::update() {
     updateNerve();
 #ifdef TARGET_PC
     reportCoopPlayer();
+    NebulaRemotePlayer::updateAll();
     NebulaAchievements::update();
     if (sTestBoard && MR::isExistSceneObj(SceneObj_GameSceneLayoutHolder) && MR::getGameSceneLayoutHolder()->mAchievementBoard != nullptr) {
         sTestBoard = false;
