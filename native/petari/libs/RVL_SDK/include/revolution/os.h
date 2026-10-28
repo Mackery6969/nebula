@@ -90,6 +90,8 @@ u32 __NebulaCoopRemote(struct NebulaCoopRemotePlayer* players, u32 capacity);
 struct NebulaCoopWorldEvent;
 void __NebulaCoopWorldReport(const struct NebulaCoopWorldEvent* event);
 u32 __NebulaCoopWorldTake(struct NebulaCoopWorldEvent* events, u32 capacity);
+// The Power Stars the local player got in this online co-op room, -1 with none (NebulaHostServices::coop_star_count).
+s32 __NebulaCoopStarCount(void);
 // An achievement the save data meets: 1 when newly unlocked, its name in `name` (NebulaHostServices::achievement).
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity);
 s32 __NebulaAchievementDate(const char* id);

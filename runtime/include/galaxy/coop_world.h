@@ -171,7 +171,7 @@ private:
     void remember_save(const SaveChange& change);
     void push_save(const SaveChange& change);
     void host_gone(net::PeerId from, std::span<const Gone> gone);
-    void host_save(const SaveChange& change);
+    void host_save(net::PeerId from, const SaveChange& change);
     // The others in `from`'s instance told of its star: the host's own game here, the rest as messages to send once
     // the lock is let go.
     [[nodiscard]] std::vector<std::pair<net::PeerId, std::vector<std::uint8_t>>> host_star(net::PeerId from,

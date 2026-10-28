@@ -327,7 +327,7 @@ void World::attach(Session& session) {
         const std::lock_guard<std::recursive_mutex> lock(lock_);
         if (!active_) return;
         if (host_) {
-            for (const SaveChange& change : *changes) host_save(change);
+            for (const SaveChange& change : *changes) host_save(from.id, change);
             return;
         }
         if (!from.host) return;
@@ -483,6 +483,7 @@ void World::report_gone(const Gone& gone) {
 void World::report_save(const SaveChange& change) {
     const PeerId host = host_peer();
     std::vector<Outgoing> out;
+    bool star = false;
     {
         const std::lock_guard<std::recursive_mutex> lock(lock_);
         if (!active_ || !valid_change(change)) return;
@@ -490,6 +491,7 @@ void World::report_save(const SaveChange& change) {
             if (authority_.save(change, true)) {
                 remember_save(change);
                 queue_changes(out, net::kEveryone, std::span<const SaveChange>(&change, 1u));
+                star = change.kind == SaveKind::Star;
             }
         } else if (change.kind != SaveKind::Value) {
             // A joiner's event values are its own (WorldAuthority::save): they aren't sent.
@@ -497,6 +499,8 @@ void World::report_save(const SaveChange& change) {
         }
     }
     flush(session_, out);
+    // The Personal Star Counter: a star new to the session's save counts for who got it, the host here.
+    if (star && session_ != nullptr) session_->credit_star(self_peer());
 }
 
 void World::report_star(const StarGot& star) {
@@ -605,8 +609,11 @@ std::vector<std::pair<PeerId, std::vector<std::uint8_t>>> World::host_star(PeerI
     return out;
 }
 
-void World::host_save(const SaveChange& change) {
+void World::host_save(PeerId from, const SaveChange& change) {
     if (!authority_.save(change, false)) return;
+    // The Personal Star Counter: a star new to the session's save counts for the player who got it (on the session's
+    // thread, which holds the session already).
+    if (change.kind == SaveKind::Star && session_ != nullptr) session_->credit_star(from);
     // The host's game and every player, the sender too: each one's copy of the save is the session's.
     push_save(change);
     std::vector<Outgoing> out;

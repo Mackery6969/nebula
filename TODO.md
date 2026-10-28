@@ -28,11 +28,13 @@ What's left to turn Nebula into an online co-op mod like sm64coopdx. The reasoni
 - [x] Network layer (UDP, reliable and ordered channels) on every platform
 - [x] Host opens the room; Join connects to `address:port`; Leave game closes or leaves it
 - [x] Other players drawn as remote Marios and Luigis from their snapshots
-- [ ] Nametags over each player's head
+- [x] Nametags over each player's head
 - [x] Player list while Tab (keyboard) or Share (controller) is held
 - [x] Version, mods and disc check when a player joins
 - [x] Mod sharing as sm64coopdx's: joiners download the room's mods they don't have from the host
 - [x] Chat (keyboard only; controllers read it): T opens a line, Enter sends it, Escape drops it
+- [x] Personal Star Counter (sm64coopdx's mod, built in): each player's stars this room and all time under the HUD's
+      star count, and each player's in the player list
 
 ## Same world (Phase 2)
 

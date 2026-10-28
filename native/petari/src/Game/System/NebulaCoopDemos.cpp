@@ -27,8 +27,8 @@ namespace {
     RoomStar sRoomStars[cMaxRoomStars];
     s32 sRoomStarNum = 0;
     bool sInRoom = false;
-    // Power Stars others in the instance took this scene (bit n for star n): gone here.
-    u64 sGoneStars = 0;
+    // Power Stars others in the instance took this scene (bit n for star n): shown here as had.
+    u64 sTakenStars = 0;
     // A Grand Star another player took, to take this player along once play allows it, in its stage and scenario.
     s32 sPullStar = 0;
     char sPullStage[48];
@@ -54,8 +54,8 @@ namespace {
         return -1;
     }
 
-    bool isGoneStar(s32 starId) {
-        return starId > 0 && starId < 64 && (sGoneStars & (1ull << starId)) != 0;
+    bool isTakenStar(s32 starId) {
+        return starId > 0 && starId < 64 && (sTakenStars & (1ull << starId)) != 0;
     }
 
     // The scene's Power Star with this number, when it has one.
@@ -75,16 +75,16 @@ namespace {
         return nullptr;
     }
 
-    // A Power Star another player took leaves quietly, once it shows and waits (its appearing demo, if one plays
-    // here, ends first).
-    void removeGoneStars() {
-        for (s32 starId = 1; starId < 64 && sGoneStars != 0; starId++) {
-            if (!isGoneStar(starId)) {
+    // A Power Star another player took shows as one already had, as a finished mission's star does: still there to
+    // take, for its get and return.
+    void showTakenStars() {
+        for (s32 starId = 1; starId < 64 && sTakenStars != 0; starId++) {
+            if (!isTakenStar(starId)) {
                 continue;
             }
             PowerStar* pStar = findPowerStar(starId);
-            if (pStar != nullptr && !MR::isDead(pStar) && pStar->isEndAppearDemo()) {
-                pStar->makeActorDead();
+            if (pStar != nullptr && !pStar->isShownAsHad()) {
+                pStar->showAsHad();
             }
         }
     }
@@ -93,7 +93,7 @@ namespace {
 namespace NebulaCoopDemos {
     void startScene(bool inRoom) {
         sInRoom = inRoom;
-        sGoneStars = 0;
+        sTakenStars = 0;
         sPulling = false;
         if (!inRoom) {
             sRoomStarNum = 0;
@@ -139,7 +139,7 @@ namespace NebulaCoopDemos {
             sPullScenario = MR::getCurrentScenarioNo();
         } else if (starId < 64) {
             OSReport("[coop] another player took star %d here\n", static_cast< int >(starId));
-            sGoneStars |= 1ull << starId;
+            sTakenStars |= 1ull << starId;
         }
     }
 
@@ -147,7 +147,7 @@ namespace NebulaCoopDemos {
         if (!sInRoom) {
             return false;
         }
-        removeGoneStars();
+        showTakenStars();
         if (sPullStar == 0) {
             return false;
         }

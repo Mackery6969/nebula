@@ -123,6 +123,10 @@ u32 __NebulaCoopWorldTake(struct NebulaCoopWorldEvent* events, u32 capacity) {
     return sHost->coop_world_take(sHost->user, events, capacity);
 }
 
+s32 __NebulaCoopStarCount(void) {
+    return sHost->coop_star_count(sHost->user);
+}
+
 s32 __NebulaAchievement(const char* id, u16* name, u32 capacity) {
     return sHost->achievement(sHost->user, id, name, capacity);
 }

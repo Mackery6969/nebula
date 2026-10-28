@@ -964,6 +964,7 @@ void GameScene::stageClear() {
         // The star just collected (PowerStar sent it with the get sequence's request) unlocks what it completes now,
         // while its get sequence plays, not when the hub records it.
         NebulaAchievements::evaluate();
+        NebulaAchievements::onStarGet();
         // Online co-op: the others in the instance hear of it.
         if (GameSequenceFunction::hasStageResultSequence() &&
             MR::isEqualString(GameSequenceFunction::getClearedStageName(), MR::getCurrentStageName())) {

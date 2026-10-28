@@ -33,7 +33,7 @@
 namespace galaxy::coop {
 
 // The session's own protocol (its messages, below the transport's): a different one refuses the join.
-inline constexpr std::uint16_t kSessionProtocol = 3u;
+inline constexpr std::uint16_t kSessionProtocol = 4u;
 // The first message type a feature may use with send() and on_message(); below are the session's.
 inline constexpr std::uint8_t kFirstFeatureMessage = 32u;
 // The host's save, sent at a join: this many bytes at most.
@@ -49,6 +49,8 @@ struct SessionPlayer {
     // Where they play (set_place): the stage's name and its scenario; empty until they reach one.
     std::string stage;
     int scenario = 0;
+    // The Power Stars they got in this room, new to its save (credit_star): sm64coopdx's Personal Star Counter.
+    unsigned stars = 0u;
     // The round trip to them (to the host, for a joiner's view of the others), 0 for this player or when unknown.
     unsigned ping_ms = 0u;
 };
@@ -116,6 +118,14 @@ struct JoinConfig {
     std::function<std::optional<std::filesystem::path>(const SharedMod&)> find_mod;
 };
 
+// How far a join is (Session::join_step), for the joining screen.
+enum class JoinStep : std::uint8_t {
+    None,             // not joining
+    Reaching,         // reaching the host's lobby
+    Asking,           // in its lobby, waiting for the host to let this player in
+    DownloadingMods,  // getting the room's mods it lacks (download_progress())
+};
+
 // A joiner's download of the room's mods.
 struct DownloadProgress {
     bool active = false;
@@ -155,10 +165,17 @@ public:
     // Where this player plays (the player list's galaxy and star), told to everyone as it changes. Kept while there
     // is no room too: a room opened or joined later starts with it.
     void set_place(const std::string& stage, int scenario);
+    // The host: `player` got a Power Star new to the room's save (the shared world settled it): their count goes up
+    // and everyone is told. Nothing for a joiner or outside a room; each room starts from 0.
+    void credit_star(net::PeerId player);
+    // This player's Power Stars in this room (0 outside one).
+    [[nodiscard]] unsigned stars() const;
 
     [[nodiscard]] std::vector<SessionEvent> take_events();
     // Once, after Joined: the host's save.
     [[nodiscard]] std::optional<RoomSave> take_room_save();
+    // While a joiner connects: what it waits for.
+    [[nodiscard]] JoinStep join_step() const;
     // While a joiner downloads the room's mods: how far.
     [[nodiscard]] DownloadProgress download_progress() const;
     // Once, after ModsReady: the room's mods, in its order, each with its folder here.
