@@ -195,32 +195,8 @@ particles and immediate draws, then the command stream goes).
   50 ms unchanged (76 + 87 against 75 + 88 ms; the builder at normal priority made one of 218 ms). Same run
   (`GALAXY_TEST_NATIVE_SHAPES_AB`, native every other presented frame, paused): identical; with ray tracing High the
   native and GX frames differ no more than two GX frames do.
-- Versioned display lists. J3D's material lists, shape-packet difference lists and shared lists
-  (`J3DDisplayListObj`) each have a handle, never reused, and a version that every writer raises; `callDL` sends the
-  handle and version (`kMarkerVersionedList`) before its call, and the parser replays the recording bound to the handle
-  while version, address and size match, with no cache lookup or byte comparison. The game rewrites most of these lists
-  every frame (DisplayListMaker's fog and colour controls, J3DMaterial::patch) into the other half of a double buffer,
-  usually with the same bytes; a rewrite that leaves the list as it was keeps the previous buffer current and the
-  version unchanged, so a handle and version name one material state across frames. Battlerock, stand-in at 1x, every
-  render chunk counted: 401,576 versioned calls, 292,180 replayed by handle (72.8 %); the other 109,396 are lists whose
-  bytes changed, recorded again as before (cache misses 109,333). Same run (`GALAXY_TEST_LIST_HANDLES_AB`, paused):
-  identical pictures on D3D12 and Vulkan. Render thread 76.9 / 77.2 -> 78.4 / 77.5 ms/s and GPU 4.85 / 4.82 ->
-  4.80 / 4.78 ms against 7a8a2870 (alternating pairs; no measurable change: the translation's per-list cost is small).
-  What it is for: the per-material identity that compiled native materials (NATIVE-RENDER step 3) attach to. The
-  remaining byte-compared calls (661,643 hits a 6,000-chunk sample) are J3DShape's vertex-description lists and JPA's
-  static particle lists, which native vertex formats and particle records replace.
 - Matrix palette snapshots copy 3,584 of their 6,656 bytes: XF memory has nothing at 0x100-0x3FF, which no reader
   addresses (98 snapshots a frame at Battlerock: 652,288 -> 351,232 bytes copied).
-- Matrix arena (outside temporal and interpolated frames, which still snapshot palettes for their history): the
-  vertex shaders, per-pixel lighting, ray tracing's vertex transform and the curved-surface sort read XF rows through
-  `xf_row`, which follows the draw's table of 23 entries (GxVsConstants::mtx_chunks) to 128-byte entries in the matrix
-  ring, one per eight-row XF chunk they read (matrices, normal matrices, post-texture matrices, lights); an entry is
-  written only when its chunk changed, and the light chunks also as one block for per-pixel lighting. Battlerock,
-  stand-in at 1x: matrix data 331.6 -> 39.1 KB a frame; GPU 4.80 / 4.81 -> 4.80 / 4.80 ms, render thread 81.9 / 79.9
-  -> 82.2 / 82.2 ms/s (within run-to-run spread; a first version that walked all 23 entries on every state flush cost
-  ~4 ms/s, M, profiled). Same run (`GALAXY_TEST_MATRIX_ARENA_AB`, paused): identical pictures on D3D12, Vulkan and the
-  stand-in (curve sort on the GPU); with ray tracing High arena and palette frames differ no more than two palette
-  frames do. `GALAXY_MATRIX_ARENA=0` keeps palettes.
 - Display copies. SMG's copy to the XFB filters every frame (weights 32, 32, 0: each row averaged with the one above,
   the Wii's deflicker), so it is a pass of its own: `display_filter_shader_source`, the general conversion's integer
   arithmetic for a 1:1 copy without gamma (rows loaded, not filtered by the sampler; truncated to 8 bits, weighted,
