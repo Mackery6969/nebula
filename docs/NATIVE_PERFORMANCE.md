@@ -181,7 +181,7 @@ draws subsystem by subsystem (design: the shared NATIVE-RENDER note; order: shap
 particles and immediate draws, then the command stream goes).
 
 - Model shapes: J3DShapeDraw draws its list by a handle (`__NebulaGXCallShapeDisplayList`, the shape-list marker).
-  Each list is built once on a worker at background priority (`galaxy/gx/native_shapes.h`): decoded by the renderer's
+  Each list is built once on a worker at background priority (`galaxy/render/native_shapes.h`): decoded by the renderer's
   own decoder, each distinct vertex once, its triangles in the list's order. Registered when its model is final
   (`NebulaNativeShapes::registerModel` from ResourceHolder, after ModelUtil's edits: texture-matrix indices added to
   lists, new vertex descriptions, position arrays halved) with its vertex description, the arrays J3DShape sets before
