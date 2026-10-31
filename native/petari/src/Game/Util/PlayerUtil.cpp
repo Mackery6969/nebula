@@ -8,6 +8,7 @@
 #include "Game/Player/MarioActor.hpp"
 #include "Game/Player/PlayerEvent.hpp"
 #include "Game/Player/RushEndInfo.hpp"
+#include "Game/Player/NebulaRemotePlayer.hpp"  // For co-op remote player support
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/Util/AreaObjUtil.hpp"
 #include "Game/Util/EffectUtil.hpp"
@@ -19,7 +20,6 @@
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
 #include <JSystem/JMath/F32.hpp>
-#include <JSystem/JSystem/SystemConfig.hpp>
 
 namespace MR {
     bool isOnGroundPlayer() {
@@ -873,26 +873,26 @@ namespace MR {
     TVec3f* getNearestPlayerPos() {
         // Find the nearest player among all remote players
         // Returns the nearest player's position for enemy targeting
+        // For co-op: checks NebulaRemotePlayer copies; for single-player: uses main player
+        
         TVec3f* nearestPos = nullptr;
         f32 nearestDist = FLT_MAX;
         
-        // Iterate through player slots to find the nearest
-        // Using 4 as a reasonable max for co-op (typical 4-player limit)
-        const int maxPlayerSlots = 4;
-        for (int i = 0; i < maxPlayerSlots; i++) {
-            // Get the player actor for this slot
-            MarioActor* playerActor = MarioAccess::getPlayerActor();
+        // Check NebulaRemotePlayer copies for remote players
+        // Use getCopyNum() for accurate count (set in NebulaRemotePlayer::updateAll())
+        s32 copyNum = NebulaRemotePlayer::getCopyNum();
+        for (s32 i = 0; i < copyNum; i++) {
+            NebulaRemotePlayer* pCopy = NebulaRemotePlayer::getCopy(i);
+            if (pCopy == nullptr || pCopy->mNumber == 0) {
+                continue;  // No copy at this index
+            }
             
-            if (playerActor != nullptr && playerActor->isEnableNerveChange()) {
-                // Check if this is a remote player by checking player mode
-                // Player mode 6+ indicates co-op/element modes
-                if (playerActor->mPlayerMode >= 6) {
-                    f32 dist = playerActor->mPosition.distance(*nearestPos);
-                    if (dist < nearestDist) {
-                        nearestDist = dist;
-                        nearestPos = &playerActor->mPosition;
-                    }
-                }
+            // mPosition is available from LiveActor base class
+            // Distance to nearestPos (nullptr means use arbitrary initial distance)
+            f32 dist = nearestPos ? pCopy->mPosition.distance(*nearestPos) : 0;
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestPos = &pCopy->mPosition;
             }
         }
         
