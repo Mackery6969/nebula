@@ -8,6 +8,7 @@
 #include "Game/Player/MarioActor.hpp"
 #include "Game/Player/PlayerEvent.hpp"
 #include "Game/Player/RushEndInfo.hpp"
+#include "Game/Player/NebulaRemotePlayer.hpp"  // For co-op remote player support
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/Util/AreaObjUtil.hpp"
 #include "Game/Util/EffectUtil.hpp"
@@ -18,6 +19,7 @@
 #include "Game/Util/ObjUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
+#include <JSystem/JMath/F32.hpp>
 
 namespace MR {
     bool isOnGroundPlayer() {
@@ -866,5 +868,35 @@ namespace MR {
 
     CubeCameraArea* getCameraCube() {
         return MarioAccess::getCameraCubeCode();
+    }
+
+    TVec3f* getNearestPlayerPos() {
+        // Find the nearest player among all remote players
+        // Returns the nearest player's position for enemy targeting
+        // For co-op: checks NebulaRemotePlayer copies; for single-player: uses main player
+        
+        TVec3f* nearestPos = nullptr;
+        f32 nearestDist = FLT_MAX;
+        
+        // Check NebulaRemotePlayer copies for remote players
+        // Use getCopyNum() for accurate count (set in NebulaRemotePlayer::updateAll())
+        s32 copyNum = NebulaRemotePlayer::getCopyNum();
+        for (s32 i = 0; i < copyNum; i++) {
+            NebulaRemotePlayer* pCopy = NebulaRemotePlayer::getCopy(i);
+            if (pCopy == nullptr || pCopy->mNumber == 0) {
+                continue;  // No copy at this index
+            }
+            
+            // mPosition is available from LiveActor base class
+            // Distance to nearestPos (nullptr means use arbitrary initial distance)
+            f32 dist = nearestPos ? pCopy->mPosition.distance(*nearestPos) : 0;
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestPos = &pCopy->mPosition;
+            }
+        }
+        
+        // If no remote player found, use main player position
+        return nearestPos != nullptr ? nearestPos : getPlayerPos();
     }
 };  // namespace MR

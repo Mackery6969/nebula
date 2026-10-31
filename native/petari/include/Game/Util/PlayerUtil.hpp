@@ -26,6 +26,7 @@ namespace MR {
     TVec3f* getPlayerPos();
     TVec3f* getPlayerCenterPos();
     void getPlayerTakePos(TVec3f*);
+    TVec3f* getNearestPlayerPos();  // For enemies targeting nearest player instead of single player
     void setPlayerPos(const TVec3f&);
     void setPlayerUpperRotateY(f32);
     TVec3f* getPlayerRotate();
