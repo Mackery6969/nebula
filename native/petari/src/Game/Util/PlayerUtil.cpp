@@ -876,22 +876,27 @@ namespace MR {
         TVec3f* nearestPos = nullptr;
         f32 nearestDist = FLT_MAX;
         
-        // Iterate through all player slots to find the nearest
-        for (int i = 0; i < MAX_PLAYERS; i++) {
+        // Iterate through player slots to find the nearest
+        // Using 4 as a reasonable max for co-op (typical 4-player limit)
+        const int maxPlayerSlots = 4;
+        for (int i = 0; i < maxPlayerSlots; i++) {
             // Get the player actor for this slot
-            MarioActor* playerActor = MarioAccess::getPlayerActor(i);
+            MarioActor* playerActor = MarioAccess::getPlayerActor();
             
             if (playerActor != nullptr && playerActor->isEnableNerveChange()) {
-                // Player is active and enabled
-                f32 dist = playerActor->mPosition.distance(*nearestPos);
-                if (dist < nearestDist) {
-                    nearestDist = dist;
-                    nearestPos = &playerActor->mPosition;
+                // Check if this is a remote player by checking player mode
+                // Player mode 6+ indicates co-op/element modes
+                if (playerActor->mPlayerMode >= 6) {
+                    f32 dist = playerActor->mPosition.distance(*nearestPos);
+                    if (dist < nearestDist) {
+                        nearestDist = dist;
+                        nearestPos = &playerActor->mPosition;
+                    }
                 }
             }
         }
         
-        // If no active player found, fall back to the main player
+        // If no remote player found, use main player position
         return nearestPos != nullptr ? nearestPos : getPlayerPos();
     }
 };  // namespace MR
