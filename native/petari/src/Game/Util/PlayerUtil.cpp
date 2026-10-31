@@ -18,6 +18,8 @@
 #include "Game/Util/ObjUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
+#include <JSystem/JMath/F32.hpp>
+#include <JSystem/JSystem/SystemConfig.hpp>
 
 namespace MR {
     bool isOnGroundPlayer() {
@@ -866,5 +868,30 @@ namespace MR {
 
     CubeCameraArea* getCameraCube() {
         return MarioAccess::getCameraCubeCode();
+    }
+
+    TVec3f* getNearestPlayerPos() {
+        // Find the nearest player among all remote players
+        // Returns the nearest player's position for enemy targeting
+        TVec3f* nearestPos = nullptr;
+        f32 nearestDist = FLT_MAX;
+        
+        // Iterate through all player slots to find the nearest
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            // Get the player actor for this slot
+            MarioActor* playerActor = MarioAccess::getPlayerActor(i);
+            
+            if (playerActor != nullptr && playerActor->isEnableNerveChange()) {
+                // Player is active and enabled
+                f32 dist = playerActor->mPosition.distance(*nearestPos);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestPos = &playerActor->mPosition;
+                }
+            }
+        }
+        
+        // If no active player found, fall back to the main player
+        return nearestPos != nullptr ? nearestPos : getPlayerPos();
     }
 };  // namespace MR

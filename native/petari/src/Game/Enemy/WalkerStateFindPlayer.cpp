@@ -41,7 +41,9 @@ void WalkerStateFindPlayer::exeFind() {
     }
 
     WalkerStateFunction::calcPassiveMovement(getHost(), mStateParam);
-    MR::turnDirectionToTargetUseGroundNormalDegree(getHost(), mDirection, *MR::getPlayerPos(), mFindPlayerParam->mTurnMaxRateDegree);
+    // Use nearest player pos for co-op support - enemies will target the nearest player
+    TVec3f* nearestPlayerPos = MR::getNearestPlayerPos();
+    MR::turnDirectionToTargetUseGroundNormalDegree(getHost(), mDirection, *nearestPlayerPos, mFindPlayerParam->mTurnMaxRateDegree);
 
     if (MR::isStep(this, mFindPlayerParam->mJumpStartStep)) {
         setNerve(GET_NERVE(WalkerStateFindPlayer, WalkerStateFindPlayerNrvFindJumpStart));
