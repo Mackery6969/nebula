@@ -5,11 +5,15 @@
 #include "private/iostypes.h"
 #include "revolution/types.h"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/main
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define ISFS_ERROR_OK 0
 #define ISFS_ERROR_INVALID -101
 #define ISFS_ERROR_ACCESS -102
@@ -64,6 +68,11 @@ typedef struct {
     u8 path2[64];
 } ISFSPathsArgs;
 
+=======
+typedef s32 ISFSError;
+typedef void (*ISFSCallback)(ISFSError, void* ctxt);
+
+>>>>>>> upstream/main
 s32 ISFS_Open(const u8*, u32);
 s32 ISFS_OpenAsync(const u8*, u32, ISFSCallback, void*);
 

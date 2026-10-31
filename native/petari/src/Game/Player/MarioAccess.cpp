@@ -541,7 +541,11 @@ namespace MarioAccess {
         getPlayerActor()->_EA4 = true;
         MR::invalidateHitSensors(getPlayerActor());
 
+<<<<<<< HEAD
         PSMTXCopy(getPlayerActor()->getBaseMtx(), getPlayerActor()->_EA8);
+=======
+        NebulaMtxCopy(getPlayerActor()->getBaseMtx(), getPlayerActor()->_EA8);
+>>>>>>> upstream/main
 
         getPlayerActor()->_B90 = true;
         getPlayerActor()->getMario()->stopWalk();

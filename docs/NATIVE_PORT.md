@@ -6,14 +6,22 @@ in this tree. **D**: read from the RMGE01 assembly or source. **H**: hypothesis,
 
 ## Game core
 
+<<<<<<< HEAD
 - Petari (SMGCommunity, CC0-1.0) is forked into `native/petari`: the files the module compiles and includes, credited (its README, THIRD-PARTY-NOTICES.md). Its history up to 92263da is the local fork's (`D:/NebulaWork/petari`, branch `nebula`); changes continue in this tree.
+=======
+- Petari (SMGCommunity, CC0-1.0) is forked into `native/petari`: the files the module compiles and includes, credited (its README, THIRD-PARTY-NOTICES.md). Its history up to 92263da is a separate fork's (branch `nebula`); changes continue in this tree.
+>>>>>>> upstream/main
   - The fork is Nebula's own code: it is optimised for native speed and need not match the console's object code.
     It will live in Nebula's repository, credited to SMGCommunity. Nothing goes back upstream: Petari does not accept
     AI-generated changes. With every function decompiled there is nothing to track.
   - Changes stay behind `TARGET_PC` where the console build should stay buildable.
   - It becomes public with Nebula's repository; pushing is the owner's call.
 - Version: RMGE01. The test disc's `main.dol` SHA1 is 9A71008AE1EE9010E267FA67D1F0B0D4F0E895DD, which equals Petari's `config/RMGE01/build.sha1` (M).
+<<<<<<< HEAD
 - 99.90% of RMGE01 functions match the DOL byte for byte (decomp.dev). Of the 42 that don't (`D:/NebulaWork/agents/petari-audit/RMGE01_UNMATCHED.md`):
+=======
+- 99.90% of RMGE01 functions match the DOL byte for byte (decomp.dev). Of the 42 that don't (each audited against the assembly):
+>>>>>>> upstream/main
   - one has no source: `StarPointerFunction::forceOutsideScreenEdge`, now written from the assembly (D);
   - two differ only in instruction order (D);
   - 39 are SDK code the platform layer replaces.
@@ -144,13 +152,21 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
 - The Microsoft ABI sizes a member pointer by its class's inheritance where the class is complete: SystemUtil defined `callMethodAllSceneNameObj` with `NameObj` incomplete, a different size from its callers. `-fcomplete-member-pointers` now makes any such site an error (one existed).
 - Game threads run on native stacks from a pool at the top of MEM2 (256 KB each, 1 MB under ASan; guarded): the buffers the game gives are sized for PowerPC frames. The deepest measured, boot to the title screen, is 13.5 KB (M).
 - `nebula_game_debug_dump` reports every game thread with the module addresses on its stack and how deep the stack has been (`native/tools/symbolize_dump.py` names them). An out-of-memory panic lists the heap's largest blocks, children and uncovered spans.
+<<<<<<< HEAD
 - The arena is aligned to its size (512 MB): an arena pointer's low 29 bits are its physical address, so values the game derives from an address's low bits (J3DDrawBuffer's hash slots) are the console's (M, `os_scheduler_tests`).
+=======
+- The arena is aligned to its size (512 MB): an arena pointer's low 29 bits are its physical address, so values the game derives from an address's low bits (J3DDrawBuffer's hash slots) are the console's (M, `kernel_tests`).
+>>>>>>> upstream/main
 - Memory a device reads, by the type the CPU wrote it as (`gpu_data_audit.py`: every pointer handed to GX, GD, J3DGD, the DSP, the AI or a cache operation; 371 sites, M). Fixed: `clearZTexData`, the Z24X8 texture that clears depth each frame, was a `u32` array, so the GPU read far as near and all gameplay 3D failed the depth test; NormalMapBase's IA8 gradient texels; JUTDirectPrint's frame-buffer pixels.
 - Bitfields whose words code also reads (`bitfield_audit.py`: casts, unions, byte copies; 457 sites, M). CodeWarrior allocates from the most significant bit, clang from the least. Fixed: J3DModelX's flags (directDraw picks display list *i* by bit *i*: Mario's shadow silhouette drew black into the frame), Mario's movement and draw states (word masks), RushEndInfo's damage type (shifts), JASChannel's mix config (`0x150` gave bus 0x50), Binder's collision flags (byte masks).
 - Host pointers tested against the console's memory map (`console_address_audit.py`, every line built natively; it runs before each link of the module and fails it). Fixed: `J3DMaterial::getMaterialAnm` returned null for any pointer at or above 0xC0000000, which every host heap address is, so no material animation ran: texture patterns (BTP; Good Egg's Dino Piranha egg drew its dark default shell texture, not the white Vs1 one), TEV colours (BRK), texture scrolling (BTK: clouds, water) and material colours (BPK) (M). `OSIsMEM1Region` and `OSIsMEM2Region` are console-only; NW4R's debug pointer assertion checks for null. Truncating a pointer to 32 bits is a compile error (`-Werror=pointer-to-int-cast`, `-Werror=void-pointer-to-int-cast`; audit build with both and `-Wmicrosoft-cast`: 0 sites in 1,879 units, M).
 - SDK answers the game turns into logic: `VIGetDimmingCount` returned 0, the console's "screen dimmed", so AudSystem lowered the music to a third from boot. The VI now counts idle fields as the console does (below).
 - Galaxy tour (`GALAXY_TEST_GALAXY_TOUR`, `port/tools/tour_enterable.txt`, both hosts, ASan headless; M, 2026-10-18):
+<<<<<<< HEAD
   - PowerPC's `divw`/`divwu` never trap; x86's do. A trap inside the module finishes with PowerPC's result (`native/sdk/os/divide_native.c`; CannonFleet 2's FlipPanel divided by a frame count of 0). A site that traps every frame gets a source fix (ImageEffectLocalUtil::capture, 0 divisions from FallOutFieldDraw in DarkRoomGalaxy).
+=======
+  - PowerPC's `divw`/`divwu` never trap; x86's do (CannonFleet 2's FlipPanel divided by a frame count of 0; FallOutFieldDraw in DarkRoomGalaxy passes 0 divisions). Every division is now safe in source (next bullet).
+>>>>>>> upstream/main
   - `DynamicCollisionObj` built its one-leaf octree as the console's two u16 halves; the native KCL code reads host-order entries (HeavenlyBeach 3 crashed). It is the only octree, or disc format, the game builds raw; the others go through big-endian field types.
   - `JASTrack::setIIR` copies 8 values from an `sIIRCutoff` row: row 127 reads the next 8 bytes of the console's `.rodata`, which the native table now carries.
   - Hidden scenarios (a hidden star's entry, `PlacedHiddenStarScenarioTable`) are not enterable by number: the console sizes per-scenario storage without them. Six stops removed from the list.
@@ -159,6 +175,18 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
   - Waits that spin on another thread's work: on the console the interrupt that completes the work, and the thread it wakes, preempt the spin; natively a loop that makes no OS call never takes it. GameScene's wait for the scenario's sound waves hung when the disc was slower than the scene's set-up (Linux under WSL; Windows with every read delayed 4 ms by `GALAXY_TEST_DISC_DELAY_US`: EggStar 1, the game thread at 540 ms/s and no frames; M). Every loop of the game, JSystem, nw4r, the SDK and RFL with an empty or OS-free body was reviewed (`native/tools/spin_audit.py`, 26 sites listed, plus loops on clock reads); the waits on other threads now call `__NebulaPoll` (deliver what is pending, else sleep until a host thread raises something): the wave wait, the player-archive swap, RFL's async wait, the triple-buffer swap, `JASDriver::waitSubFrame` (was a busy `OSYieldThread` loop) and the NAND error freeze. JUTException's and JUTConsole's retrace waits run only on its crash screen, which is `OSPanic` natively; the DSP loops wait on calls that finish synchronously natively. With the fix the 4 ms-per-read tour runs all stops at 60 retraces/s (M).
   - Results (M): ASan and ASan+UBSan headless, all 102 stops, 0 reports; NebulaNative at 21:9, EFB 2x, 81 stops (time limit), no crash; story stages at 16:10 (prologue garden, Observatory 1-5, domes 1-6, storybook); PrologueA through the game's movie sequence (video and sound); misses to game over. Linux headless (WSL, clang 18): all 102 stops. NebulaNative at 4:3 (1280x960) and 32:9 (1920x540): Battlerock and Gusty Garden, the picture fitted vertically and horizontally. The final Grand Star (`grandstar@`): the ending movies, the staff roll with its gameplay inserts, the storybook's new chapter and the save prompt. Luigi (`luigi@`, then a miss): the stage reloads with Luigi's archive, model and HUD.
   - Forcing a stage change while a story sequence waits for its demo to end reads the scene that is being replaced (null): a state the game never enters, as on the console. Story stops run from a fresh boot instead.
+<<<<<<< HEAD
+=======
+- Integer divisions whose divisor is not a nonzero constant (`native/tools/divide_audit.py`, clang-query over every
+  unit of the module, headers once): 287 sites, 57 of them in Windows SDK headers the host-facing units include (M,
+  2026-10-29). Each is shown unable to divide by zero (D: counts, constants, values checked before; 126 sites), or
+  states the console's result in its own terms where its divisor comes from data (48 sites: placement arguments,
+  animation frame counts, particle and sound data, interval steps; a zero divisor gives a quotient of 0, or -1 for a
+  negative signed dividend, and the dividend as the remainder). Fonts with no sheet rows, lines or size are rejected
+  when they load (ResFont::SetResource), so glyph lookups never divide by zero. The x86 trap handler that finished
+  traps with PowerPC's result is gone; the galaxy tour runs all 102 stops (M, 2026-10-29). Verdicts per site:
+  the audit's classification file in the program's tracker data.
+>>>>>>> upstream/main
 - Block-scope lifetimes again, with a scanner that follows assignments (`native/tools/scope_escape_audit.py`, every unit): 28 sites, 2 real (LiveActorGroupArray's default group name, missed by `scope_escape.query`, and Tamakoro's). The other 26 point a parameter or global at a local used inside the same function, as the console does.
 - Undefined-behaviour diagnostics (audit build with `-Wuninitialized`, `-Wsometimes-uninitialized`, `-Wconditional-uninitialized`, `-Wtautological-undefined-compare`, `-Wtautological-pointer-compare`, `-Wundefined-reinterpret-cast`, `-Warray-bounds-pointer-arithmetic` and the rest of `-Wall`): 53 uninitialised uses, all over closed value sets or never-called matching stubs; `this != nullptr` (SurfRay) and `&member != nullptr` (SoundUtil) are true on the console too.
 - Parity with v1.0.1 on the same input route (`port/tools/route_star_festival.txt`, v1.0.1 = the Native47 package): Star Festival frames match after the fixes above; the title music, aligned by cross-correlation, matches in RMS (1895.6 against 1890.6) and per band within 3 % from 20 Hz to 16 kHz except 4-8 kHz (effects timing), correlation 0.93 (M, 2026-10-18).
@@ -177,6 +205,7 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
 
 ## Memory and the GPU's addresses
 
+<<<<<<< HEAD
 - The game's memory is one host arena in the console's physical layout: MEM1 at physical 0, MEM2 at 0x10000000, enlarged for 8-byte pointers.
 - `OSCachedToPhysical` and `OSPhysicalToCached` map arena pointers to the same 32-bit physical addresses the console used. The game module's image is a second window at physical 0x08000000 (between MEM1 and MEM2, up to 128 MB), for the static display lists, arrays and textures the game hands to GX: every GPU address stays below 512 MB, as GX's 29-bit array bases and 24-bit texture bases need.
 - Coherency is the console's: what the CPU flushes or stores (`DCFlushRange`, `DCStoreRange`, `DCZeroRange`), DMA (`ARStartDMA`) and disc reads are reported to the renderer (`gpu_coherent`, API 4), which invalidates what it cached from those bytes.
@@ -217,6 +246,43 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
 - **GX**: the game's GX calls write the hardware's FIFO format, which J3D's display lists already use. Nebula's D3D12 backend (`runtime/src/gx`) parses it.
   - Addresses in commands (CP array bases, texture and TLUT images, display-list calls, copy destinations) are the arena's 32-bit physical addresses, as on the console.
   - GD (display-list building) is Petari's C code with one reservation per command.
+=======
+- The game's memory is one host arena in the console's layout: MEM1 at offset 0, MEM2 at 0x10000000, enlarged for 8-byte pointers. The arena is aligned to its size, so values the game derives from an address's low bits (J3DDrawBuffer's hash slots) are the console's. Nothing maps pointers to physical addresses any more: the renderer and the host's services take the game's pointers.
+- Images reach the renderer as records: the game hands each texture image (and palette) over where it loads or rewrites it (`texture_image`, API 42), and the renderer decodes from its copy. What remains of the console's coherency (file loads' and a few writers' flushes, DMA, disc reads through `gpu_coherent`) only covers images not handed over yet.
+- Game threads run on stacks allocated in the arena.
+- The game draws through typed records (`nebula_game_api.h`; docs/GRAPHICS_ARCHITECTURE.md "Native record stream"): J3D shapes, matrices and materials, the geometry it builds or sends as it draws, drawing state, lights, EFB copies and texture images. No game code calls GX's state, vertex or display-list functions any more.
+- EFB peeks run in draw-sync token callbacks: the lens flare's visibility test (the sun sphere's alpha) and the star pointer's and talk balloons' depth. The console's GPU waited at a breakpoint after the token while the callback peeked. Natively each peek carries its token (API 7); the render thread records a 640x528 field into the frame's command list where it parses that token, on one of four channels bound to a kind and token, and the peek reads that token's previous field (one frame old; the lens flare alternates two tokens, two frames). Before (M): fields were taken at whichever chunk end followed a peek, and a colour field held texel (0,0) in every pixel (conversion shader; `galaxy_efb_conversion_tests` covers it now), so the lens flare never saw the sun. Now the Good Egg intro's flare matches v1.0.1; D3D12 and Vulkan identical (M).
+- The auxiliary memory (the console's ARAM; `Game/System/NebulaAuxMemory`): the first 14 MB of MEM2's arena, addressed by 32-bit offsets from its base, which JKRAram allocates and the mixer reads wave data at. A transfer is a copy.
+
+## Platform boundary
+
+- The native objects reference **407 symbols** they don't define (M, `native/tools/boundary.py`, 2026-10-29), and this is the whole surface:
+
+  | area | symbols |
+  |---|---|
+  | GX | 71 |
+  | OS | 55 |
+  | C library | 76 |
+  | C++ runtime | 18 |
+  | other | 38 |
+  | NAND | 24 |
+  | VI, WPAD, DVD | 14 each |
+  | NWC24 | 13 |
+  | ARC | 10 |
+  | KPAD | 9 |
+  | MSL (Nebula) | 9 |
+  | MEM | 7 |
+  | MTX/VEC/QUAT | 13 |
+  | AI | 6 |
+  | SC, AR | 5 each |
+  | PPC | 3 |
+  | TPL | 2 |
+  | WENC | 1 |
+
+- 2,480 of the DOL's 2,911 SDK functions are never reached and are not implemented (`droppable_functions.csv`). That includes all of AX, AXFX, MIX, SYN, SEQ, PAD, SI, EXI, BTE, WUD, IPC, ES, USB, NET and EUART.
+- 19 externals are used only by code absent from the DOL (dead-only). They get stubs that stop with a message if ever reached.
+- **GX**: the game's drawing is typed records (above); its native layer (`J3DNativeShape`, `J3DNativeMaterial`, `J3DNativeDraw`, `J3DNativeState`, `J3DNativeView`, `J3DNativeTexture`) replaced the GX and GD calls. Image identities and copy destinations are still the arena's 32-bit physical addresses.
+>>>>>>> upstream/main
 - **Audio**: JAudio2 drives the DSP directly, not through AX (D). NebulaNative runs v1.0.1's host version of the JAudio DSP program (`runtime/src/jaudio_host_mixer.cpp`) on the command words (`galaxy::host::NativeGameAudio`) and plays each AI block through v1.0.1's sink (XAudio2, master volume, WAV dump). The output device's clock paces the AI: the next block is taken once fewer than two wait there.
 - **Video timing**: the retrace (60 Hz, as v1.0.1 paces the game; the console's 59.94 would repeat a frame every 17 s on a 60 Hz display), the AI and the remotes run on high-resolution waitable timers. Screen dimming is counted as on the console (idle fields since WPAD's last input or connection, 18000 with SYSCONF's screen saver on); the picture is not darkened, as a PC display dims itself.
 - **Controls**: Nebula's live controls build the remote's reports (v1.0.1's snapshot builder); the mouse is the pointer through v1.0.1's input providers. What v1.0.1 read from the console's memory for its control mapping the native game reports as it changes (`game_context`): StarPointerOnOffController's mode (menu or play mapping, rumble held in menus) and the ride Mario is bound to (Star Ball or Ray: tilt steering). The game's motor bit drives the controller in use. The pointer is exact: each report carries the position its IR dots stand for, and KPAD takes it as the position (distance and roll still from the dots). A real remote's camera needs KPAD's 0.03 play radius and halved steps (`KPADSetPosParam`, WPadPointer); a mouse does not: they left the pointer 0.03 + 0.02*v units behind a moving cursor (v in screen units per second; about 35 ms at one screen width a second) and quantized it to 1/226 unit.
@@ -228,7 +294,11 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
 - **Crash reports**: a fatal exception in the module or the host, or the game's fatal call, writes a minidump (stacks and what they point at, about 150 KB) from a thread kept for it, and logs the module offset and the game's threads (`GALAXY_CRASH_DUMP_DIR`; else `%LOCALAPPDATA%\Nebula\crashes` for NebulaNative and `crashes\` for the headless host; `GALAXY_CRASH_TEST=1` checks the path). Every exception in the process passes the exception handlers, so theirs are small, uninstrumented frames.
 - **Thread stacks**: an exiting thread's stack slot is freed by the switch that leaves it (it still runs the reschedule and idle interrupts on it); a thread within 8 KB of its stack's end is logged at a switch. The switch keeps the TIB's stack fields with each stack (`context_switch.c`).
 - **Tests**: `GALAXY_TEST_GALAXY_TOUR` and `GALAXY_TEST_TELEPORT` as in v1.0.1, and `GALAXY_TEST_EVENTS=kill@frame/...` (a miss through `MR::forceKillPlayerByAbyss`; five reach game over); the host decides, the game acts through `MR::requestChangeStageInGameMoving` and `MR::setPlayerPos` once per scene frame (`test_scene_frame`). `GALAXY_TEST_HOME_ROW` picks a HOME Menu row by its keys. Other events: `star@`, `grandstar@` (taken once the scene plays), `movieN@`, `luigi@`/`mario@` (the file's player from the next scene), `defeat:<model>@` (that model's live actors killed), `wait@`; frames count from the last tour stop. `GALAXY_TEST_DISC_DELAY_US` makes every disc read take that long, `GALAXY_TEST_NAND_DELAY_US` every NAND operation (saves); `GALAXY_TEST_CPU_AFFINITY` (hex mask) limits the processors; `GALAXY_TRACE_THREAD_CPU=1` logs each thread's CPU time per second by name. `GALAXY_TEST_SHADER_KEY_CAPTURE=<file>` appends every shader key the session resolves, for `galaxy_vk_shader_tests <file>`. `GALAXY_TEST_BLOOM_ROUTE=0|1|2` forces the game's bloom route (0 its own chains as the console's, 1 NATIVE, 2 ENHANCED); `GALAXY_TEST_RT_EFFECT_AB=reflections|water|sun_rays|lens_bloom` turns that ray-traced effect off in frames that end in an odd present (at 60 fps every other frame). `GALAXY_TEST_CURVED_AB=1` draws curved surfaces flat in the same frames.
+<<<<<<< HEAD
 - **Threads**: the console runs one thread at a time, by priority, and the game relies on it (`OSDisableInterrupts` used as a lock). All game threads run on one host thread with the SDK's own scheduler, and a thread switch is a stack switch (`native/sdk/os`). Parallelism lives in the host: renderer, audio mixer, input, disc.
+=======
+- **Threads**: the console runs one thread at a time, by priority, and the game relies on it (an interrupt-disabled section used as a lock). The game's threads, mutexes, message queues, thread queues and alarms are Nebula's kernel (`Game/System/NebulaKernel`), which keeps the console's scheduling rules (tested in `native/sdk/os/tests/kernel_tests.cpp`); every game thread runs on one host thread, the simulation thread, and a switch is a stack switch (`native/sdk/os/context_switch.c`). Host events (disc, frame clock, controllers, audio DMA, the timer) reach the game only at the kernel's scheduling points. Parallelism lives in the host: renderer, audio mixer, input, disc.
+>>>>>>> upstream/main
 
 ## Open
 
@@ -237,7 +307,11 @@ Complete over every compiled unit (1,874), with the compiler as the checker. An 
 | Disc data byte order and 64-bit pointers (archives, J3D, JPA, KCL, JMap, BMG, layouts, audio banks; `JKRMemArchive` writes pointers into 32-bit file fields, D) | done: every kept unit compiles and links (M) |
 | 274 US data sections not yet compared byte for byte (`us_data_unverified.csv`) | H: symbol naming; verify against the matching build |
 | Heap sizes: pointers double in size natively, so fixed JKRHeap sizes need a 64-bit allowance | open |
+<<<<<<< HEAD
 | `nw4r::ut::RomFont`: the console's system font comes from the IPL ROM, not the disc | open |
+=======
+| `nw4r::ut::RomFont`: the console's system font comes from the IPL ROM, not the disc | deleted: nothing in the game reaches it (the console's linker dropped it too) |
+>>>>>>> upstream/main
 | THP movies (prologue, endings, final battle): Petari's decoder is paired-single assembly | video through v1.0.1's decoder with each frame's size, audio in `native/sdk/thp`; a route that reaches a movie is still to run |
 | Mii data (RFL) without a console NAND | an empty database (RFL_DB.dat) is created, as v1.0.1 does; Mii import (runtime/src/mii_import.cpp, mii_formats.cpp) adds any console's Miis to it and to the running game's (nebula_game_mii_prepare/install) |
 | Volume categories (music, effects, voices) natively | open: v1.0.1 classifies channels from game memory; the native game will report each channel's category |

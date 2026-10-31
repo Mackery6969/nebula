@@ -21,7 +21,11 @@ public:
     void exeDeactive();
 
     inline bool isReadyToSpawn() const {
+<<<<<<< HEAD
         return mSpawnTimer % mSpawnDelay == 0;
+=======
+        return (mSpawnDelay != 0 ? mSpawnTimer % mSpawnDelay : mSpawnTimer) == 0;
+>>>>>>> upstream/main
     }
 
     /* 0x8C */ Rock* mRocks;

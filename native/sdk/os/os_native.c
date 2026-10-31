@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* The native OS core: what lies under the RVL SDK's own scheduler, alarms and synchronisation (OSThread.c,
    OSMutex.c, OSMessage.c, OSAlarm.c, OSTime.c, OSArena.c and OSAlloc.c, compiled as they are).
 
@@ -9,6 +10,12 @@
    heap allocation takes a mutex), so all pending work is one word and the check is one load
    (docs/NATIVE_PERFORMANCE.md). The decrementer is a host clock thread that sets its bit in that word when the
    deadline passes. When no thread can run, the simulation thread sleeps until a host event instead of spinning. */
+=======
+/* The platform under the game's thread kernel (Game/System/NebulaKernel): the time base, the calendar, the timer thread that
+   raises the kernel's timer event, the simulation thread's sleep and wake, the game threads' native stacks, the log
+   and fatal errors, and the boot onto the boot thread. The kernel schedules; this layer provides what is
+   platform-specific. */
+>>>>>>> upstream/main
 #include <stdarg.h>
 #include <stdatomic.h>
 #include <stdio.h>
@@ -20,6 +27,10 @@
 
 #include <nebula_game_api.h>
 
+<<<<<<< HEAD
+=======
+#include "nebula_kernel.h"
+>>>>>>> upstream/main
 #include "nebula_sdk.h"
 
 #if defined(_WIN32)
@@ -30,9 +41,12 @@
 #include <time.h>
 #endif
 
+<<<<<<< HEAD
 void* nebula_prepare_stack(void* top, size_t size, void (*entry)(void*), void* arg);
 void nebula_switch_stack(void** from_sp, void* to_sp);
 
+=======
+>>>>>>> upstream/main
 /* AddressSanitizer test builds: every stack switch is a fiber switch it is told of. */
 #if defined(__has_feature)
 #if __has_feature(address_sanitizer)
@@ -46,6 +60,7 @@ void nebula_switch_stack(void** from_sp, void* to_sp);
 #define NEBULA_ASAN_FINISH(save) ((void)0)
 #endif
 
+<<<<<<< HEAD
 extern volatile u32 RunQueueBits;
 void __OSThreadInit(void);
 void __OSInitAlarm(void);
@@ -53,6 +68,8 @@ void __OSReschedule(void);
 void OSSetMEM1ArenaLo(void*);
 void OSSetMEM1ArenaHi(void*);
 void OSSetMEM2ArenaLo(void*);
+=======
+>>>>>>> upstream/main
 
 /* The host's log takes whole lines (stderr before the host attaches): a report without its newline waits for the rest
    of its line. */
@@ -173,6 +190,7 @@ int64_t nebula_time_base(void) {
 #endif
 }
 
+<<<<<<< HEAD
 static int64_t game_time(void);
 
 /* The time base counts from the local calendar time at boot (ticks since 2000-01-01), as the console's does: the
@@ -212,6 +230,9 @@ enum { kDecrementerShift = 32 };
 static _Atomic uint64_t sPending;
 static atomic_int sIdle;
 
+=======
+/* The simulation thread's sleep for want of work and a host thread's wake of it (the kernel decides when). */
+>>>>>>> upstream/main
 #if defined(_WIN32)
 static HANDLE sWake;
 #else
@@ -220,7 +241,11 @@ static pthread_cond_t sWakeCond = PTHREAD_COND_INITIALIZER;
 static int sWakePending;
 #endif
 
+<<<<<<< HEAD
 static void wake_simulation(void) {
+=======
+void nebula_wake_simulation(void) {
+>>>>>>> upstream/main
 #if defined(_WIN32)
     SetEvent(sWake);
 #else
@@ -231,6 +256,7 @@ static void wake_simulation(void) {
 #endif
 }
 
+<<<<<<< HEAD
 static void raise_pending(uint64_t bits) {
     atomic_fetch_or(&sPending, bits);
     if (atomic_load(&sIdle)) {
@@ -246,6 +272,9 @@ void nebula_signal_simulation(void) {
 
 /* Sleeps until something is raised (sIdle is set and the pending word re-checked by the caller first). */
 static void sleep_for_work(void) {
+=======
+void nebula_sleep_for_work(void) {
+>>>>>>> upstream/main
 #if defined(_WIN32)
     WaitForSingleObject(sWake, INFINITE);
 #else
@@ -258,6 +287,7 @@ static void sleep_for_work(void) {
 #endif
 }
 
+<<<<<<< HEAD
 /* The decrementer: a host thread that sleeps until the deadline PPCMtdec set and then raises its bit, as the
    console's decrementer interrupts the running thread. Its lateness is the host timer's (docs/NATIVE_PERFORMANCE.md);
    the game's alarms are timeouts, periodic speaker updates and sleeps, which that does not disturb. */
@@ -273,6 +303,23 @@ static int64_t game_time(void) {
     int64_t deadline = atomic_load_explicit(&sDecrementerDeadline, memory_order_relaxed);
     if (__builtin_expect(now >= deadline, 0) && atomic_compare_exchange_strong(&sDecrementerDeadline, &deadline, INT64_MAX)) {
         atomic_fetch_or(&sPending, DECREMENTER_PENDING);
+=======
+/* The timer: a host thread that sleeps until the deadline the kernel armed (nebula_timer_arm) and then raises the
+   kernel's timer event. Its lateness is the host timer's (docs/NATIVE_PERFORMANCE.md); the game's alarms are
+   timeouts, periodic speaker updates and sleeps, which that does not disturb. */
+
+static _Atomic int64_t sTimerDeadline = INT64_MAX; /* in time-base ticks since boot */
+static _Atomic int64_t sClockArmed = INT64_MAX; /* the deadline the clock thread is sleeping toward */
+
+/* The kernel's own clock reads (nebula_time, on the simulation thread) also catch a passed deadline, at no extra
+   clock read: the alarm is then due at the next scheduling point instead of when the host timer wakes the timer
+   thread. */
+static int64_t game_time(void) {
+    const int64_t now = nebula_time_base();
+    int64_t deadline = atomic_load_explicit(&sTimerDeadline, memory_order_relaxed);
+    if (__builtin_expect(now >= deadline, 0) && atomic_compare_exchange_strong(&sTimerDeadline, &deadline, INT64_MAX)) {
+        nebula_note_event(NEBULA_EVENT_TIMER);
+>>>>>>> upstream/main
     }
     return now;
 }
@@ -285,9 +332,15 @@ static DWORD WINAPI clock_main(void* arg) {
     (void)arg;
     HANDLE handles[2] = {sClockWake, sClockTimer};
     for (;;) {
+<<<<<<< HEAD
         int64_t deadline = atomic_load(&sDecrementerDeadline);
         atomic_store(&sClockArmed, deadline);
         if (atomic_load(&sDecrementerDeadline) != deadline) {
+=======
+        int64_t deadline = atomic_load(&sTimerDeadline);
+        atomic_store(&sClockArmed, deadline);
+        if (atomic_load(&sTimerDeadline) != deadline) {
+>>>>>>> upstream/main
             continue;
         }
         if (deadline == INT64_MAX) {
@@ -296,9 +349,15 @@ static DWORD WINAPI clock_main(void* arg) {
         }
         const int64_t now = nebula_time_base();
         if (now >= deadline) {
+<<<<<<< HEAD
             if (atomic_compare_exchange_strong(&sDecrementerDeadline, &deadline, INT64_MAX)) {
                 atomic_store(&sClockArmed, INT64_MAX);
                 raise_pending(DECREMENTER_PENDING);
+=======
+            if (atomic_compare_exchange_strong(&sTimerDeadline, &deadline, INT64_MAX)) {
+                atomic_store(&sClockArmed, INT64_MAX);
+                nebula_raise_event(NEBULA_EVENT_TIMER);
+>>>>>>> upstream/main
             }
             continue;
         }
@@ -321,10 +380,17 @@ static void clock_start(void) {
     }
     HANDLE thread = CreateThread(NULL, 64 * 1024, clock_main, NULL, 0, NULL);
     if (sClockWake == NULL || sClockTimer == NULL || thread == NULL) {
+<<<<<<< HEAD
         nebula_fatal("could not start the decrementer's clock thread");
     }
     SetThreadPriority(thread, THREAD_PRIORITY_TIME_CRITICAL);
     SetThreadDescription(thread, L"Nebula Decrementer");
+=======
+        nebula_fatal("could not start the timer thread");
+    }
+    SetThreadPriority(thread, THREAD_PRIORITY_TIME_CRITICAL);
+    SetThreadDescription(thread, L"Nebula Timer");
+>>>>>>> upstream/main
     CloseHandle(thread);
 }
 
@@ -339,7 +405,11 @@ static void* clock_main(void* arg) {
     (void)arg;
     pthread_mutex_lock(&sClockLock);
     for (;;) {
+<<<<<<< HEAD
         int64_t deadline = atomic_load(&sDecrementerDeadline);
+=======
+        int64_t deadline = atomic_load(&sTimerDeadline);
+>>>>>>> upstream/main
         atomic_store(&sClockArmed, deadline);
         if (deadline == INT64_MAX) {
             pthread_cond_wait(&sClockCond, &sClockLock);
@@ -347,9 +417,15 @@ static void* clock_main(void* arg) {
         }
         const int64_t now = nebula_time_base();
         if (now >= deadline) {
+<<<<<<< HEAD
             if (atomic_compare_exchange_strong(&sDecrementerDeadline, &deadline, INT64_MAX)) {
                 atomic_store(&sClockArmed, INT64_MAX);
                 raise_pending(DECREMENTER_PENDING);
+=======
+            if (atomic_compare_exchange_strong(&sTimerDeadline, &deadline, INT64_MAX)) {
+                atomic_store(&sClockArmed, INT64_MAX);
+                nebula_raise_event(NEBULA_EVENT_TIMER);
+>>>>>>> upstream/main
             }
             continue;
         }
@@ -387,12 +463,20 @@ static void clock_start(void) {
     pthread_attr_setstacksize(&threadAttr, 64 * 1024);
     pthread_attr_setdetachstate(&threadAttr, PTHREAD_CREATE_DETACHED);
     if (pthread_create(&thread, &threadAttr, clock_main, NULL) != 0) {
+<<<<<<< HEAD
         nebula_fatal("could not start the decrementer's clock thread");
+=======
+        nebula_fatal("could not start the timer thread");
+>>>>>>> upstream/main
     }
 #if defined(__APPLE__)
     (void)thread;
 #else
+<<<<<<< HEAD
     pthread_setname_np(thread, "nebula-dec");
+=======
+    pthread_setname_np(thread, "nebula-timer");
+>>>>>>> upstream/main
 #endif
     pthread_attr_destroy(&threadAttr);
 }
@@ -404,6 +488,7 @@ static void clock_rearm(void) {
 }
 #endif
 
+<<<<<<< HEAD
 static BOOL sInterruptsEnabled; /* the simulation thread's MSR[EE] */
 static __OSExceptionHandler sExceptionHandlers[16];
 static OSContext* sCurrentContext;
@@ -550,11 +635,24 @@ BOOL OSRestoreInterrupts(BOOL level) {
 void PPCMtdec(u32 ticks) {
     const int64_t deadline = nebula_time_base() + (int64_t)ticks;
     atomic_store(&sDecrementerDeadline, deadline);
+=======
+/* The kernel's time, ticks since boot (dates are the host's, NebulaCalendar): alarms are set in it. */
+int64_t nebula_time(void) {
+    return game_time();
+}
+
+/* The timer thread is woken only when the new deadline is earlier than the one it sleeps toward; for a later one it
+   wakes at the old deadline, sees the new one and sleeps again. A timer event already raised stays raised; the
+   kernel re-arms when it finds nothing due. */
+void nebula_timer_arm(int64_t deadline) {
+    atomic_store(&sTimerDeadline, deadline);
+>>>>>>> upstream/main
     if (deadline < atomic_load(&sClockArmed)) {
         clock_rearm();
     }
 }
 
+<<<<<<< HEAD
 u32 PPCMfmsr(void) {
     return sInterruptsEnabled ? 0x8000u : 0u;
 }
@@ -643,11 +741,14 @@ typedef struct {
     void* param;
 } ThreadStart;
 
+=======
+>>>>>>> upstream/main
 void nebula_thread_start(void (*entry)(void*), void* arg) {
     entry(arg);
     nebula_fatal("a thread's entry returned");
 }
 
+<<<<<<< HEAD
 /* A new thread starts with interrupts enabled, as a new OSContext does, and ends in OSExitThread with its function's
    result. */
 static void thread_main(void* arg) {
@@ -697,6 +798,10 @@ void* __NebulaPrepareThread(void* (*func)(void*), void* param, void* stackTop, u
     start->func = func;
     start->param = param;
     return nebula_prepare_stack(top, stackSize - 48, thread_main, start);
+=======
+NEBULA_GAME_API void nebula_game_debug_dump(void) {
+    nebula_kernel_dump();
+>>>>>>> upstream/main
 }
 
 /* A game thread runs on a stack from the pool at the top of MEM2 (in the arena, where the GPU can read stack data the
@@ -715,7 +820,11 @@ void* __NebulaPrepareThread(void* (*func)(void*), void* param, void* stackTop, u
 enum { kStackGuard = 0x4000u, kStackMin = NEBULA_STACK_MIN, kStackSlots = 64 };
 
 typedef struct {
+<<<<<<< HEAD
     OSThread* owner;
+=======
+    const void* owner;
+>>>>>>> upstream/main
     uint8_t* end;
     u32 size;
 } StackSlot;
@@ -724,11 +833,19 @@ static StackSlot sStackSlots[kStackSlots];
 static int sStackSlotCount;
 static uint8_t* sStackNext;
 
+<<<<<<< HEAD
 void* __NebulaThreadStack(OSThread* thread, u32 requested, u32* size) {
     const u32 want = (requested > kStackMin ? (requested + 0xFFFFu) & ~0xFFFFu : kStackMin);
     StackSlot* slot = NULL;
     for (int i = 0; i < sStackSlotCount; i++) {
         if (sStackSlots[i].owner == thread) {
+=======
+void* nebula_thread_stack(const void* owner, uint32_t requested, uint32_t* size) {
+    const u32 want = (requested > kStackMin ? (requested + 0xFFFFu) & ~0xFFFFu : kStackMin);
+    StackSlot* slot = NULL;
+    for (int i = 0; i < sStackSlotCount; i++) {
+        if (sStackSlots[i].owner == owner) {
+>>>>>>> upstream/main
             sStackSlots[i].owner = NULL; /* a thread object created again */
         }
     }
@@ -752,11 +869,16 @@ void* __NebulaThreadStack(OSThread* thread, u32 requested, u32* size) {
         slot->size = want;
         sStackNext += kStackGuard + want;
     }
+<<<<<<< HEAD
     slot->owner = thread;
+=======
+    slot->owner = owner;
+>>>>>>> upstream/main
     *size = slot->size;
     return slot->end + slot->size;
 }
 
+<<<<<<< HEAD
 /* An exiting thread still runs on its stack (the reschedule, the idle wait and the interrupts it delivers, which may
    create threads) until the switch away: its slot is freed by that switch, not here. */
 static OSThread* sReleasing;
@@ -764,11 +886,17 @@ static OSThread* sReleasing;
 static void release_slot(const OSThread* thread) {
     for (int i = 0; i < sStackSlotCount; i++) {
         if (sStackSlots[i].owner == thread) {
+=======
+void nebula_thread_stack_release(const void* owner) {
+    for (int i = 0; i < sStackSlotCount; i++) {
+        if (sStackSlots[i].owner == owner) {
+>>>>>>> upstream/main
             sStackSlots[i].owner = NULL;
         }
     }
 }
 
+<<<<<<< HEAD
 void __NebulaReleaseThreadStack(OSThread* thread) {
     if (thread == (OSThread*)OSGetCurrentThread()) {
         if (sReleasing != NULL) {
@@ -847,12 +975,34 @@ OSPowerCallback OSSetPowerCallback(OSPowerCallback callback) {
 
 BOOL OSGetResetButtonState(void) {
     return FALSE;
+=======
+/* The boot thread runs on a stack in MEM1 below the arena, as the console's main stack is. */
+enum { kBootStackTop = 0x00100000u, kBootStackSize = 0x00080000u };
+
+static void* boot_stack_top(void) {
+    return nebula_arena_base() + kBootStackTop;
+}
+
+static void* boot_stack_end(void) {
+    return nebula_arena_base() + kBootStackTop - kBootStackSize;
+}
+
+/* KPAD (the SDK's controller processing, still compiled until the native input replaces it, I-01) guards its state and
+   registers its version through these. */
+BOOL OSDisableInterrupts(void) {
+    return nebula_interrupts_disable();
+}
+
+BOOL OSRestoreInterrupts(BOOL enabled) {
+    return nebula_interrupts_restore(enabled);
+>>>>>>> upstream/main
 }
 
 void OSRegisterVersion(const char* id) {
     (void)id;
 }
 
+<<<<<<< HEAD
 void OSProtectRange(u32 channel, void* addr, u32 nBytes, u32 control) {
     (void)channel;
     (void)addr;
@@ -889,6 +1039,8 @@ BOOL __DVDTestAlarm(const OSAlarm* alarm) {
     return FALSE;
 }
 
+=======
+>>>>>>> upstream/main
 void OSReport(const char* format, ...) {
     va_list args;
     va_start(args, format);
@@ -917,6 +1069,7 @@ static void* sHostStack;
 static void boot_thread(void* arg) {
     (void)arg;
     NEBULA_ASAN_FINISH(NULL);
+<<<<<<< HEAD
     void *mem1Lo, *mem1Hi, *mem2Lo, *mem2Hi;
     nebula_memory_arenas(&mem1Lo, &mem1Hi, &mem2Lo, &mem2Hi);
     OSSetMEM1ArenaLo(mem1Lo);
@@ -932,6 +1085,10 @@ static void boot_thread(void* arg) {
     __OSThreadInit();
     __OSInitAlarm();
     enable_and_deliver();
+=======
+    nebula_kernel_init(boot_stack_top(), boot_stack_end());
+    nebula_interrupts_restore(1);
+>>>>>>> upstream/main
     sGameMain();
     nebula_fatal("the game's main returned");
 }
@@ -941,16 +1098,26 @@ void nebula_os_boot(void (*gameMain)(void)) {
     sWake = CreateEventW(NULL, FALSE, FALSE, NULL);
 #endif
     time_init();
+<<<<<<< HEAD
     calendar_init();
+=======
+>>>>>>> upstream/main
     clock_start();
     if (!nebula_memory_init()) {
         nebula_fatal("could not reserve the game's memory");
     }
+<<<<<<< HEAD
     nebula_divide_init();
     sGameMain = gameMain;
     void* sp = nebula_prepare_stack(__NebulaBootStackBase(), kBootStackSize, boot_thread, NULL);
     void* fake = NULL;
     NEBULA_ASAN_START(&fake, __NebulaBootStackEnd(), kBootStackSize);
+=======
+    sGameMain = gameMain;
+    void* sp = nebula_prepare_stack(boot_stack_top(), kBootStackSize, boot_thread, NULL);
+    void* fake = NULL;
+    NEBULA_ASAN_START(&fake, boot_stack_end(), kBootStackSize);
+>>>>>>> upstream/main
     nebula_switch_stack(&sHostStack, sp);
     nebula_fatal("the boot thread returned to the host stack");
 }

@@ -20,10 +20,19 @@ public:
     /// @brief Draws the `OdhConverter` to the screen.
     virtual void draw() const;
 
+<<<<<<< HEAD
     void capture() {
         convert();
 
         mIsRequestedCapture = false;
+=======
+    // The capture is read back from the renderer: requested at the first call, encoded at the first call after it has
+    // finished (the request stays until then).
+    void capture() {
+        if (convert()) {
+            mIsRequestedCapture = false;
+        }
+>>>>>>> upstream/main
     }
 
     void requestCapture() {
@@ -42,7 +51,11 @@ public:
         return mImageSize;
     }
 
+<<<<<<< HEAD
     void convert();
+=======
+    bool convert();
+>>>>>>> upstream/main
 
 private:
     /// @brief The width of the frame buffer, in bytes.
@@ -56,6 +69,11 @@ private:
 
     /// @brief Determines if a screen capture was queued.
     /* 0x2C */ bool mIsRequestedCapture;
+<<<<<<< HEAD
+=======
+    bool mCapturePending;
+    u32 mCaptureSerial;
+>>>>>>> upstream/main
 
     /// @brief The size of the AJPG data buffer, in bytes.
     /* 0x30 */ u32 mImageSize;

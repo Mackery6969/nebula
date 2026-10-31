@@ -1,10 +1,18 @@
 #include "nw4r/ut/CharWriter.h"
+<<<<<<< HEAD
 #include "nw4r/ut/Font.h"
 #include <revolution/gx/GXVert.h>
+=======
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+#include "nw4r/ut/Font.h"
+>>>>>>> upstream/main
 
 namespace {
     void SetupGXCommon() {
         static const nw4r::ut::Color fog = 0;
+<<<<<<< HEAD
         GXSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, fog);
         GXSetTevSwapModeTable(GX_TEV_SWAP0, GX_CH_RED, GX_CH_GREEN, GX_CH_BLUE, GX_CH_ALPHA);
         GXSetZTexture(GX_ZT_DISABLE, GX_TF_Z8, 0);
@@ -15,6 +23,18 @@ namespace {
         GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, 0x7D);
         GXSetNumIndStages(0);
         GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_SET);
+=======
+        J3DNativeState::setFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, fog);
+        J3DNativeState::setTevSwapModeTable(GX_TEV_SWAP0, GX_CH_RED, GX_CH_GREEN, GX_CH_BLUE, GX_CH_ALPHA);
+        J3DNativeState::setZTexture(GX_ZT_DISABLE, GX_TF_Z8, 0);
+        J3DNativeState::setNumChans(1);
+        J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_DISABLE, GX_SRC_REG, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_DISABLE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        J3DNativeState::setNumTexGens(1);
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, 0x7D);
+        J3DNativeState::setNumIndStages(0);
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_SET);
+>>>>>>> upstream/main
     }
 };  // namespace
 
@@ -42,10 +62,17 @@ namespace nw4r {
             if (loadInfo != mLoadingTexture) {
                 GXTexObj tobj;
 
+<<<<<<< HEAD
                 GXInitTexObj(&tobj, const_cast< void* >(glyph.pTexture), glyph.texWidth, glyph.texHeight, glyph.texFormat, GX_CLAMP, GX_CLAMP,
                              GX_FALSE);
                 GXInitTexObjLOD(&tobj, mFilter.atSmall, mFilter.atLarge, 0, 0, 0, GX_DISABLE, GX_DISABLE, GX_ANISO_1);
                 GXLoadTexObj(&tobj, slot);
+=======
+                J3DNativeTexture::init(&tobj, const_cast< void* >(glyph.pTexture), glyph.texWidth, glyph.texHeight, glyph.texFormat, GX_CLAMP, GX_CLAMP,
+                             GX_FALSE);
+                J3DNativeTexture::initLOD(&tobj, mFilter.atSmall, mFilter.atLarge, 0, 0, 0, GX_DISABLE, GX_DISABLE, GX_ANISO_1);
+                J3DNativeTexture::load(&tobj, slot);
+>>>>>>> upstream/main
 
                 mLoadingTexture = loadInfo;
             }
@@ -55,6 +82,7 @@ namespace nw4r {
         }
 
         void CharWriter::SetupVertexFormat() {
+<<<<<<< HEAD
             GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
             GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
             GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_U16, TEXTURE_COODINATE_FRACTION_BITS);
@@ -62,6 +90,8 @@ namespace nw4r {
             GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
             GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
             GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+=======
+>>>>>>> upstream/main
         }
 
         void CharWriter::SetupGX() {
@@ -102,16 +132,25 @@ namespace nw4r {
 
         void CharWriter::SetupGXDefault() {
             SetupGXCommon();
+<<<<<<< HEAD
             GXSetNumTevStages(1);
             GXSetTevDirect(GX_TEVSTAGE0);
             GXSetTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
             GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
             GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+=======
+            J3DNativeState::setNumTevStages(1);
+            J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+            J3DNativeState::setTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
+            J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+            J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+>>>>>>> upstream/main
             SetupVertexFormat();
         }
 
         void CharWriter::SetupGXForI() {
             SetupGXCommon();
+<<<<<<< HEAD
             GXSetNumTevStages(1);
             GXSetTevDirect(GX_TEVSTAGE0);
             GXSetTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
@@ -120,6 +159,16 @@ namespace nw4r {
             GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_ZERO);
             GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
             GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+=======
+            J3DNativeState::setNumTevStages(1);
+            J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+            J3DNativeState::setTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
+            J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+            J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+            J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_ZERO);
+            J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+>>>>>>> upstream/main
             SetupVertexFormat();
         }
 
@@ -187,6 +236,7 @@ namespace nw4r {
 
             LoadTexture(glyph, GX_TEXMAP0);
 
+<<<<<<< HEAD
             GXBegin(GX_QUADS, GX_VTXFMT0, 4);
             {
                 GXPosition3f32(posLeft, posTop, posZ);
@@ -206,6 +256,26 @@ namespace nw4r {
                 GXTexCoord2u16(texLeft, texBottom);
             }
             GXEnd();
+=======
+            J3DNativeDraw::begin(GX_QUADS, 4, NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0);
+            {
+                J3DNativeDraw::position(posLeft, posTop, posZ);
+                J3DNativeDraw::color(mVertexColor.lu);
+                J3DNativeDraw::texCoord(texLeft / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS), texTop / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS));
+
+                J3DNativeDraw::position(posRight, posTop, posZ);
+                J3DNativeDraw::color(mVertexColor.ru);
+                J3DNativeDraw::texCoord(texRight / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS), texTop / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS));
+
+                J3DNativeDraw::position(posRight, posBottom, posZ);
+                J3DNativeDraw::color(mVertexColor.rd);
+                J3DNativeDraw::texCoord(texRight / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS), texBottom / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS));
+
+                J3DNativeDraw::position(posLeft, posBottom, posZ);
+                J3DNativeDraw::color(mVertexColor.ld);
+                J3DNativeDraw::texCoord(texLeft / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS), texBottom / static_cast< f32 >(1 << TEXTURE_COODINATE_FRACTION_BITS));
+            }
+>>>>>>> upstream/main
         }
 
         void CharWriter::UpdateVertexColor() {
@@ -222,6 +292,7 @@ namespace nw4r {
 
         void CharWriter::SetupGXWithColorMapping(Color min, Color max) {
             SetupGXCommon();
+<<<<<<< HEAD
             GXSetNumTevStages(2);
             GXSetTevDirect(GX_TEVSTAGE0);
             GXSetTevDirect(GX_TEVSTAGE1);
@@ -239,6 +310,25 @@ namespace nw4r {
             GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_RASA, GX_CA_ZERO);
             GXSetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
             GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+=======
+            J3DNativeState::setNumTevStages(2);
+            J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+            J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+            J3DNativeState::setTevSwapMode(GX_TEVSTAGE0, GX_TEV_SWAP0, GX_TEV_SWAP0);
+            J3DNativeState::setTevSwapMode(GX_TEVSTAGE1, GX_TEV_SWAP0, GX_TEV_SWAP0);
+            J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+            J3DNativeState::setTevColor(GX_TEVREG0, min);
+            J3DNativeState::setTevColor(GX_TEVREG1, max);
+            J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_C1, GX_CC_TEXC, GX_CC_ZERO);
+            J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_A0, GX_CA_A1, GX_CA_TEXA, GX_CA_ZERO);
+            J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+            J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, GX_CC_RASC, GX_CC_ZERO);
+            J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_APREV, GX_CA_RASA, GX_CA_ZERO);
+            J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+>>>>>>> upstream/main
 
             SetupVertexFormat();
         }

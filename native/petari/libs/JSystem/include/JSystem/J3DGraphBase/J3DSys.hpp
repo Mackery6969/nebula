@@ -1,6 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 enum J3DSysDrawBuf {
     /* 0x0 */ J3DSysDrawBuf_Opa,
@@ -49,8 +55,11 @@ public:
     /* 0x054 */ u32 mMaterialMode;
     /* 0x058 */ J3DTexture* mTexture;
     /* 0x05C */ u8 unk_0x5c[0x60 - 0x5C];
+<<<<<<< HEAD
     /* 0x060 */ u32 mTexCacheRegionNum;
     /* 0x064 */ GXTexRegion mTexCacheRegion[8];
+=======
+>>>>>>> upstream/main
     /* 0x0E4 */ u8 unk_0xe4[0x104 - 0xE4];
     /* 0x104 */ Mtx* mModelDrawMtx;
     /* 0x108 */ Mtx33* mModelNrmMtx;
@@ -63,7 +72,10 @@ public:
 
     void loadPosMtxIndx(int, u16) const;
     void loadNrmMtxIndx(int, u16) const;
+<<<<<<< HEAD
     void setTexCacheRegion(GXTexCacheSize);
+=======
+>>>>>>> upstream/main
     void drawInit();
     void reinitGX();
     void reinitGenMode();
@@ -118,12 +130,18 @@ public:
 
     void setModelDrawMtx(Mtx* pMtxArr) {
         mModelDrawMtx = pMtxArr;
+<<<<<<< HEAD
         GXSetArray(GX_POS_MTX_ARRAY, mModelDrawMtx, sizeof(*mModelDrawMtx));
+=======
+>>>>>>> upstream/main
     }
 
     void setModelNrmMtx(Mtx33* pMtxArr) {
         mModelNrmMtx = pMtxArr;
+<<<<<<< HEAD
         GXSetArray(GX_NRM_MTX_ARRAY, mModelNrmMtx, sizeof(*mModelNrmMtx));
+=======
+>>>>>>> upstream/main
     }
 
     void setNBTScale(Vec* scale) {

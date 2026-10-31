@@ -1,4 +1,9 @@
 #include "Game/MapObj/GCaptureRibbon.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorLightCtrl.hpp"
 #include "Game/Util/DirectDraw.hpp"
 #include "Game/Util/JMapInfo.hpp"
@@ -9,8 +14,11 @@
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <revolution/gx/GXEnum.h>
 #include <revolution/gx/GXGeometry.h>
+<<<<<<< HEAD
 #include <revolution/gx/GXPixel.h>
 #include <revolution/gx/GXVert.h>
+=======
+>>>>>>> upstream/main
 #include <revolution/types.h>
 
 GCaptureRibbon::GCaptureRibbon(const char* pName) : LiveActor(pName), mTexture(), _990(), _994() {
@@ -22,15 +30,22 @@ void GCaptureRibbon::draw() const {
         TDDraw::setup(1, 2, 0);
         f32 width = calcLineWidth();
         mTexture->load(GX_TEXMAP0);
+<<<<<<< HEAD
         GXSetZMode(true, GX_LEQUAL, false);
 
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 2 * _990);
+=======
+        J3DNativeState::setZMode(true, GX_LEQUAL, false);
+
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 2 * _990, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
         {
             for (s32 i = 0; i < _990; i++) {
                 f32 v2 = i / (_990 - 1.0f);
 
                 TVec3f v1 = _690[i] * width;
 
+<<<<<<< HEAD
                 GXPosition3f32(v1.x + _90[i].x, v1.y + _90[i].y, v1.z + _90[i].z);
                 GXTexCoord2f32(0.0f, v2);
                 GXPosition3f32(_90[i].x - v1.x, _90[i].y - v1.y, _90[i].z - v1.z);
@@ -40,12 +55,23 @@ void GCaptureRibbon::draw() const {
         GXEnd();
 
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 2 * _990);
+=======
+                J3DNativeDraw::position(v1.x + _90[i].x, v1.y + _90[i].y, v1.z + _90[i].z);
+                J3DNativeDraw::texCoord(0.0f, v2);
+                J3DNativeDraw::position(_90[i].x - v1.x, _90[i].y - v1.y, _90[i].z - v1.z);
+                J3DNativeDraw::texCoord(1.0f, v2);
+            }
+        }
+
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 2 * _990, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
         {
             for (s32 j = 0; j < _990; j++) {
                 f32 v2 = j / (_990 - 1.0f);
 
                 TVec3f v1 = _390[j] * width;
 
+<<<<<<< HEAD
                 GXPosition3f32(v1.x + _90[j].x, v1.y + _90[j].y, v1.z + _90[j].z);
                 GXTexCoord2f32(0.0f, v2);
                 GXPosition3f32(_90[j].x - v1.x, _90[j].y - v1.y, _90[j].z - v1.z);
@@ -53,6 +79,14 @@ void GCaptureRibbon::draw() const {
             }
         }
         GXEnd();
+=======
+                J3DNativeDraw::position(v1.x + _90[j].x, v1.y + _90[j].y, v1.z + _90[j].z);
+                J3DNativeDraw::texCoord(0.0f, v2);
+                J3DNativeDraw::position(_90[j].x - v1.x, _90[j].y - v1.y, _90[j].z - v1.z);
+                J3DNativeDraw::texCoord(1.0f, v2);
+            }
+        }
+>>>>>>> upstream/main
     }
 }
 

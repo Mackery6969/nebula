@@ -286,12 +286,15 @@ namespace MR {
     /// @param channel The handle to the Wii Remote.
     /// @return `true` if the Wii Remote is being controlled, `false` otherwise.
     bool isOperatingWPad(s32 channel);
+<<<<<<< HEAD
 
 #ifdef TARGET_PC
     /// @brief Holds every Wii Remote neutral for the rest of the frame (WPad::holdForMenu): a menu over the running game
     /// has read them, and the game plays on without them.
     void holdWPadsForMenu();
 #endif
+=======
+>>>>>>> upstream/main
 };  // namespace MR
 
 namespace WPadFunction {

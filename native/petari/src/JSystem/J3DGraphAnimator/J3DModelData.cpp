@@ -19,11 +19,19 @@ s32 J3DModelData::newSharedDisplayList(u32 mdlFlags) {
     for (u16 i = 0; i < matNum; i++) {
         s32 ret;
         if (mdlFlags & J3DMdlFlag_UseSingleDL) {
+<<<<<<< HEAD
             ret = getMaterialNodePointer(i)->newSingleSharedDisplayList(getMaterialNodePointer(i)->countDLSize());
             if (ret != kJ3DError_Success)
                 return ret;
         } else {
             ret = getMaterialNodePointer(i)->newSharedDisplayList(getMaterialNodePointer(i)->countDLSize());
+=======
+            ret = getMaterialNodePointer(i)->newSharedDisplayList();
+            if (ret != kJ3DError_Success)
+                return ret;
+        } else {
+            ret = getMaterialNodePointer(i)->newSharedDisplayList();
+>>>>>>> upstream/main
             if (ret != kJ3DError_Success)
                 return ret;
         }
@@ -32,6 +40,7 @@ s32 J3DModelData::newSharedDisplayList(u32 mdlFlags) {
     return kJ3DError_Success;
 }
 
+<<<<<<< HEAD
 void J3DModelData::indexToPtr() {
     j3dSys.setTexture(getTexture());
 
@@ -53,6 +62,8 @@ void J3DModelData::indexToPtr() {
     OSEnableScheduler();
     OSRestoreInterrupts(sInterruptFlag);
 }
+=======
+>>>>>>> upstream/main
 
 void J3DModelData::syncJ3DSysFlags() const {
     if (checkFlag(0x20)) {

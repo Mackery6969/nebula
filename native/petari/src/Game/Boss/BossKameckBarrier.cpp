@@ -7,6 +7,10 @@
 #include "Game/Util/ActorSensorUtil.hpp"
 #include "Game/Util/LiveActorUtil.hpp"
 #include "Game/Util/ObjUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NrvBossKameckBarrier {
     NEW_NERVE(BossKameckBarrierNrvWait, BossKameckBarrier, Wait);
@@ -18,7 +22,11 @@ BossKameckBarrier::BossKameckBarrier(const char* pName, const char* pModelName) 
 void BossKameckBarrier::init(const JMapInfoIter& rIter) {
     MR::initDefaultPos(this, rIter);
 #ifdef TARGET_PC
+<<<<<<< HEAD
     if (u32 bits = 0; __NebulaCodePatch(NEBULA_PATCH_KAMECK_BARRIER_OFFSET_Y, &bits)) {
+=======
+    if (u32 bits = 0; NebulaHost::codePatch(NEBULA_PATCH_KAMECK_BARRIER_OFFSET_Y, &bits)) {
+>>>>>>> upstream/main
         f32 offset;
         memcpy(&offset, &bits, sizeof(offset));
         mPosition.y += offset;

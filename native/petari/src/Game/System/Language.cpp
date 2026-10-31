@@ -5,8 +5,20 @@
 #include "Game/Util/StringUtil.hpp"
 #include "Game/Util/SystemUtil.hpp"
 #include <revolution/sc.h>
+<<<<<<< HEAD
 
 #if (VERSION == RMGJ01)
+=======
+#ifdef TARGET_PC
+#include "Game/System/NebulaRegion.hpp"
+#include "Game/System/NebulaSystemSettings.hpp"
+#endif
+
+#ifdef TARGET_PC
+// The disc's release's row (RMGJ01, RMGE01, RMGP01), as its own build picks it.
+#define SCLanguage2GameLanguageTableIndex (NebulaRegion::isJapan() ? 0 : NebulaRegion::isPal() ? 2 : 1)
+#elif (VERSION == RMGJ01)
+>>>>>>> upstream/main
 #define SCLanguage2GameLanguageTableIndex 0
 #elif (VERSION == RMGE01)
 #define SCLanguage2GameLanguageTableIndex 1
@@ -127,7 +139,11 @@ namespace {
 
 namespace MR {
     u32 getDecidedLanguageFromIPL() {
+<<<<<<< HEAD
         s32 language = SCGetLanguage();
+=======
+        s32 language = NebulaSystemSettings::language();
+>>>>>>> upstream/main
         s32 i;
 
         if (language < 0) {

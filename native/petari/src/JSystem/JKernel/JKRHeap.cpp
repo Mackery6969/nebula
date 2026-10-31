@@ -1,6 +1,12 @@
 #include "JSystem/JKernel/JKRHeap.hpp"
+<<<<<<< HEAD
 #include "JSystem/JUtility/JUTException.hpp"
 #include <revolution/os/OSBootInfo.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+#include "JSystem/JUtility/JUTException.hpp"
+>>>>>>> upstream/main
 
 JKRHeap* JKRHeap::sSystemHeap;
 JKRHeap* JKRHeap::sCurrentHeap;
@@ -9,11 +15,14 @@ JKRErrorHandler JKRHeap::mErrorHandler;
 
 static bool byte_806B70B8;
 
+<<<<<<< HEAD
 void* JKRHeap::mCodeStart;
 void* JKRHeap::mCodeEnd;
 void* JKRHeap::mUserRamStart;
 void* JKRHeap::mUserRamEnd;
 u32 JKRHeap::mMemorySize;
+=======
+>>>>>>> upstream/main
 
 static bool byte_806B26D8 = true;
 // The DSP's ARAM-in-MEM2 base; natively the MEM2 arena address HeapMemoryWatcher sets before the DSP boots.
@@ -39,7 +48,11 @@ static void heapUnpoison(const void* p, s32 n) {
 #endif
 
 JKRHeap::JKRHeap(void* data, u32 size, JKRHeap* parent, bool error) : JKRDisposer(), mChildTree(this), mDisposerList() {
+<<<<<<< HEAD
     OSInitMutex(&mMutex);
+=======
+    mMutex.init();
+>>>>>>> upstream/main
     mSize = size;
     mStart = (u8*)data;
     mEnd = (u8*)data + size;
@@ -94,6 +107,7 @@ u32 JKRNativeHeapSize(u32 size, JKRHeap* pParent, int alignment) {
 }
 #endif
 
+<<<<<<< HEAD
 bool JKRHeap::initArena(char** memory, u32* size, int maxHeaps) {
     void *ramStart, *ramEnd, *arenaStart;
 
@@ -101,11 +115,24 @@ bool JKRHeap::initArena(char** memory, u32* size, int maxHeaps) {
     void* arenaHi = OSGetArenaHi();
 
     OSReport("original arenaLo = %p arenaHi = %p\n", arenaLo, arenaHi);
+=======
+extern "C" void nebula_memory_arenas(void** mem1Lo, void** mem1Hi, void** mem2Lo, void** mem2Hi);
+
+// The root heap takes the main memory the platform gives the game (MEM1's arena). The console's OS first kept a table of
+// `maxHeaps` 12-byte heap descriptors at the arena's start, which nothing here uses; the heaps still begin after it,
+// where they did, since values the game derives from addresses (J3DDrawBuffer's hash slots) depend on that.
+bool JKRHeap::initArena(char** memory, u32* size, int maxHeaps) {
+    void *arenaLo, *arenaHi, *mem2Lo, *mem2Hi;
+    nebula_memory_arenas(&arenaLo, &arenaHi, &mem2Lo, &mem2Hi);
+
+    JUTNativeLog("original arenaLo = %p arenaHi = %p\n", arenaLo, arenaHi);
+>>>>>>> upstream/main
 
     if (arenaLo == arenaHi) {
         return false;
     }
 
+<<<<<<< HEAD
     arenaStart = OSInitAlloc(arenaLo, arenaHi, maxHeaps);
     OSBootInfo* code = (OSBootInfo*)OSPhysicalToCached(0);
     ramStart = (void*)(((uintptr_t)arenaStart + 31) & ~(uintptr_t)31);
@@ -119,6 +146,11 @@ bool JKRHeap::initArena(char** memory, u32* size, int maxHeaps) {
 
     OSSetArenaLo(ramEnd);
     OSSetArenaHi(ramEnd);
+=======
+    const uintptr_t heapTableEnd = reinterpret_cast< uintptr_t >(arenaLo) + static_cast< uintptr_t >(maxHeaps) * 12;
+    void* ramStart = reinterpret_cast< void* >((heapTableEnd + 31) & ~static_cast< uintptr_t >(31));
+    void* ramEnd = reinterpret_cast< void* >(reinterpret_cast< uintptr_t >(arenaHi) & ~static_cast< uintptr_t >(31));
+>>>>>>> upstream/main
 
     *memory = (char*)ramStart;
     *size = (u32)((uintptr_t)ramEnd - (uintptr_t)ramStart);

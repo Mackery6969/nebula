@@ -3,7 +3,13 @@
 #include "JSystem/J3DGraphAnimator/J3DMtxCalc.hpp"
 #include "JSystem/J3DGraphBase/J3DMaterial.hpp"
 #include "JSystem/J3DGraphBase/J3DTransform.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DAnmTransform;
 class J3DJoint;
@@ -141,7 +147,11 @@ public:
 struct J3DMtxCalcJ3DSysInitSoftimage {
     static void init(const Vec& param_0, const Mtx& param_1) {
         J3DSys::mCurrentS = param_0;
+<<<<<<< HEAD
         PSMTXCopy(param_1, J3DSys::mCurrentMtx);
+=======
+        NebulaMtxCopy(param_1, J3DSys::mCurrentMtx);
+>>>>>>> upstream/main
     }
 };
 

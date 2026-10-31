@@ -12,11 +12,16 @@ typedef unsigned short UINT16;
 typedef u32 UINT32;
 typedef s32 INT32;
 typedef signed char INT8;
+<<<<<<< HEAD
 typedef signed short INT16;
 typedef unsigned char BOOLEAN;
 
 typedef unsigned char UBYTE;
 
+=======
+typedef unsigned char BOOLEAN;
+
+>>>>>>> upstream/main
 #ifdef __cplusplus
 }
 #endif

@@ -5,6 +5,10 @@
 #include "Game/Util/MemoryUtil.hpp"
 #include "Game/Util/SingletonHolder.hpp"
 #include <JSystem/JKernel/JKRExpHeap.hpp>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 StationedArchiveLoader::Condition::~Condition() {
 }
@@ -73,6 +77,7 @@ void StationedArchiveLoader::createAndAddResourcesFromTable(const Condition& rCo
 }
 
 void StationedArchiveLoader::loadScenarioData(JKRHeap* pHeap) {
+<<<<<<< HEAD
     DVDDir dir;
     DVDDirEntry dirEntry;
 
@@ -80,16 +85,29 @@ void StationedArchiveLoader::loadScenarioData(JKRHeap* pHeap) {
 
     while (DVDReadDir(&dir, &dirEntry)) {
         if (!dirEntry.isDir) {
+=======
+    NebulaDisc::FolderEntry dirEntry;
+
+    for (u32 i = 0; NebulaDisc::folderEntry("/StageData", i, &dirEntry); i++) {
+        if (!dirEntry.mIsFolder) {
+>>>>>>> upstream/main
             continue;
         }
 
         char name[256];
+<<<<<<< HEAD
         MR::makeScenarioArchiveFileName(name, sizeof(name), dirEntry.name);
+=======
+        MR::makeScenarioArchiveFileName(name, sizeof(name), dirEntry.mName);
+>>>>>>> upstream/main
 
         if (MR::isFileExist(name, false)) {
             MR::mountArchive(name, pHeap);
         }
     }
+<<<<<<< HEAD
 
     DVDCloseDir(&dir);
+=======
+>>>>>>> upstream/main
 }

@@ -75,12 +75,21 @@ bool JPABaseEmitter::processTermination() {
 
 void JPABaseEmitter::calcEmitterGlobalPosition(JGeometry::TVec3< f32 >* dst) const {
     Mtx mtx;
+<<<<<<< HEAD
     PSMTXScale(mtx, mGlobalScl.x, mGlobalScl.y, mGlobalScl.z);
     PSMTXConcat(mGlobalRot, mtx, mtx);
     mtx[0][3] = mGlobalTrs.x;
     mtx[1][3] = mGlobalTrs.y;
     mtx[2][3] = mGlobalTrs.z;
     PSMTXMultVec(mtx, mLocalTrs, *dst);
+=======
+    NebulaMtxScale(mtx, mGlobalScl.x, mGlobalScl.y, mGlobalScl.z);
+    NebulaMtxConcat(mGlobalRot, mtx, mtx);
+    mtx[0][3] = mGlobalTrs.x;
+    mtx[1][3] = mGlobalTrs.y;
+    mtx[2][3] = mGlobalTrs.z;
+    NebulaMtxMultVec(mtx, mLocalTrs, *dst);
+>>>>>>> upstream/main
 }
 
 #include "JSystem/JParticle/JPAListInline.hpp"

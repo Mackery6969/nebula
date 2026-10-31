@@ -1,10 +1,18 @@
 #include "Game/System/GameSystem.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/NameObj/NameObjRegister.hpp"
 #include "Game/Screen/HomeButtonLayout.hpp"
 #include "Game/Screen/SystemWipeHolder.hpp"
 #include "Game/System/AudSystemWrapper.hpp"
+<<<<<<< HEAD
 #include "Game/System/DrawSyncManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/FileRipper.hpp"
 #include "Game/System/GameSequenceDirector.hpp"
 #include "Game/System/GameSequenceFunction.hpp"
@@ -31,6 +39,7 @@
 #include <JSystem/JKernel/JKRAram.hpp>
 #include <JSystem/JKernel/JKRExpHeap.hpp>
 #include <nw4r/lyt/init.h>
+<<<<<<< HEAD
 #include <revolution.h>
 #ifdef TARGET_PC
 #include "Game/Screen/NebulaMenuFocus.hpp"
@@ -38,6 +47,19 @@
 #include "Game/Screen/NebulaIcons.hpp"
 #include "Game/System/NebulaCutsceneSkip.hpp"
 #include "Game/Util/GamePadUtil.hpp"
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#ifdef TARGET_PC
+#include "Game/Screen/NebulaMenuFocus.hpp"
+#include "Game/Screen/NebulaRtPrepare.hpp"
+#include "Game/Screen/NebulaSettingsMenu.hpp"
+#include "Game/Screen/NebulaIcons.hpp"
+#include "Game/System/NebulaCutsceneSkip.hpp"
+#include "Game/System/NebulaFrameClock.hpp"
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 #endif
 
 #define GX_FIFO_SIZE 0x80000
@@ -58,6 +80,7 @@ extern "C" void nebula_game_main(void) {
 #else
 void main(void) {
 #endif
+<<<<<<< HEAD
     OSInitFastCast();
     DVDInit();
     VIInit();
@@ -67,6 +90,15 @@ void main(void) {
     OSInitMutex(&MR::MutexHolder< 2 >::sMutex);
     nw4r::lyt::LytInit();
     MR::setLayoutDefaultAllocator();
+=======
+    NebulaDisc::init();
+    NebulaFrameClock::init();
+    HeapMemoryWatcher::createRootHeap();
+    (MR::MutexHolder< 0 >::sMutex).init();
+    (MR::MutexHolder< 1 >::sMutex).init();
+    (MR::MutexHolder< 2 >::sMutex).init();
+    nw4r::lyt::LytInit();
+>>>>>>> upstream/main
     SingletonHolder< HeapMemoryWatcher >::init();
     SingletonHolder< HeapMemoryWatcher >::get()->setCurrentHeapToStationedHeap();
     FileRipper::setup(0x20000, MR::getStationedHeapNapa());
@@ -83,7 +115,11 @@ void main(void) {
 }
 
 GameSystem::GameSystem()
+<<<<<<< HEAD
     : NerveExecutor("GameSystem"), mFifoBase(nullptr), mSequenceDirector(nullptr), mErrorWatcher(nullptr), mFontHolder(nullptr),
+=======
+    : NerveExecutor("GameSystem"), mSequenceDirector(nullptr), mErrorWatcher(nullptr), mFontHolder(nullptr),
+>>>>>>> upstream/main
       mFrameControl(nullptr), mObjHolder(nullptr), mSceneController(nullptr), mStationedArchiveLoader(nullptr), mHomeButtonLayout(nullptr),
       mSystemWipeHolder(nullptr), mHomeButtonStateNotifier(nullptr), mIsExecuteLoadSystemArchive(false) {
 }
@@ -96,7 +132,10 @@ void GameSystem::init() {
     initNerve(GET_NERVE(GameSystem, GameSystemInitializeAudio));
     mSequenceDirector = new GameSequenceDirector();
     initGX();
+<<<<<<< HEAD
     DrawSyncManager::start(0x300, 15);
+=======
+>>>>>>> upstream/main
     mSceneController = new GameSystemSceneController();
     mObjHolder->init();
     mErrorWatcher = new GameSystemErrorWatcher();
@@ -169,11 +208,16 @@ void GameSystem::exeNormal() {
 }
 
 void GameSystem::initGX() {
+<<<<<<< HEAD
     if (mFifoBase == nullptr) {
         mFifoBase = new (32) u8[GX_FIFO_SIZE];
     }
 
     GXInit(mFifoBase, GX_FIFO_SIZE);
+=======
+    // The drawing state the game starts from, before anything is drawn.
+    J3DNativeState::initDefaults();
+>>>>>>> upstream/main
 }
 
 void GameSystem::initAfterStationedResourceLoaded() {
@@ -186,6 +230,10 @@ void GameSystem::initAfterStationedResourceLoaded() {
     NebulaIcons::init();
     NebulaCutsceneSkip::init();
     NebulaSettingsMenu::init();
+<<<<<<< HEAD
+=======
+    NebulaRtPrepare::init();
+>>>>>>> upstream/main
 #endif
     mSceneController->initAfterStationedResourceLoaded();
     mSequenceDirector->initAfterResourceLoaded();
@@ -247,6 +295,10 @@ void GameSystem::draw() {
     mErrorWatcher->draw();
 #ifdef TARGET_PC
     mSceneController->drawSceneOverlay();
+<<<<<<< HEAD
+=======
+    NebulaRtPrepare::draw();
+>>>>>>> upstream/main
     if (isSettingsShown) {
         NebulaSettingsMenu::draw();
         mObjHolder->drawStarPointer();
@@ -262,12 +314,20 @@ void GameSystem::update() {
     mObjHolder->update();
 #ifdef TARGET_PC
     NebulaMenuFocus::update();
+<<<<<<< HEAD
     NebulaSettingsMenu::update();
     NebulaIcons::update();
     // The settings menu has read the remotes: the game plays on without them. The skip's question waits under it.
     if (NebulaSettingsMenu::isHoldingInput()) {
         MR::holdWPadsForMenu();
     } else {
+=======
+    NebulaRtPrepare::update();
+    NebulaSettingsMenu::update();
+    NebulaIcons::update();
+    // The skip's question waits under the settings menu.
+    if (!NebulaSettingsMenu::isFreezingScene()) {
+>>>>>>> upstream/main
         NebulaCutsceneSkip::update();
     }
 #endif
@@ -301,6 +361,7 @@ void GameSystem::updateSceneController() {
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     // The cutscene skip's question and its fade out hold the scene still as the HOME Menu does (a movie resumes in step
     // after them). The settings menu doesn't: the game plays on under it.
     const bool isSkipPrompt = NebulaCutsceneSkip::isFreezingScene();
@@ -308,6 +369,17 @@ void GameSystem::updateSceneController() {
         isSceneUpdate = false;
     }
     mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning() || isSkipPrompt);
+=======
+    // The cutscene skip's question and its fade out, and the settings menu, hold the scene still as the HOME Menu does
+    // (a movie resumes in step after them).
+    const bool isSkipPrompt = NebulaCutsceneSkip::isFreezingScene();
+    const bool isSettingsMenu = NebulaSettingsMenu::isFreezingScene();
+    if (isSkipPrompt || isSettingsMenu) {
+        isSceneUpdate = false;
+    }
+    mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning() ||
+                                     isSkipPrompt || isSettingsMenu);
+>>>>>>> upstream/main
 #else
     mHomeButtonStateNotifier->update(mHomeButtonLayout->isActive() || GameSystemFunction::isOccurredSystemWarning());
 #endif
@@ -324,7 +396,11 @@ void GameSystem::updateSceneController() {
         mSceneController->updateScene();
     }
 #ifdef TARGET_PC
+<<<<<<< HEAD
     else if (isSkipPrompt && mSystemWipeHolder != nullptr) {
+=======
+    else if (isSkipPrompt && !isSettingsMenu && mSystemWipeHolder != nullptr) {
+>>>>>>> upstream/main
         // The skip's fade to black runs over the held scene.
         mSystemWipeHolder->movement();
     }

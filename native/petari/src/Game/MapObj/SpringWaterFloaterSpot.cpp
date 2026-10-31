@@ -101,7 +101,11 @@ void SpringWaterFloaterSpot::control() {
 
     TVec3f vec20;
     TVec3f vec14(0.0f, -70.0f + _A4, 0.0f);
+<<<<<<< HEAD
     PSMTXMultVec(_CC, vec14, vec20);
+=======
+    NebulaMtxMultVec(_CC, vec14, vec20);
+>>>>>>> upstream/main
     _CC.setTrans(vec20);
 }
 

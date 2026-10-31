@@ -12,9 +12,15 @@ namespace {
         f32 dot = rFrom.dot(rTo);
 
         if (MR::normalizeOrZero(&axis)) {
+<<<<<<< HEAD
             PSMTXIdentity(pMtx);
         } else {
             PSMTXRotAxisRad(pMtx, &axis, -MR::min(acos(dot), MR::abs(MR::toRadian(degree))));
+=======
+            NebulaMtxIdentity(pMtx);
+        } else {
+            NebulaMtxRotAxisRad(pMtx, &axis, -MR::min(acos(dot), MR::abs(MR::toRadian(degree))));
+>>>>>>> upstream/main
         }
     }
 };  // namespace
@@ -179,7 +185,11 @@ bool TurnJointCtrl::updateJointMtxCallBack(TPos3f* pMtx, const Ctrl& rCtrl) {
             ::makeMtxRotVecDegree(rotation, projected, front, mNegativeDegreeMax * rate);
         }
 
+<<<<<<< HEAD
         PSMTXConcat(rotation, result, result);
+=======
+        NebulaMtxConcat(rotation, result, result);
+>>>>>>> upstream/main
     }
 
     getMtxDir(&horizontalAxis, pMtx, rCtrl.mHorizontalTurnAxis);
@@ -191,7 +201,11 @@ bool TurnJointCtrl::updateJointMtxCallBack(TPos3f* pMtx, const Ctrl& rCtrl) {
 
         const f32 rate = mCtrlRate->_0;
         ::makeMtxRotVecDegree(rotation, projected, front, mHorizontalDegreeMax * rate);
+<<<<<<< HEAD
         PSMTXConcat(rotation, result, result);
+=======
+        NebulaMtxConcat(rotation, result, result);
+>>>>>>> upstream/main
     }
 
     result.setTrans(position);

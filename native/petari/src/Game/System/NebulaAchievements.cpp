@@ -1,4 +1,8 @@
 #include "Game/System/NebulaAchievements.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/System/GalaxyInfoTable.hpp"
@@ -7,12 +11,19 @@
 #include "Game/System/GameDataHolder.hpp"
 #include "Game/System/GameSequenceFunction.hpp"
 #include "Game/System/NebulaText.hpp"
+<<<<<<< HEAD
 #include "Game/Util/EventUtil.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/Util/JMapInfo.hpp"
 #include "Game/Util/SceneUtil.hpp"
 #include "Game/Util/StringUtil.hpp"
 #include <cstdio>
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     // Glyphs of the picture font (MR::addPictureFontTag's codes).
@@ -119,7 +130,11 @@ namespace {
 
     // galaxy::stats' names, in NebulaStat's order.
     const char* const cStatNames[NebulaStat_Num] = {
+<<<<<<< HEAD
         "jumps", "spins", "coins", "star_bits", "lives_lost", "game_overs", "one_ups", "play_seconds", "power_stars",
+=======
+        "jumps", "spins", "coins", "star_bits", "lives_lost", "game_overs", "one_ups", "play_seconds",
+>>>>>>> upstream/main
     };
     u32 sStatWaiting[NebulaStat_Num];
     bool sFileInPlay = false;  // the stage is not the title and file select
@@ -176,11 +191,19 @@ namespace {
         return nullptr;
     }
 
+<<<<<<< HEAD
     // Its name in the played language: NebulaText's Achievement.<id>, or Achievement.<id>.Luigi playing Luigi.
     s32 getEntryName(wchar_t* pDst, s32 capacity, const char* pId) {
         char textId[64];
         snprintf(textId, sizeof(textId), "Achievement.%s.Luigi", pId);
         if (!MR::isPlayerLuigi() || !NebulaText::has(textId)) {
+=======
+    // Its name in the played language: NebulaText's Achievement.<id>, or Achievement.<id>.Luigi on a Luigi file.
+    s32 getEntryName(wchar_t* pDst, s32 capacity, const char* pId) {
+        char textId[64];
+        snprintf(textId, sizeof(textId), "Achievement.%s.Luigi", pId);
+        if (GameDataFunction::isDataMario() || !NebulaText::has(textId)) {
+>>>>>>> upstream/main
             snprintf(textId, sizeof(textId), "Achievement.%s", pId);
         }
         return NebulaText::get(pDst, capacity, textId);
@@ -199,11 +222,19 @@ namespace {
     // Asks the host to unlock what is met; a new one waits for its pop-up.
     void tryUnlock(bool met, const char* pId) {
         const Entry* pEntry = met ? findEntry(pId) : nullptr;
+<<<<<<< HEAD
         if (pEntry == nullptr || sQueued >= cQueueMax || __NebulaAchievement(pId, nullptr, 0) == 0) {
             return;
         }
         enqueue(*pEntry);
         OSReport("achievement: %s\n", pId);
+=======
+        if (pEntry == nullptr || sQueued >= cQueueMax || NebulaHost::achievement(pId, nullptr, 0) == 0) {
+            return;
+        }
+        enqueue(*pEntry);
+        JUTNativeLog("achievement: %s\n", pId);
+>>>>>>> upstream/main
     }
 
     void tryUnlock(const char* pId) {
@@ -330,6 +361,7 @@ namespace {
         return value < most ? value : most;
     }
 
+<<<<<<< HEAD
     // The pop-ups queued since `queuedBefore`, when there are several: one for them all.
     void mergeBatch(s32 queuedBefore) {
         const s32 unlocked = sQueued - queuedBefore;
@@ -371,6 +403,8 @@ namespace {
         mergeBatch(queuedBefore);
     }
 
+=======
+>>>>>>> upstream/main
     // Lives and Star Bits change mid-stage; checked at each stage start and once a second.
     void checkCounters() {
         const s32 starBits = GameDataFunction::getStockedStarPieceNum();
@@ -394,8 +428,12 @@ namespace NebulaAchievements {
             return;
         }
         const s32 queuedBefore = sQueued;
+<<<<<<< HEAD
         // The player's character (Options' PLAYER page's, else the file's half).
         const bool mario = !MR::isPlayerLuigi();
+=======
+        const bool mario = GameDataFunction::isDataMario();
+>>>>>>> upstream/main
 
         // The story, in the order it is played.
         tryUnlock("first_star");
@@ -445,7 +483,32 @@ namespace NebulaAchievements {
         sUpdateFrames = 0;
 
         // Several at once (a save from before Nebula's achievements, imported or updated): one pop-up for them all.
+<<<<<<< HEAD
         mergeBatch(queuedBefore);
+=======
+        const s32 unlocked = sQueued - queuedBefore;
+        if (unlocked >= cBatchMin) {
+            sQueued = queuedBefore;
+            Waiting& rWaiting = sQueue[sQueued++];
+            wchar_t pattern[cNameLength];
+            NebulaText::get(pattern, cNameLength, "AchievementsUnlocked");
+            char digits[8];
+            snprintf(digits, sizeof(digits), "%d", unlocked);
+            s32 length = 0;
+            for (const wchar_t* q = pattern; *q != 0 && length + 1 < cNameLength; q++) {
+                if (q[0] == L'{' && q[1] == L'n' && q[2] == L'}') {
+                    for (const char* d = digits; *d != 0 && length + 1 < cNameLength; d++) {
+                        rWaiting.mName[length++] = static_cast< wchar_t >(*d);
+                    }
+                    q += 2;
+                } else {
+                    rWaiting.mName[length++] = *q;
+                }
+            }
+            rWaiting.mName[length] = 0;
+            rWaiting.mIcon = &cIconCrown;
+        }
+>>>>>>> upstream/main
     }
 
     void update() {
@@ -457,7 +520,10 @@ namespace NebulaAchievements {
         if (++sStatFlushFrames >= cStatFlushFrames) {
             flushStats();
         }
+<<<<<<< HEAD
         takeShared();
+=======
+>>>>>>> upstream/main
         if (++sUpdateFrames < 60) {
             return;
         }
@@ -500,7 +566,11 @@ namespace NebulaAchievements {
         if (const Entry* pEntry = findEntry(pId)) {
             enqueue(*pEntry);
         } else {
+<<<<<<< HEAD
             OSReport("test: no achievement %s\n", pId);
+=======
+            JUTNativeLog("test: no achievement %s\n", pId);
+>>>>>>> upstream/main
         }
     }
 
@@ -528,12 +598,17 @@ namespace NebulaAchievements {
         case Secret:
             return false;
         case AfterHalfway:
+<<<<<<< HEAD
             return __NebulaAchievementDate("halfway") != 0;
+=======
+            return NebulaHost::achievementDate("halfway") != 0;
+>>>>>>> upstream/main
         default:
             return true;
         }
     }
 
+<<<<<<< HEAD
     void onStarGet() {
         // Only a star new to the save, as sm64coopdx's Personal Star Counter counts one only when the star count goes
         // up: in co-op a star the room already has counts for nobody again. (The room's own count is the host's.)
@@ -544,6 +619,8 @@ namespace NebulaAchievements {
         countStat(NebulaStat_PowerStars, 1);
     }
 
+=======
+>>>>>>> upstream/main
     void onGrandStarGet() {
         // Cosmic Immortal: Bowser beaten again once every Power Star is in hand, and never a life lost. The star a
         // Grand Star sequence awards is saved when it ends, so here the file's count and stars are those from before:
@@ -573,7 +650,11 @@ namespace NebulaAchievements {
     }
 
     s32 getUnlockDate(s32 index) {
+<<<<<<< HEAD
         return index >= 0 && index < cEntryNum ? __NebulaAchievementDate(cEntries[index].mId) : 0;
+=======
+        return index >= 0 && index < cEntryNum ? NebulaHost::achievementDate(cEntries[index].mId) : 0;
+>>>>>>> upstream/main
     }
 
     void getFileProgress(NebulaFileProgress* pProgress) {
@@ -663,7 +744,11 @@ namespace NebulaAchievements {
         sStatFlushFrames = 0;
         for (s32 i = 0; i < NebulaStat_Num; i++) {
             if (sStatWaiting[i] != 0) {
+<<<<<<< HEAD
                 __NebulaStatAdd(cStatNames[i], sStatWaiting[i]);
+=======
+                NebulaHost::statAdd(cStatNames[i], sStatWaiting[i]);
+>>>>>>> upstream/main
                 sStatWaiting[i] = 0;
             }
         }
@@ -673,7 +758,11 @@ namespace NebulaAchievements {
         if (stat < 0 || stat >= NebulaStat_Num) {
             return 0;
         }
+<<<<<<< HEAD
         return __NebulaStatGet(cStatNames[stat]) + sStatWaiting[stat];
+=======
+        return NebulaHost::statGet(cStatNames[stat]) + sStatWaiting[stat];
+>>>>>>> upstream/main
     }
 };  // namespace NebulaAchievements
 #endif

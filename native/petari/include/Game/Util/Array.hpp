@@ -1,7 +1,13 @@
 #pragma once
 
 #include "Inline.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace MR {
     /// @brief A contiguous reallocatable array.

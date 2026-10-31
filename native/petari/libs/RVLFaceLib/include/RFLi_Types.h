@@ -1,7 +1,10 @@
 #ifndef RVL_FACE_LIBRARY_INTERNAL_TYPES_H
 #define RVL_FACE_LIBRARY_INTERNAL_TYPES_H
 #include "RFL_Types.h"
+<<<<<<< HEAD
 #include "RFLi_Endian.h"
+=======
+>>>>>>> upstream/main
 #include <revolution/types.h>
 #ifdef __cplusplus
 extern "C" {
@@ -258,6 +261,7 @@ typedef struct RFLiCharInfo {
     RFLCreateID createID; // at 0x46
 } RFLiCharInfo;
 
+<<<<<<< HEAD
 typedef struct RFLiCharData {
     // at 0x0
     u16 padding0 : 1;
@@ -432,6 +436,8 @@ typedef struct RFLiHiddenCharData {
     char padding9[10]; // at 0x36
 } RFLiHiddenCharData;
 
+=======
+>>>>>>> upstream/main
 #ifdef __cplusplus
 }
 #endif

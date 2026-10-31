@@ -87,7 +87,11 @@ void MapPartsRailRotator::rotateBetweenPoints(s32 point, f32 time) {
 
 void MapPartsRailRotator::updateHostRotateMtx() {
     if (mHostRotateMtx != nullptr) {
+<<<<<<< HEAD
         PSMTXCopy(mHostRotateMtx, _2C.toMtxPtr());
+=======
+        NebulaMtxCopy(mHostRotateMtx, _2C.toMtxPtr());
+>>>>>>> upstream/main
     } else if (mHost->getBaseMtx() != nullptr) {
         _2C.set(mHost->getBaseMtx());
         _2C.zeroTrans();

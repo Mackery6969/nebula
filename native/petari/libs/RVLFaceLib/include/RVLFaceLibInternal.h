@@ -6,6 +6,7 @@ extern "C" {
 
 #include "RVLFaceLib.h"
 #include "RFLi_Config.h"
+<<<<<<< HEAD
 #include "RFLi_Controller.h"
 #include "RFLi_DataUtility.h"
 #include "RFLi_Database.h"
@@ -17,6 +18,14 @@ extern "C" {
 #include "RFLi_MiddleDatabase.h"
 #include "RFLi_Model.h"
 #include "RFLi_NANDAccess.h"
+=======
+#include "RFLi_DataUtility.h"
+#include "RFLi_Database.h"
+#include "RFLi_DefaultDatabase.h"
+#include "RFLi_MakeRandomFace.h"
+#include "RFLi_MakeTex.h"
+#include "RFLi_Model.h"
+>>>>>>> upstream/main
 #include "RFLi_NANDLoader.h"
 #include "RFLi_System.h"
 #include "RFLi_Texture.h"

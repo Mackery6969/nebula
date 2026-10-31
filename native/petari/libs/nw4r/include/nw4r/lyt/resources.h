@@ -3,7 +3,13 @@
 #include "nebula_disc.hpp"
 #include "nw4r/lyt/types.h"
 #include "nw4r/math/types.h"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 // BRLYT/BRLAN, read in place: big-endian fields; the vector, size and SRT values the layout copies into its panes and
 // materials are NEBULA_DISC twins.

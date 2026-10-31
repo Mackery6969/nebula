@@ -1,4 +1,8 @@
 #include "Game/MapObj/MapObjActorInitInfo.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "Game/MapObj/MapObjActor.hpp"
 #include "Game/Util/JMapUtil.hpp"
 #include "Game/Util/MapPartsUtil.hpp"
@@ -6,8 +10,13 @@
 #include "revolution/os.h"
 
 void MapObjActorInitInfo_FORCE_MATCH_STRINGS() {
+<<<<<<< HEAD
     OSReport("\222\156\214\140\203\111\203\165\203\127\203\106" /* 地形オブジェ */);
     OSReport("\230\146\220\257" /* 惑星 */);
+=======
+    JUTNativeLog("\222\156\214\140\203\111\203\165\203\127\203\106" /* 地形オブジェ */);
+    JUTNativeLog("\230\146\220\257" /* 惑星 */);
+>>>>>>> upstream/main
 }
 
 MapObjActorInitInfo::MapObjActorInitInfo()

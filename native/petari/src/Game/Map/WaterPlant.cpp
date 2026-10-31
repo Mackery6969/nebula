@@ -1,4 +1,10 @@
 #include "Game/Map/WaterPlant.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/Util.hpp"
@@ -246,6 +252,7 @@ void WaterPlant::drawDirect() const {
 
         f32 drawOffsetX = mHalfWidth * ::sDrawVec.x;
         f32 drawOffsetZ = mHalfWidth * ::sDrawVec.z;
+<<<<<<< HEAD
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 8);
         GXPosition3f32(drawVec3.x - drawOffsetX, drawVec3.y, drawVec3.z - drawOffsetZ);
         GXPosition1x8(0);
@@ -264,6 +271,26 @@ void WaterPlant::drawDirect() const {
         GXPosition3f32(position->x + drawOffsetX, position->y, position->z + drawOffsetZ);
         GXPosition1x8(7);
         GXEnd();
+=======
+        // Each vertex's texture coordinate is its entry of ::gxArray.
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 8, NEBULA_SHAPE_TEXCOORD0);
+        J3DNativeDraw::position(drawVec3.x - drawOffsetX, drawVec3.y, drawVec3.z - drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 0], ::gxArray[2 * 0 + 1]);
+        J3DNativeDraw::position(drawVec3.x + drawOffsetX, drawVec3.y, drawVec3.z + drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 1], ::gxArray[2 * 1 + 1]);
+        J3DNativeDraw::position(drawVec2.x - drawOffsetX, drawVec2.y, drawVec2.z - drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 2], ::gxArray[2 * 2 + 1]);
+        J3DNativeDraw::position(drawVec2.x + drawOffsetX, drawVec2.y, drawVec2.z + drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 3], ::gxArray[2 * 3 + 1]);
+        J3DNativeDraw::position(drawVec1.x - drawOffsetX, drawVec1.y, drawVec1.z - drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 4], ::gxArray[2 * 4 + 1]);
+        J3DNativeDraw::position(drawVec1.x + drawOffsetX, drawVec1.y, drawVec1.z + drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 5], ::gxArray[2 * 5 + 1]);
+        J3DNativeDraw::position(position->x - drawOffsetX, position->y, position->z - drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 6], ::gxArray[2 * 6 + 1]);
+        J3DNativeDraw::position(position->x + drawOffsetX, position->y, position->z + drawOffsetZ);
+        J3DNativeDraw::texCoord(::gxArray[2 * 7], ::gxArray[2 * 7 + 1]);
+>>>>>>> upstream/main
     }
 }
 
@@ -308,7 +335,11 @@ void WaterPlantDrawInit::movement() {
     }
 
     TPos3f inverseViewMtx;
+<<<<<<< HEAD
     PSMTXInverse(MR::getCameraViewMtx(), inverseViewMtx);
+=======
+    NebulaMtxInverse(MR::getCameraViewMtx(), inverseViewMtx);
+>>>>>>> upstream/main
     // normal getXDir call here reverses float load order
     ::sDrawVec.set< f32 >(inverseViewMtx[0][0], inverseViewMtx[1][0], inverseViewMtx[2][0]);
 }
@@ -344,6 +375,7 @@ void WaterPlantDrawInit::updateSwingPos() {
 #pragma push
 #pragma opt_propagation off
 void WaterPlantDrawInit::initDraw() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_POS_XYZ, GX_F32, 0);
     GXClearVtxDesc();
@@ -371,5 +403,28 @@ void WaterPlantDrawInit::initDraw() const {
 
     static const GXColor fogColor = {0x32, 0x32, 0x96, 0xFF};
     GXSetFog(GX_FOG_LIN, ::sFogStartZ, ::sFogEndZ, MR::getNearZ(), MR::getFarZ(), fogColor);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 60, GX_FALSE, 125);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    J3DNativeState::setAlphaCompare(GX_GREATER, 50, GX_AOP_OR, GX_GREATER, 50);
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    J3DNativeState::setZCompLoc(GX_FALSE);
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+
+    static const GXColor fogColor = {0x32, 0x32, 0x96, 0xFF};
+    J3DNativeState::setFog(GX_FOG_LIN, ::sFogStartZ, ::sFogEndZ, MR::getNearZ(), MR::getFarZ(), fogColor);
+>>>>>>> upstream/main
 }
 #pragma pop

@@ -4,11 +4,15 @@
 #include "revolution/os/OSContext.h"
 #include "revolution/types.h"
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/main
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define __OS_EXCEPTION_SYSTEM_RESET 0
 #define __OS_EXCEPTION_MACHINE_CHECK 1
 #define __OS_EXCEPTION_DSI 2
@@ -26,6 +30,8 @@ extern "C" {
 #define __OS_EXCEPTION_THERMAL_INTERRUPT 14
 #define __OS_EXCEPTION_MAX (__OS_EXCEPTION_THERMAL_INTERRUPT + 1)
 
+=======
+>>>>>>> upstream/main
 typedef u8 __OSException;
 typedef void (*__OSExceptionHandler)(__OSException, OSContext*);
 

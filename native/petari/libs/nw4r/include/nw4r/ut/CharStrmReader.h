@@ -2,7 +2,13 @@
 
 #include "nw4r/db/assert.h"
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace ut {

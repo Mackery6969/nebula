@@ -1,9 +1,18 @@
 #pragma once
 
 #include "Inline.hpp"
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRDisposer.hpp"
 #include "JSystem/JSupport/JSUList.hpp"
 #include <revolution.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "JSystem/JKernel/JKRDisposer.hpp"
+#include "JSystem/JSupport/JSUList.hpp"
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 typedef void (*JKRErrorHandler)(void*, u32, int);
 void JKRDefaultMemoryErrorRoutine(void*, u32, int);
@@ -102,11 +111,19 @@ public:
     }
 
     void lock() const {
+<<<<<<< HEAD
         OSLockMutex(const_cast< OSMutex* >(&mMutex));
     }
 
     void unlock() const {
         OSUnlockMutex(const_cast< OSMutex* >(&mMutex));
+=======
+        (const_cast< NebulaMutex* >(&mMutex))->lock();
+    }
+
+    void unlock() const {
+        (const_cast< NebulaMutex* >(&mMutex))->unlock();
+>>>>>>> upstream/main
     }
 
     bool getErrorFlag() const {
@@ -149,6 +166,7 @@ public:
     static void fillMemory(u8*, u32, u8);
     static bool checkMemoryFilled(u8*, u32, u8);
 
+<<<<<<< HEAD
     static void* getCodeStart(void) {
         return mCodeStart;
     }
@@ -169,6 +187,8 @@ public:
         return mMemorySize;
     }
 
+=======
+>>>>>>> upstream/main
     static JKRHeap* getRootHeap() {
         return sRootHeap;
     }
@@ -199,11 +219,14 @@ public:
 
     static JKRErrorHandler mErrorHandler;
 
+<<<<<<< HEAD
     static void* mCodeStart;
     static void* mCodeEnd;
     static void* mUserRamStart;
     static void* mUserRamEnd;
     static u32 mMemorySize;
+=======
+>>>>>>> upstream/main
 
     inline void* getStartAddr() const {
         return (void*)mStart;
@@ -213,7 +236,11 @@ public:
         return (void*)mEnd;
     }
 
+<<<<<<< HEAD
     /* 0x18 */ mutable OSMutex mMutex;
+=======
+    /* 0x18 */ mutable NebulaMutex mMutex;
+>>>>>>> upstream/main
     /* 0x30 */ u8* mStart;
     /* 0x34 */ u8* mEnd;
     /* 0x38 */ u32 mSize;

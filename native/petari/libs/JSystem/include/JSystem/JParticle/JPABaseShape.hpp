@@ -250,6 +250,12 @@ struct JPAClrAnmKeyData {
     /* 0x2 */ GXColor color;
 };
 
+<<<<<<< HEAD
+=======
+// The quad arrays the particles drawn next read (JPAResource's), and a particle's quad from them (type 1: crossed).
+void JPASetQuadArrays(const u8* pPositions, const u8* pTexCoords);
+void JPADrawQuad(u32 type);
+>>>>>>> upstream/main
 void JPACalcTexIdxNormal(JPAEmitterWorkData*);
 void JPACalcTexIdxRepeat(JPAEmitterWorkData*);
 void JPACalcTexIdxReverse(JPAEmitterWorkData*);

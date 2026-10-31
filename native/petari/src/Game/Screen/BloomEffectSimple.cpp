@@ -1,4 +1,8 @@
 #include "Game/Screen/BloomEffectSimple.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Screen/CopyFilterNegater.hpp"
 #include "Game/Screen/ImageEffectLocalUtil.hpp"
 #include "Game/Screen/ImageEffectResource.hpp"
@@ -9,8 +13,14 @@
 #include "Game/Util/SystemUtil.hpp"
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <nebula_game_api.h>
+<<<<<<< HEAD
 #include <nebula_gx_fifo.h>
 #include <revolution/os.h>
+=======
+#include "Game/Util/RenderSignals.hpp"
+#include <revolution/os.h>
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -54,7 +64,11 @@ void BloomEffectSimple::draw() const {
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     const u32 route = __NebulaGXLinked != 0 ? __NebulaOption(NEBULA_OPTION_BLOOM) : 0;
+=======
+    const u32 route = NebulaHost::option(NEBULA_OPTION_BLOOM);
+>>>>>>> upstream/main
     if (route == 2) {
         // The chain below, drawn by the renderer at the internal resolution (galaxy/gx/game_bloom.h): the threshold,
         // the channel, the ring's tap weight (blurTexture's), the intensity and the ring's vertical radius per unit;
@@ -64,15 +78,25 @@ void BloomEffectSimple::draw() const {
         const f32 vertical = MR::isScreen16Per9() ? 1.333f : 1.0f;
         u32 verticalBits;
         __builtin_memcpy(&verticalBits, &vertical, sizeof(verticalBits));
+<<<<<<< HEAD
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_SIMPLE,
+=======
+        NebulaRender::bloomMarker(NebulaRender::kBloomSimple,
+>>>>>>> upstream/main
                               mThreshold | static_cast< u32 >(mMaskFilter & 0xFF) << 8 | tap << 16 | static_cast< u32 >(alpha) << 24,
                               verticalBits);
         MR::reinitGX();
         ImageEffectLocalUtil::setupDrawTexture();
         _28->load(GX_TEXMAP0);
+<<<<<<< HEAD
         GXSetChanMatColor(GX_COLOR0A0, Color8(alpha, alpha, alpha, 255));
         GXSetChanAmbColor(GX_COLOR0A0, Color8(0, 0, 0, 255));
         GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+=======
+        J3DNativeState::setChanMatColor(GX_COLOR0A0, Color8(alpha, alpha, alpha, 255));
+        J3DNativeState::setChanAmbColor(GX_COLOR0A0, Color8(0, 0, 0, 255));
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+>>>>>>> upstream/main
         return;
     }
 #endif
@@ -86,7 +110,11 @@ void BloomEffectSimple::draw() const {
     // The renderer keeps the scene in the EFB's own format: the corner the chain works in is saved as a texture copy,
     // which cuts the ray tracer's HDR scene at 1 there.
     if (route != 0) {
+<<<<<<< HEAD
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_KEEP, 0, 0);
+=======
+        NebulaRender::bloomMarker(NebulaRender::kBloomKeep, 0, 0);
+>>>>>>> upstream/main
     } else
 #endif
     {
@@ -113,6 +141,7 @@ void BloomEffectSimple::draw() const {
         break;
     }
 
+<<<<<<< HEAD
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_RASC, GX_CC_ONE, GX_CC_ZERO);
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_COMP_R8_GT, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
@@ -123,6 +152,18 @@ void BloomEffectSimple::draw() const {
     GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+=======
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_RASC, GX_CC_ONE, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_COMP_R8_GT, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    ImageEffectLocalUtil::drawTexture(_2C, 4, 0, mThreshold, ImageEffectLocalUtil::TexDrawType_3);
+    ImageEffectLocalUtil::capture(_24, 4, 0, GX_TF_RGB565, true, 0);
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+>>>>>>> upstream/main
     ImageEffectLocalUtil::setupDrawTexture();
     texSpec.set(_24, 8, 0, GX_TF_RGB565);
     ImageEffectLocalUtil::blurTexture(texSpec._0, texSpec._4, texSpec._8, 8, 0.009f, 1.0f);
@@ -130,7 +171,11 @@ void BloomEffectSimple::draw() const {
 #ifdef TARGET_PC
     if (route != 0) {
         // The kept scene drawn back over the corner the chain worked in (the rest of the frame is unchanged).
+<<<<<<< HEAD
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_RESTORE, 0, 0);
+=======
+        NebulaRender::bloomMarker(NebulaRender::kBloomRestore, 0, 0);
+>>>>>>> upstream/main
     } else
 #endif
     {

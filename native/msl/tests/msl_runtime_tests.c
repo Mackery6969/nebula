@@ -1,7 +1,10 @@
 /* MSL behaviours the game relies on, checked against MSL_C/wprintf.c, wstring.c and extras.c. */
+<<<<<<< HEAD
 /* The build force-includes the prelude too; named here so swprintf and sprintf read as MSL's formatters (32-bit
    long) to anything that reads this file without the build's flags. */
 #include "nebula_prelude.h"
+=======
+>>>>>>> upstream/main
 #include <stdio.h>
 #include <string.h>
 

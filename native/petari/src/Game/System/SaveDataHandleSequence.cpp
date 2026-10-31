@@ -1,4 +1,8 @@
 #include "Game/System/SaveDataHandleSequence.hpp"
+<<<<<<< HEAD
+=======
+#include <revolution/nand.h>
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Screen/SaveIcon.hpp"
 #include "Game/Screen/SysInfoWindow.hpp"
@@ -37,7 +41,11 @@ SaveDataHandleSequence::SaveDataHandleSequence()
       mNerveForError(), mTempBuffer(), mOnSaveSuccessFunc(), mJustBeforeSaveFunc(), mSaveIcon()
 #ifdef TARGET_PC
       ,
+<<<<<<< HEAD
       mWindowFollows(false), mNewSysConfigFile(nullptr), mNewUserFile(nullptr)
+=======
+      mWindowFollows(false)
+>>>>>>> upstream/main
 #endif
 {
     mTempBuffer = new (32) u8[SaveDataHandler::getEnoughtTempBufferSize()];
@@ -50,10 +58,13 @@ void SaveDataHandleSequence::initAfterResourceLoaded() {
     mCurrentUserFile = new UserFile();
     mBackupUserFile = new UserFile();
     mSaveDataHandler = new SaveDataHandler(mSysConfigFile, mCurrentUserFile);
+<<<<<<< HEAD
 #ifdef TARGET_PC
     mNewSysConfigFile = new SysConfigFile();
     mNewUserFile = new UserFile();
 #endif
+=======
+>>>>>>> upstream/main
 
     mSysInfoWindowConfirm = MR::createSysInfoWindowExecuteWithChildren();
     mSysInfoWindowConfirm->kill();
@@ -114,6 +125,7 @@ void SaveDataHandleSequence::startPreLoad() {
     setNerve(GET_NERVE_ANON(SaveDataHandleSequencePreLoad));
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 void SaveDataHandleSequence::startReload() {
     // The constructor's start: every file as new, then whatever the folder holds read over it.
@@ -125,6 +137,8 @@ void SaveDataHandleSequence::startReload() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 void SaveDataHandleSequence::startCreateUserFile(int index) {
     restoreUserFile(mCurrentUserFile, index, true);
     mCurrentUserFile->resetAllData();

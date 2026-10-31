@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define PHY_ADDR_MASK ~((~0x3FFF) << 16)
 #ifdef TARGET_PC
 // The address the GPU sees: physical, from the platform layer's mapping of the game's memory.
@@ -18,13 +19,19 @@ extern "C" u32 __NebulaToPhysical(const void* addr);
 u32 __NebulaToPhysical(const void* addr);
 #endif
 #define GX_PHY_ADDR(a) __NebulaToPhysical((const void*)(a))
+=======
+#ifdef TARGET_PC
+>>>>>>> upstream/main
 // A colour as the console's 32-bit load of it read: r in the top byte, on any host.
 #define GX_COLOR_WORD(c) (((u32)(c).r << 24) | ((u32)(c).g << 16) | ((u32)(c).b << 8) | (u32)(c).a)
 // The two words of a GXColorS10 (four s16) as the console read them: r:g, then b:a.
 #define GX_COLOR_S10_RG(c) (((u32)(u16)(c).r << 16) | (u32)(u16)(c).g)
 #define GX_COLOR_S10_BA(c) (((u32)(u16)(c).b << 16) | (u32)(u16)(c).a)
 #else
+<<<<<<< HEAD
 #define GX_PHY_ADDR(a) ((u32)a & PHY_ADDR_MASK)
+=======
+>>>>>>> upstream/main
 #define GX_COLOR_WORD(c) (*(u32*)(&(c)))
 #define GX_COLOR_S10_RG(c) (*(u32*)(&(c)))
 #define GX_COLOR_S10_BA(c) (*((u32*)(&(c)) + 1))
@@ -121,10 +128,13 @@ extern GXBool __GXinBegin;
 #endif
 
 // this is required to match some functions, even when stripped
+<<<<<<< HEAD
 #define CHECK_IN_BGN(func) ASSERTMSG(!__GXinBegin, "'" #func "' is not allowed between GXBegin/GXEnd")
 
 #define BP_SENT() gx->bpSentNot = GX_FALSE;
 #define XF_SENT() gx->bpSentNot = GX_TRUE;
+=======
+>>>>>>> upstream/main
 
 extern void __GXFlushTextureState();
 extern void __GXAbort();
@@ -132,6 +142,7 @@ extern void __GXSetTmemConfig(u32);
 
 extern void __GetImageTileCount(GXTexFmt fmt, u16 wd, u16 ht, u32* rowTiles, u32* colTiles, u32* cmpTiles);
 
+<<<<<<< HEAD
 typedef struct __GXLightObjInt_struct {
     u32 reserved[3];
     u32 Color;
@@ -190,6 +201,8 @@ typedef struct __GXTlutRegionInt_struct {
 
 #define GX_SETUP_TLUTREGOBJ(l, p) GXTlutRegionInt* l = (GXTlutRegionInt*)p;
 
+=======
+>>>>>>> upstream/main
 #ifdef __cplusplus
 }
 #endif

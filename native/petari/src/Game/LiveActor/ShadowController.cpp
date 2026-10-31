@@ -203,7 +203,11 @@ void ShadowController::getDropPos(TVec3f* pOut) const {
         pOut->set(*mDropPos);
     } else {
         if (_1C) {
+<<<<<<< HEAD
             PSMTXMultVec(_1C, (const Vec*)&_30, (Vec*)pOut);
+=======
+            NebulaMtxMultVec(_1C, (const Vec*)&_30, (Vec*)pOut);
+>>>>>>> upstream/main
         } else {
             pOut->set(_30);
         }

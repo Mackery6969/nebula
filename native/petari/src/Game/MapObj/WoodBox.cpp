@@ -56,7 +56,11 @@ void WoodBox::init(const JMapInfoIter& rIter) {
     }
 
     calcAndSetBaseMtx();
+<<<<<<< HEAD
     PSMTXCopy(getBaseMtx(), mBaseMtx);
+=======
+    NebulaMtxCopy(getBaseMtx(), mBaseMtx);
+>>>>>>> upstream/main
     ;
     MR::addTransMtx(mBaseMtx, TVec3f(0.0f, 100.0f, 0.0f));
 
@@ -250,7 +254,11 @@ void WoodBox::exeHit() {
             TVec3f upVec;
             MR::calcUpVec(&upVec, this);
             Mtx spawnMtx;
+<<<<<<< HEAD
             PSMTXCopy(getBaseMtx(), spawnMtx);
+=======
+            NebulaMtxCopy(getBaseMtx(), spawnMtx);
+>>>>>>> upstream/main
 
             MR::addTransMtx(spawnMtx, upVec * 50.0f);
 

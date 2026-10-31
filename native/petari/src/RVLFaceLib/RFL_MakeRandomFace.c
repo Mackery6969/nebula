@@ -1,5 +1,11 @@
 #include "RVLFaceLibInternal.h"
 #include <cstdio>
+<<<<<<< HEAD
+=======
+#include <nebula_game_api.h>
+
+const NebulaHostServices* nebula_host(void);
+>>>>>>> upstream/main
 
 #ifndef LENGTHOF
 #define LENGTHOF(a) (sizeof(a) / sizeof((a)[0]))
@@ -508,5 +514,11 @@ u8 RFLi_GetEyeColor(RFLRace race) {
 }
 
 u32 RFLi_GetRandU32(u32 max) {
+<<<<<<< HEAD
     return OSGetTick() % max;
+=======
+    // A random number from the host's steady clock, as the console's took its time base.
+    const NebulaHostServices* host = nebula_host();
+    return (u32)host->clock_ns(host->user) % max;
+>>>>>>> upstream/main
 }

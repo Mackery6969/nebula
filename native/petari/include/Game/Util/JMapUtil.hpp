@@ -2,7 +2,13 @@
 
 #include "Game/Util/JMapInfo.hpp"
 #include <JSystem/JGeometry.hpp>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace MR {
     bool isValidInfo(const JMapInfoIter& rIter);

@@ -12,7 +12,10 @@
 #include "Game/System/Language.hpp"
 #include "Game/System/MainLoopFramework.hpp"
 #include "Game/System/MessageHolder.hpp"
+<<<<<<< HEAD
 #include "Game/System/NANDManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/RenderMode.hpp"
 #include "Game/System/ResourceHolderManager.hpp"
 #include "Game/System/WPadHolder.hpp"
@@ -23,7 +26,10 @@
 #include "Game/Util/StarPointerUtil.hpp"
 #include <JSystem/JKernel/JKRExpHeap.hpp>
 #include <JSystem/JUtility/JUTVideo.hpp>
+<<<<<<< HEAD
 #include <revolution/vi.h>
+=======
+>>>>>>> upstream/main
 
 GameSystemObjHolder::GameSystemObjHolder()
     : mObjHolder(), mParticleResHolder(), mRenderModeObj(), mCaptureScreenDirector(), mScreenPreserver(), mAudioSystem(), mWPadHolder(),
@@ -119,7 +125,10 @@ void GameSystemObjHolder::initDvd() {
 }
 
 void GameSystemObjHolder::initNAND() {
+<<<<<<< HEAD
     SingletonHolder< NANDManager >::init();
+=======
+>>>>>>> upstream/main
 }
 
 void GameSystemObjHolder::initAudio() {
@@ -163,6 +172,7 @@ void GameSystemObjHolder::initStarPointerDirector() {
 }
 
 void GameSystemObjHolder::initDisplay() {
+<<<<<<< HEAD
     MainLoopFramework* pManager;
     s32 size = MR::getRequiredExternalFrameBufferSize();
     JKRHeap* pStationedHeap = MR::getStationedHeapGDDR3();
@@ -172,11 +182,17 @@ void GameSystemObjHolder::initDisplay() {
     _14 = new (pStationedHeap, 32) u8[size];
 
     pManager = MainLoopFramework::createManager(nullptr, _C, _10, _14, true);
+=======
+    MainLoopFramework* pManager = MainLoopFramework::createManager(nullptr, true);
+>>>>>>> upstream/main
     pManager->setClearColor(Color8(30, 30, 200, 0));
 
     mCaptureScreenDirector = new CaptureScreenDirector();
     mScreenPreserver = new ScreenPreserver();
 
+<<<<<<< HEAD
     VISetTrapFilter(VI_TRUE);
     VISetTrapFilter(VI_FALSE);
+=======
+>>>>>>> upstream/main
 }

@@ -189,7 +189,11 @@ void AreaFormBowl::calcUpVec(const TVec3f& rPos) {
 
     Mtx mtx;
     MR::makeMtxTR(mtx, 0.0f, 0.0f, 0.0f, rPos.x, rPos.y, rPos.z);
+<<<<<<< HEAD
     PSMTXMultVec(mtx, (const Vec*)&up, (Vec*)&up);
+=======
+    NebulaMtxMultVec(mtx, (const Vec*)&up, (Vec*)&up);
+>>>>>>> upstream/main
     mUp = up;
 }
 
@@ -257,11 +261,19 @@ void AreaFormCylinder::calcDir(const TVec3f& rRotation) {
     mRotation.z = 0.0f;
 
     MtxPtr mtx_x = MR::tmpMtxRotXDeg(rRotation.x);
+<<<<<<< HEAD
     PSMTXMultVec(mtx_x, (const Vec*)&mRotation, (Vec*)&mRotation);
     MtxPtr mtx_y = MR::tmpMtxRotYDeg(rRotation.y);
     PSMTXMultVec(mtx_y, (const Vec*)&mRotation, (Vec*)&mRotation);
     MtxPtr mtx_z = MR::tmpMtxRotZDeg(rRotation.z);
     PSMTXMultVec(mtx_z, (const Vec*)&mRotation, (Vec*)&mRotation);
+=======
+    NebulaMtxMultVec(mtx_x, (const Vec*)&mRotation, (Vec*)&mRotation);
+    MtxPtr mtx_y = MR::tmpMtxRotYDeg(rRotation.y);
+    NebulaMtxMultVec(mtx_y, (const Vec*)&mRotation, (Vec*)&mRotation);
+    MtxPtr mtx_z = MR::tmpMtxRotZDeg(rRotation.z);
+    NebulaMtxMultVec(mtx_z, (const Vec*)&mRotation, (Vec*)&mRotation);
+>>>>>>> upstream/main
     mRotation.normalize();
 }
 
@@ -281,7 +293,11 @@ void AreaFormSphere::init(const JMapInfoIter& rIter) {
 
     Mtx mtx;
     MR::makeMtxTR(mtx, 0.0f, 0.0f, 0.0f, rotation.x, rotation.y, rotation.z);
+<<<<<<< HEAD
     PSMTXMultVec(mtx, (const Vec*)&up, (Vec*)&up);
+=======
+    NebulaMtxMultVec(mtx, (const Vec*)&up, (Vec*)&up);
+>>>>>>> upstream/main
     mUp = up;
 }
 

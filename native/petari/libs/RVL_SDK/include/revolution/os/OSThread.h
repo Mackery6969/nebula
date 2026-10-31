@@ -18,8 +18,11 @@ typedef struct OSMutexQueue OSMutexQueue;
 typedef struct OSMutexLink OSMutexLink;
 typedef struct OSCond OSCond;
 
+<<<<<<< HEAD
 typedef void (*OSSwitchThreadCallback)(OSThread *, OSThread *);
 
+=======
+>>>>>>> upstream/main
 struct OSThreadQueue {
     OSThread* head;
     OSThread* tail;
@@ -60,6 +63,7 @@ struct OSThread {
     void* specific[2];
 };
 
+<<<<<<< HEAD
 enum OS_THREAD_STATE {
     OS_THREAD_STATE_READY    =  1,
     OS_THREAD_STATE_RUNNING  =  2,
@@ -67,6 +71,8 @@ enum OS_THREAD_STATE {
     OS_THREAD_STATE_MORIBUND =  8
 };
 
+=======
+>>>>>>> upstream/main
 void __OSThreadInit(void);
 void OSInitThreadQueue(OSThreadQueue *);
 OSThread* OSGetCurrentThread(void);

@@ -1,4 +1,8 @@
 #include "Inline.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #pragma inline_max_size(250)
 #include "JSystem/JKernel/JKRDvdAramRipper.hpp"
 #include "JSystem/JKernel/JKRAram.hpp"
@@ -10,6 +14,10 @@
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JSupport/JSUFileStream.hpp"
 #include <cstring>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaFrameClock.hpp"
+>>>>>>> upstream/main
 
 int JKRDecompressFromDVDToAram(JKRDvdFile*, u32, u32, u32, u32, u32, u32*);
 static inline u8* firstSrcData();
@@ -75,7 +83,11 @@ JKRADCommand* JKRDvdAramRipper::callCommand_Async(JKRADCommand* command) {
     JKRDvdFile* dvdFile = command->mDvdFile;
     s32 compression = 0;
     s32 uncompressedSize;
+<<<<<<< HEAD
     OSLockMutex(&dvdFile->mMutex2);
+=======
+    dvdFile->mMutex2.lock();
+>>>>>>> upstream/main
     if (command->field_0x44) {
         *command->field_0x44 = 0;
     }
@@ -83,7 +95,11 @@ JKRADCommand* JKRDvdAramRipper::callCommand_Async(JKRADCommand* command) {
     if (dvdFile->field_0x50) {
         bVar1 = false;
     } else {
+<<<<<<< HEAD
         dvdFile->field_0x50 = OSGetCurrentThread();
+=======
+        dvdFile->field_0x50 = NebulaKernel::current();
+>>>>>>> upstream/main
         JSUFileInputStream* stream = new (JKRGetSystemHeap(), -4) JSUFileInputStream(dvdFile);
         dvdFile->mFileStream = stream;
         u32 fileSize = dvdFile->getFileSize();
@@ -95,7 +111,11 @@ JKRADCommand* JKRDvdAramRipper::callCommand_Async(JKRADCommand* command) {
             u8 buffer[0x40];
             u8* bufPtr = reinterpret_cast< u8* >(ALIGN_NEXT(reinterpret_cast< uintptr_t >(&buffer), 0x20));
             while (true) {
+<<<<<<< HEAD
                 s32 result = DVDReadPrio(dvdFile->getFileInfo(), bufPtr, 0x20, 0, 2);
+=======
+                s32 result = NebulaDisc::read(dvdFile->getFile(), bufPtr, 0x20, 0);
+>>>>>>> upstream/main
                 if (result >= 0) {
                     break;
                 }
@@ -105,9 +125,14 @@ JKRADCommand* JKRDvdAramRipper::callCommand_Async(JKRADCommand* command) {
                     return nullptr;
                 }
 
+<<<<<<< HEAD
                 VIWaitForRetrace();
             }
             DCInvalidateRange(bufPtr, 0x20);
+=======
+                NebulaFrameClock::waitFrame();
+            }
+>>>>>>> upstream/main
 
             JKRCompression detectedCompression = JKRDecomp::checkCompressed(bufPtr);
             if (detectedCompression == COMPRESSION_ASR) {
@@ -176,20 +201,32 @@ JKRADCommand* JKRDvdAramRipper::callCommand_Async(JKRADCommand* command) {
         }
     }
 
+<<<<<<< HEAD
     OSUnlockMutex(&dvdFile->mMutex2);
+=======
+    dvdFile->mMutex2.unlock();
+>>>>>>> upstream/main
     return bVar1 == true ? command : nullptr;
 }
 
 bool JKRDvdAramRipper::syncAram(JKRADCommand* command, int param_1) {
     JKRDvdFile* dvdFile = command->mDvdFile;
+<<<<<<< HEAD
     OSLockMutex(&dvdFile->mMutex2);
+=======
+    dvdFile->mMutex2.lock();
+>>>>>>> upstream/main
 
     if (command->mStreamCommand) {
         JKRAramStreamCommand* var1 = JKRStreamToAram_Sync(command->mStreamCommand, param_1);
         command->field_0x48 = (var1) ? 0 : -1;
 
         if (param_1 != 0 && var1 == nullptr) {
+<<<<<<< HEAD
             OSUnlockMutex(&dvdFile->mMutex2);
+=======
+            dvdFile->mMutex2.unlock();
+>>>>>>> upstream/main
             return false;
         }
     }
@@ -201,7 +238,11 @@ bool JKRDvdAramRipper::syncAram(JKRADCommand* command, int param_1) {
 
     delete dvdFile->mFileStream;
     dvdFile->field_0x50 = nullptr;
+<<<<<<< HEAD
     OSUnlockMutex(&dvdFile->mMutex2);
+=======
+    dvdFile->mMutex2.unlock();
+>>>>>>> upstream/main
     return true;
 }
 
@@ -216,7 +257,11 @@ JKRADCommand::~JKRADCommand() {
     }
 }
 
+<<<<<<< HEAD
 static OSMutex decompMutex;
+=======
+static NebulaMutex decompMutex;
+>>>>>>> upstream/main
 
 u32 JKRDvdAramRipper::sSZSBufferSize = 0x00000400;
 
@@ -257,6 +302,7 @@ static u32* tsPtr;
 static u32 tsArea;
 
 int JKRDecompressFromDVDToAram(JKRDvdFile* dvdFile, u32 param_1, u32 fileSize, u32 uncompressedSize, u32 param_4, u32 param_5, u32* param_6) {
+<<<<<<< HEAD
     BOOL level = OSDisableInterrupts();
     if (!data_804514A4) {
         OSInitMutex(&decompMutex);
@@ -265,6 +311,16 @@ int JKRDecompressFromDVDToAram(JKRDvdFile* dvdFile, u32 param_1, u32 fileSize, u
 
     OSRestoreInterrupts(level);
     OSLockMutex(&decompMutex);
+=======
+    BOOL level = NebulaKernel::disableInterrupts();
+    if (!data_804514A4) {
+        decompMutex.init();
+        data_804514A4 = true;
+    }
+
+    NebulaKernel::restoreInterrupts(level);
+    decompMutex.lock();
+>>>>>>> upstream/main
     int result = 0;
     u32 bufferSize = JKRDvdAramRipper::getSZSBufferSize();
     szpBuf = static_cast< u8* >(JKRAllocFromSysHeap(bufferSize, 0x20));
@@ -295,7 +351,11 @@ int JKRDecompressFromDVDToAram(JKRDvdFile* dvdFile, u32 param_1, u32 fileSize, u
     JKRFree(szpBuf);
     JKRFree(refBuf);
     JKRFree(dmaBuf);
+<<<<<<< HEAD
     OSUnlockMutex(&decompMutex);
+=======
+    decompMutex.unlock();
+>>>>>>> upstream/main
     return result;
 }
 
@@ -407,14 +467,22 @@ static u8* firstSrcData() {
     u32 bufSize = szpEnd - buffer;
     u32 length = transLeft < bufSize ? transLeft : bufSize;
     while (true) {
+<<<<<<< HEAD
         int result = DVDReadPrio(srcFile->getFileInfo(), buffer, length, 0, 2);
+=======
+        int result = NebulaDisc::read(srcFile->getFile(), buffer, length, 0);
+>>>>>>> upstream/main
         if (result >= 0) {
             break;
         }
         if (!JKRDvdAramRipper::isErrorRetry()) {
             return nullptr;
         }
+<<<<<<< HEAD
         VIWaitForRetrace();
+=======
+        NebulaFrameClock::waitFrame();
+>>>>>>> upstream/main
     }
     srcOffset += length;
     transLeft -= length;
@@ -437,14 +505,22 @@ static inline u8* nextSrcData(u8* src) {
     }
 
     while (true) {
+<<<<<<< HEAD
         s32 result = DVDReadPrio(srcFile->getFileInfo(), dest + size, transSize, srcOffset, 2);
+=======
+        s32 result = NebulaDisc::read(srcFile->getFile(), dest + size, transSize, srcOffset);
+>>>>>>> upstream/main
         if (result >= 0) {
             break;
         }
         if (!JKRDvdAramRipper::isErrorRetry()) {
             return nullptr;
         }
+<<<<<<< HEAD
         VIWaitForRetrace();
+=======
+        NebulaFrameClock::waitFrame();
+>>>>>>> upstream/main
     }
     srcOffset += transSize;
     transLeft -= transSize;

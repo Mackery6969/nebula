@@ -46,9 +46,15 @@
 #include "Game/AudioLib/AudSystem.hpp"
 #include "Game/AudioLib/AudWrap.hpp"
 #include "Game/Screen/NebulaQuitButton.hpp"
+<<<<<<< HEAD
 #include "Game/Screen/NebulaSettingsMenu.hpp"
 #include <nebula_game_api.h>
 #include "Game/System/GameSystemFunction.hpp"
+=======
+#include "Game/System/GameSystemFunction.hpp"
+#include "Game/System/NebulaCalendar.hpp"
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 #endif
 
 #define USER_FILE_NUM 6
@@ -135,12 +141,15 @@ namespace NrvFileSelector {
     NEW_NERVE(FileSelectorNrvFileBroken, FileSelector, FileBroken);
     NEW_NERVE(FileSelectorNrvManualStart, FileSelector, ManualStart);
     NEW_NERVE(FileSelectorNrvManual, FileSelector, Manual);
+<<<<<<< HEAD
 #ifdef TARGET_PC
     NEW_NERVE(FileSelectorNrvCoopMenu, FileSelector, CoopMenu);
     NEW_NERVE(FileSelectorNrvCoopLoad, FileSelector, CoopLoad);
     NEW_NERVE(FileSelectorNrvCoopCreate, FileSelector, CoopCreate);
     NEW_NERVE(FileSelectorNrvCoopQuit, FileSelector, CoopQuit);
 #endif
+=======
+>>>>>>> upstream/main
 };  // namespace NrvFileSelector
 
 void FileSelector_FORCE_MATCH_SDATA2() {
@@ -155,7 +164,11 @@ FileSelector::FileSelector(const char* pName)
       mBgmState(), mSelectEffect()
 #ifdef TARGET_PC
       ,
+<<<<<<< HEAD
       mQuitButton(), mQuitWindow(), mIsAskingQuit(false), mQuitFrames(-1), mIsQuitFocusWanted(false), mIsCoopPlayWanted(false)
+=======
+      mQuitButton(), mQuitWindow(), mIsAskingQuit(false), mQuitFrames(-1), mIsQuitFocusWanted(false)
+>>>>>>> upstream/main
 #endif
 {
 }
@@ -270,6 +283,7 @@ void FileSelector::control() {
 bool FileSelector::receiveOtherMsg(u32 msg, HitSensor* pSender, HitSensor* pReceiver) {
     if (MR::isMsgAutoRushBegin(msg) && isNerve(GET_NERVE(FileSelector, FileSelectorNrvWaitBind))) {
         MR::hidePlayer();
+<<<<<<< HEAD
 #ifdef TARGET_PC
         // Online co-op: the main menu in place of the files (docs/COOP_PLAN.md, "Main menu"), after the title as Nebula
         // starts; back from a room, the menu at once.
@@ -281,6 +295,9 @@ bool FileSelector::receiveOtherMsg(u32 msg, HitSensor* pSender, HitSensor* pRece
 #else
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvTitle));
 #endif
+=======
+        setNerve(GET_NERVE(FileSelector, FileSelectorNrvTitle));
+>>>>>>> upstream/main
 
         return true;
     }
@@ -733,7 +750,11 @@ namespace {
 };  // namespace
 
 void FileSelector::setFileInfo(s32 id) {
+<<<<<<< HEAD
     OSCalendarTime td;
+=======
+    NebulaCalendar::Date date;
+>>>>>>> upstream/main
     u16 nameBuffer[RFL_NAME_LEN + 1];
     wchar_t dateBuffer[32];
     wchar_t timeBuffer[32];
@@ -744,10 +765,17 @@ void FileSelector::setFileInfo(s32 id) {
         ::copyIconMiiName(this, nameBuffer, id);
     }
 
+<<<<<<< HEAD
     OSTicksToCalendarTime(::getUserFileLastModified(this, id), &td);
 
     MR::makeDateString(dateBuffer, ARRAY_SIZE(dateBuffer), td.year, td.mon + 1, td.mday);
     MR::makeTimeString(timeBuffer, ARRAY_SIZE(timeBuffer), td.hour, td.min);
+=======
+    date = NebulaCalendar::toDate(::getUserFileLastModified(this, id));
+
+    MR::makeDateString(dateBuffer, ARRAY_SIZE(dateBuffer), date.mYear, date.mMonth, date.mDay);
+    MR::makeTimeString(timeBuffer, ARRAY_SIZE(timeBuffer), date.mHour, date.mMinute);
+>>>>>>> upstream/main
 
     bool isViewCompleteEnding = ::isUserFileViewCompleteEnding(this, id);
     bool isViewNormalEnding = ::isUserFileViewNormalEnding(this, id);
@@ -1080,6 +1108,7 @@ void FileSelector::updateBgm() {
     mBgmState = state;
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 // The online co-op main menu over the file select's sky and music, the files not shown. Host plays the save picked
 // on its page (CoopLoad), Quit leaves as Quit to desktop does; the menu itself is the host's (coop_menu), drawn by
@@ -1194,6 +1223,8 @@ void FileSelector::exeCoopQuit() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 void FileSelector::exeWaitBind() {
     mPosition.set(*MR::getPlayerPos());
 }
@@ -1212,10 +1243,13 @@ void FileSelector::exeTitle() {
         return;
     }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // Online co-op: the main menu, which waits for the Mii data itself when a save starts.
     setNerve(GET_NERVE(FileSelector, FileSelectorNrvCoopMenu));
 #else
+=======
+>>>>>>> upstream/main
     if (::getMiiFacePartsHolder()->isInitEnd()) {
         if (::getMiiFacePartsHolder()->isError()) {
             setNerve(GET_NERVE(FileSelector, FileSelectorNrvRFLError));
@@ -1225,7 +1259,10 @@ void FileSelector::exeTitle() {
     } else {
         setNerve(GET_NERVE(FileSelector, FileSelectorNrvRFLWait));
     }
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> upstream/main
 }
 
 void FileSelector::exeTitleEnd() {
@@ -1296,7 +1333,11 @@ void FileSelector::exeFileSelectStart() {
 void FileSelector::exeFileSelect() {
     if (MR::isFirstStep(this)) {
 #ifdef TARGET_PC
+<<<<<<< HEAD
         __NebulaPresence(nullptr, nullptr, -1);  // Discord: choosing a file
+=======
+        NebulaHost::presence(nullptr, nullptr, -1);  // Discord: choosing a file
+>>>>>>> upstream/main
 #endif
         validateSelectAll();
         appearAllIndex();

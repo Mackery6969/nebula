@@ -1,4 +1,10 @@
 #include "Game/MapObj/AstroDomeOrbit.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Map/SphereSelector.hpp"
 #include "Game/MapObj/MiniatureGalaxyHolder.hpp"
 #include "Game/Scene/SceneFunction.hpp"
@@ -97,6 +103,7 @@ void AstroDomeOrbit::calcGalaxyPos(TVec3f* pPos) const {
 }
 
 void AstroDomeOrbit::initDraw(const Color8& rColor) const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
@@ -118,6 +125,25 @@ void AstroDomeOrbit::initDraw(const Color8& rColor) const {
     GXSetZMode(1u, GX_LEQUAL, 0);
     GXSetZCompLoc(0);
     GXSetCullMode(GX_CULL_BACK);
+=======
+    TPos3f rotateMtx;
+    SphereSelectorFunction::calcHandledRotateMtx(mRotation, &rotateMtx);
+    rotateMtx.concat(MR::getCameraViewMtx(), rotateMtx);
+    J3DNativeShape::sendPosition(rotateMtx, GX_PNMTX0);
+    J3DNativeState::setCurrentMtx(GX_PNMTX0);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, rColor);
+    J3DNativeState::setNumTexGens(0);
+    J3DNativeState::setNumTevStages(1u);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_NOOP);
+    J3DNativeState::setAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    J3DNativeState::setZMode(1u, GX_LEQUAL, 0);
+    J3DNativeState::setZCompLoc(0);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+>>>>>>> upstream/main
 }
 
 void AstroDomeOrbit::drawCelling(f32 width, bool isAddHeight, f32 height) const {
@@ -130,7 +156,11 @@ void AstroDomeOrbit::drawCelling(f32 width, bool isAddHeight, f32 height) const 
         handleTrans.y -= (0.5f * height);
     }
 
+<<<<<<< HEAD
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 130);
+=======
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 130, 0);
+>>>>>>> upstream/main
 
     for (s32 i = 0; i < ::cDevideNum + 1; i++) {
         f32 angle = TWO_PI * i / ::cDevideNum;
@@ -147,6 +177,7 @@ void AstroDomeOrbit::drawCelling(f32 width, bool isAddHeight, f32 height) const 
         posVec.add(handleTrans);
 
         if (isAddHeight) {
+<<<<<<< HEAD
             GXPosition3f32(negVec.x, negVec.y, negVec.z);
             GXPosition3f32(posVec.x, posVec.y, posVec.z);
         } else {
@@ -156,6 +187,15 @@ void AstroDomeOrbit::drawCelling(f32 width, bool isAddHeight, f32 height) const 
     }
 
     GXEnd();
+=======
+            J3DNativeDraw::position(negVec.x, negVec.y, negVec.z);
+            J3DNativeDraw::position(posVec.x, posVec.y, posVec.z);
+        } else {
+            J3DNativeDraw::position(posVec.x, posVec.y, posVec.z);
+            J3DNativeDraw::position(negVec.x, negVec.y, negVec.z);
+        }
+    }
+>>>>>>> upstream/main
 }
 
 void AstroDomeOrbit::drawSide(f32 width, bool isAddWidth, f32 height) const {
@@ -170,7 +210,11 @@ void AstroDomeOrbit::drawSide(f32 width, bool isAddWidth, f32 height) const {
         scale = mOrbitRadius - (0.5f * width);
     }
 
+<<<<<<< HEAD
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, (::cDevideNum + 1) * 2);
+=======
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, (::cDevideNum + 1) * 2, 0);
+>>>>>>> upstream/main
 
     for (s32 i = 0; i < ::cDevideNum + 1; i++) {
         f32 angle = TWO_PI * i / ::cDevideNum;
@@ -187,6 +231,7 @@ void AstroDomeOrbit::drawSide(f32 width, bool isAddWidth, f32 height) const {
         v15.y -= height;
 
         if (isAddWidth) {
+<<<<<<< HEAD
             GXPosition3f32(v16.x, v16.y, v16.z);
             GXPosition3f32(v15.x, v15.y, v15.z);
         } else {
@@ -196,6 +241,15 @@ void AstroDomeOrbit::drawSide(f32 width, bool isAddWidth, f32 height) const {
     }
 
     GXEnd();
+=======
+            J3DNativeDraw::position(v16.x, v16.y, v16.z);
+            J3DNativeDraw::position(v15.x, v15.y, v15.z);
+        } else {
+            J3DNativeDraw::position(v15.x, v15.y, v15.z);
+            J3DNativeDraw::position(v16.x, v16.y, v16.z);
+        }
+    }
+>>>>>>> upstream/main
 }
 
 f32 AstroDomeOrbit::calcRepeatedRotateCoord(f32 coord) const {

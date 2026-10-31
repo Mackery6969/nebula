@@ -197,7 +197,11 @@ void DummyDisplayModel::calcAndSetBaseMtx() {
     TVec3f offset;
     TVec3f v19 = mModelInfo->_4;
     offset.negate(v19);
+<<<<<<< HEAD
     PSMTXMultVec((MtxPtr)m, offset, &mPosition);
+=======
+    NebulaMtxMultVec((MtxPtr)m, offset, &mPosition);
+>>>>>>> upstream/main
     m->setTrans(mPosition);
 
     switch (mItemType) {

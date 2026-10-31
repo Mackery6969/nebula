@@ -150,7 +150,11 @@ void MorphItemObjNeo::init(const JMapInfoIter& rIter) {
     s32 arg7 = -1;
     MR::getJMapInfoArg7NoInit(rIter, &arg7);
 
+<<<<<<< HEAD
     PSMTXCopy(getBaseMtx(), mBaseMtx);
+=======
+    NebulaMtxCopy(getBaseMtx(), mBaseMtx);
+>>>>>>> upstream/main
 
     _95 = false;
 
@@ -434,32 +438,52 @@ void MorphItemObjNeo::calcAndSetBaseMtx() {
     if (isNerve(GET_NERVE(MorphItemObjNeo, MorphItemObjNeoNrvWait))) {
         if (mContainerType == 2) {
             MtxPtr pMtx = MR::getJointMtx(mContainerModel, "CrystalBox");
+<<<<<<< HEAD
             PSMTXCopy(pMtx, getBaseMtx());
+=======
+            NebulaMtxCopy(pMtx, getBaseMtx());
+>>>>>>> upstream/main
 
             TVec3f yDir;
             reinterpret_cast< TPos3f* >(getBaseMtx())->getYDir(yDir);
             MR::addTransMtx(getBaseMtx(), yDir * -60.0f);
 
             pMtx = MR::tmpMtxScale(0.8f, 0.8f, 0.8f);
+<<<<<<< HEAD
             PSMTXConcat(getBaseMtx(), pMtx, getBaseMtx());
         } else if (mContainerType == 1) {
             MtxPtr pMtx = mContainerModel->getBaseMtx();
             PSMTXCopy(pMtx, getBaseMtx());
+=======
+            NebulaMtxConcat(getBaseMtx(), pMtx, getBaseMtx());
+        } else if (mContainerType == 1) {
+            MtxPtr pMtx = mContainerModel->getBaseMtx();
+            NebulaMtxCopy(pMtx, getBaseMtx());
+>>>>>>> upstream/main
 
             TVec3f yDir;
             reinterpret_cast< TPos3f* >(getBaseMtx())->getYDir(yDir);
             MR::addTransMtx(getBaseMtx(), yDir * -50.0f);
 
             pMtx = MR::tmpMtxScale(0.8f, 0.8f, 0.8f);
+<<<<<<< HEAD
             PSMTXConcat(getBaseMtx(), pMtx, getBaseMtx());
         } else {
             LiveActor::calcAndSetBaseMtx();
 
             PSMTXConcat(getBaseMtx(), MR::tmpMtxRotYDeg(mAngle), getBaseMtx());
+=======
+            NebulaMtxConcat(getBaseMtx(), pMtx, getBaseMtx());
+        } else {
+            LiveActor::calcAndSetBaseMtx();
+
+            NebulaMtxConcat(getBaseMtx(), MR::tmpMtxRotYDeg(mAngle), getBaseMtx());
+>>>>>>> upstream/main
         }
     } else {
         LiveActor::calcAndSetBaseMtx();
 
+<<<<<<< HEAD
         PSMTXConcat(getBaseMtx(), MR::tmpMtxRotYDeg(mAngle), getBaseMtx());
 
         if (mAppearMode != 0) {
@@ -468,6 +492,16 @@ void MorphItemObjNeo::calcAndSetBaseMtx() {
 
             TVec3f rotVec;
             PSMTXMultVec(rotMtx, mZRotation, rotVec);
+=======
+        NebulaMtxConcat(getBaseMtx(), MR::tmpMtxRotYDeg(mAngle), getBaseMtx());
+
+        if (mAppearMode != 0) {
+            TPos3f rotMtx;
+            NebulaMtxRotAxisRad(rotMtx, mVelocity, mAppearMode * (TWO_PI / ::sUnknown2));
+
+            TVec3f rotVec;
+            NebulaMtxMultVec(rotMtx, mZRotation, rotVec);
+>>>>>>> upstream/main
 
             rotVec.setLength(mAppearMode * ::cRotateRadiusPower + ::cRotateRadiusMini);
             MR::addTransMtx(getBaseMtx(), rotVec);

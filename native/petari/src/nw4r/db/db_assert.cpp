@@ -1,8 +1,19 @@
 #include "nw4r/db/assert.h"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "nw4r/db/console.h"
 #include "nw4r/db/directPrint.h"
 #include "nw4r/db/mapFile.h"
 #include <va_list.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaFrameClock.hpp"
+
+extern "C" __attribute__((noreturn)) void nebula_fatal(const char* format, ...);
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace db {
@@ -13,7 +24,11 @@ namespace nw4r {
             va_start(vlist, fmt);
             if (sAssertionConsole) {
             } else {
+<<<<<<< HEAD
                 OSVReport(fmt, vlist);
+=======
+                JUTNativeLogV(fmt, vlist);
+>>>>>>> upstream/main
             }
             va_end(vlist);
         }
@@ -80,11 +95,19 @@ namespace nw4r {
             }
             stackPointer = *((u32*)stackPointer);
 #endif
+<<<<<<< HEAD
             (void)OSDisableInterrupts();
             (void)OSDisableScheduler();
 
             (void)VISetPreRetraceCallback(NULL);
             (void)VISetPostRetraceCallback(NULL);
+=======
+            (void)NebulaKernel::disableInterrupts();
+            (void)NebulaKernel::disableScheduler();
+
+            (void)NebulaFrameClock::setPreHook(NULL);
+            (void)NebulaFrameClock::setPostHook(NULL);
+>>>>>>> upstream/main
 
             if (sAssertionConsole) {
                 (void)detail::DirectPrint_SetupFB(NULL);
@@ -100,6 +123,7 @@ namespace nw4r {
                 (void)Console_SetVisible(sAssertionConsole, true);
                 Console_DrawDirect(sAssertionConsole);
             } else {
+<<<<<<< HEAD
                 OSReport("%s:%d Panic:", file, line);
                 OSVReport(fmt, vlist);
                 OSReport("\n");
@@ -107,6 +131,15 @@ namespace nw4r {
 
             if (halt) {
                 PPCHalt();
+=======
+                JUTNativeLog("%s:%d Panic:", file, line);
+                JUTNativeLogV(fmt, vlist);
+                JUTNativeLog("\n");
+            }
+
+            if (halt) {
+                nebula_fatal("%s:%d: NW4R panic", file, line);
+>>>>>>> upstream/main
             }
         }
 
@@ -115,7 +148,10 @@ namespace nw4r {
             va_start(vlist, fmt);
             nw4r::db::VPanic(file, line, fmt, vlist, true);
             va_end(vlist);
+<<<<<<< HEAD
             PPCHalt();
+=======
+>>>>>>> upstream/main
         }
 
     };  // namespace db

@@ -3,7 +3,13 @@
 #include "JSystem/JGadget/linklist.hpp"
 #include "JSystem/JKernel/JKRDisposer.hpp"
 #include "JSystem/JUtility/TColor.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class JUTConsole;
 
@@ -27,7 +33,10 @@ public:
     enum EConsoleType {
         CONSOLE_TYPE_0 = 0,
         CONSOLE_TYPE_1 = 1,
+<<<<<<< HEAD
         CONSOLE_TYPE_2 = 2,
+=======
+>>>>>>> upstream/main
     };
 
     enum OutputFlag {
@@ -115,8 +124,11 @@ public:
     void appendConsole(JUTConsole*);
     void removeConsole(JUTConsole*);
     void draw() const;
+<<<<<<< HEAD
     void drawDirect(bool) const;
     void setDirectConsole(JUTConsole*);
+=======
+>>>>>>> upstream/main
 
     static JUTConsoleManager* createManager(JKRHeap*);
 
@@ -128,7 +140,10 @@ public:
 
     /* 0x00 */ ConsoleList mList;
     /* 0x0C */ JUTConsole* mActiveConsole;
+<<<<<<< HEAD
     /* 0x10 */ JUTConsole* mDirectConsole;
+=======
+>>>>>>> upstream/main
 
     static JUTConsoleManager* const getManager() {
         return sManager;

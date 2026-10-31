@@ -1,7 +1,13 @@
 #pragma once
 
 #include <limits>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 // Android's C library defines bcopy and bzero as macros (<strings.h>); JASCalc has functions of those names.

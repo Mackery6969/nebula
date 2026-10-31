@@ -1,4 +1,8 @@
 #include "Game/System/AudSystemWrapper.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/AudioLib/AudMeNameConverter.hpp"
 #include "Game/AudioLib/AudMicWrap.hpp"
 #include "Game/AudioLib/AudSceneMgr.hpp"
@@ -48,7 +52,11 @@ void AudSystemWrapper::createAudioSystem() {
     receiveResourceForInitialize();
 
     if (mIsResetDone) {
+<<<<<<< HEAD
         OSSuspendThread(OSGetCurrentThread());
+=======
+        NebulaKernel::suspend(NebulaKernel::current());
+>>>>>>> upstream/main
     }
 
     mDisableReset = true;

@@ -8,6 +8,10 @@
 #include "Game/Util/LayoutUtil.hpp"
 #include "Game/Util/MessageUtil.hpp"
 #include <nw4r/lyt/textBox.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     nw4r::lyt::TextBox* getTextBoxPane(LayoutActor* pActor, const char* pPaneName) NO_INLINE {
@@ -176,7 +180,11 @@ void TalkTextFormer::updateTalking() {
 // A skipped cutscene's pages come whole.
 void TalkTextFormer::updateTalkingAtTextSpeed() {
     updateTalking();
+<<<<<<< HEAD
     const u32 speed = NebulaCutsceneSkip::isSkipping() ? 4 : __NebulaOption(NEBULA_OPTION_TEXT_SPEED);
+=======
+    const u32 speed = NebulaCutsceneSkip::isSkipping() ? 4 : NebulaHost::option(NEBULA_OPTION_TEXT_SPEED);
+>>>>>>> upstream/main
     for (u32 extra = speed >= 4 ? 0x2000 : speed - 1; extra != 0 && !isTextAppearedAll(); extra--) {
         updateTalking();
     }

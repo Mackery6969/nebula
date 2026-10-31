@@ -42,17 +42,27 @@ enum NebulaStat {
     NebulaStat_GameOvers,
     NebulaStat_OneUps,
     NebulaStat_PlaySeconds,
+<<<<<<< HEAD
     NebulaStat_PowerStars,  // Power and Grand Stars new to the save, got by this player (the Personal Star Counter)
+=======
+>>>>>>> upstream/main
     NebulaStat_Num
 };
 
 // Nebula's achievements (galaxy::achievements has the catalogue): each stage start checks every goal against the save
+<<<<<<< HEAD
 // data and asks the host to unlock what is met; a newly unlocked one waits for its pop-up (NebulaAchievementToast). In
 // online co-op the save's achievements are every player's: one another player unlocks pops up here too.
 namespace NebulaAchievements {
     void evaluate();  // GameScene::start
     void update();    // GameScene::update: the goals that change mid-stage (lives, Star Bits), once a second; the room's
                       // unlocks, each frame
+=======
+// data and asks the host to unlock what is met; a newly unlocked one waits for its pop-up (NebulaAchievementToast).
+namespace NebulaAchievements {
+    void evaluate();  // GameScene::start
+    void update();    // GameScene::update: the goals that change mid-stage (lives, Star Bits), once a second
+>>>>>>> upstream/main
 
     // The oldest unlocked achievement not yet shown: its name in the played language and its icon; null when none
     // waits.
@@ -74,9 +84,12 @@ namespace NebulaAchievements {
     bool isShownLocked(s32 index);
     // GameScene: a Grand Star touched (Cosmic Immortal: the rematch with Bowser).
     void onGrandStarGet();
+<<<<<<< HEAD
     // GameScene: a star's get sequence starts. One new to the save counts for this player all time
     // (NebulaStat_PowerStars, the Personal Star Counter's green count).
     void onStarGet();
+=======
+>>>>>>> upstream/main
     const NebulaAchievementIcon* getIcon(s32 index);
 
     // The textures the icons use, each once (the pop-up loads them when its scene starts).

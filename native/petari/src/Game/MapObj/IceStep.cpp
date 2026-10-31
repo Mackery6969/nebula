@@ -36,7 +36,11 @@ void IceStep::init(const JMapInfoIter& rIter) {
     initHitSensor(1);
     MR::addHitSensorMapObj(this, "body", 8, radius, TVec3f(0.0f, radius, 0.0f));
 
+<<<<<<< HEAD
     PSMTXIdentity(_8C);
+=======
+    NebulaMtxIdentity(_8C);
+>>>>>>> upstream/main
 
     MR::initCollisionParts(this, "IceStep", getSensor("body"), nullptr);
 

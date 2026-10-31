@@ -72,7 +72,11 @@ public:
             }
         }
 
+<<<<<<< HEAD
         PSMTXMultVecSR(mMtx, diff, pRel->mPos);
+=======
+        NebulaMtxMultVecSR(mMtx, diff, pRel->mPos);
+>>>>>>> upstream/main
         pRel->mDir.set(diff);
         pRel->mDist = pRel->mDir.normalize();
     }

@@ -91,6 +91,7 @@ native_audio_bus_from_channel_format(
     return {};
 }
 
+<<<<<<< HEAD
 // The JAudio2 owner of one DSP channel, through the game's structures (field
 // offsets from the Petari layouts, docs/PROVENANCE.md), every link checked:
 //   JASDSPChannel::sDspChannels: 64 x 0x1C; +0x14 callback data. A
@@ -103,6 +104,10 @@ native_audio_bus_from_channel_format(
 //     +0xC8 (a JAISe begins with its JSULink, whose +0 points at it) or in a
 //     JAISeq at +0xA8. JAISound::mSoundID is JAISe +0x28, JAISeq +0x18,
 //     JAIStream +0x18 (its JASAramStream at +0xA8).
+=======
+// How the game knows a channel's sound (nebula_game_audio_channel_owner): by its sample format only, or as a
+// sound effect, a sequence or a stream with that sound's ID.
+>>>>>>> upstream/main
 enum class JAudioOwnerRoute : std::uint8_t { Format, Se, Seq, Stream };
 
 struct JAudioChannelOwner {
@@ -110,6 +115,7 @@ struct JAudioChannelOwner {
     std::uint32_t sound_id{};
 };
 
+<<<<<<< HEAD
 inline constexpr std::uint32_t kJasDspChannelsPointer = 0x806A2BD0u;
 inline constexpr std::uint32_t kJasDspChannelSize = 0x1cu;
 
@@ -182,6 +188,8 @@ template <class ReadU32>
     return decision;
 }
 
+=======
+>>>>>>> upstream/main
 // Per-bus gains. `master` multiplies each bus here; the host passes 1 because it applies the master gain once, at
 // the final output, so that it also covers audio mixed outside these channels (the movie player).
 struct NativeAudioBusGains {

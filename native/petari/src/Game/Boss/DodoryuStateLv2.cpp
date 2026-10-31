@@ -10,6 +10,10 @@
 #include <JSystem/JMath/JMATrigonometric.hpp>
 #include <JSystem/JMath/JMath.hpp>
 #include <cmath>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 void DodoryuStateLv2_FORCE_MATCH(TPos3f* pMtx, TVec3f* pVec) {
     pMtx->getYDir(*pVec);
@@ -695,7 +699,11 @@ bool DodoryuStateLv2::catchPlayerAttack(u32 msg, HitSensor* pSender, HitSensor* 
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     if (__NebulaCodePatch(NEBULA_PATCH_DODORYU_SHELL_ONLY, nullptr) ? MR::isMsgJetTurtleAttack(msg)
+=======
+    if (NebulaHost::codePatch(NEBULA_PATCH_DODORYU_SHELL_ONLY, nullptr) ? MR::isMsgJetTurtleAttack(msg)
+>>>>>>> upstream/main
                                                                       : MR::isMsgPlayerHitAll(msg)) {
 #else
     if (MR::isMsgPlayerHitAll(msg)) {

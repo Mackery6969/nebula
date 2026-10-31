@@ -1,6 +1,13 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 class JKRHeap;
 
@@ -11,7 +18,11 @@ public:
     static void setup(u32, JKRHeap*);
     static s32 checkCompressed(const u8*);
     static void* loadToMainRAM(const char*, u8*, bool, JKRHeap*, AllocDirection);
+<<<<<<< HEAD
     static bool decompressFromDVD(DVDFileInfo*, void*, u32, u32, const u8*, u32);
+=======
+    static bool decompressFromDVD(NebulaDisc::File*, void*, u32, u32, const u8*, u32);
+>>>>>>> upstream/main
     static bool decompressSzsSub(u8*, u8*);
     static u8* readSrcDataFirst();
     static u8* readSrcDataNext(u8*);

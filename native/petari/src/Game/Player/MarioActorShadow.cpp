@@ -1,4 +1,8 @@
 #include "Game/LiveActor/HitSensor.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Map/HitInfo.hpp"
 #include "Game/Player/J3DModelX.hpp"
 #include "Game/Player/JetTurtleShadow.hpp"
@@ -56,9 +60,15 @@ void MarioActor::initShadow() {
 void MarioActor::calcViewReflectionModel() {
     J3DModelX* pModel = getJ3DModel();
     TPos3f matrix;
+<<<<<<< HEAD
     PSMTXCopy(getJ3DModel()->getBaseTRMtx(), matrix.toMtxPtr());
     TPos3f offset;
     PSMTXIdentity(offset.toMtxPtr());
+=======
+    NebulaMtxCopy(getJ3DModel()->getBaseTRMtx(), matrix.toMtxPtr());
+    TPos3f offset;
+    NebulaMtxIdentity(offset.toMtxPtr());
+>>>>>>> upstream/main
     f32 factor;
     f32 distance = 10.0f;
     if (isAnimationRun("\203\136\201\133\203\223\203\127\203\203\203\223\203\166" /* ターンジャンプ */)) {
@@ -83,7 +93,11 @@ void MarioActor::calcViewReflectionModel() {
         TVec3f root;
         getRealPos("All_Root", &root);
         TVec3f translation(mPosition - root);
+<<<<<<< HEAD
         PSMTXTrans(offset.toMtxPtr(), translation.x, translation.y, translation.z);
+=======
+        NebulaMtxTrans(offset.toMtxPtr(), translation.x, translation.y, translation.z);
+>>>>>>> upstream/main
         updateReflectAlphaDL(_A09);
         break;
     }
@@ -190,6 +204,7 @@ void MarioActor::calcViewReflectionModel() {
     }
 
     matrix.setTrans(position);
+<<<<<<< HEAD
     PSMTXCopy(matrix.toMtxPtr(), _E0C.toMtxPtr());
     if (getCarrySensor() != nullptr) {
         TPos3f carry;
@@ -201,6 +216,19 @@ void MarioActor::calcViewReflectionModel() {
     PSMTXConcat(_BC8.mMtx, offset.toMtxPtr(), offset.toMtxPtr());
     PSMTXConcat(matrix.toMtxPtr(), offset.toMtxPtr(), matrix.toMtxPtr());
     PSMTXConcat(j3dSys.mViewMtx, matrix.toMtxPtr(), j3dSys.mViewMtx);
+=======
+    NebulaMtxCopy(matrix.toMtxPtr(), _E0C.toMtxPtr());
+    if (getCarrySensor() != nullptr) {
+        TPos3f carry;
+        NebulaMtxConcat(_BC8.mMtx, MR::getJointMtx(getCarrySensor()->mHost, 0), carry.toMtxPtr());
+        NebulaMtxConcat(_E0C.toMtxPtr(), carry.toMtxPtr(), _E0C.toMtxPtr());
+        _9A0->calcType0(_E0C.toMtxPtr());
+    }
+
+    NebulaMtxConcat(_BC8.mMtx, offset.toMtxPtr(), offset.toMtxPtr());
+    NebulaMtxConcat(matrix.toMtxPtr(), offset.toMtxPtr(), matrix.toMtxPtr());
+    NebulaMtxConcat(j3dSys.mViewMtx, matrix.toMtxPtr(), j3dSys.mViewMtx);
+>>>>>>> upstream/main
     pModel->viewCalc3(3, nullptr);
     MR::loadViewMtx();
 }
@@ -273,7 +301,11 @@ void MarioActor::calcViewWallShadowModel() {
     MR::normalizeOrZero(&normal);
     J3DModelX* pModel = getJ3DModel();
     J3DModelX* pSimple = getSimpleModel();
+<<<<<<< HEAD
     PSMTXCopy(pModel->getBaseTRMtx(), pSimple->getBaseTRMtx());
+=======
+    NebulaMtxCopy(pModel->getBaseTRMtx(), pSimple->getBaseTRMtx());
+>>>>>>> upstream/main
     TPos3f& matrix = *reinterpret_cast< TPos3f* >(pSimple->getBaseTRMtx());
     TVec3f x;
     matrix.getXDir(x);
@@ -291,7 +323,11 @@ void MarioActor::calcViewWallShadowModel() {
     MR::vecKillElement(mPosition - position, getGravityVec(), &horizontal);
     TVec3f translation = mPosition + normal * (10.0f + horizontal.length());
     MR::setMtxTrans(matrix.toMtxPtr(), translation.x, translation.y, translation.z);
+<<<<<<< HEAD
     PSMTXConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
+=======
+    NebulaMtxConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
+>>>>>>> upstream/main
     pSimple->viewCalcRef(3, pModel);
     _A0C = 1;
 }
@@ -328,9 +364,15 @@ void MarioActor::drawShadow() const {
 
     J3DModelX* pSimple = getSimpleModel();
     TPos3f matrix;
+<<<<<<< HEAD
     PSMTXScale(matrix.toMtxPtr(), mScale.x, mScale.y, mScale.z);
     PSMTXConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
     PSMTXConcat(getJ3DModel()->getBaseTRMtx(), matrix.toMtxPtr(), pSimple->getBaseTRMtx());
+=======
+    NebulaMtxScale(matrix.toMtxPtr(), mScale.x, mScale.y, mScale.z);
+    NebulaMtxConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
+    NebulaMtxConcat(getJ3DModel()->getBaseTRMtx(), matrix.toMtxPtr(), pSimple->getBaseTRMtx());
+>>>>>>> upstream/main
     _214->calcView(pSimple, 2, getJ3DModel());
     if (mMario->mSinkTimer > 180) {
         return;
@@ -422,7 +464,11 @@ void MarioActor::calcViewSilhouetteModel() {
     J3DModelX* pSimple = getSimpleModel();
     TVec3f direction(mPosition - mCamPos);
     MR::normalizeOrZero(&direction);
+<<<<<<< HEAD
     PSMTXCopy(pModel->getBaseTRMtx(), pSimple->getBaseTRMtx());
+=======
+    NebulaMtxCopy(pModel->getBaseTRMtx(), pSimple->getBaseTRMtx());
+>>>>>>> upstream/main
     TPos3f& matrix = *reinterpret_cast< TPos3f* >(pSimple->getBaseTRMtx());
     TVec3f x;
     matrix.getXDir(x);
@@ -446,7 +492,11 @@ void MarioActor::calcViewSilhouetteModel() {
     }
 
     MR::setMtxTrans(matrix.toMtxPtr(), translation.x, translation.y, translation.z);
+<<<<<<< HEAD
     PSMTXConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
+=======
+    NebulaMtxConcat(matrix.toMtxPtr(), _BC8.mMtx, matrix.toMtxPtr());
+>>>>>>> upstream/main
     pSimple->viewCalcRef(1, pModel);
 }
 
@@ -510,8 +560,13 @@ void MarioActor::calcViewBlurModel() {
     if (_A6E == 2) {
         for (u32 i = 0; i < 8; i++) {
             for (u32 j = 0; j < getModelData()->getDrawMtxNum(); j++) {
+<<<<<<< HEAD
                 PSMTXCopy(pModel->getDrawMtx(j), _A70[i][j]);
                 PSMTXCopy(pModel->getDrawMtx(j), _A90[i][j]);
+=======
+                NebulaMtxCopy(pModel->getDrawMtx(j), _A70[i][j]);
+                NebulaMtxCopy(pModel->getDrawMtx(j), _A90[i][j]);
+>>>>>>> upstream/main
             }
         }
 
@@ -520,7 +575,11 @@ void MarioActor::calcViewBlurModel() {
     } else if (_37C % 3 == 0) {
         _B12 = (_B12 + 1) & 7;
         for (u32 j = 0; j < getModelData()->getDrawMtxNum(); j++) {
+<<<<<<< HEAD
             PSMTXCopy(pModel->getDrawMtx(j), mBlurMatrices[1 - _B10][_B12][j]);
+=======
+            NebulaMtxCopy(pModel->getDrawMtx(j), mBlurMatrices[1 - _B10][_B12][j]);
+>>>>>>> upstream/main
         }
     }
 
@@ -588,7 +647,13 @@ void MarioActor::drawSilhouette() const {
     pModel->mFlags._1C = true;
     pModel->directDraw(nullptr);
     pModel->mFlags._1C = false;
+<<<<<<< HEAD
     GXSetAlphaUpdate(GX_TRUE);
     GXSetColorUpdate(GX_TRUE);
     GXSetDstAlpha(GX_TRUE, 0);
+=======
+    J3DNativeState::setAlphaUpdate(GX_TRUE);
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setDstAlpha(GX_TRUE, 0);
+>>>>>>> upstream/main
 }

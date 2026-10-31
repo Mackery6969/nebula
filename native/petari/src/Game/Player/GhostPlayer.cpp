@@ -1,4 +1,8 @@
 #include "Game/Player/GhostPlayer.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Animation/XanimeCore.hpp"
 #include "Game/Animation/XanimePlayer.hpp"
 #include "Game/Camera/CameraTargetArg.hpp"
@@ -197,7 +201,11 @@ void GhostPlayer::init(const JMapInfoIter& rIter) {
     mWaitingToStart = true;
     _112 = true;
     MR::getRotatedAxisZ(&mInitialDirection, mRotation);
+<<<<<<< HEAD
     PSMTXCopy(getBaseMtx(), mTargetRotationMtx);
+=======
+    NebulaMtxCopy(getBaseMtx(), mTargetRotationMtx);
+>>>>>>> upstream/main
     mJetTurtleShadow = new JetTurtleShadow("\203\112\203\201\203\126\203\203\203\150\203\105\203\202\203\146\203\213" /* カメシャドウモデル */);
     mJetTurtleShadow->initWithoutIter();
     mHandRPos = new FixedPosition(this, "HandR", TVec3f(15.59f, 42.5f, 42.93f), TVec3f(-17.05f, -0.7f, 113.55f));
@@ -279,7 +287,11 @@ void GhostPlayer::exeWait() {
 
 void GhostPlayer::warpPosition(const char* pName) {
     MR::findNamePos(pName, getBaseMtx());
+<<<<<<< HEAD
     PSMTXCopy(getBaseMtx(), mTargetRotationMtx);
+=======
+    NebulaMtxCopy(getBaseMtx(), mTargetRotationMtx);
+>>>>>>> upstream/main
     MR::extractMtxTrans(getBaseMtx(), &mPosition);
 }
 
@@ -403,7 +415,11 @@ void GhostPlayer::exePreStartDemo2() {
             frontVec = normalizedFrontVec;
         }
         MR::makeMtxUpFront(reinterpret_cast< TPos3f* >(getBaseMtx()), upVec, frontVec);
+<<<<<<< HEAD
         PSMTXCopy(getBaseMtx(), mTargetRotationMtx);
+=======
+        NebulaMtxCopy(getBaseMtx(), mTargetRotationMtx);
+>>>>>>> upstream/main
         MR::extractMtxTrans(getBaseMtx(), &mPosition);
     }
     if (!mRaceManagerLayout->isPlayCountAnim()) {
@@ -458,8 +474,13 @@ void GhostPlayer::exeWinDemo() {
     }
 
     if (mPowerStarTarget != nullptr) {
+<<<<<<< HEAD
         PSMTXCopy(mPowerStarTarget->getBaseMtx(), getBaseMtx());
         PSMTXCopy(getBaseMtx(), mTargetRotationMtx);
+=======
+        NebulaMtxCopy(mPowerStarTarget->getBaseMtx(), getBaseMtx());
+        NebulaMtxCopy(getBaseMtx(), mTargetRotationMtx);
+>>>>>>> upstream/main
         MR::extractMtxTrans(getBaseMtx(), &mPosition);
     }
 
@@ -595,16 +616,25 @@ void GhostPlayer::draw() const {
 
     J3DModelX* model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(this));
     model->viewCalc2();
+<<<<<<< HEAD
     GXInvalidateVtxCache();
+=======
+>>>>>>> upstream/main
     model->mFlags.clear();
     model->directDraw(nullptr);
     if (mHasJetTurtle) {
         mJetTurtleShadow->drawType1();
     }
 
+<<<<<<< HEAD
     GXSetAlphaUpdate(GX_FALSE);
     GXSetColorUpdate(GX_TRUE);
     GXSetDstAlpha(GX_FALSE, 0);
+=======
+    J3DNativeState::setAlphaUpdate(GX_FALSE);
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setDstAlpha(GX_FALSE, 0);
+>>>>>>> upstream/main
 }
 
 u32 GhostPlayer::receiveGhostPacket(GhostPacket* pPacket) {

@@ -18,13 +18,21 @@
 // CameraDirector) and copies the target matrix unsmoothed; a set flag there
 // is a hard cut.
 //
+<<<<<<< HEAD
 // Host markers (op 0xF0, kind byte): 1-4 draw identity (fifo_parser.h); 5 draw
+=======
+// Host markers (op 0xF0, kind byte): 1-4 draw identity; 5 draw
+>>>>>>> upstream/main
 // category or scene phase; 6 scene signals (first marker of a 3D scene); 7
 // pass; 8 light load; 9-11 the 2D layer's identity (layout pane, layout
 // actor, star pointer); 12 material.
 //
 // 2D layer: GameScene::draw2D's entry and epilogue are FIFO markers like the
+<<<<<<< HEAD
 // 3D scene's (gx::FifoMarker::Scene2DBegin / Scene2DEnd). Layout markers sit
+=======
+// 3D scene's (render::FifoMarker::Scene2DBegin / Scene2DEnd). Layout markers sit
+>>>>>>> upstream/main
 // at the start of a pane's, layout actor's or star pointer's draw: a function
 // entry or the path after its visibility test, never inside a GXBegin.
 //
@@ -63,7 +71,11 @@ inline constexpr std::uint8_t kMarkerEffect = 13u;       // a the emitter's effe
 // aux 1: the draws up to the next one (aux 0) are the traced scene's alone, never drawn to the picture (the player's
 // body in the first-person view, MarioActor::drawTracedBody).
 inline constexpr std::uint8_t kMarkerTraceOnly = 14u;
+<<<<<<< HEAD
 // The game's bloom through the renderer (galaxy/gx/game_bloom.h; NEBULA_OPTION_BLOOM), aux the phase: kBloomKeep the
+=======
+// The game's bloom through the renderer (galaxy/render/game_bloom.h; NEBULA_OPTION_BLOOM), aux the phase: kBloomKeep the
+>>>>>>> upstream/main
 // scene before the bloom works over it (BloomEffect::preDraw; BloomEffectSimple::draw's start with its own chain);
 // kBloomNormal BloomEffect::postDraw drawn by the renderer, a the threshold, the two blurs' tap weights and the
 // intensity (8 bits each, low first), b the rings' horizontal radius per unit (float bits: 1 / the camera's aspect);
@@ -75,6 +87,12 @@ inline constexpr std::uint16_t kBloomKeep = 1u;
 inline constexpr std::uint16_t kBloomNormal = 2u;
 inline constexpr std::uint16_t kBloomSimple = 3u;
 inline constexpr std::uint16_t kBloomRestore = 4u;
+<<<<<<< HEAD
+=======
+// The next draw is the game's EFB clear quad (Game/Util/RenderSignals.hpp NebulaRender::clearQuad), a its Z texture's depth;
+// aux 1: b its constant colour (TEV C0 and A0, RGBA).
+inline constexpr std::uint8_t kMarkerClearQuad = 16u;
+>>>>>>> upstream/main
 
 // Kind 6 flags.
 inline constexpr std::uint16_t kSceneCameraCut = 1u;  // the view jumped since the previous scene

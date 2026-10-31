@@ -185,7 +185,11 @@ void DynamicCollisionObj::createCollision() {
 
     mParts = new CollisionParts();
     TPos3f posmtx;
+<<<<<<< HEAD
     PSMTXTrans(posmtx, mPosition.x, mPosition.y, mPosition.z);
+=======
+    NebulaMtxTrans(posmtx, mPosition.x, mPosition.y, mPosition.z);
+>>>>>>> upstream/main
     mParts->init(posmtx, getSensor("body"), mKCLFile, nullptr, 0, true);
     MR::validateCollisionParts(mParts);
     mParts->mServer->calcFarthestVertexDistance();

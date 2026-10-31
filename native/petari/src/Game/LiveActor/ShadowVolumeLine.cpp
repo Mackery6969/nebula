@@ -1,4 +1,10 @@
 #include "Game/LiveActor/ShadowVolumeLine.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/DirectDraw.hpp"
 #include "Game/Util/MathUtil.hpp"
@@ -11,11 +17,16 @@ ShadowVolumeLine::ShadowVolumeLine() : ShadowVolumeDrawer("\211\145\225\140\211\
 }
 
 void ShadowVolumeLine::loadModelDrawMtx() const {
+<<<<<<< HEAD
     GXLoadPosMtxImm(MR::getCameraViewMtx(), 0);
     GXSetCurrentMtx(0);
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+>>>>>>> upstream/main
 }
 
 void ShadowVolumeLine::drawShape() const {
@@ -61,21 +72,35 @@ void ShadowVolumeLine::drawShape() const {
     points[6].scaleAdd(toLength, toDrop, points[4]);
     points[7].scaleAdd(toLength, toDrop, points[5]);
 
+<<<<<<< HEAD
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+=======
+    J3DNativeDraw::begin(GX_QUADS, 4, 0);
+>>>>>>> upstream/main
     TDDraw::sendPoint(points[1]);
     TDDraw::sendPoint(points[5]);
     TDDraw::sendPoint(points[7]);
     TDDraw::sendPoint(points[3]);
+<<<<<<< HEAD
     GXEnd();
 
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+=======
+
+    J3DNativeDraw::begin(GX_QUADS, 4, 0);
+>>>>>>> upstream/main
     TDDraw::sendPoint(points[0]);
     TDDraw::sendPoint(points[2]);
     TDDraw::sendPoint(points[6]);
     TDDraw::sendPoint(points[4]);
+<<<<<<< HEAD
     GXEnd();
 
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 10);
+=======
+
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 10, 0);
+>>>>>>> upstream/main
     TDDraw::sendPoint(points[0]);
     TDDraw::sendPoint(points[1]);
     TDDraw::sendPoint(points[2]);
@@ -86,7 +111,10 @@ void ShadowVolumeLine::drawShape() const {
     TDDraw::sendPoint(points[5]);
     TDDraw::sendPoint(points[0]);
     TDDraw::sendPoint(points[1]);
+<<<<<<< HEAD
     GXEnd();
+=======
+>>>>>>> upstream/main
 }
 
 void ShadowVolumeLine::setFromShadowController(const ShadowController* pController) {

@@ -1,11 +1,16 @@
+<<<<<<< HEAD
 /* System settings and the Wii Message Board natively.
    - SC: the console's system settings, which the host answers from its Wii settings (sc_get).
+=======
+/* The Wii Message Board natively.
+>>>>>>> upstream/main
    - NWC24: the game posts letters to the Wii Message Board (records, star totals). A PC has no message board, so
      every call succeeds and the letters go nowhere; the game's flow is the console's with WiiConnect24 on.
    - VF: the virtual file system WiiConnect24 works in; nothing to set up. */
 #include <string.h>
 
 #include <revolution/nwc24.h>
+<<<<<<< HEAD
 #include <revolution/sc.h>
 
 #include <nebula_game_api.h>
@@ -41,6 +46,8 @@ u8 SCGetEuRgb60Mode(void) {
 u8 SCGetScreenSaverMode(void) {
     return setting(NEBULA_SC_SCREEN_SAVER_MODE);
 }
+=======
+>>>>>>> upstream/main
 
 NWC24Err NWC24OpenLib(void* work) {
     (void)work;

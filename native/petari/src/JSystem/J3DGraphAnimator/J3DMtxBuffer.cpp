@@ -360,7 +360,11 @@ void J3DMtxBuffer::calcDrawMtx(u32 mdlFlag, Vec const& param_1, Mtx const& param
         viewMtx = j3dSys.getViewMtx();
         fullWgtNum = mJointTree->getDrawFullWgtMtxNum();
         for (u16 i = 0; i < fullWgtNum; i++) {
+<<<<<<< HEAD
             PSMTXConcat(viewMtx, getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
+=======
+            NebulaMtxConcat(viewMtx, getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
+>>>>>>> upstream/main
         }
         if (mJointTree->getDrawMtxNum() > fullWgtNum) {
             J3DPSMtxArrayConcat(viewMtx, *mpWeightEvlpMtx, *getDrawMtx(fullWgtNum), mJointTree->getWEvlpMtxNum());
@@ -369,18 +373,30 @@ void J3DMtxBuffer::calcDrawMtx(u32 mdlFlag, Vec const& param_1, Mtx const& param
     case 1:
         fullWgtNum = mJointTree->getDrawFullWgtMtxNum();
         for (u16 i = 0; i < fullWgtNum; i++) {
+<<<<<<< HEAD
             PSMTXCopy(getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
         }
         fullWgtNum = mJointTree->getDrawFullWgtMtxNum();
         for (u16 i = 0; i < fullWgtNum; i++) {
             PSMTXCopy(getWeightAnmMtx(i), *getDrawMtx(mJointTree->getDrawFullWgtMtxNum() + i));
+=======
+            NebulaMtxCopy(getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
+        }
+        fullWgtNum = mJointTree->getDrawFullWgtMtxNum();
+        for (u16 i = 0; i < fullWgtNum; i++) {
+            NebulaMtxCopy(getWeightAnmMtx(i), *getDrawMtx(mJointTree->getDrawFullWgtMtxNum() + i));
+>>>>>>> upstream/main
         }
         break;
     case 2:
         J3DCalcViewBaseMtx(j3dSys.getViewMtx(), param_1, param_2, viewBaseMtx);
         fullWgtNum = mJointTree->getDrawFullWgtMtxNum();
         for (u16 i = 0; i < fullWgtNum; i++) {
+<<<<<<< HEAD
             PSMTXConcat(viewBaseMtx, getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
+=======
+            NebulaMtxConcat(viewBaseMtx, getAnmMtx(mJointTree->getDrawMtxIndex(i)), *getDrawMtx(i));
+>>>>>>> upstream/main
         }
         if (mJointTree->getDrawMtxNum() > mJointTree->getDrawFullWgtMtxNum()) {
             J3DPSMtxArrayConcat(viewBaseMtx, *mpWeightEvlpMtx, *getDrawMtx(mJointTree->getDrawFullWgtMtxNum()), mJointTree->getWEvlpMtxNum());
@@ -457,5 +473,9 @@ void J3DCalcViewBaseMtx(Mtx view, Vec const& scale, const Mtx& base, Mtx dst) {
     m[2][2] = base[2][2] * scale.z;
     m[2][3] = base[2][3];
 
+<<<<<<< HEAD
     PSMTXConcat(view, m, dst);
+=======
+    NebulaMtxConcat(view, m, dst);
+>>>>>>> upstream/main
 }

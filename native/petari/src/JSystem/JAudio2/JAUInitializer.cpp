@@ -37,6 +37,7 @@ JAU_JASInitializer::JAU_JASInitializer() {
     waveArcDir_ = nullptr;
 }
 
+<<<<<<< HEAD
 inline void JAU_JASInitializer::initJASystem(JKRSolidHeap* pHeap) {
     JASKernel::setupRootHeap(pHeap, heapSize_);
 
@@ -86,6 +87,8 @@ inline void JAU_JASInitializer::initJASystem(JKRSolidHeap* pHeap) {
     }
 }
 
+=======
+>>>>>>> upstream/main
 JAU_JAIInitializer::JAU_JAIInitializer() {
     mMaxNumSe = 100;
     mMaxNumSeq = 4;

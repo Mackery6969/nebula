@@ -1,4 +1,9 @@
 #include "Game/LiveActor/DisplayListMaker.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/ModelManager.hpp"
 #include "Game/MapObj/CollectCounter.hpp"
 #include "Game/MapObj/IceStep.hpp"
@@ -35,16 +40,22 @@
 #include <JSystem/JUtility/JUTNameTab.hpp>
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <cstring>
+<<<<<<< HEAD
 #include <revolution/gd/GDBase.h>
+=======
+>>>>>>> upstream/main
 
 namespace MR {
     void showMaterial(J3DModel*, const char*);
 };  // namespace MR
 
+<<<<<<< HEAD
 extern "C" {
 void GDSetTexImgPtr(GXTexMapID, void*);
 }
 
+=======
+>>>>>>> upstream/main
 class JetTurtleShadow : public LiveActor {
 public:
     void drawType0() const;
@@ -108,11 +119,19 @@ void MarioActor::initDrawAndModel() {
 
     initFace();
 
+<<<<<<< HEAD
     mDL[0] = new (0x20) u8[0x100];
     mDL[1] = new (0x20) u8[0x100];
     mCurrDL = 0;
 
     mDLchanger = new DLchanger(2, 0x100);
+=======
+    mDL[0].reserve(16);
+    mDL[1].reserve(16);
+    mCurrDL = 0;
+
+    mDLchanger = new DLchanger(2, 16);
+>>>>>>> upstream/main
     _1A4 = 0.0f;
 
     swapTextureInit();
@@ -499,15 +518,26 @@ void MarioActor::drawMarioModel() const {
             MR::showJoint(model, "Face0");
         } else {
             if (mCurrModel == 4) {
+<<<<<<< HEAD
                 model->setDynamicDL(nullptr, 0);
             } else {
                 model->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+                model->setDynamicDL(nullptr);
+            } else {
+                model->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
             }
         }
 
         if (mBeeWallWalk != 0) {
+<<<<<<< HEAD
             GXSetAlphaUpdate(GX_TRUE);
             GXSetDstAlpha(GX_TRUE, 0);
+=======
+            J3DNativeState::setAlphaUpdate(GX_TRUE);
+            J3DNativeState::setDstAlpha(GX_TRUE, 0);
+>>>>>>> upstream/main
         }
 
         model->setDrawView(0);
@@ -525,13 +555,22 @@ void MarioActor::drawMarioModel() const {
 
     if (!MR::isHiddenModel(_A5C)) {
         J3DModelX* cool = static_cast< J3DModelX* >(MR::getJ3DModel(_A5C));
+<<<<<<< HEAD
         cool->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+        cool->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
         cool->directDraw(nullptr);
     }
 
     if (mBeeWallWalk != 0) {
+<<<<<<< HEAD
         GXSetAlphaUpdate(GX_FALSE);
         GXSetDstAlpha(GX_FALSE, 0);
+=======
+        J3DNativeState::setAlphaUpdate(GX_FALSE);
+        J3DNativeState::setDstAlpha(GX_FALSE, 0);
+>>>>>>> upstream/main
     }
 }
 
@@ -548,7 +587,11 @@ void MarioActor::drawTracedBody(J3DModelX* pModel) const {
         return;
     }
     const J3DModelX::Flags flags = pModel->mFlags;
+<<<<<<< HEAD
     pModel->setDynamicDL(mCurrModel == 4 ? nullptr : mDL[mCurrDL], mDLSize);
+=======
+    pModel->setDynamicDL(mCurrModel == 4 ? nullptr : &mDL[mCurrDL]);
+>>>>>>> upstream/main
     MR::showJoint(pModel, "HandR0");
     MR::showJoint(pModel, "HandL0");
     MR::showJoint(pModel, "Face0");
@@ -557,7 +600,11 @@ void MarioActor::drawTracedBody(J3DModelX* pModel) const {
     pModel->directDraw(nullptr);
     if (_1A1 && !MR::isHiddenModel(_A5C)) {
         J3DModelX* cool = static_cast< J3DModelX* >(MR::getJ3DModel(_A5C));
+<<<<<<< HEAD
         cool->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+        cool->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
         cool->directDraw(nullptr);
     }
     MotionSignal::traceOnly(false);
@@ -741,7 +788,11 @@ void MarioActor::initBlur() {
             mBlurMatrices[i][j] = new (0x20) Mtx[_B14];
 
             for (u32 k = 0; k < _B14; k++) {
+<<<<<<< HEAD
                 PSMTXIdentity(mBlurMatrices[i][j][k]);
+=======
+                NebulaMtxIdentity(mBlurMatrices[i][j][k]);
+>>>>>>> upstream/main
             }
         }
     }
@@ -773,8 +824,13 @@ void MarioActor::calcViewMainModel() {
 
     Mtx invView;
     Mtx invBase;
+<<<<<<< HEAD
     PSMTXInverse(_BF8, invView);
     PSMTXInverse(mModels[mCurrModel]->mBaseTransformMtx, invBase);
+=======
+    NebulaMtxInverse(_BF8, invView);
+    NebulaMtxInverse(mModels[mCurrModel]->mBaseTransformMtx, invBase);
+>>>>>>> upstream/main
     MR::multMtx(_BC8, invBase, invView);
 }
 
@@ -855,7 +911,11 @@ void MarioActor::drawIndirectModel() const {
 
             mDLchanger->addDL(model);
         } else {
+<<<<<<< HEAD
             model->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+            model->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
         }
 
         MR::showJoint(model, "Face0");
@@ -909,7 +969,11 @@ void MarioActor::drawReflectModel() const {
     model->mFlags.clear();
 
     if (_A08 == 2) {
+<<<<<<< HEAD
         GXSetZScaleOffset(1.0f, 0.00001f);
+=======
+        J3DNativeView::setZScaleOffset(1.0f, 0.00001f);
+>>>>>>> upstream/main
         model->mFlags._1A = true;
         model->setDrawView(3);
         model->directDraw(nullptr);
@@ -924,7 +988,11 @@ void MarioActor::drawReflectModel() const {
         model->mFlags._14 = true;
     }
 
+<<<<<<< HEAD
     GXSetZScaleOffset(1.0f, 0.0f);
+=======
+    J3DNativeView::setZScaleOffset(1.0f, 0.0f);
+>>>>>>> upstream/main
     model->setDrawView(3);
     model->directDraw(nullptr);
     model->mFlags.clear();
@@ -964,7 +1032,11 @@ void MarioActor::drawModelBlur() const {
     model->mFlags._13 = true;
 
     Mtx inv;
+<<<<<<< HEAD
     PSMTXInverse(const_cast< TMtx34f& >(_AB0).toMtxPtr(), inv);
+=======
+    NebulaMtxInverse(const_cast< TMtx34f& >(_AB0).toMtxPtr(), inv);
+>>>>>>> upstream/main
     MR::multMtx(inv, inv, MR::getCameraViewMtx());
     for (u32 i = 1; i < 8; i++) {
         const u32 idx = static_cast< u32 >(i + _B12) & 7;
@@ -976,7 +1048,10 @@ void MarioActor::drawModelBlur() const {
             }
         }
 
+<<<<<<< HEAD
         DCStoreRange(mBlurMatrices[_B10][idx], getModelData()->getDrawMtxNum() * sizeof(Mtx));
+=======
+>>>>>>> upstream/main
 
         _94[idx + ((i - 1) << 3)]->addDL(model);
         model->directDraw(nullptr);
@@ -986,6 +1061,7 @@ void MarioActor::drawModelBlur() const {
 }
 
 void MarioActor::createTextureDL(DLholder* pHolder, u16 texMapID, u16 texIndex) {
+<<<<<<< HEAD
     MR::ProhibitSchedulerAndInterrupts prohibit(false);
 
     u8 tempDL[0x200] ATTRIBUTE_ALIGN(32);
@@ -1006,6 +1082,11 @@ void MarioActor::createTextureDL(DLholder* pHolder, u16 texMapID, u16 texIndex) 
 
     MR::copyMemory(pHolder->mDL, tempDL, alignedSize);
     DCStoreRange(pHolder->mDL, alignedSize);
+=======
+    ResTIMG* texture = _B64[texIndex];
+    pHolder->mList.reserve(1);
+    pHolder->mList.setTexImgPtr(static_cast< GXTexMapID >(texMapID), reinterpret_cast< u8* >(texture) + texture->mImageDataOffset);
+>>>>>>> upstream/main
 }
 
 void MarioActor::swapTexture(const char* pMaterialName, u8 texNo) const {
@@ -1033,6 +1114,7 @@ void MarioActor::swapTexture(const char* pMaterialName, u8 texNo) const {
 
     const DLholder* holder = _B6C;
     const u8 modelIdx = mCurrModel;
+<<<<<<< HEAD
     u8* dl = holder[texNo].mDL;
     u16 dlSize = holder[texNo].mSize;
     J3DModelX* model = mModels[modelIdx];
@@ -1043,6 +1125,12 @@ void MarioActor::swapTexture(const char* pMaterialName, u8 texNo) const {
 
     model->_1C8[materialNo] = dl;
     model->_1CC[materialNo] = dlSize;
+=======
+    const J3DStateList* dl = holder[texNo].mList.isEmpty() ? nullptr : &holder[texNo].mList;
+    J3DModelX* model = mModels[modelIdx];
+
+    model->_1C8[materialNo] = dl;
+>>>>>>> upstream/main
 }
 
 void MarioActor::copyMaterial(J3DModel* pModel, u16 materialNo, s32 packetIndex) {
@@ -1095,6 +1183,7 @@ void J3DModelX::swapDrawBuffer(u32 drawBuffer) {
 
 void DLchanger::addDL(J3DModelX* pModel) {
     DLholder* buffer = &mBuffers[mCurrentBuffer];
+<<<<<<< HEAD
     pModel->setDynamicDL(buffer->mDL, buffer->mSize);
 }
 
@@ -1105,4 +1194,11 @@ void J3DModelX::setDynamicDL(u8* pDL, u32 dlSize) {
 
     _1B8 = pDL;
     _1BC = dlSize;
+=======
+    pModel->setDynamicDL(&buffer->mList);
+}
+
+void J3DModelX::setDynamicDL(const J3DStateList* pList) {
+    _1B8 = pList;
+>>>>>>> upstream/main
 }

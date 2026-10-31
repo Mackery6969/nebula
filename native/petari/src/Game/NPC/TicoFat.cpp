@@ -1,4 +1,8 @@
 #include "Game/NPC/TicoFat.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "Game/Camera/CameraTargetArg.hpp"
 #include "Game/Demo/AstroDemoFunction.hpp"
 #include "Game/Effect/MultiEmitter.hpp"
@@ -570,7 +574,11 @@ void TicoFat::emitScreenEffect() {
 }
 
 void TicoFat_FORCE_EMIT_STRING() {
+<<<<<<< HEAD
     OSReport("TicoFatScreenEffectFog");
+=======
+    JUTNativeLog("TicoFatScreenEffectFog");
+>>>>>>> upstream/main
 }
 
 void TicoFat::updateScreenEffect() {

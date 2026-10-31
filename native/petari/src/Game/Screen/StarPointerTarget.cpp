@@ -1,4 +1,8 @@
 #include "Game/Screen/StarPointerTarget.hpp"
+<<<<<<< HEAD
+=======
+#include <revolution/wpad.h>
+>>>>>>> upstream/main
 #include "Game/Screen/LayoutCoreUtil.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/LayoutUtil.hpp"
@@ -28,14 +32,22 @@ StarPointerTarget::StarPointerTarget(f32 radius, const TVec3f* pPosition, MtxPtr
 bool StarPointerTarget::calcScreenPosition(TVec2f* pScreenPos) const {
     TVec3f worldPos, viewPos;
     calcPosition(&worldPos);
+<<<<<<< HEAD
     PSMTXMultVec(MR::getStarPointerViewMtx(), &worldPos, &viewPos);
+=======
+    NebulaMtxMultVec(MR::getStarPointerViewMtx(), &worldPos, &viewPos);
+>>>>>>> upstream/main
     return calcScreenPositionFromView(pScreenPos, viewPos);
 }
 
 bool StarPointerTarget::isPointing(const TVec2f& rPointerPos, f32 zMargin, f32 radiusMargin) const {
     TVec3f worldPos, viewPos;
     calcPosition(&worldPos);
+<<<<<<< HEAD
     PSMTXMultVec(MR::getStarPointerViewMtx(), &worldPos, &viewPos);
+=======
+    NebulaMtxMultVec(MR::getStarPointerViewMtx(), &worldPos, &viewPos);
+>>>>>>> upstream/main
 
     if (-viewPos.z <= 0.0f) {
         return false;

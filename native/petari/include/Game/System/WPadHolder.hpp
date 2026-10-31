@@ -1,7 +1,11 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution/hbm.h>
 #include <revolution/types.h>
+=======
+#include <revolution/kpad.h>
+>>>>>>> upstream/main
 
 class WPad;
 
@@ -39,6 +43,9 @@ namespace MR {
     void resetWPad();
     void setWPadHolderModeHomeButton();
     void setWPadHolderModeGame();
+<<<<<<< HEAD
     void getHBMKPadData(HBMKPadData*, s32);
+=======
+>>>>>>> upstream/main
     void setAutoSleepTimeWiiRemote(bool);
 };  // namespace MR

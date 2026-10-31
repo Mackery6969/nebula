@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+#include "JSystem/J3DGraphBase/J3DNativeShape.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/FurShader.hpp"
 #include "Game/Util/MathUtil.hpp"
 #include <JSystem/J3DGraphAnimator/J3DModelData.hpp>
@@ -204,6 +208,7 @@ void CShader::calc(J3DModel* pModel) {
         }
     }
 
+<<<<<<< HEAD
     switch (_24) {
     case GX_S16:
         DCStoreRange(pOutput, count * sizeof(TVec3s));
@@ -213,6 +218,10 @@ void CShader::calc(J3DModel* pModel) {
         break;
     }
 
+=======
+    // The shell's positions as values, for the draws that read them.
+    J3DNativeShape::sendPositions(pOutput, count, static_cast< GXCompType >(_24), GX_POS_XYZ, _21);
+>>>>>>> upstream/main
     pModel->mVertexBuffer.setCurrentVtxPos(pOutput);
 }
 #else
@@ -366,6 +375,7 @@ void CShader::calc(J3DModel* pModel) {
         }
     }
 
+<<<<<<< HEAD
     switch (_24) {
     case GX_S16:
         DCStoreRange(pOutput, count * sizeof(TVec3s));
@@ -375,6 +385,8 @@ void CShader::calc(J3DModel* pModel) {
         break;
     }
 
+=======
+>>>>>>> upstream/main
     pModel->mVertexBuffer.setCurrentVtxPos(pOutput);
 }
 #endif

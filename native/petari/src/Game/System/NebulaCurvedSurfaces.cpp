@@ -5,11 +5,21 @@
 #include "JSystem/J3DGraphBase/J3DShape.hpp"
 #include "JSystem/J3DGraphBase/J3DShapeDraw.hpp"
 #include "JSystem/J3DGraphBase/J3DVertex.hpp"
+<<<<<<< HEAD
 #include <revolution/gx.h>
 #include <revolution/os.h>
 #include <stdlib.h>
 #include <string.h>
 
+=======
+#include <nebula_game_api.h>
+#include <revolution/gx.h>
+#include <stdlib.h>
+#include <string.h>
+
+extern "C" const NebulaHostServices* nebula_host(void);
+
+>>>>>>> upstream/main
 namespace {
     // A growable array in the CRT's heap: the arrays here are CPU-only and short-lived, and the game's heaps are sized
     // as the console's.
@@ -292,7 +302,12 @@ namespace NebulaCurvedSurfaces {
                 pDecodedNormals[i * 3 + c] = component(p + c * typeBytes(normal.mType), normal.mType, normalScale);
             }
         }
+<<<<<<< HEAD
         __NebulaCurvedSurface(GX_PHY_ADDR(pPositions), pPositions, positionCount * positionStride, pDecoded,
+=======
+        const NebulaHostServices* pHost = nebula_host();
+        pHost->curved_surface(pHost->user, static_cast< u64 >(reinterpret_cast< uintptr_t >(pPositions)), pDecoded,
+>>>>>>> upstream/main
                               positionCount, pDecodedNormals, normalCount, corners.mData, corners.mCount / 6);
         free(pDecoded);
     }

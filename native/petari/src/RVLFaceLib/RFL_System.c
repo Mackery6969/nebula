@@ -1,7 +1,13 @@
 #include "RVLFaceLibInternal.h"
+<<<<<<< HEAD
 #include <revolution/os.h>
 #include <cstdio>
 #include <revolution/mem.h>
+=======
+#include <nebula_kernel.h>
+#include <revolution/os.h>
+#include <cstdio>
+>>>>>>> upstream/main
 #include <revolution/types.h>
 
 #define RFL_SYSTEM_HEAP_SIZE 0x24800
@@ -33,32 +39,47 @@ u32 RFLGetWorkSize(BOOL deluxeTex) {
     return deluxeTex ? RFL_DELUXE_WORK_SIZE + sizeof(RFLiManager) : RFL_WORK_SIZE + sizeof(RFLiManager);
 }
 
+<<<<<<< HEAD
 u32 MEMGetAllocatableSizeForExpHeap(MEMiHeapHead* heap) {
     return MEMGetAllocatableSizeForExpHeapEx(heap, 4);
 }
 
+=======
+>>>>>>> upstream/main
 RFLErrcode RFLInitResAsync(void* workBuffer, void* resBuffer, u32 resSize, BOOL useDeluxTex) {
     RFLErrcode errcode;
     u32 wholesize;
 
+<<<<<<< HEAD
     if (resBuffer == NULL) {
+=======
+    if (resBuffer == NULL || !RFLiCookResource(resBuffer, resSize)) {
+>>>>>>> upstream/main
         return RFLErrcode_Fatal;
     }
 
     if (RFLiGetManager() == NULL) {
+<<<<<<< HEAD
         OSRegisterVersion(__RFLVersion);
+=======
+>>>>>>> upstream/main
 
         wholesize = useDeluxTex ? RFL_DELUXE_WORK_SIZE : RFL_WORK_SIZE;
         memset(workBuffer, 0, wholesize);
 
         sRFLManager = (RFLiManager*)workBuffer;
         sRFLLastErrCode = RFLErrcode_NotAvailable;
+<<<<<<< HEAD
         sRFLLastReason = NAND_RESULT_OK;
+=======
+        sRFLLastReason = 0;
+>>>>>>> upstream/main
         sRFLiFileBrokenType = RFLiFileBrokenType_DBNotFound;
         sRFLManager->workBuffer = (u8*)workBuffer + sizeof(RFLiManager);
 
         {
             u32 size = useDeluxTex ? RFL_DELUXE_WORK_SIZE - sizeof(RFLiManager) : RFL_WORK_SIZE - sizeof(RFLiManager);
+<<<<<<< HEAD
             RFLiGetManager()->rootHeap = MEMCreateExpHeapEx(RFLiGetManager()->workBuffer, size, 1);
         }
         {
@@ -70,6 +91,19 @@ RFLErrcode RFLInitResAsync(void* workBuffer, void* resBuffer, u32 resSize, BOOL 
             u32 size = MEMGetAllocatableSizeForExpHeap(RFLiGetManager()->rootHeap);
             void* buffer = MEMAllocFromExpHeapEx(RFLiGetManager()->rootHeap, size, 8);
             RFLiGetManager()->tmpHeap = MEMCreateExpHeapEx(buffer, size, 1);
+=======
+            RFLiGetManager()->rootHeap = NebulaMiiHeapCreate(RFLiGetManager()->workBuffer, size);
+        }
+        {
+            u32 size = RFL_SYSTEM_HEAP_SIZE;
+            void* buffer = NebulaMiiHeapAlloc(RFLiGetManager()->rootHeap, size, 32);
+            RFLiGetManager()->systemHeap = NebulaMiiHeapCreate(buffer, size);
+        }
+        {
+            u32 size = NebulaMiiHeapLargestFree(RFLiGetManager()->rootHeap);
+            void* buffer = NebulaMiiHeapAlloc(RFLiGetManager()->rootHeap, size, 8);
+            RFLiGetManager()->tmpHeap = NebulaMiiHeapCreate(buffer, size);
+>>>>>>> upstream/main
         }
 
         RFLiGetManager()->lastErrCode = RFLErrcode_Success;
@@ -82,11 +116,15 @@ RFLErrcode RFLInitResAsync(void* workBuffer, void* resBuffer, u32 resSize, BOOL 
         RFLSetIconDrawDoneCallback(NULL);
         RFLSetModelDrawDoneCallback(NULL);
         RFLiSetWorking(FALSE);
+<<<<<<< HEAD
         RFLiInitDatabase(RFLiGetManager()->systemHeap);
         RFLiInitLoader();
         RFLiInitCtrlBuf(RFLiGetManager()->systemHeap);
         RFLiInitHiddenDatabase();
         RFLiInitAccessInfo(RFLiGetManager()->systemHeap);
+=======
+        RFLiInitLoader();
+>>>>>>> upstream/main
         RFLiSetCoordinateData(&scCoordinate);
 
         if (resBuffer != NULL) {
@@ -127,15 +165,22 @@ void RFLExit(void) {
         RFLFreeCachedResource();
     }
 
+<<<<<<< HEAD
     RFLiExitAccessInfo();
 
     MEMDestroyExpHeap(RFLiGetManager()->tmpHeap);
     MEMDestroyExpHeap(RFLiGetManager()->systemHeap);
     MEMDestroyExpHeap(RFLiGetManager()->rootHeap);
+=======
+    NebulaMiiHeapDestroy(RFLiGetManager()->tmpHeap);
+    NebulaMiiHeapDestroy(RFLiGetManager()->systemHeap);
+    NebulaMiiHeapDestroy(RFLiGetManager()->rootHeap);
+>>>>>>> upstream/main
 
     sRFLManager = NULL;
 }
 
+<<<<<<< HEAD
 static void bootloadDB2Res_(void) {
     RFLiLoadResourceHeaderAsync();
 
@@ -151,6 +196,12 @@ static void bootloadDB2Res_(void) {
 
 static RFLErrcode RFLiBootLoadAsync(void) {
     return RFLiBootLoadDatabaseAsync(bootloadDB2Res_);
+=======
+// The Miis are the host's; booting reads the parts archive's header.
+static RFLErrcode RFLiBootLoadAsync(void) {
+    RFLiStartWorking();
+    return RFLiLoadResourceHeaderAsync();
+>>>>>>> upstream/main
 }
 
 BOOL RFLAvailable(void) {
@@ -158,7 +209,11 @@ BOOL RFLAvailable(void) {
 }
 
 static void* allocal_(u32 size, s32 align) {
+<<<<<<< HEAD
     return MEMAllocFromExpHeapEx(RFLiGetManager()->tmpHeap, size, align);
+=======
+    return NebulaMiiHeapAlloc(RFLiGetManager()->tmpHeap, size, align);
+>>>>>>> upstream/main
 }
 
 static void* RFLiAlloc(u32 size) {
@@ -170,6 +225,7 @@ void* RFLiAlloc32(u32 size) {
 }
 
 void RFLiFree(void* block) {
+<<<<<<< HEAD
     MEMFreeToExpHeap(RFLiGetManager()->tmpHeap, block);
 }
 
@@ -179,12 +235,55 @@ RFLiDBManager* RFLiGetDBManager(void) {
 
 RFLiHDBManager* RFLiGetHDBManager(void) {
     return !RFLAvailable() ? NULL : &RFLiGetManager()->hdbMgr;
+=======
+    NebulaMiiHeapFree(RFLiGetManager()->tmpHeap, block);
+>>>>>>> upstream/main
 }
 
 RFLiLoader* RFLiGetLoader(void) {
     return !RFLAvailable() ? NULL : &RFLiGetManager()->loader;
 }
 
+<<<<<<< HEAD
+=======
+// The library's asynchronous status: busy while it works, then the result and its reason.
+BOOL RFLiIsWorking(void) {
+    return RFLiGetWorking();
+}
+
+void RFLiStartWorking(void) {
+    int enabled = nebula_interrupts_disable();
+
+    RFLiSetWorking(TRUE);
+    RFLiGetManager()->lastErrCode = RFLErrcode_Busy;
+
+    nebula_interrupts_restore(enabled);
+}
+
+void RFLiEndWorkingReason(RFLErrcode err, s32 reason) {
+    BOOL enabled;
+
+    switch (RFLiGetManager()->lastErrCode) {
+    case RFLErrcode_Busy:
+    case RFLErrcode_Success:
+        enabled = nebula_interrupts_disable();
+
+        RFLiSetWorking(FALSE);
+        RFLiGetManager()->lastErrCode = err;
+        RFLiGetManager()->lastReason = reason;
+
+        nebula_interrupts_restore(enabled);
+        break;
+    default:
+        break;
+    }
+}
+
+void RFLiEndWorking(RFLErrcode err) {
+    RFLiEndWorkingReason(err, 0);
+}
+
+>>>>>>> upstream/main
 BOOL RFLiGetWorking(void) {
     return !RFLAvailable() ? FALSE : RFLiGetManager()->working;
 }
@@ -224,7 +323,11 @@ static RFLErrcode RFLWaitAsync(void) {
         status = RFLGetAsyncStatus();
 #ifdef TARGET_PC
         if (status == RFLErrcode_Busy) {
+<<<<<<< HEAD
             __NebulaPoll();
+=======
+            nebula_kernel_poll();
+>>>>>>> upstream/main
         }
 #endif
     } while (status == RFLErrcode_Busy);
@@ -232,6 +335,7 @@ static RFLErrcode RFLWaitAsync(void) {
     return status;
 }
 
+<<<<<<< HEAD
 RFLiAccessInfo* RFLiGetAccInfo(RFLiFileType type) {
     return !RFLAvailable() ? NULL : &RFLiGetManager()->info[type];
 }
@@ -240,6 +344,8 @@ RFLiCtrlBufManager* RFLiGetCtrlBufManager(void) {
     return !RFLAvailable() ? NULL : &RFLiGetManager()->ctrlMgr;
 }
 
+=======
+>>>>>>> upstream/main
 BOOL RFLiGetUseDeluxTex(void) {
     return !RFLAvailable() ? FALSE : RFLiGetManager()->deluxeTex;
 }

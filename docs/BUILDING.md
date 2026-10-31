@@ -18,7 +18,11 @@ Vulkan-Headers, volk, VulkanMemoryAllocator, glslang, SPIRV-Tools and SPIRV-Head
 
 ```powershell
 cargo build --release --locked -p nebula-import
+<<<<<<< HEAD
 .\target\release\nebula-import.exe identify D:\Games\SMG.rvz      # must report RMGE01
+=======
+.\target\release\nebula-import.exe identify D:\Games\SMG.rvz      # must report RMGE01, RMGP01 or RMGJ01
+>>>>>>> upstream/main
 .\target\release\nebula-import.exe import D:\Games\SMG.rvz --output D:\nebula\content
 ```
 
@@ -45,6 +49,7 @@ Builds `build\game\smg_game.dll` with clang and Ninja.
 
 ## 4. Run
 
+<<<<<<< HEAD
 Put `NebulaNative.exe` and `smg_game.dll` in one folder with the `content` folder from step 1, then:
 
 ```powershell
@@ -53,6 +58,9 @@ Put `NebulaNative.exe` and `smg_game.dll` in one folder with the `content` folde
 
 With no arguments it finds `content\game.pak` next to it (or in the current folder) and uses the launcher's saves,
 `%LOCALAPPDATA%\Nebula\saves`. `--pak <game.pak>` and `--nand <folder>` name others:
+=======
+Put `NebulaNative.exe` and `smg_game.dll` in one folder, then:
+>>>>>>> upstream/main
 
 ```powershell
 .\NebulaNative.exe --pak D:\nebula\content\game.pak --nand "$env:LOCALAPPDATA\Nebula\saves"

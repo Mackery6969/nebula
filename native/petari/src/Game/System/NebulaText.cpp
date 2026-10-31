@@ -1,15 +1,26 @@
 #include "Game/System/NebulaText.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/Screen/LayoutCoreUtil.hpp"
 #include "Game/System/Language.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/MessageUtil.hpp"
 #include "Game/Util/StringUtil.hpp"
 #include <cstdio>
 #include <cstring>
 #include <nw4r/lyt/textBox.h>
 #include <nw4r/ut/Rect.h>
+<<<<<<< HEAD
 #include <revolution/dvd.h>
+=======
+>>>>>>> upstream/main
 #include <revolution/os.h>
 
 namespace {
@@ -143,7 +154,11 @@ namespace {
                 if (column >= 0) {
                     sColumn = column;
                 } else {
+<<<<<<< HEAD
                     OSReport("NebulaText: unknown language in NebulaText.txt\n");
+=======
+                    JUTNativeLog("NebulaText: unknown language in NebulaText.txt\n");
+>>>>>>> upstream/main
                 }
                 continue;
             }
@@ -166,6 +181,7 @@ namespace {
         const char* pPrefix = MR::getCurrentLanguagePrefix();
         const s32 column = findColumn(pPrefix, strlen(pPrefix));
         sColumn = column >= 0 ? column : 0;
+<<<<<<< HEAD
         OSReport("NebulaText: %s\n", pPrefix);
 
         char path[96];
@@ -184,6 +200,22 @@ namespace {
             OSReport("NebulaText: %s (%d texts)\n", path, sOverrideNum);
         }
         DVDClose(&file);
+=======
+        JUTNativeLog("NebulaText: %s\n", pPrefix);
+
+        char path[96];
+        snprintf(path, sizeof(path), "/%s/MessageData/NebulaText.txt", pPrefix);
+        NebulaDisc::File file;
+        if (!NebulaDisc::open(path, &file)) {
+            return;
+        }
+        const s32 length = file.mLength < static_cast< u32 >(cFileMax) ? static_cast< s32 >(file.mLength) : cFileMax;
+        const s32 read = (length + 31) & ~31;
+        if (length > 0 && read <= cFileMax && NebulaDisc::read(&file, sFile, read, 0) >= 0) {
+            parse(sFile, length);
+            JUTNativeLog("NebulaText: %s (%d texts)\n", path, sOverrideNum);
+        }
+>>>>>>> upstream/main
     }
 
     const wchar_t* find(const char* pId) {

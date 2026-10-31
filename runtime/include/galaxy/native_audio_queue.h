@@ -34,20 +34,34 @@ observe_callback_buffer_state(ReadCompleted&& read_completed,
     return {completed, started};
 }
 
+<<<<<<< HEAD
 // Wii AI DMA stores each stereo frame as big-endian right, left; the output and the WAV writer take little-endian
 // left, right. Adapted from WiiCompiled runtime/src/audio_backend.cpp::PushWiiAiSamplesBE16,
 // GPLv3, https://github.com/patchzyy/Wiicompiled/blob/83463764b8acda394e058b0c689a10b8561fc380/runtime/src/audio_backend.cpp
 [[nodiscard]] inline bool native_audio_convert_wii_ai_pcm16(
+=======
+// The game's audio interface blocks hold each stereo frame as right, left in host byte order; the output and the WAV
+// writer take left, right. Adapted from WiiCompiled runtime/src/audio_backend.cpp::PushWiiAiSamplesBE16,
+// GPLv3, https://github.com/patchzyy/Wiicompiled/blob/83463764b8acda394e058b0c689a10b8561fc380/runtime/src/audio_backend.cpp
+[[nodiscard]] inline bool native_audio_convert_ai_pcm16(
+>>>>>>> upstream/main
     std::span<const std::byte> source,
     std::span<std::byte> destination) noexcept {
     if (source.size() != destination.size() || (source.size() & 3u) != 0u) {
         return false;
     }
     for (std::size_t i = 0; i < source.size(); i += 4u) {
+<<<<<<< HEAD
         destination[i] = source[i + 3u];
         destination[i + 1u] = source[i + 2u];
         destination[i + 2u] = source[i + 1u];
         destination[i + 3u] = source[i];
+=======
+        destination[i] = source[i + 2u];
+        destination[i + 1u] = source[i + 3u];
+        destination[i + 2u] = source[i];
+        destination[i + 3u] = source[i + 1u];
+>>>>>>> upstream/main
     }
     return true;
 }

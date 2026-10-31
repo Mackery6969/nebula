@@ -14,7 +14,10 @@ typedef struct {
     char res[18];
 } OSPlayRecord;
 
+<<<<<<< HEAD
 void __OSStartPlayRecord(void);
 void __OSStopPlayRecord(void);
 
+=======
+>>>>>>> upstream/main
 #endif // OSPLAYRECORD_H

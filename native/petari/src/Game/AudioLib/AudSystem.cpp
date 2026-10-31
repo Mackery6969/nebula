@@ -37,8 +37,14 @@
 #include <JSystem/JKernel/JKRArchive.hpp>
 #include <JSystem/JKernel/JKRHeap.hpp>
 #include <JSystem/JKernel/JKRSolidHeap.hpp>
+<<<<<<< HEAD
 #include <revolution/sc.h>
 #include <revolution/vi/vifuncs.h>
+=======
+#include "Game/System/NebulaFrameClock.hpp"
+#include "Game/System/NebulaSystemSettings.hpp"
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 const char sAudioResFile[] = "/AudioRes/SMR.szs";
 const char sJaiSeqArc[] = "/AudioRes/Seqs/JaiSeq.arc";
@@ -98,7 +104,11 @@ AudSystem* AudNewAudSystem(JKRSolidHeap* pHeap, void* pV, JKRArchive* pSeqArchiv
     newHeap->getHeap()->becomeCurrentHeap();
 
     if (pV == nullptr) {
+<<<<<<< HEAD
         if (DVDConvertPathToEntrynum(sAudioResFile) >= 0) {
+=======
+        if (NebulaDisc::find(sAudioResFile) >= 0) {
+>>>>>>> upstream/main
             JAUAudioArcLoader loader(newHeap);
             loader.load(sAudioResFile);
             newHeap->getHeap()->freeTail();
@@ -111,7 +121,11 @@ AudSystem* AudNewAudSystem(JKRSolidHeap* pHeap, void* pV, JKRArchive* pSeqArchiv
 
     u32 maxSeqDataSize;
     if (pSeqArchive == nullptr) {
+<<<<<<< HEAD
         if (DVDConvertPathToEntrynum(sJaiSeqArc) >= 0) {
+=======
+        if (NebulaDisc::find(sJaiSeqArc) >= 0) {
+>>>>>>> upstream/main
             JKRArchive* seqArc = JKRArchive::mount(sJaiSeqArc, JKRArchive::MOUNT_MODE_DVD, newHeap->getHeap(), JKRArchive::MOUNT_DIRECTION_1);
             newHeap->setSeqDataArchive(seqArc);
             maxSeqDataSize = AudParams::maxSeqDataSize;
@@ -403,6 +417,7 @@ bool AudSystem::isSubmitSeByVolumeSetting(JAISoundID soundID) {
 }
 
 void AudSystem::updateOutputMode() {
+<<<<<<< HEAD
     switch (SCGetSoundMode()) {
     case 0:
         JASDriver::setOutputMode(0);  // neither? (TODO)
@@ -411,6 +426,16 @@ void AudSystem::updateOutputMode() {
         JASDriver::setOutputMode(1);  // only pan
         break;
     case 2:
+=======
+    switch (NebulaSystemSettings::soundMode()) {
+    case NebulaSystemSettings::SoundModeMono:
+        JASDriver::setOutputMode(0);  // neither? (TODO)
+        break;
+    case NebulaSystemSettings::SoundModeStereo:
+        JASDriver::setOutputMode(1);  // only pan
+        break;
+    case NebulaSystemSettings::SoundModeSurround:
+>>>>>>> upstream/main
         JASDriver::setOutputMode(2);  // pan and effect
         break;
     }
@@ -587,6 +612,31 @@ void AudSystem::fadeOutForQuit() {
     mSeMgr.getParams()->moveVolume(0.0f, 30);
 }
 
+<<<<<<< HEAD
+=======
+// Nebula's settings menu (NebulaSettingsMenu): as for the pause menu, the music fades out, the game's sounds end and the
+// system's (the menu's own) play on; the menu stops the music once faded. On its close everything returns as it was.
+// Over the pause or HOME Menu only the sound effects' volumes change, and that menu's close restores the rest.
+// `stayFaded`: the music stays faded on the close, under the cutscene skip's question or its unseen run (the skip
+// brings it back).
+void AudSystem::holdForSettingsMenu(bool hold, bool stayFaded) {
+    const bool otherMenu = isPauseMenuActive() || isHomeButtonMenuActive();
+    if (hold) {
+        if (!otherMenu) {
+            mSeqMgr.getParams()->moveVolume(0.0f, 12);
+            mStreamMgr.getParams()->moveVolume(0.0f, 12);
+            setVolumeZeroForce(MenuType_Pause);
+        }
+        setSeVolumeSet(AudSystemVolumeController::VolumeSet_PauseMenu, 12);
+        return;
+    }
+    if (!otherMenu && !stayFaded) {
+        mSeqMgr.getParams()->moveVolume(AudParams::masterVolBgm, 20);
+        mStreamMgr.getParams()->moveVolume(AudParams::masterVolStream, 20);
+    }
+    recoverSeVolumeSet(20);
+}
+>>>>>>> upstream/main
 #endif
 
 void AudSystem::exitPauseMenu() {
@@ -631,7 +681,11 @@ bool AudSystem::isPauseMenuActive() const {
 }
 
 void AudSystem::screenSaverProcess() {
+<<<<<<< HEAD
     if (VIGetDimmingCount() > 0) {
+=======
+    if (NebulaFrameClock::framesUntilDimming() > 0) {
+>>>>>>> upstream/main
         return;
     }
 

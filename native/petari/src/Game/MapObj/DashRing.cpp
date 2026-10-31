@@ -1,4 +1,8 @@
 #include "Game/MapObj/DashRing.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Util/ActorSensorUtil.hpp"
 #include "Game/Util/DirectDraw.hpp"
@@ -230,7 +234,11 @@ void DashRing::calcAndSetBaseMtx() {
     if (mDoLoop) {
         TPos3f pos;
         MR::makeMtxFrontSidePos(&pos, mAxis, mSubAxis, mPosition);
+<<<<<<< HEAD
         PSMTXCopy(pos, getBaseMtx());
+=======
+        NebulaMtxCopy(pos, getBaseMtx());
+>>>>>>> upstream/main
     }
 }
 
@@ -240,7 +248,11 @@ void DashRing::calcAxis() {
     Mtx mtxTR;
     MR::makeMtxTR(mtxTR, 0.0f, 0.0f, 0.0f, mRotation.x, mRotation.y, mRotation.z);
 
+<<<<<<< HEAD
     PSMTXMultVec(mtxTR, &axis, &axis);
+=======
+    NebulaMtxMultVec(mtxTR, &axis, &axis);
+>>>>>>> upstream/main
     mAxis = axis;
 
     calcSubAxis();
@@ -289,11 +301,19 @@ void DashRing::draw() const {
     f32 segmentLength = (f2 * JMath::TAngleConstant_< f32 >::RADIAN_DEG360()) / 64.0f;
 
     TPos3f rotMtx;
+<<<<<<< HEAD
     PSMTXRotAxisRad(rotMtx, axis, TWO_PI / 64.0f);
 
     TDDraw::setup(0, 1, 0);
 
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+=======
+    NebulaMtxRotAxisRad(rotMtx, axis, TWO_PI / 64.0f);
+
+    TDDraw::setup(0, 1, 0);
+
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+>>>>>>> upstream/main
 
     for (u32 idx = 0; idx <= 64; idx++) {
         TVec3f vecB0 = mPosition + subAxis * f2;
@@ -303,6 +323,10 @@ void DashRing::draw() const {
 
         TDDraw::drawCylinder(vecB0 - crossVec * segmentLength * 0.5f, crossVec * segmentLength, mScale.y * f1 * 30.0f, 0x00808060, 0x00808080, 0x10);
 
+<<<<<<< HEAD
         PSMTXMultVec(rotMtx, subAxis, subAxis);
+=======
+        NebulaMtxMultVec(rotMtx, subAxis, subAxis);
+>>>>>>> upstream/main
     }
 }

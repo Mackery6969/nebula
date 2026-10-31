@@ -3,7 +3,10 @@
 #include "Game/System/NebulaAchievements.hpp"
 #endif
 #include "Game/LiveActor/Nerve.hpp"
+<<<<<<< HEAD
 #include "Game/System/DrawSyncManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/GameSequenceFunction.hpp"
 #include "Game/System/GameSystemFunction.hpp"
 #include "Game/System/MainLoopFramework.hpp"
@@ -13,9 +16,18 @@
 #include "Game/Util/MathUtil.hpp"
 #include "Game/Util/ScreenUtil.hpp"
 #include "Game/Util/SingletonHolder.hpp"
+<<<<<<< HEAD
 #include "Game/Util/TriggerChecker.hpp"
 #include "Game/Util/ValueControl.hpp"
 #include <JSystem/JUtility/JUTVideo.hpp>
+=======
+#include "Game/Util/ValueControl.hpp"
+#include <JSystem/JUtility/JUTVideo.hpp>
+#include "Game/System/NebulaFrameClock.hpp"
+#include <nebula_game_api.h>
+
+extern "C" const NebulaHostServices* nebula_host(void);
+>>>>>>> upstream/main
 
 namespace {
     static const s32 sFadeinoutFrame = 30;
@@ -33,7 +45,10 @@ namespace NrvGameSystemResetAndPowerProcess {
 
 void GameSystemResetAndPowerProcess::init(const JMapInfoIter& rIter) {
     initNerve(GET_NERVE(GameSystemResetAndPowerProcess, GameSystemResetAndPowerProcessPolling));
+<<<<<<< HEAD
     OSSetPowerCallback(GameSystemResetAndPowerProcess::handleOSPowerCallback);
+=======
+>>>>>>> upstream/main
     appear();
 }
 
@@ -93,12 +108,18 @@ void GameSystemResetAndPowerProcess::notifyCheckDiskResult(bool param1) {
     }
 }
 
+<<<<<<< HEAD
 void GameSystemResetAndPowerProcess::exePolling() {
     if (tryAcceptPowerOff()) {
         setNerve(GET_NERVE(GameSystemResetAndPowerProcess, GameSystemResetAndPowerProcessWaitResetPermitted));
     } else if (mResetTriggerChecker->getOnTrigger()) {
         setNerve(GET_NERVE(GameSystemResetAndPowerProcess, GameSystemResetAndPowerProcessWaitResetPermitted));
     }
+=======
+// The console's power and reset buttons started a reset from here. A PC has neither: resets come from the HOME Menu
+// (requestReset, requestGoWiiMenu).
+void GameSystemResetAndPowerProcess::exePolling() {
+>>>>>>> upstream/main
 }
 
 void GameSystemResetAndPowerProcess::exeWaitResetPermitted() {
@@ -154,7 +175,12 @@ void GameSystemResetAndPowerProcess::exeReset() {
     if (MR::isFirstStep(this)) {
         _5C = false;
 
+<<<<<<< HEAD
         DVDCheckDiskAsync(&mCommandBlock, GameSystemResetAndPowerProcess::handleCheckDiskAsync);
+=======
+        // The console checked the disc was still in (its answer came before the check returned); the game's files are.
+        notifyCheckDiskResult(true);
+>>>>>>> upstream/main
     }
 
     if (_5C) {
@@ -185,6 +211,7 @@ void GameSystemResetAndPowerProcess::exeFadein() {
         GameSystemFunction::restoreFromResetSaveDataHandleSequence();
     }
 
+<<<<<<< HEAD
     if (tryAcceptPowerOff()) {
         GameSystemFunction::restartControllerLeaveWatcher();
         GameSystemFunction::restartSceneController();
@@ -199,6 +226,16 @@ void GameSystemResetAndPowerProcess::exeFadein() {
             GameSystemFunction::restartSceneController();
             setNerve(GET_NERVE(GameSystemResetAndPowerProcess, GameSystemResetAndPowerProcessPolling));
         }
+=======
+    if (MR::isFirstStep(this)) {
+        mFadeinoutControl->setDirToOneResetFrame();
+    }
+
+    if (mFadeinoutControl->mFrame == mFadeinoutControl->mMaxFrame) {
+        GameSystemFunction::restartControllerLeaveWatcher();
+        GameSystemFunction::restartSceneController();
+        setNerve(GET_NERVE(GameSystemResetAndPowerProcess, GameSystemResetAndPowerProcessPolling));
+>>>>>>> upstream/main
     }
 }
 
@@ -207,6 +244,7 @@ void GameSystemResetAndPowerProcess::exitApplication() {
     // The counts Nebula's achievements hold for the host (jumps, coins, play time), before the game ends.
     NebulaAchievements::flushStats();
 #endif
+<<<<<<< HEAD
     DrawSyncManager::end();
     MainLoopFramework::setForOSResetSystem();
     VISetBlack(TRUE);
@@ -227,12 +265,22 @@ void GameSystemResetAndPowerProcess::exitApplication() {
         OSShutdownSystem();
         break;
     }
+=======
+    MainLoopFramework::setForOSResetSystem();
+    NebulaFrameClock::show(false);
+    NebulaFrameClock::waitFrame();
+
+    // The host starts the game again, or closes it for "leave the game" (the Wii Menu); it does not return.
+    const NebulaHostServices* const host = nebula_host();
+    host->power(host->user, mResetOperation == ResetOperation_ReturnToMenu ? NEBULA_POWER_MENU : NEBULA_POWER_RESTART);
+>>>>>>> upstream/main
 }
 
 bool GameSystemResetAndPowerProcess::tryPermitReset() NO_INLINE {
     return !isActive();
 }
 
+<<<<<<< HEAD
 bool GameSystemResetAndPowerProcess::tryAcceptPowerOff() {
     if (!mIsValidPowerOff) {
         return false;
@@ -244,6 +292,8 @@ bool GameSystemResetAndPowerProcess::tryAcceptPowerOff() {
     return true;
 }
 
+=======
+>>>>>>> upstream/main
 bool GameSystemResetAndPowerProcess::isResetAcceptAudio() const {
     if (mResetOperation != ResetOperation_ApplicationReset && MR::isGreaterStep(this, 2) && GameSystemFunction::isDoneResetAudioSystem()) {
         return true;
@@ -253,6 +303,7 @@ bool GameSystemResetAndPowerProcess::isResetAcceptAudio() const {
 }
 
 void GameSystemResetAndPowerProcess::control() {
+<<<<<<< HEAD
     mResetTriggerChecker->update(OSGetResetButtonState() != FALSE);
     mFadeinoutControl->update();
 }
@@ -270,6 +321,14 @@ GameSystemResetAndPowerProcess::GameSystemResetAndPowerProcess()
       mIsValidPowerOff(), _5E() {
     mResetTriggerChecker = new TriggerChecker();
 
+=======
+    mFadeinoutControl->update();
+}
+
+GameSystemResetAndPowerProcess::GameSystemResetAndPowerProcess()
+    : LayoutActor("\203\212\203\132\203\142\203\147\201\105\223\144\214\271" /* リセット・電源 */, false), mFadeinoutControl(), mResetOperation(ResetOperation_Restart), _5C(true),
+      _5E() {
+>>>>>>> upstream/main
     mFadeinoutControl = new ValueControl(::sFadeinoutFrame);
     mFadeinoutControl->setOne();
 }

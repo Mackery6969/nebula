@@ -1,4 +1,9 @@
 #include "Game/Map/OceanRingPipeInside.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/Map/OceanRingPipe.hpp"
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Util/CameraUtil.hpp"
@@ -25,8 +30,12 @@ namespace {
 };  // namespace
 
 OceanRingPipeInside::OceanRingPipeInside(const OceanRingPipe* pPipe)
+<<<<<<< HEAD
     : LiveActor("\203\111\201\133\203\126\203\203\203\223\203\212\203\223\203\117\202\314\223\340\221\244" /* オーシャンリングの内側 */), mRingPipe(pPipe), mTexU0(), mTexV0(), mTexU1(), mTexV1(), mWaterPipeInsideTex(), mDispListLength(),
       mDispList() {
+=======
+    : LiveActor("\203\111\201\133\203\126\203\203\203\223\203\212\203\223\203\117\202\314\223\340\221\244" /* オーシャンリングの内側 */), mRingPipe(pPipe), mTexU0(), mTexV0(), mTexU1(), mTexV1(), mWaterPipeInsideTex() {
+>>>>>>> upstream/main
 }
 
 void OceanRingPipeInside::init(const JMapInfoIter& rIter) {
@@ -45,6 +54,7 @@ void OceanRingPipeInside::movement() {
 }
 
 void OceanRingPipeInside::initDisplayList() {
+<<<<<<< HEAD
     MR::ProhibitSchedulerAndInterrupts prohibit(false);
 
     u32 x = (mRingPipe->_9C - 1) * (36 * mRingPipe->_98 + 3);
@@ -58,6 +68,12 @@ void OceanRingPipeInside::initDisplayList() {
     GDPadCurr32();
     mDispListLength = obj.ptr - obj.start;
     DCStoreRange(mDispList, length);
+=======
+    mMesh.init(NEBULA_SHAPE_TEXCOORD0 | NEBULA_SHAPE_TEXCOORD0 << 1, 2 * mRingPipe->_98 * (mRingPipe->_9C - 1));
+    mMesh.useArray(NativeMesh::SLOT_POSITION, mRingPipe->_A0);
+    sendGD();
+    mMesh.send();
+>>>>>>> upstream/main
 }
 
 void OceanRingPipeInside::draw() const {
@@ -66,11 +82,16 @@ void OceanRingPipeInside::draw() const {
     }
 
     loadMaterial();
+<<<<<<< HEAD
     GXCallDisplayList(mDispList, mDispListLength);
+=======
+    mMesh.draw();
+>>>>>>> upstream/main
 }
 
 const GXColor sFogCol = {0xFF, 0xFF, 0xFF, 0xFF};
 void OceanRingPipeInside::loadMaterial() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_POS_XYZ, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX1, GX_POS_XYZ, GX_F32, 0);
@@ -90,11 +111,21 @@ void OceanRingPipeInside::loadMaterial() const {
     GXSetNumTexGens(2);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1E, 0, 0x7D);
     GXSetTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, 0x21, 0, 0x7D);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeShape::sendNormal(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+    J3DNativeState::setNumChans(0);
+    J3DNativeState::setNumTexGens(2);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1E, 0, 0x7D);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, 0x21, 0, 0x7D);
+>>>>>>> upstream/main
 
     TMtx34f mtx;
     mtx.identity();
     mtx.mMtx[0][2] = mTexU0;
     mtx.mMtx[1][2] = mTexV0;
+<<<<<<< HEAD
     GXLoadTexMtxImm(mtx.toMtxPtr(), 0x1E, GX_MTX2x4);
     mtx.mMtx[0][2] = mTexU1;
     mtx.mMtx[1][2] = mTexV1;
@@ -104,6 +135,17 @@ void OceanRingPipeInside::loadMaterial() const {
     GXSetNumIndStages(1);
     GXSetIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD1, GX_TEXMAP0);
     GXSetTevIndWarp(GX_TEVSTAGE0, GX_INDTEXSTAGE0, 1, 0, GX_ITM_0);
+=======
+    J3DNativeShape::sendTexture(mtx.toMtxPtr(), 0x1E, GX_MTX2x4);
+    mtx.mMtx[0][2] = mTexU1;
+    mtx.mMtx[1][2] = mTexV1;
+    J3DNativeShape::sendTexture(mtx.toMtxPtr(), 0x21, GX_MTX2x4);
+
+    mWaterPipeInsideTex->load(GX_TEXMAP0);
+    J3DNativeState::setNumIndStages(1);
+    J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD1, GX_TEXMAP0);
+    J3DNativeState::setTevIndWarp(GX_TEVSTAGE0, GX_INDTEXSTAGE0, 1, 0, GX_ITM_0);
+>>>>>>> upstream/main
     Mtx23 new_mtx;
     new_mtx[0][0] = ::sIndirectScale;
     new_mtx[0][1] = 0.0f;
@@ -111,6 +153,7 @@ void OceanRingPipeInside::loadMaterial() const {
     new_mtx[1][0] = 0.0f;
     new_mtx[1][1] = ::sIndirectScale;
     new_mtx[1][2] = 0.0f;
+<<<<<<< HEAD
     GXSetIndTexMtx(GX_ITM_0, new_mtx, 0);
 
     GXSetTevColor(GX_TEVREG0, ::sTevReg0);
@@ -132,6 +175,29 @@ void OceanRingPipeInside::loadMaterial() const {
 }
 
 void OceanRingPipeInside::sendGD() const {
+=======
+    J3DNativeState::setIndTexMtx(GX_ITM_0, new_mtx, 0);
+
+    J3DNativeState::setTevColor(GX_TEVREG0, ::sTevReg0);
+    J3DNativeState::setTevColor(GX_TEVREG1, ::sTevReg1);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_C1, GX_CC_TEXC, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_4, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_TEXA, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_4, GX_TRUE, GX_TEVPREV);
+
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_COPY);
+    J3DNativeState::setAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    J3DNativeState::setZMode(1, GX_LEQUAL, 0);
+    J3DNativeState::setZCompLoc(1);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    J3DNativeState::setFog(GX_FOG_NONE, 0.0f, 0.0f, MR::getNearZ(), MR::getFarZ(), sFogCol);
+}
+
+void OceanRingPipeInside::sendGD() {
+>>>>>>> upstream/main
     u8 something = 0x98;
     s32 vv;
     s32 v;
@@ -152,6 +218,7 @@ void OceanRingPipeInside::sendGD() const {
         f32 f24 = 0.0f;
         f32 f23 = 0.0f;
         vv = mRingPipe->_98;
+<<<<<<< HEAD
         GDWrite_u8(something);
         GDWrite_u16((u16)(vv << 1));
         for (s32 j = 0; j < mRingPipe->_98; j++) {
@@ -167,6 +234,20 @@ void OceanRingPipeInside::sendGD() const {
             GDWrite_f32(f28);
             GDWrite_f32(f23);
             GDWrite_f32(f27);
+=======
+        mMesh.begin(static_cast< GXPrimitive >(something), (u16)(vv << 1));
+        for (s32 j = 0; j < mRingPipe->_98; j++) {
+            v = j * mRingPipe->_9C;
+            mMesh.index(NativeMesh::SLOT_POSITION, i + v);
+            mMesh.texCoord(0, f24, f26);
+            mMesh.texCoord(1, f23, f25);
+            mMesh.corner();
+
+            mMesh.index(NativeMesh::SLOT_POSITION, i + (v + 1));
+            mMesh.texCoord(0, f24, f28);
+            mMesh.texCoord(1, f23, f27);
+            mMesh.corner();
+>>>>>>> upstream/main
 
             f24 += f29;
             f23 += f30;

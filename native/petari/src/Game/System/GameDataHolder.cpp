@@ -1,7 +1,10 @@
 #include "Game/System/GameDataHolder.hpp"
+<<<<<<< HEAD
 #ifdef TARGET_PC
 #include "Game/System/NebulaCoopWorld.hpp"
 #endif
+=======
+>>>>>>> upstream/main
 #include "Game/System/GameDataGalaxyStorage.hpp"
 #include "Game/System/GameDataPlayerStatus.hpp"
 #include "Game/System/GameEventFlagChecker.hpp"
@@ -75,6 +78,7 @@ bool GameDataHolder::isOnGameEventFlag(const char* pFlagName) const {
 }
 
 void GameDataHolder::tryOnGameEventFlag(const char* pFlagName) {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     const bool wasOn = mEventFlagChecker->isOn(pFlagName);
 #endif
@@ -85,6 +89,9 @@ void GameDataHolder::tryOnGameEventFlag(const char* pFlagName) {
         NebulaCoopWorld::noticeEventFlag(this, pFlagName);
     }
 #endif
+=======
+    mEventFlagChecker->tryOn(pFlagName);
+>>>>>>> upstream/main
 }
 
 s32 GameDataHolder::getGameEventValue(const char* pName) const {
@@ -94,6 +101,7 @@ s32 GameDataHolder::getGameEventValue(const char* pName) const {
 }
 
 void GameDataHolder::setGameEventValue(const char* pName, u16 value) {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     const bool changed = mEventValueChecker->getValue(pName) != value;
 #endif
@@ -103,6 +111,9 @@ void GameDataHolder::setGameEventValue(const char* pName, u16 value) {
         NebulaCoopWorld::noticeEventValue(this, pName, value);
     }
 #endif
+=======
+    mEventValueChecker->setValue(pName, value);
+>>>>>>> upstream/main
 }
 
 bool GameDataHolder::isOnGameEventValueForBit(const char* pName, int bit) const {
@@ -208,6 +219,7 @@ bool GameDataHolder::hasGrandStar(int index) const {
 }
 
 void GameDataHolder::setPowerStar(const char* pGalaxyName, s32 scenarioNum, bool set) {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     const bool isNew = set && !hasPowerStar(pGalaxyName, scenarioNum);
 #endif
@@ -217,6 +229,9 @@ void GameDataHolder::setPowerStar(const char* pGalaxyName, s32 scenarioNum, bool
         NebulaCoopWorld::noticePowerStar(this, pGalaxyName, scenarioNum);
     }
 #endif
+=======
+    makeGalaxyScenarioAccessor(pGalaxyName, scenarioNum).setPowerStarFlag(set);
+>>>>>>> upstream/main
 }
 
 s32 GameDataHolder::getPowerStarNumOwned(const char* pGalaxyName) const {

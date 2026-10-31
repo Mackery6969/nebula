@@ -433,7 +433,11 @@ void SmallStone::initMember(const char* pModelName, bool useGravity) {
             MR::startBva(pMember, "Kind");
             MR::stopBva(pMember);
             s32 max = MR::getBvaFrameMax(pMember, "Kind");
+<<<<<<< HEAD
             s32 frame = (max + i) % max;
+=======
+            s32 frame = max != 0 ? (max + i) % max : i;
+>>>>>>> upstream/main
             MR::setBvaFrameAndStop(pMember, frame);
 
             switch (frame) {

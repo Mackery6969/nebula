@@ -2,11 +2,20 @@
 #ifdef TARGET_PC
 #include "Game/Screen/NebulaIcons.hpp"
 #endif
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaAuxMemory.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/MemoryUtil.hpp"
 #include <JSystem/JKernel/JKRExpHeap.hpp>
 #include <JSystem/JKernel/JKRSolidHeap.hpp>
 #include <revolution/os.h>
 #include <revolution/wpad.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+#include "JSystem/JUtility/JUTException.hpp"
+>>>>>>> upstream/main
 
 JKRExpHeap* HeapMemoryWatcher::sRootHeapGDDR3;
 
@@ -119,16 +128,31 @@ void HeapMemoryWatcher::destroyGameHeap() {
     createGameHeap();
 }
 
+<<<<<<< HEAD
+=======
+extern "C" void nebula_memory_arenas(void** mem1Lo, void** mem1Hi, void** mem2Lo, void** mem2Hi);
+
+>>>>>>> upstream/main
 void HeapMemoryWatcher::createRootHeap() {
     JKRExpHeap* pHeap;
     void* newHi;
     uintptr_t arenaHi, arenaLo;
 
     JKRExpHeap::createRoot(1, true);
+<<<<<<< HEAD
     arenaLo = reinterpret_cast< uintptr_t >(OSGetMEM2ArenaLo());
     arenaHi = reinterpret_cast< uintptr_t >(OSGetMEM2ArenaHi());
     newHi = reinterpret_cast< void* >(arenaLo + 0xE00000);
     OSSetMEM2ArenaHi(newHi);
+=======
+    // MEM2's arena: its first 14 MB are the auxiliary memory, the rest the GDDR3 root heap.
+    void *mem1Lo, *mem1Hi, *mem2Lo, *mem2Hi;
+    nebula_memory_arenas(&mem1Lo, &mem1Hi, &mem2Lo, &mem2Hi);
+    arenaLo = reinterpret_cast< uintptr_t >(mem2Lo);
+    arenaHi = reinterpret_cast< uintptr_t >(mem2Hi);
+    newHi = reinterpret_cast< void* >(arenaLo + 0xE00000);
+    NebulaAuxMemory::init(mem2Lo, 0xE00000);
+>>>>>>> upstream/main
     JKRHeap::setAltAramStartAdr(arenaLo);
     pHeap = JKRExpHeap::create(newHi, (u32)(arenaHi - reinterpret_cast< uintptr_t >(newHi)), JKRHeap::sRootHeap, true);
 
@@ -145,7 +169,11 @@ void HeapMemoryWatcher::createHeaps() {
     mAudSystemHeap = ::createSolidHeap(0x1E0000, JKRHeap::sRootHeap);
     mStationedHeapNapa = ::createExpHeap(0x900000, JKRHeap::sRootHeap, false);
     JKRHeap* pRootHeapGDDR = HeapMemoryWatcher::sRootHeapGDDR3;
+<<<<<<< HEAD
     u32 wpadHeapSize = OSRoundUp32B(WPADGetWorkMemorySize()) + 0xD0;
+=======
+    u32 wpadHeapSize = NebulaAlignUp32(WPADGetWorkMemorySize()) + 0xD0;
+>>>>>>> upstream/main
     mWPadHeap = ::createExpHeap(wpadHeapSize, pRootHeapGDDR, false);
     mHomeButtonLayoutHeap = ::createExpHeap(0x80000, HeapMemoryWatcher::sRootHeapGDDR3, false);
 #ifdef TARGET_PC
@@ -169,12 +197,16 @@ HeapMemoryWatcher::HeapMemoryWatcher()
     createHeaps();
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
+=======
+>>>>>>> upstream/main
 // Natively the report names the heap and the request, for the host's crash report.
 void HeapMemoryWatcher::memoryErrorCallback(void* pHeap, u32 size, int alignment) {
     if (static_cast< JKRHeap* >(pHeap)->getHeapType() == 'EXPH') {
         static_cast< JKRExpHeap* >(pHeap)->reportBlocks();
     }
+<<<<<<< HEAD
     OSPanic(__FILE__, 537, "out of memory: heap %p (%d bytes free), %u bytes, alignment %d", pHeap,
             static_cast< JKRHeap* >(pHeap)->getFreeSize(), size, alignment);
 }
@@ -183,6 +215,11 @@ void HeapMemoryWatcher::memoryErrorCallback(void*, u32, int) {
     OSPanic(__FILE__, 537, "");
 }
 #endif
+=======
+    JUTException::panic_f(__FILE__, 537, "out of memory: heap %p (%d bytes free), %u bytes, alignment %d", pHeap,
+            static_cast< JKRHeap* >(pHeap)->getFreeSize(), size, alignment);
+}
+>>>>>>> upstream/main
 
 void HeapMemoryWatcher::checkRestMemory() {
 }

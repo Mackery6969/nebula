@@ -5,7 +5,10 @@
 #include "galaxy/controller_roster.h"
 #include "galaxy/frame_cadence_diagnostics.h"
 #include "galaxy/host_pointer_events.h"
+<<<<<<< HEAD
 #include "galaxy/guest_memory.h"
+=======
+>>>>>>> upstream/main
 #include "galaxy/input_bindings.h"
 #include "galaxy/native_input.h"
 #include "galaxy/synthetic_kpad_buttons.h"
@@ -27,6 +30,12 @@
 #include <unordered_map>
 #include <vector>
 
+<<<<<<< HEAD
+=======
+struct NebulaJAudioFxLine;  // nebula_game_api.h
+struct NebulaJAudioChannel;  // nebula_game_api.h
+
+>>>>>>> upstream/main
 namespace galaxy::host {
 
 // Once enabled, environment variables the input report reads are cached by literal name. The host enables it after
@@ -102,6 +111,11 @@ std::size_t connected_controllers(std::span<input::ControllerInfo> out) noexcept
 [[nodiscard]] std::optional<input::DeviceKey> last_input_device() noexcept;
 // The game's button icons now (ButtonIcons setting, the controller last used and its bindings); `menu`: a menu shows.
 [[nodiscard]] input::ButtonIconSpec button_icons(bool menu) noexcept;
+<<<<<<< HEAD
+=======
+// The style the Auto setting shows now (the controller in use; Wii's before the game first asks).
+[[nodiscard]] input::ButtonIconStyle button_icons_auto_style() noexcept;
+>>>>>>> upstream/main
 // A person typed or clicked (overlay keys included).
 void note_keyboard_input() noexcept;
 // Synchronous check (settings UI only): a controller is attached now.
@@ -131,9 +145,14 @@ void native_game_wiimote_calibration(
 // A valid, empty Mii database (RFL_DB.dat) for a NAND that has none.
 [[nodiscard]] std::vector<std::byte> native_game_empty_mii_database();
 
+<<<<<<< HEAD
 // The game's sound: the JAudio DSP program run on the host (JAudioHostMixer) over the game's DSP memory, which the
 // game keeps in the console's byte order, and the audio interface's blocks played on the output device (XAudio2,
 // master volume, WAV dump).
+=======
+// The game's sound: the JAudio DSP program run on the host (JAudioHostMixer) over the game's channel records, and the
+// audio interface's blocks played on the output device (XAudio2, master volume, WAV dump).
+>>>>>>> upstream/main
 class NativeGameAudio {
 public:
     NativeGameAudio();
@@ -141,11 +160,23 @@ public:
     NativeGameAudio(const NativeGameAudio&) = delete;
     NativeGameAudio& operator=(const NativeGameAudio&) = delete;
 
+<<<<<<< HEAD
     // The command words the game mails to the DSP (count 0: one word, a halted subframe's release), with physical
     // addresses resolved in `memory`. True when the words completed a subframe (the DSP's AUDIOMSG_DSP mail).
     bool dsp_command(const std::uint32_t* words, std::uint32_t count, const GuestMemory& memory);
     // One AI block: 16-bit samples, right then left, big-endian, as the console's DMA engine reads them. Call from one
     // thread; the first call opens the device.
+=======
+    // The game's JAudio mixer calls (nebula_game_api.h jaudio_*). mix returns true when it completed a subframe (the
+    // game then posts its AUDIOMSG_DSP).
+    void setup(std::uint32_t channels, NebulaJAudioChannel* channel_records, const std::int16_t* resample_filter,
+               const std::int16_t* adpcm_filter, const NebulaJAudioFxLine* fx_lines);
+    void set_aux(const void* base, std::uint32_t size);
+    void frame(std::uint32_t subframes, std::uint32_t mixer_level, std::int16_t* left, std::int16_t* right);
+    bool mix(std::uint32_t group, std::uint32_t active);
+    // One AI block: 16-bit (right, left) pairs in host byte order. Call from one thread; the first call opens the
+    // device.
+>>>>>>> upstream/main
     bool play(std::span<const std::byte> block, std::uint32_t sample_rate);
     // Blocks submitted and not yet played (the sink's pending queue and the device's).
     [[nodiscard]] unsigned queued_blocks() const;

@@ -145,6 +145,10 @@ void WaterLeakPipe::initPipeHeight() {
     TVec3f v10;
     v10.scaleAdd(mPipeHeight, upVec, mPosition);
     mtx.setTrans(v10);
+<<<<<<< HEAD
     PSMTXCopy(mtx, mTopMtx);
+=======
+    NebulaMtxCopy(mtx, mTopMtx);
+>>>>>>> upstream/main
     calcAndSetBaseMtx();
 }

@@ -74,10 +74,13 @@ namespace MR {
     void getCurrentScenarioStartAnimCameraData(void**, s32*);
     void incCoin(int);
     void incPurpleCoin();
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // Online co-op: coins another player in this instance took count here too (ScenePlayingResult).
     void incCoinOfOtherPlayer(int);
 #endif
+=======
+>>>>>>> upstream/main
     s32 getCoinNum();
     s32 getPurpleCoinNum();
     s32 getPowerStarNum();

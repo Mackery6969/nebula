@@ -116,9 +116,15 @@ bool MarioRecovery::calcFirstVector() {
 
 void MarioRecovery::updateJump() {
     Mtx rotation;
+<<<<<<< HEAD
     PSMTXRotAxisRad(rotation, &_64, _7C);
     TVec3f rotated;
     PSMTXMultVec(rotation, &_70, &rotated);
+=======
+    NebulaMtxRotAxisRad(rotation, &_64, _7C);
+    TVec3f rotated;
+    NebulaMtxMultVec(rotation, &_70, &rotated);
+>>>>>>> upstream/main
     if (_88 > 60 && _88 < 120) {
         if (_7C < 4.712389f) {
             f32 frames = _88 - 60;

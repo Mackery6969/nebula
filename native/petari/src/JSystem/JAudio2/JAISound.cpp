@@ -1,4 +1,8 @@
 #include "JSystem/JAudio2/JAISound.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JAIAudience.hpp"
 #include "JSystem/JAudio2/JAISoundHandles.hpp"
 #include "JSystem/JAudio2/JASReport.hpp"
@@ -148,10 +152,17 @@ bool JAISound::calc_JAISound_() {
         // stopped every sound. It fades out as a stopped sound does, and names itself.
         if (mCount == 1800 && asSe() != nullptr) {
             if (mHandle == nullptr && !hasLifeTime() && !isStopping()) {
+<<<<<<< HEAD
                 OSReport("audio: orphaned sound %08x stopped after 30 s\n", (u32)mSoundID);
                 stop(30);
             } else {
                 OSReport("audio: sound %08x alive 30 s (lifetime %s, handle %s)\n", (u32)mSoundID,
+=======
+                JUTNativeLog("audio: orphaned sound %08x stopped after 30 s\n", (u32)mSoundID);
+                stop(30);
+            } else {
+                JUTNativeLog("audio: sound %08x alive 30 s (lifetime %s, handle %s)\n", (u32)mSoundID,
+>>>>>>> upstream/main
                          hasLifeTime() ? "on" : "off", isHandleAttached() ? "held" : "none");
             }
         }

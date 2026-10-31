@@ -1,23 +1,45 @@
 #include "Game/System/FileRipper.hpp"
+<<<<<<< HEAD
 #include "Game/Util/FileUtil.hpp"
 #include "Game/Util/MemoryUtil.hpp"
 #include <JSystem/JKernel/JKRHeap.hpp>
 
 namespace {
     OSMutex sDecompMutex;
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "Game/Util/FileUtil.hpp"
+#include "Game/Util/MemoryUtil.hpp"
+#include <JSystem/JKernel/JKRHeap.hpp>
+#include "Game/System/NebulaFrameClock.hpp"
+#include "Game/System/NebulaDisc.hpp"
+#include "Game/Util/RenderSignals.hpp"
+#include "JSystem/JUtility/JUTException.hpp"
+
+namespace {
+    NebulaMutex sDecompMutex;
+>>>>>>> upstream/main
 
     u8* sReadBuffer;
     u8* sReadBufferEnd;
     u8* sReadBufferLimit;
     s32 sReadDvdOffset;
     u32 sReadDvdLeftSize;
+<<<<<<< HEAD
     DVDFileInfo* sSrcFileInfo;
+=======
+    NebulaDisc::File* sSrcFileInfo;
+>>>>>>> upstream/main
 };  // namespace
 
 void FileRipper::setup(u32 size, JKRHeap* pHeap) {
     ::sReadBuffer = new (pHeap, 0x40) u8[size];
     ::sReadBufferEnd = ::sReadBuffer + size;
+<<<<<<< HEAD
     OSInitMutex(&::sDecompMutex);
+=======
+    (::sDecompMutex).init();
+>>>>>>> upstream/main
 }
 
 s32 FileRipper::checkCompressed(const u8* pData) {
@@ -41,14 +63,24 @@ void* FileRipper::loadToMainRAM(const char* fpath, u8* dest, bool decompress, JK
     u32 decompressedSize;
 
     if (!MR::isFileExist(fpath, false)) {
+<<<<<<< HEAD
         OSPanic(__FILE__, 0x70, "File isn't exist.");
+=======
+        JUTException::panic_f(__FILE__, 0x70, "File isn't exist.");
+>>>>>>> upstream/main
     }
 
     u32 fsize = (MR::getFileSize(fpath, false) + 0x1f) / 0x20 * 0x20;
 
+<<<<<<< HEAD
     DVDFileInfo fileInfo;
     if (!DVDOpen(fpath, &fileInfo)) {
         OSPanic(__FILE__, 0x77, "DVDOpen() failed");
+=======
+    NebulaDisc::File fileInfo;
+    if (!NebulaDisc::open(fpath, &fileInfo)) {
+        JUTException::panic_f(__FILE__, 0x77, "NebulaDisc::open() failed");
+>>>>>>> upstream/main
     }
 
 #ifdef TARGET_PC
@@ -61,15 +93,24 @@ void* FileRipper::loadToMainRAM(const char* fpath, u8* dest, bool decompress, JK
 #endif
         copySrc = (u8*)((uintptr_t)(buf + 0x3f) / 0x40 * 0x40);
         while (true) {
+<<<<<<< HEAD
             s32 result = DVDReadPrio(&fileInfo, copySrc, 0x20, 0, 2);
+=======
+            s32 result = NebulaDisc::read(&fileInfo, copySrc, 0x20, 0);
+>>>>>>> upstream/main
             if (result >= 0) {
                 break;
             } else if (result == -3) {
                 return 0;
             }
+<<<<<<< HEAD
             VIWaitForRetrace();
         }
         DCInvalidateRange(copySrc, 0x20);
+=======
+            NebulaFrameClock::waitFrame();
+        }
+>>>>>>> upstream/main
         compression = checkCompressed(copySrc);
         decompressedSize = (copySrc[4] << 24) | (copySrc[5] << 16) | (copySrc[6] << 8) | copySrc[7];
     }
@@ -108,7 +149,11 @@ void* FileRipper::loadToMainRAM(const char* fpath, u8* dest, bool decompress, JK
                 readOffset = 0x20;
                 MR::copyMemory(dest, copySrc, 0x20);
             }
+<<<<<<< HEAD
             s32 result = DVDReadPrio(&fileInfo, readDest, readSize, readOffset, 2);
+=======
+            s32 result = NebulaDisc::read(&fileInfo, readDest, readSize, readOffset);
+>>>>>>> upstream/main
             if (result >= 0) {
                 break;
             }
@@ -118,7 +163,11 @@ void* FileRipper::loadToMainRAM(const char* fpath, u8* dest, bool decompress, JK
                 }
                 return 0;
             }
+<<<<<<< HEAD
             VIWaitForRetrace();
+=======
+            NebulaFrameClock::waitFrame();
+>>>>>>> upstream/main
         }
         return dest;
     } else if (compression == 2) {
@@ -138,8 +187,13 @@ void* FileRipper::loadToMainRAM(const char* fpath, u8* dest, bool decompress, JK
     }
 }
 
+<<<<<<< HEAD
 bool FileRipper::decompressFromDVD(DVDFileInfo* fileInfo, void* dest, u32 readSize, u32 destSize, const u8* currentPos, u32 copySize) {
     OSLockMutex(&::sDecompMutex);
+=======
+bool FileRipper::decompressFromDVD(NebulaDisc::File* fileInfo, void* dest, u32 readSize, u32 destSize, const u8* currentPos, u32 copySize) {
+    (::sDecompMutex).lock();
+>>>>>>> upstream/main
 
     ::sSrcFileInfo = fileInfo;
     ::sReadDvdOffset = 0;
@@ -163,8 +217,13 @@ bool FileRipper::decompressFromDVD(DVDFileInfo* fileInfo, void* dest, u32 readSi
         result = false;
     }
 
+<<<<<<< HEAD
     DCStoreRangeNoSync(dest, destSize);
     OSUnlockMutex(&::sDecompMutex);
+=======
+    NebulaRender::memoryRewritten(dest, destSize);
+    (::sDecompMutex).unlock();
+>>>>>>> upstream/main
 
     return result;
 }
@@ -238,15 +297,24 @@ u8* FileRipper::readSrcDataFirst() {
         readSize = ::sReadDvdLeftSize;
     }
     while (true) {
+<<<<<<< HEAD
         s32 result = DVDReadPrio(::sSrcFileInfo, readBuf, readSize, ::sReadDvdOffset, 2);
+=======
+        s32 result = NebulaDisc::read(::sSrcFileInfo, readBuf, readSize, ::sReadDvdOffset);
+>>>>>>> upstream/main
         if (result >= 0) {
             break;
         } else if (result == -3) {
             return 0;
         }
+<<<<<<< HEAD
         VIWaitForRetrace();
     }
     DCInvalidateRange(readBuf, readSize);
+=======
+        NebulaFrameClock::waitFrame();
+    }
+>>>>>>> upstream/main
     ::sReadDvdOffset += readSize;
     ::sReadDvdLeftSize -= readSize;
     return readBuf;
@@ -267,15 +335,24 @@ u8* FileRipper::readSrcDataNext(u8* buf) {
         readSize = ::sReadDvdLeftSize;
     }
     while (true) {
+<<<<<<< HEAD
         s32 result = DVDReadPrio(::sSrcFileInfo, readBuf, readSize, ::sReadDvdOffset, 2);
+=======
+        s32 result = NebulaDisc::read(::sSrcFileInfo, readBuf, readSize, ::sReadDvdOffset);
+>>>>>>> upstream/main
         if (result >= 0) {
             break;
         } else if (result == -3) {
             return 0;
         }
+<<<<<<< HEAD
         VIWaitForRetrace();
     }
     DCInvalidateRange(readBuf, readSize);
+=======
+        NebulaFrameClock::waitFrame();
+    }
+>>>>>>> upstream/main
     ::sReadDvdOffset += readSize;
     ::sReadDvdLeftSize -= readSize;
     if (!::sReadDvdLeftSize) {

@@ -148,7 +148,11 @@ void MarioEffect::updateFollowMtx(MovingFollowMtx* pFollow) {
 
     if (pFollow->_0 == 0) {
         Mtx temp;
+<<<<<<< HEAD
         PSMTXCopy(_24, temp);
+=======
+        NebulaMtxCopy(_24, temp);
+>>>>>>> upstream/main
 
         const TVec3f& rTrans = getTrans();
         MR::setMtxTrans(temp, rTrans.x, rTrans.y, rTrans.z);
@@ -161,9 +165,15 @@ void MarioEffect::updateFollowMtx(MovingFollowMtx* pFollow) {
         }
 
         Mtx inv;
+<<<<<<< HEAD
         PSMTXInverse(pFollow->_64, inv);
         MR::multMtx(pFollow->_4, temp, inv);
         PSMTXCopy(temp, pFollow->_34);
+=======
+        NebulaMtxInverse(pFollow->_64, inv);
+        MR::multMtx(pFollow->_4, temp, inv);
+        NebulaMtxCopy(temp, pFollow->_34);
+>>>>>>> upstream/main
     } else {
         MR::multMtx(pFollow->_34, pFollow->_4, pFollow->_64);
     }
@@ -649,7 +659,11 @@ MultiEmitter* MarioActor::playCommonEffect(const char* pName) {
                 TVec3f rot;
                 MR::makeMtxUpNoSupportPos(&mtx, dir, TVec3f(0.0f, 0.0f, 0.0f));
                 MR::makeRTFromMtxPtr(nullptr, &rot, mtx.toMtxPtr(), true);
+<<<<<<< HEAD
                 PSMTXCopy(mtx.toMtxPtr(), mMarioEffect->_24.toMtxPtr());
+=======
+                NebulaMtxCopy(mtx.toMtxPtr(), mMarioEffect->_24.toMtxPtr());
+>>>>>>> upstream/main
 
                 if (emitter != nullptr) {
                     emitter->setGlobalRotationDegree(rot, -1);
@@ -1208,7 +1222,11 @@ MarioEffect::MarioEffect(MarioActor* pActor) : MarioModule(pActor) {
     _18 = 0;
     _1C.set(0, 0, 0, 0);
     _20.set(0, 0, 0, 0);
+<<<<<<< HEAD
     PSMTXIdentity(_24.toMtxPtr());
+=======
+    NebulaMtxIdentity(_24.toMtxPtr());
+>>>>>>> upstream/main
 }
 
 void MarioEffect::playSwingEffect() {

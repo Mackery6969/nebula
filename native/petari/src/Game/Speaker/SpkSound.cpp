@@ -1,4 +1,8 @@
 #include "Game/Speaker/SpkSound.hpp"
+<<<<<<< HEAD
+=======
+#include <revolution/wpad.h>
+>>>>>>> upstream/main
 #include "Game/Speaker/SpkSpeakerCtrl.hpp"
 #include "Game/Speaker/SpkSystem.hpp"
 #include <JSystem/JAudio2/JASCriticalSection.hpp>

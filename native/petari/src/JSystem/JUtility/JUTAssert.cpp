@@ -1,10 +1,16 @@
 #include "JSystem/JUtility/JUTAssert.hpp"
 #include "JSystem/JUtility/JUTConsole.hpp"
 #include "JSystem/JUtility/JUTDbPrint.hpp"
+<<<<<<< HEAD
 #include "JSystem/JUtility/JUTDirectPrint.hpp"
 #include "JSystem/JUtility/JUTFont.hpp"
 #include <cstdio>
 #include <revolution/vi.h>
+=======
+#include "JSystem/JUtility/JUTFont.hpp"
+#include <cstdio>
+#include "Game/System/NebulaFrameClock.hpp"
+>>>>>>> upstream/main
 
 extern bool sAssertVisible;
 
@@ -38,6 +44,7 @@ namespace JUTAssertion {
         return 0;
     }
 
+<<<<<<< HEAD
     void flushMessage() {
         if (flush_subroutine() && sAssertVisible == true) {
             JUTDirectPrint* manager = JUTDirectPrint::getManager();
@@ -49,11 +56,17 @@ namespace JUTAssertion {
         }
     }
 
+=======
+>>>>>>> upstream/main
     void flushMessage_dbPrint() {
         if (flush_subroutine() && sAssertVisible == true && JUTDbPrint::getManager() != nullptr) {
             JUTFont* font = JUTDbPrint::getManager()->getFont();
             if (font != nullptr) {
+<<<<<<< HEAD
                 u8 tmp = ((VIGetRetraceCount() & 0x3C) << 2) | 0xF;
+=======
+                u8 tmp = ((NebulaFrameClock::count() & 0x3C) << 2) | 0xF;
+>>>>>>> upstream/main
                 font->setGX();
                 font->setCharColor(JUtility::TColor(255, tmp, tmp, 255));
                 font->drawString(30, 36, sMessageFileLine, true);

@@ -1,11 +1,20 @@
 #pragma inline_max_size(250)
 #include "JSystem/JKernel/JKRDvdRipper.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRCompression.hpp"
 #include "JSystem/JKernel/JKRDecomp.hpp"
 #include "JSystem/JKernel/JKRDvdFile.hpp"
 #include "JSystem/JUtility/JUTException.hpp"
 #include <cstring>
 #include <stdint.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaFrameClock.hpp"
+#include "Game/Util/RenderSignals.hpp"
+>>>>>>> upstream/main
 
 
 JSUList< JKRDMCommand > JKRDvdRipper::sDvdAsyncList = JSUList< JKRDMCommand >();
@@ -51,16 +60,25 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
         u8 buffer[0x3F];
         u8* bufPtr = reinterpret_cast< u8* >(ALIGN_NEXT(reinterpret_cast< uintptr_t >(buffer), 32));
         while (true) {
+<<<<<<< HEAD
             int readBytes = DVDReadPrio(dvdFile->getFileInfo(), bufPtr, 0x20, 0, 2);
+=======
+            int readBytes = NebulaDisc::read(dvdFile->getFile(), bufPtr, 0x20, 0);
+>>>>>>> upstream/main
             if (readBytes >= 0)
                 break;
 
             if (readBytes == -3 || errorRetry == false)
                 return nullptr;
 
+<<<<<<< HEAD
             VIWaitForRetrace();
         }
         DCInvalidateRange(bufPtr, 0x20);
+=======
+            NebulaFrameClock::waitFrame();
+        }
+>>>>>>> upstream/main
 
         compression = JKRCheckCompressed_noASR(bufPtr);
         expandSize = JKRDecompExpandSize(bufPtr);
@@ -107,7 +125,11 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
             u8 buffer[0x3F];
             u8* bufPtr = reinterpret_cast< u8* >(ALIGN_NEXT(reinterpret_cast< uintptr_t >(buffer), 32));
             while (true) {
+<<<<<<< HEAD
                 int readBytes = DVDReadPrio(dvdFile->getFileInfo(), bufPtr, 32, static_cast< s32 >(offset), 2);
+=======
+                int readBytes = NebulaDisc::read(dvdFile->getFile(), bufPtr, 32, static_cast< s32 >(offset));
+>>>>>>> upstream/main
                 if (readBytes >= 0)
                     break;
 
@@ -117,9 +139,14 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
                     }
                     return nullptr;
                 }
+<<<<<<< HEAD
                 VIWaitForRetrace();
             }
             DCInvalidateRange(bufPtr, 32);
+=======
+                NebulaFrameClock::waitFrame();
+            }
+>>>>>>> upstream/main
 
             compression2 = JKRCheckCompressed_noASR(bufPtr);
             JKRDecompExpandSize(bufPtr);
@@ -129,7 +156,11 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
             if (dstLength != 0 && dstLength < readSize)
                 readSize = dstLength;
             while (true) {
+<<<<<<< HEAD
                 int readBytes = DVDReadPrio(dvdFile->getFileInfo(), dst, readSize, static_cast< s32 >(offset), 2);
+=======
+                int readBytes = NebulaDisc::read(dvdFile->getFile(), dst, readSize, static_cast< s32 >(offset));
+>>>>>>> upstream/main
                 if (readBytes >= 0)
                     break;
 
@@ -138,7 +169,11 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
                         JKRFree(dst);
                     return nullptr;
                 }
+<<<<<<< HEAD
                 VIWaitForRetrace();
+=======
+                NebulaFrameClock::waitFrame();
+>>>>>>> upstream/main
             }
             if (param_8) {
                 *param_8 = readSize;
@@ -155,7 +190,11 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
             JUTException::panic(__FILE__, 0x14d, "Not support SZP with offset read");
         }
         while (true) {
+<<<<<<< HEAD
             int readBytes = DVDReadPrio(dvdFile->getFileInfo(), mem, fileSizeAligned, 0, 2);
+=======
+            int readBytes = NebulaDisc::read(dvdFile->getFile(), mem, fileSizeAligned, 0);
+>>>>>>> upstream/main
             if (readBytes >= 0)
                 break;
 
@@ -167,10 +206,16 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
                 JKRFree(mem);
                 return nullptr;
             }
+<<<<<<< HEAD
             VIWaitForRetrace();
         }
 
         DCInvalidateRange(mem, fileSizeAligned);
+=======
+            NebulaFrameClock::waitFrame();
+        }
+
+>>>>>>> upstream/main
         JKRDecompress(mem, dst, expandSize, offset);
         JKRFree(mem);
         if (param_8) {
@@ -196,7 +241,11 @@ void* JKRDvdRipper::loadToMainRAM(JKRDvdFile* dvdFile, u8* dst, JKRExpandSwitch 
 
 
 static u8 lit_491[12];
+<<<<<<< HEAD
 static OSMutex decompMutex;
+=======
+static NebulaMutex decompMutex;
+>>>>>>> upstream/main
 u32 JKRDvdRipper::sSZSBufferSize = 0x00000400;
 static u8* szpBuf;
 static u8* szpEnd;
@@ -230,16 +279,25 @@ static inline u8* nextSrcData(u8* src) {
     }
 
     while (true) {
+<<<<<<< HEAD
         s32 result = DVDReadPrio(srcFile->getFileInfo(), (dest + limit), transSize, srcOffset, 2);
+=======
+        s32 result = NebulaDisc::read(srcFile->getFile(), (dest + limit), transSize, srcOffset);
+>>>>>>> upstream/main
         if (result >= 0)
             break;
 
         if (result == -3 || !JKRDvdRipper::isErrorRetry())
             return nullptr;
 
+<<<<<<< HEAD
         VIWaitForRetrace();
     }
     DCInvalidateRange((dest + limit), transSize);
+=======
+        NebulaFrameClock::waitFrame();
+    }
+>>>>>>> upstream/main
     srcOffset += transSize;
     transLeft -= transSize;
     if (transLeft == 0)
@@ -255,7 +313,11 @@ static inline u8* firstSrcData() {
     u32 length = transLeft < bufSize ? transLeft : bufSize;
 
     while (true) {
+<<<<<<< HEAD
         int result = DVDReadPrio(srcFile->getFileInfo(), buffer, length, srcOffset, 2);
+=======
+        int result = NebulaDisc::read(srcFile->getFile(), buffer, length, srcOffset);
+>>>>>>> upstream/main
         if (result >= 0) {
             break;
         }
@@ -263,10 +325,16 @@ static inline u8* firstSrcData() {
         if (result == -3 || !JKRDvdRipper::isErrorRetry()) {
             return nullptr;
         }
+<<<<<<< HEAD
         VIWaitForRetrace();
     }
 
     DCInvalidateRange(buffer, length);
+=======
+        NebulaFrameClock::waitFrame();
+    }
+
+>>>>>>> upstream/main
     srcOffset += length;
     transLeft -= length;
     return buffer;
@@ -388,6 +456,7 @@ static inline int decompSZS_subroutine(u8* src, u8* dest) {
 }
 
 static int JKRDecompressFromDVD(JKRDvdFile* dvdFile, void* dst, u32 fileSize, u32 inMaxDest, u32 inFileOffset, u32 inSrcOffset, u32* inTsPtr) {
+<<<<<<< HEAD
     BOOL interrupts = OSDisableInterrupts();
     if (data_80451458 == false) {
         OSInitMutex(&decompMutex);
@@ -395,6 +464,15 @@ static int JKRDecompressFromDVD(JKRDvdFile* dvdFile, void* dst, u32 fileSize, u3
     }
     OSRestoreInterrupts(interrupts);
     OSLockMutex(&decompMutex);
+=======
+    BOOL interrupts = NebulaKernel::disableInterrupts();
+    if (data_80451458 == false) {
+        decompMutex.init();
+        data_80451458 = true;
+    }
+    NebulaKernel::restoreInterrupts(interrupts);
+    decompMutex.lock();
+>>>>>>> upstream/main
     u32 result = 0;
     u32 szsBufferSize = JKRDvdRipper::getSZSBufferSize();
     szpBuf = reinterpret_cast< u8* >(JKRAllocFromSysHeap(szsBufferSize, -0x20));
@@ -425,8 +503,13 @@ static int JKRDecompressFromDVD(JKRDvdFile* dvdFile, void* dst, u32 fileSize, u3
     if (refBuf) {
         JKRFree(refBuf);
     }
+<<<<<<< HEAD
     DCStoreRangeNoSync(dst, *tsPtr);
     OSUnlockMutex(&decompMutex);
+=======
+    NebulaRender::memoryRewritten(dst, *tsPtr);
+    decompMutex.unlock();
+>>>>>>> upstream/main
     return result;
 }
 

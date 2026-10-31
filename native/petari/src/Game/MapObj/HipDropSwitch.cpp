@@ -87,7 +87,11 @@ void HipDropSwitch::calcAnim() {
         MR::calcUpVec(&upVec, this);
         trans += upVec * springValue;
         mtx.setTrans(trans);
+<<<<<<< HEAD
         PSMTXCopy(mtx, jointMtx);
+=======
+        NebulaMtxCopy(mtx, jointMtx);
+>>>>>>> upstream/main
     }
 
     mSpringModel->setMtx(mtx);

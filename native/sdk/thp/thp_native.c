@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 /* THP movies natively (in place of the SDK's THPDec.c, paired-single assembly, and THPAudio.c).
    - Video: each frame's JPEG data goes to Nebula's native decoder in the host (thp_video_decode), which writes the
      Y, U and V planes into the game's buffers before the renderer reads them.
    - Audio: THPAudio.c's ADPCM decoder, reading the frame's big-endian record header. */
+=======
+/* THP movies' sound natively (in place of the SDK's THPAudio.c): its ADPCM decoder, reading the frame's big-endian
+   record header. Video frames go from the game's player to the host's decoder (thp_video_decode). */
+>>>>>>> upstream/main
 #include <string.h>
 
 #include <revolution/thp.h>
 
 #include <nebula_endian.h>
+<<<<<<< HEAD
 #include <nebula_game_api.h>
 
 const NebulaHostServices* nebula_host(void);
@@ -29,6 +35,8 @@ s32 THPVideoDecode(void* file, void* tileY, void* tileU, void* tileV, void* work
     (void)work;
     return -1;
 }
+=======
+>>>>>>> upstream/main
 
 typedef struct {
     const u8* data;

@@ -1,7 +1,13 @@
 #pragma once
 
 #include "JSystem/J3DGraphBase/J3DShape.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 inline J3DShapeMtx::~J3DShapeMtx() {
 }
@@ -20,7 +26,11 @@ public:
     }
 
     void setMtx(u16 idx, const Mtx mtx) {
+<<<<<<< HEAD
         PSMTXCopy(mtx, mpTexMtx[idx]);
+=======
+        NebulaMtxCopy(mtx, mpTexMtx[idx]);
+>>>>>>> upstream/main
     }
 
     Mtx44& getEffectMtx(u16 idx) {

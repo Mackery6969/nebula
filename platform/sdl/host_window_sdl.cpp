@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
+<<<<<<< HEAD
 // The game window and input on SDL3 platforms (sdl_host.h, host_window.h and the window functions of gx_d3d12.h):
+=======
+// The game window and input on SDL3 platforms (sdl_host.h, host_window.h and the window functions of renderer_api.h):
+>>>>>>> upstream/main
 // the SDL window and its Vulkan surface; its events (size, focus, quit, the finger and the mouse as the pointer, keys,
 // gamepads); on Android the activity's touch controls and HOME Menu through JNI.
 
 #include "sdl_host.h"
 
+<<<<<<< HEAD
 #include "galaxy/coop_menu.h"
 #include "galaxy/gx/display_modes.h"
 #include "galaxy/gx/galaxy_select.h"
@@ -13,6 +18,16 @@
 #include "galaxy/gx/render_config.h"
 #include "galaxy/gx_d3d12.h"
 #include "galaxy/native_host.h"
+=======
+#include "galaxy/render/display_modes.h"
+#include "galaxy/render/host_window.h"
+#include "galaxy/render/vk/vk_context.h"
+#include "galaxy/render/render_config.h"
+#include "galaxy/renderer_api.h"
+#include "galaxy/input_bindings.h"
+#include "galaxy/native_host.h"
+#include "galaxy/runtime_settings.h"
+>>>>>>> upstream/main
 #include "galaxy/platform_paths.h"
 #include "galaxy/platform_time.h"
 #include "galaxy/virtual_keys.h"
@@ -24,13 +39,21 @@
 #include <android/log.h>
 #include <android/native_window.h>
 #include <jni.h>
+<<<<<<< HEAD
 #endif
 #include <unistd.h>
+=======
+#include <unistd.h>
+#endif
+>>>>>>> upstream/main
 
 #include <algorithm>
 #include <atomic>
 #include <bit>
+<<<<<<< HEAD
 #include <cerrno>
+=======
+>>>>>>> upstream/main
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -38,16 +61,34 @@
 #include <cstring>
 #include <filesystem>
 #include <mutex>
+<<<<<<< HEAD
 #include <string>
 #include <thread>
 #include <vector>
 
 namespace galaxy::sdl {
+=======
+#include <thread>
+
+namespace galaxy::sdl {
+
+// The device that gave input last (button_icons' Auto): none (touch controls), the keyboard and mouse, or a
+// controller: kLastPad plus its scheme.
+constexpr std::uint32_t kLastNone = 0u;
+constexpr std::uint32_t kLastKeyboard = 1u;
+constexpr std::uint32_t kLastPad = 2u;
+std::atomic<std::uint32_t> g_last_input{kLastNone};
+std::atomic<SDL_JoystickID> g_last_pad{0};
+
+>>>>>>> upstream/main
 namespace {
 
 std::mutex g_input_mutex;
 InputState g_input;                 // guarded by g_input_mutex
+<<<<<<< HEAD
 std::atomic<unsigned> g_coop_keys_held{0u};  // galaxy::gx::coop_keys_held
+=======
+>>>>>>> upstream/main
 SDL_Window* g_window = nullptr;
 std::atomic<int> g_home_choice{-1};
 std::atomic<bool> g_home_visible{false};
@@ -213,23 +254,42 @@ void set_key(int vk, bool down) {
     if (vk <= 0 || vk > 0xFF) {
         return;
     }
+<<<<<<< HEAD
     // Tab (1) and Escape (2): coop_keys_held.
     const unsigned coop = vk == VK_TAB ? 1u : vk == VK_ESCAPE ? 2u : 0u;
     if (coop != 0u && down) g_coop_keys_held.fetch_or(coop, std::memory_order_relaxed);
     if (coop != 0u && !down) g_coop_keys_held.fetch_and(~coop, std::memory_order_relaxed);
     g_input.keys.set_key(static_cast<std::uint8_t>(vk), down);
+=======
+    g_input.keys.set_key(static_cast<std::uint8_t>(vk), down);
+    if (down) {
+        g_last_input.store(kLastKeyboard, std::memory_order_relaxed);
+    }
+>>>>>>> upstream/main
     // The runtime's bindings name the generic modifier keys too.
     if (vk == VK_LSHIFT || vk == VK_RSHIFT) g_input.keys.set_key(VK_SHIFT, down);
     if (vk == VK_LCONTROL || vk == VK_RCONTROL) g_input.keys.set_key(VK_CONTROL, down);
     if (vk == VK_LMENU || vk == VK_RMENU) g_input.keys.set_key(VK_MENU, down);
 }
 
+<<<<<<< HEAD
 // The unified layout's scheme for an SDL gamepad: Nintendo's positional layout for Switch controllers.
+=======
+// The unified layout's scheme for an SDL gamepad: Nintendo's positional layout for Switch controllers, PlayStation's
+// for Sony's (as the Windows host's HID controllers).
+>>>>>>> upstream/main
 galaxy::input::ControlScheme scheme_of(SDL_Gamepad* pad) noexcept {
     switch (SDL_GetGamepadType(pad)) {
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_PRO:
     case SDL_GAMEPAD_TYPE_NINTENDO_SWITCH_JOYCON_PAIR:
         return galaxy::input::ControlScheme::SwitchPro;
+<<<<<<< HEAD
+=======
+    case SDL_GAMEPAD_TYPE_PS3:
+    case SDL_GAMEPAD_TYPE_PS4:
+    case SDL_GAMEPAD_TYPE_PS5:
+        return galaxy::input::ControlScheme::PlayStation;
+>>>>>>> upstream/main
     default:
         return galaxy::input::ControlScheme::Xbox;
     }
@@ -278,6 +338,13 @@ void sample_gamepads() {
         sample.axes[3] = -axis(gamepad, SDL_GAMEPAD_AXIS_RIGHTY);
         sample.axes[4] = std::max(0.0f, axis(gamepad, SDL_GAMEPAD_AXIS_LEFT_TRIGGER));
         sample.axes[5] = std::max(0.0f, axis(gamepad, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER));
+<<<<<<< HEAD
+=======
+        if (bits != 0u || std::any_of(std::begin(sample.axes), std::end(sample.axes), [](float a) { return std::abs(a) > 0.5f; })) {
+            g_last_input.store(kLastPad + static_cast<std::uint32_t>(sample.scheme), std::memory_order_relaxed);
+            g_last_pad.store(g_input.pad_ids[i], std::memory_order_relaxed);
+        }
+>>>>>>> upstream/main
     }
 }
 
@@ -300,6 +367,12 @@ void close_gamepad(SDL_JoystickID id) {
             slot = nullptr;
         }
     }
+<<<<<<< HEAD
+=======
+    if (g_last_pad.load(std::memory_order_relaxed) == id && g_last_input.load(std::memory_order_relaxed) >= kLastPad) {
+        g_last_input.store(kLastNone, std::memory_order_relaxed);
+    }
+>>>>>>> upstream/main
 }
 
 // The first finger on the picture is the pointer; x, y in window pixels. Called with g_input_mutex held.
@@ -364,6 +437,7 @@ bool start() noexcept {
     return true;
 }
 
+<<<<<<< HEAD
 // Tasks other threads left for SDL's thread (run_on_sdl_thread).
 std::mutex g_task_mutex;
 std::vector<std::function<void()>> g_tasks;  // guarded by g_task_mutex
@@ -378,6 +452,10 @@ void run_requests() {
     for (std::function<void()>& task : tasks) {
         task();
     }
+=======
+// Requests from other threads (g_home_request, rumble), on SDL's thread.
+void run_requests() {
+>>>>>>> upstream/main
 #if defined(__ANDROID__)
     if (const int request = g_home_request.exchange(0, std::memory_order_acq_rel); request != 0) {
         call_activity(request == 1 ? "showHomeMenu" : "hideHomeMenu");
@@ -411,7 +489,11 @@ void pump_events(int timeout_ms) noexcept {
     static std::int64_t wait_cpu = 0;
     static std::uint32_t waits = 0;
     static auto report_time = std::chrono::steady_clock::now();
+<<<<<<< HEAD
     const std::int64_t wait_start = galaxy::gx::vk::thread_cpu_ns();
+=======
+    const std::int64_t wait_start = galaxy::render::vk::thread_cpu_ns();
+>>>>>>> upstream/main
 #if defined(__ANDROID__)
     // SDL's timed event wait polls without sleeping on Android, keeping a core busy: the events are pumped here and
     // the thread sleeps between pumps.
@@ -425,10 +507,17 @@ void pump_events(int timeout_ms) noexcept {
 #else
     bool any = SDL_WaitEventTimeout(&event, timeout_ms);
 #endif
+<<<<<<< HEAD
     wait_cpu += galaxy::gx::vk::thread_cpu_ns() - wait_start;
     ++waits;
     if (const auto now = std::chrono::steady_clock::now(); now - report_time >= std::chrono::seconds(10)) {
         const std::int64_t cpu = galaxy::gx::vk::thread_cpu_ns();
+=======
+    wait_cpu += galaxy::render::vk::thread_cpu_ns() - wait_start;
+    ++waits;
+    if (const auto now = std::chrono::steady_clock::now(); now - report_time >= std::chrono::seconds(10)) {
+        const std::int64_t cpu = galaxy::render::vk::thread_cpu_ns();
+>>>>>>> upstream/main
         const double seconds = std::chrono::duration<double>(now - report_time).count();
         if (report_cpu != 0) {
             std::fprintf(stderr, "[host-events] %u waits; main thread %.1f ms/s, %.1f ms/s of it in the event wait\n",
@@ -440,6 +529,7 @@ void pump_events(int timeout_ms) noexcept {
         wait_cpu = 0;
         waits = 0;
     }
+<<<<<<< HEAD
     // A main menu text row being edited, or the settings' PLAYER page name, takes the keyboard's typing (Android: its
     // on-screen keyboard shows).
     static bool s_text_input = false;
@@ -452,17 +542,27 @@ void pump_events(int timeout_ms) noexcept {
             SDL_StopTextInput(g_window);
         }
     }
+=======
+>>>>>>> upstream/main
     {
     std::lock_guard<std::mutex> lock(g_input_mutex);
     while (any) {
         switch (event.type) {
         case SDL_EVENT_QUIT:
         case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+<<<<<<< HEAD
             galaxy::gx::host_window::quit_request.store(true, std::memory_order_release);
             break;
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
             update_window_size();
             galaxy::gx::host_window::pending_resize_extent.store(
+=======
+            galaxy::render::host_window::quit_request.store(true, std::memory_order_release);
+            break;
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            update_window_size();
+            galaxy::render::host_window::pending_resize_extent.store(
+>>>>>>> upstream/main
                 (static_cast<std::uint64_t>(g_input.window_width) << 32u) |
                     static_cast<std::uint32_t>(g_input.window_height),
                 std::memory_order_release);
@@ -473,13 +573,20 @@ void pump_events(int timeout_ms) noexcept {
         case SDL_EVENT_WINDOW_FOCUS_LOST:
             g_input.window_focused = false;
             g_input.keys = {};
+<<<<<<< HEAD
             g_coop_keys_held.store(0u, std::memory_order_relaxed);
+=======
+>>>>>>> upstream/main
             break;
         case SDL_EVENT_FINGER_DOWN:
         case SDL_EVENT_FINGER_MOTION:
         case SDL_EVENT_FINGER_UP:
         case SDL_EVENT_FINGER_CANCELED:
             // Platforms whose touches reach SDL (Android's go to the activity's controls, nativePointer).
+<<<<<<< HEAD
+=======
+            g_last_input.store(kLastNone, std::memory_order_relaxed);
+>>>>>>> upstream/main
             finger_event(event.tfinger.fingerID, event.tfinger.x * static_cast<float>(g_input.window_width),
                          event.tfinger.y * static_cast<float>(g_input.window_height),
                          event.type == SDL_EVENT_FINGER_DOWN,
@@ -493,7 +600,11 @@ void pump_events(int timeout_ms) noexcept {
         case SDL_EVENT_MOUSE_WHEEL: {
             // In 120ths of a notch, positive away from the player (Windows' WHEEL_DELTA), as the game takes it.
             const float notches = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+<<<<<<< HEAD
             galaxy::gx::host_window::pointer_wheel.fetch_add(static_cast<std::int32_t>(std::lround(notches * 120.0f)),
+=======
+            galaxy::render::host_window::pointer_wheel.fetch_add(static_cast<std::int32_t>(std::lround(notches * 120.0f)),
+>>>>>>> upstream/main
                                                              std::memory_order_relaxed);
             break;
         }
@@ -506,6 +617,12 @@ void pump_events(int timeout_ms) noexcept {
                 : event.button.button == SDL_BUTTON_X1 ? 3u : 4u;
             g_input.keys.mouse = static_cast<std::uint8_t>(
                 down ? (g_input.keys.mouse | (1u << bit)) : (g_input.keys.mouse & ~(1u << bit)));
+<<<<<<< HEAD
+=======
+            if (down) {
+                g_last_input.store(kLastKeyboard, std::memory_order_relaxed);
+            }
+>>>>>>> upstream/main
             g_input.finger_x = event.button.x;
             g_input.finger_y = event.button.y;
             g_input.finger_ms = galaxy::steady_ms();
@@ -524,6 +641,7 @@ void pump_events(int timeout_ms) noexcept {
                 }
                 break;
             }
+<<<<<<< HEAD
             if (event.type == SDL_EVENT_KEY_DOWN && galaxy::gx::coop_text_entry()) {
                 // The editing keys to the text row; nothing reaches the game while it is edited.
                 switch (event.key.scancode) {
@@ -564,6 +682,10 @@ void pump_events(int timeout_ms) noexcept {
                 }
             }
             break;
+=======
+            set_key(virtual_key(event.key.scancode), event.type == SDL_EVENT_KEY_DOWN);
+            break;
+>>>>>>> upstream/main
         case SDL_EVENT_GAMEPAD_ADDED:
             open_gamepad(event.gdevice.which);
             break;
@@ -634,11 +756,14 @@ int home_menu_choice() noexcept {
     return g_home_choice.load(std::memory_order_acquire);
 }
 
+<<<<<<< HEAD
 void run_on_sdl_thread(std::function<void()> task) noexcept {
     const std::lock_guard<std::mutex> lock(g_task_mutex);
     g_tasks.push_back(std::move(task));
 }
 
+=======
+>>>>>>> upstream/main
 }  // namespace galaxy::sdl
 
 #if defined(__ANDROID__)
@@ -699,9 +824,15 @@ extern "C" JNIEXPORT void JNICALL Java_dev_nebula_galaxy_GameActivity_nativeSetV
 // The activity's SurfaceView is going (surfaceDestroyed, before SDL lets the window go): returns once no present uses
 // it (host_window.h). Two seconds at most, so a stalled render thread cannot hold the UI thread.
 extern "C" JNIEXPORT void JNICALL Java_dev_nebula_galaxy_GameActivity_nativeSurfaceWithdrawn(JNIEnv*, jclass) {
+<<<<<<< HEAD
     galaxy::gx::host_window::surface_withdrawn.store(true, std::memory_order_release);
     if (galaxy::gx::host_window::surface_use.try_lock_for(std::chrono::seconds(2))) {
         galaxy::gx::host_window::surface_use.unlock();
+=======
+    galaxy::render::host_window::surface_withdrawn.store(true, std::memory_order_release);
+    if (galaxy::render::host_window::surface_use.try_lock_for(std::chrono::seconds(2))) {
+        galaxy::render::host_window::surface_use.unlock();
+>>>>>>> upstream/main
     } else {
         std::fprintf(stderr, "[window] the renderer kept the surface past 2 s\n");
     }
@@ -709,13 +840,21 @@ extern "C" JNIEXPORT void JNICALL Java_dev_nebula_galaxy_GameActivity_nativeSurf
 
 // A new surface is ready (after SDL took it in surfaceChanged): the renderer makes its own for it.
 extern "C" JNIEXPORT void JNICALL Java_dev_nebula_galaxy_GameActivity_nativeSurfaceReturned(JNIEnv*, jclass) {
+<<<<<<< HEAD
     galaxy::gx::host_window::surface_withdrawn.store(false, std::memory_order_release);
+=======
+    galaxy::render::host_window::surface_withdrawn.store(false, std::memory_order_release);
+>>>>>>> upstream/main
 }
 #endif
 
 // The renderer's window (host_window.h).
 
+<<<<<<< HEAD
 namespace galaxy::gx::host_window {
+=======
+namespace galaxy::render::host_window {
+>>>>>>> upstream/main
 
 unsigned backbuffer_width = 0;
 unsigned backbuffer_height = 0;
@@ -745,6 +884,15 @@ unsigned display_efb_scale_cap() {
                               static_cast<unsigned>(static_cast<float>(mode->h) * density), kMaxEfbScale);
 }
 
+<<<<<<< HEAD
+=======
+bool flush_native_settings_if_dirty() {
+    return true;  // the app's settings screens write the files
+}
+
+void poll_render_config_file() {}
+
+>>>>>>> upstream/main
 bool hidden_window_mode_enabled() {
     const char* value = std::getenv("GALAXY_HIDE_WINDOW");
     return value != nullptr && value[0] == '1';
@@ -809,7 +957,10 @@ bool present_grid(std::int64_t& retrace_ns, std::int64_t& period_ns, std::int64_
 // The overlay, the HOME Menu and the hint are the platform's own screens on SDL platforms (Android: the activity's).
 void draw_native_settings_overlay(UiCanvas&) {}
 void draw_home_menu(UiCanvas&) {}
+<<<<<<< HEAD
 void draw_native_settings_hint(UiCanvas&) {}
+=======
+>>>>>>> upstream/main
 
 std::vector<const char*> vulkan_instance_extensions() {
     Uint32 count = 0;
@@ -859,6 +1010,7 @@ VkSurfaceKHR create_vulkan_surface(VkInstance instance, NativeWindow window) {
     return surface;
 }
 
+<<<<<<< HEAD
 }  // namespace galaxy::gx::host_window
 
 // The window functions the host and the backend call (gx_d3d12.h).
@@ -869,6 +1021,13 @@ namespace galaxy::gx {
 // the Windows window's model shared.
 
 void request_sharp_2d(bool) noexcept {}
+=======
+}  // namespace galaxy::render::host_window
+
+// The window functions the host and the backend call (renderer_api.h).
+
+namespace galaxy::render {
+>>>>>>> upstream/main
 
 void set_native_settings_content_root(const std::string& utf8_path) {
     host_window::native_settings_content_root = utf8_path;
@@ -901,8 +1060,27 @@ host::HostPointerTransitionPoll poll_host_pointer_transition(std::uint64_t) noex
     return {};
 }
 
+<<<<<<< HEAD
 bool native_window_input_captured() noexcept {
     return home_menu_visible() || native_settings_overlay_visible() || coop_text_entry();
+=======
+// The settings menu is the Windows host's (host_window_win32.cpp: its pages, draft and keys); the SDL hosts do not
+// have it yet, so it stays closed.
+bool native_settings_overlay_visible() noexcept {
+    return false;
+}
+
+NativeSettingsView native_settings_view() {
+    return {};
+}
+
+void native_settings_input(NativeSettingsInput, int) {}
+
+void request_sharp_2d(bool) noexcept {}
+
+bool native_window_input_captured() noexcept {
+    return home_menu_visible();
+>>>>>>> upstream/main
 }
 
 void home_menu_open() noexcept {
@@ -930,10 +1108,16 @@ void home_menu_point(unsigned) noexcept {}
 
 void home_menu_choose(unsigned) noexcept {}
 
+<<<<<<< HEAD
+=======
+void native_settings_post_key(std::uintptr_t) noexcept {}
+
+>>>>>>> upstream/main
 std::int32_t take_pointer_wheel() noexcept {
     return host_window::pointer_wheel.exchange(0, std::memory_order_relaxed);
 }
 
+<<<<<<< HEAD
 bool request_restart() noexcept {
 #if defined(__ANDROID__)
     return false;
@@ -964,3 +1148,69 @@ unsigned coop_keys_held() noexcept {
 }
 
 }  // namespace galaxy::gx
+=======
+}  // namespace galaxy::render
+
+namespace galaxy::host {
+
+// The game's button icons (the Windows host's rules, native_host.cpp): the ButtonIcons setting; Auto's the keyboard's
+// after a key or mouse button (always in the keyboard and mouse input mode, never in the controller one), a
+// controller's family after its input while it stays attached, else the Wii's (touch controls).
+input::ButtonIconSpec button_icons(bool menu) noexcept {
+    using input::ButtonIconStyle;
+    using input::ControlScheme;
+    const std::uint32_t last = galaxy::sdl::g_last_input.load(std::memory_order_relaxed);
+    const std::optional<ControlScheme> pad =
+        last >= galaxy::sdl::kLastPad ? std::optional<ControlScheme>(static_cast<ControlScheme>(last - galaxy::sdl::kLastPad))
+                                      : std::nullopt;
+    const RuntimeInputMode mode = get_runtime_settings().input_mode;
+    const bool keyboard = mode == RuntimeInputMode::KeyboardMouse ||
+                          (mode != RuntimeInputMode::Controller && last == galaxy::sdl::kLastKeyboard);
+    ButtonIconStyle style = ButtonIconStyle::Wii;
+    if (keyboard) {
+        style = ButtonIconStyle::Keyboard;
+    } else if (pad.has_value()) {
+        switch (*pad) {
+        case ControlScheme::Xbox:
+        case ControlScheme::Steam: style = ButtonIconStyle::Xbox; break;
+        case ControlScheme::SwitchPro:
+        case ControlScheme::SwitchPro2: style = ButtonIconStyle::Nintendo; break;
+        case ControlScheme::PlayStation: style = ButtonIconStyle::PlayStation; break;
+        case ControlScheme::Keyboard:
+        case ControlScheme::Generic: break;
+        }
+    }
+    switch (get_runtime_settings().button_icons) {
+    case ButtonIcons::Auto: break;
+    case ButtonIcons::Wii: style = ButtonIconStyle::Wii; break;
+    case ButtonIcons::Xbox: style = ButtonIconStyle::Xbox; break;
+    case ButtonIcons::Nintendo: style = ButtonIconStyle::Nintendo; break;
+    case ButtonIcons::PlayStation: style = ButtonIconStyle::PlayStation; break;
+    case ButtonIcons::Keyboard: style = ButtonIconStyle::Keyboard; break;
+    }
+    // The bindings of the controller in use; a style chosen without one takes its own family's.
+    const ControlScheme scheme = style == ButtonIconStyle::Keyboard      ? ControlScheme::Keyboard
+                                 : pad.has_value()                       ? *pad
+                                 : style == ButtonIconStyle::Nintendo    ? ControlScheme::SwitchPro
+                                 : style == ButtonIconStyle::PlayStation ? ControlScheme::PlayStation
+                                                                         : ControlScheme::Xbox;
+    // The game's thread asks each frame: worked out again only when the bindings, the style, the controller or the
+    // context change.
+    static std::uint64_t s_generation = ~std::uint64_t{0};
+    static ButtonIconStyle s_style = ButtonIconStyle::Wii;
+    static ControlScheme s_scheme = ControlScheme::Keyboard;
+    static bool s_menu = false;
+    static input::ButtonIconSpec s_spec;
+    const std::uint64_t generation = input::controls_config_generation();
+    if (generation != s_generation || style != s_style || scheme != s_scheme || menu != s_menu) {
+        s_generation = generation;
+        s_style = style;
+        s_scheme = scheme;
+        s_menu = menu;
+        s_spec = input::button_icon_spec(style, input::get_controls_config().table(scheme), menu);
+    }
+    return s_spec;
+}
+
+}  // namespace galaxy::host
+>>>>>>> upstream/main

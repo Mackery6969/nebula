@@ -1,4 +1,11 @@
 #include "Game/Screen/BloomEffect.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Screen/CopyFilterNegater.hpp"
 #include "Game/Screen/ImageEffectLocalUtil.hpp"
 #include "Game/Screen/ImageEffectResource.hpp"
@@ -9,6 +16,7 @@
 #include "Game/Util/ScreenUtil.hpp"
 #include "JSystem/JUtility/JUTVideo.hpp"
 #include "revolution/gx/GXEnum.h"
+<<<<<<< HEAD
 #include "revolution/gx/GXFrameBuf.h"
 #include "revolution/gx/GXStruct.h"
 #include "revolution/gx/GXTev.h"
@@ -17,6 +25,15 @@
 #include <nebula_game_api.h>
 #include <nebula_gx_fifo.h>
 #include <revolution/os.h>
+=======
+#include "revolution/gx/GXStruct.h"
+#include <JSystem/JUtility/JUTTexture.hpp>
+#ifdef TARGET_PC
+#include <nebula_game_api.h>
+#include "Game/Util/RenderSignals.hpp"
+#include <revolution/os.h>
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -81,8 +98,11 @@ BloomEffect::BloomEffect(const char* pName) : ImageEffectBase(pName), _14(255), 
     for (u32 i = 0; i < ARRAY_SIZE(::sL2RadAndOfs); i++) {
         initBlurMtx(&_4C[i * ::sL2RoundPoints], ::sL2RoundPoints, ::sL2RadAndOfs[i]._0, ::sL2RadAndOfs[i]._4);
     }
+<<<<<<< HEAD
 
     PPCSync();
+=======
+>>>>>>> upstream/main
 }
 
 void BloomEffect::preDraw() const {
@@ -93,9 +113,15 @@ void BloomEffect::preDraw() const {
 #ifdef TARGET_PC
     // The renderer keeps the scene in the EFB's own format: the console's copy below is 8 bits, which cuts the ray
     // tracer's HDR scene at 1.
+<<<<<<< HEAD
     sBloomRoute = __NebulaGXLinked != 0 ? __NebulaOption(NEBULA_OPTION_BLOOM) : 0;
     if (sBloomRoute != 0) {
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_KEEP, 0, 0);
+=======
+    sBloomRoute = NebulaHost::option(NEBULA_OPTION_BLOOM);
+    if (sBloomRoute != 0) {
+        NebulaRender::bloomMarker(NebulaRender::kBloomKeep, 0, 0);
+>>>>>>> upstream/main
     } else
 #endif
     {
@@ -106,7 +132,11 @@ void BloomEffect::preDraw() const {
     MR::fillScreen(Color8(0, 0, 0, 0xFF).mGXColor);
     MR::loadViewMtx();
     MR::loadProjectionMtx();
+<<<<<<< HEAD
     GXSetClipMode(GX_CLIP_ENABLE);
+=======
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+>>>>>>> upstream/main
 }
 
 void BloomEffect::postDraw() const {
@@ -123,6 +153,7 @@ void BloomEffect::postDraw() const {
         const u8 intensity = _14 * get_10();
         const u32 tap1 = static_cast< u8 >(static_cast< s32 >(_18 * 255.0f));
         const u32 tap2 = static_cast< u8 >(static_cast< s32 >(_1C * 255.0f));
+<<<<<<< HEAD
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_NORMAL, _20 | tap1 << 8 | tap2 << 16 | static_cast< u32 >(intensity) << 24,
                               floatBits(1.0f / MR::getAspect()));
         initDraw();
@@ -144,12 +175,36 @@ void BloomEffect::postDraw() const {
     ImageEffectLocalUtil::capture(_28, 1, 0, GX_TF_RGB565, true, 0);
     initDraw();
     GXSetCopyClear(Color8(0, 0, 0, 0xFF), 0xFFFFFF);
+=======
+        NebulaRender::bloomMarker(NebulaRender::kBloomNormal, _20 | tap1 << 8 | tap2 << 16 | static_cast< u32 >(intensity) << 24,
+                              floatBits(1.0f / MR::getAspect()));
+        initDraw();
+        J3DNativeState::setCopyClear(Color8(0, 0, 0, 0xFF), 0xFFFFFF);
+        J3DNativeState::setNumTexGens(1);
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+        J3DNativeState::setNumTevStages(1);
+        J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+        J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+        _3C->load(GX_TEXMAP0);
+        J3DNativeState::setChanMatColor(GX_COLOR0A0, Color8(0xFF, 0xFF, 0xFF, 0xFF));
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+        J3DNativeState::setCopyFilter(GX_FALSE, pRenderObj->sample_pattern, GX_TRUE, pRenderObj->vfilter);
+        return;
+    }
+#endif
+    J3DNativeState::setCopyFilter(GX_FALSE, pRenderObj->sample_pattern, GX_FALSE, pRenderObj->vfilter);
+
+    ImageEffectLocalUtil::capture(_28, 1, 0, GX_TF_RGB565, true, 0);
+    initDraw();
+    J3DNativeState::setCopyClear(Color8(0, 0, 0, 0xFF), 0xFFFFFF);
+>>>>>>> upstream/main
     drawTexture(_28, 4, 0, 0xFF, DrawType_0);
 
     ImageEffectLocalUtil::capture(_2C, 4, 0, GX_TF_RGB565, false, 0);
     ImageEffectLocalUtil::capture(_40, 4, 0, GX_TF_I8, false, 0);
     drawTexture(_2C, 4, 2, 0xFF, DrawType_0);
 
+<<<<<<< HEAD
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_RASC, GX_CC_ONE, GX_CC_ZERO);
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_COMP_R8_GT, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
@@ -160,6 +215,18 @@ void BloomEffect::postDraw() const {
     GXSetBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+=======
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_RASC, GX_CC_ONE, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_COMP_R8_GT, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    drawTexture(_40, 4, 2, _20, DrawType_2);
+
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+>>>>>>> upstream/main
     ImageEffectLocalUtil::capture(_44, 4, 2, GX_TF_RGB565, false, 0);
     blurTexture(_44, _48, 4, 3, 6, _18, 2, &::sL1RadAndOfs[0]._0);
 
@@ -173,12 +240,20 @@ void BloomEffect::postDraw() const {
     drawTexture(_38, 4, 7, intensity, DrawType_1);
 
     ImageEffectLocalUtil::capture(_3C, 4, 7, GX_TF_RGB565, false, 0);
+<<<<<<< HEAD
     GXSetCopyFilter(GX_FALSE, pRenderObj->sample_pattern, GX_TRUE, pRenderObj->vfilter);
+=======
+    J3DNativeState::setCopyFilter(GX_FALSE, pRenderObj->sample_pattern, GX_TRUE, pRenderObj->vfilter);
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
     if (sBloomRoute != 0) {
         // The scene the renderer kept, drawn back as _24 would be (its RGB; the alpha update is off).
+<<<<<<< HEAD
         __NebulaGXBloomMarker(NEBULA_GX_BLOOM_RESTORE, 0, 0);
+=======
+        NebulaRender::bloomMarker(NebulaRender::kBloomRestore, 0, 0);
+>>>>>>> upstream/main
     } else
 #endif
     {
@@ -201,6 +276,7 @@ bool BloomEffect::isForEachModel() const {
 
 void BloomEffect::initDraw() const {
     MR::reinitGX();
+<<<<<<< HEAD
     GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
 
     Mtx44 projectionMtx;
@@ -237,10 +313,44 @@ void BloomEffect::initDraw() const {
     GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
     GXSetZCompLoc(GX_TRUE);
     GXSetDither(GX_FALSE);
+=======
+    J3DNativeState::setZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+
+    Mtx44 projectionMtx;
+    NebulaMtxOrtho(projectionMtx, 0.0f, MR::getFrameBufferHeight(), 0.0f, MR::getFrameBufferWidth(), -10000.0f, 10000.0f);
+    J3DNativeView::setProjection(projectionMtx, GX_ORTHOGRAPHIC);
+
+    MR::loadViewMtxFor2DModel();
+
+    TMtx34f posMtx;
+    posMtx.identity();
+    J3DNativeShape::sendPosition(posMtx.toMtxPtr(), GX_PNMTX0);
+    J3DNativeState::setCurrentMtx(GX_PNMTX0);
+
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeShape::sendTexture(posMtx.toMtxPtr(), GX_TEXMTX0, GX_MTX2x4);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+    J3DNativeState::setNumIndStages(0);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, Color8(0, 0, 0, 0));
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setAlphaUpdate(GX_FALSE);
+    J3DNativeState::setZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    J3DNativeState::setZCompLoc(GX_TRUE);
+    J3DNativeState::setDither(GX_FALSE);
+>>>>>>> upstream/main
 }
 
 void BloomEffect::drawTexture(JUTTexture* pTexture, s32 param2, s32 param3, u8 intensity, BLOOM_TEX_DRAW_TYPE param5) const {
     pTexture->load(GX_TEXMAP0);
+<<<<<<< HEAD
     GXSetChanMatColor(GX_COLOR0A0, Color8(intensity, intensity, intensity, 255));
 
     switch (param5) {
@@ -252,6 +362,19 @@ void BloomEffect::drawTexture(JUTTexture* pTexture, s32 param2, s32 param3, u8 i
         break;
     case DrawType_2:
         GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCCLR, GX_BL_ZERO, GX_LO_CLEAR);
+=======
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, Color8(intensity, intensity, intensity, 255));
+
+    switch (param5) {
+    case DrawType_0:
+        J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+        break;
+    case DrawType_1:
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+        break;
+    case DrawType_2:
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCCLR, GX_BL_ZERO, GX_LO_CLEAR);
+>>>>>>> upstream/main
         break;
     }
 
@@ -264,6 +387,7 @@ void BloomEffect::drawTexture(JUTTexture* pTexture, s32 param2, s32 param3, u8 i
     f32 bottom = (row + 1) * height;
     f32 top = row * height;
 
+<<<<<<< HEAD
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 4);
     {
         GXPosition3f32(left, bottom, -1.0f);
@@ -279,6 +403,22 @@ void BloomEffect::drawTexture(JUTTexture* pTexture, s32 param2, s32 param3, u8 i
         GXTexCoord2f32(1.0f, 0.0f);
     }
     GXEnd();
+=======
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 4, NEBULA_SHAPE_TEXCOORD0);
+    {
+        J3DNativeDraw::position(left, bottom, -1.0f);
+        J3DNativeDraw::texCoord(0.0f, 1.0f);
+
+        J3DNativeDraw::position(left, top, -1.0f);
+        J3DNativeDraw::texCoord(0.0f, 0.0f);
+
+        J3DNativeDraw::position(right, bottom, -1.0f);
+        J3DNativeDraw::texCoord(1.0f, 1.0f);
+
+        J3DNativeDraw::position(right, top, -1.0f);
+        J3DNativeDraw::texCoord(1.0f, 0.0f);
+    }
+>>>>>>> upstream/main
 }
 
 void BloomEffect::blurTexture(JUTTexture* pTexture, Mtx* pMtx, s32 param3, s32 param4, u32 param5, f32 param6, u32 param7, const f32* pParam8) const {
@@ -288,11 +428,19 @@ void BloomEffect::blurTexture(JUTTexture* pTexture, Mtx* pMtx, s32 param3, s32 p
         drawBlur(param3, param4, &pMtx[i * param5], 8, param5);
     }
 
+<<<<<<< HEAD
     GXSetNumTexGens(1);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
     GXSetNumTevStages(1);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+=======
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_MODULATE);
+>>>>>>> upstream/main
 }
 
 void BloomEffect::initBlurMtx(Mtx* pMtx, u32 count, f32 radius, f32 offset) const {
@@ -300,6 +448,7 @@ void BloomEffect::initBlurMtx(Mtx* pMtx, u32 count, f32 radius, f32 offset) cons
     radius = -radius;
 
     for (u32 i = 0; i < count; i++) {
+<<<<<<< HEAD
         PSMTXTrans(pMtx[i], invAspect * (radius * JMACosRadian(offset + i * JMath::TAngleConstant_< f32 >::RADIAN_DEG360() / count)),
                    radius * JMASinRadian(offset + i * JMath::TAngleConstant_< f32 >::RADIAN_DEG360() / count), 0.0f);
     }
@@ -334,6 +483,39 @@ void BloomEffect::initBlur(JUTTexture* pTexture, u32 param2, f32 intensity) cons
 void BloomEffect::drawBlur(s32 divisions, s32 tile, Mtx* pMtx, u32 stageCount, u32 matrixCount) const {
     GXSetArray(GX_TEX_MTX_ARRAY, pMtx, sizeof(Mtx));
 
+=======
+        NebulaMtxTrans(pMtx[i], invAspect * (radius * JMACosRadian(offset + i * JMath::TAngleConstant_< f32 >::RADIAN_DEG360() / count)),
+                   radius * JMASinRadian(offset + i * JMath::TAngleConstant_< f32 >::RADIAN_DEG360() / count), 0.0f);
+    }
+
+}
+
+void BloomEffect::initBlur(JUTTexture* pTexture, u32 param2, f32 intensity) const {
+    J3DNativeState::setNumTexGens(param2);
+
+    for (u32 i = 0; i < param2; i++) {
+        J3DNativeState::setTexCoordGen2(GXTexCoordID(i), GX_TG_MTX3x4, GX_TG_TEX0, ::sTexMtxID[i], GX_FALSE, GX_PTIDENTITY);
+    }
+
+    J3DNativeState::setNumTevStages(param2);
+
+    for (u32 i = 0; i < param2; i++) {
+        J3DNativeState::setTevOrder(GXTevStageID(i), GXTexCoordID(i), GX_TEXMAP0, GX_COLOR0A0);
+        J3DNativeState::setTevColorIn(GXTevStageID(i), GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_CPREV);
+        J3DNativeState::setTevColorOp(GXTevStageID(i), GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GXTevStageID(i), GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        J3DNativeState::setTevAlphaOp(GXTevStageID(i), GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    }
+
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GXTevStageID(param2), GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, Color8((s32)(intensity * 255.0f), (s32)(intensity * 255.0f), (s32)(intensity * 255.0f), 255));
+    pTexture->load(GX_TEXMAP0);
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ZERO, GX_BL_ZERO, GX_LO_CLEAR);
+}
+
+void BloomEffect::drawBlur(s32 divisions, s32 tile, Mtx* pMtx, u32 stageCount, u32 matrixCount) const {
+>>>>>>> upstream/main
     s32 row = tile / divisions;
     s32 column = tile % divisions;
     f32 width = static_cast< f32 >(MR::getFrameBufferWidth()) / divisions;
@@ -343,18 +525,29 @@ void BloomEffect::drawBlur(s32 divisions, s32 tile, Mtx* pMtx, u32 stageCount, u
     f32 bottom = (row + 1) * height;
     f32 top = row * height;
 
+<<<<<<< HEAD
     GXSetNumTexGens(stageCount);
     GXSetNumTevStages(stageCount);
+=======
+    J3DNativeState::setNumTexGens(stageCount);
+    J3DNativeState::setNumTevStages(stageCount);
+>>>>>>> upstream/main
 
     for (u32 i = 0; i < matrixCount; i += stageCount) {
         u32 remaining = matrixCount - i;
         if (remaining < stageCount) {
+<<<<<<< HEAD
             GXSetNumTexGens(remaining);
             GXSetNumTevStages(remaining);
+=======
+            J3DNativeState::setNumTexGens(remaining);
+            J3DNativeState::setNumTevStages(remaining);
+>>>>>>> upstream/main
             stageCount = remaining;
         }
 
         for (u32 j = 0; j < stageCount; j++) {
+<<<<<<< HEAD
             GXLoadTexMtxIndx(i + j, ::sTexMtxID[j], GX_MTX3x4);
         }
 
@@ -374,6 +567,26 @@ void BloomEffect::drawBlur(s32 divisions, s32 tile, Mtx* pMtx, u32 stageCount, u
 
         if (i == 0) {
             GXSetBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+=======
+            J3DNativeShape::sendTexture(pMtx[i + j], ::sTexMtxID[j], GX_MTX3x4);
+        }
+
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 4, NEBULA_SHAPE_TEXCOORD0);
+        J3DNativeDraw::position(left, bottom, -1.0f);
+        J3DNativeDraw::texCoord(0.0f, 1.0f);
+
+        J3DNativeDraw::position(left, top, -1.0f);
+        J3DNativeDraw::texCoord(0.0f, 0.0f);
+
+        J3DNativeDraw::position(right, bottom, -1.0f);
+        J3DNativeDraw::texCoord(1.0f, 1.0f);
+
+        J3DNativeDraw::position(right, top, -1.0f);
+        J3DNativeDraw::texCoord(1.0f, 0.0f);
+
+        if (i == 0) {
+            J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_CLEAR);
+>>>>>>> upstream/main
         }
     }
 }

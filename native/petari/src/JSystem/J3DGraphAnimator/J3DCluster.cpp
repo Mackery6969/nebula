@@ -16,10 +16,13 @@ void J3DDeformData::deform(J3DVertexBuffer* buffer) {
         mClusterPointer[i].getDeformer()->deform(buffer, i);
     }
 
+<<<<<<< HEAD
     DCStoreRangeNoSync(buffer->getVtxPosArrayPointer(0), buffer->getVertexData()->getVtxNum() * sizeof(Vec));
     DCStoreRangeNoSync(buffer->getVtxNrmArrayPointer(0), buffer->getVertexData()->getNrmNum() * sizeof(Vec));
     PPCSync();
 
+=======
+>>>>>>> upstream/main
     buffer->setCurrentVtxPos(buffer->getVtxPosArrayPointer(0));
     buffer->setCurrentVtxNrm(buffer->getVtxNrmArrayPointer(0));
 }

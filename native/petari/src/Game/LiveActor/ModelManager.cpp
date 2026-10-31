@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ModelManager.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Animation/BckCtrl.hpp"
 #include "Game/Animation/BpkPlayer.hpp"
 #include "Game/Animation/BrkPlayer.hpp"
@@ -68,7 +72,11 @@ void ModelManager::newDifferedDLBuffer() {
 }
 
 void ModelManager::updateDL(bool isDiffDL) {
+<<<<<<< HEAD
     OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+    (MR::MutexHolder< 0 >::sMutex).lock();
+>>>>>>> upstream/main
 
     bool isUpdateDL = mDisplayListMaker != nullptr && mDisplayListMaker->isValidDiff();
 
@@ -116,7 +124,11 @@ void ModelManager::updateDL(bool isDiffDL) {
         }
     }
 
+<<<<<<< HEAD
     OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+    (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
 }
 
 void ModelManager::startBck(const char* pBckName, const char* pActorAnimName) {
@@ -375,9 +387,15 @@ void ModelManager::calc() {
         mBvaPlayer->calc();
     }
 
+<<<<<<< HEAD
     OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
     getJ3DModel()->calc();
     OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+    (MR::MutexHolder< 0 >::sMutex).lock();
+    getJ3DModel()->calc();
+    (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
 
     if (mXanimePlayer != nullptr) {
         mXanimePlayer->clearAnm(0);

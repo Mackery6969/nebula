@@ -1,7 +1,14 @@
 #pragma once
 
 #include "JSystem/JSupport/JSUList.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 #include <revolution/aralt.h>
 
 class JKRDecompCommand;
@@ -26,11 +33,19 @@ public:
     /* 0x50 */ JKRAramBlock* mAramBlock;
     /* 0x54 */ u32 field_0x54;
     /* 0x58 */ AsyncCallback mCallback;
+<<<<<<< HEAD
     /* 0x5C */ OSMessageQueue* field_0x5C;
     /* 0x60 */ s32 field_0x60;
     /* 0x64 */ JKRDecompCommand* mDecompCommand;
     /* 0x68 */ OSMessageQueue mMessageQueue;
     /* 0x88 */ OSMessage mMessage;
+=======
+    /* 0x5C */ NebulaMessageQueue* field_0x5C;
+    /* 0x60 */ s32 field_0x60;
+    /* 0x64 */ JKRDecompCommand* mDecompCommand;
+    /* 0x68 */ NebulaMessageQueue mMessageQueue;
+    /* 0x88 */ void* mMessage;
+>>>>>>> upstream/main
     /* 0x8C */ void* field_0x8C;
     /* 0x90 */ void* field_0x90;
     /* 0x94 */ void* field_0x94;
@@ -57,6 +72,7 @@ public:
     static void doneDMA(uintptr_t);
     static void startDMA(JKRAMCommand*);
 
+<<<<<<< HEAD
     static OSMutex mMutex;
     static JSUList< JKRAMCommand > sAramPieceCommandList;
 
@@ -65,6 +81,16 @@ public:
     }
     static void unlock() {
         OSUnlockMutex(&mMutex);
+=======
+    static NebulaMutex mMutex;
+    static JSUList< JKRAMCommand > sAramPieceCommandList;
+
+    static void lock() {
+        mMutex.lock();
+    }
+    static void unlock() {
+        mMutex.unlock();
+>>>>>>> upstream/main
     }
 };
 

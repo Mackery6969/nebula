@@ -20,6 +20,7 @@ typedef struct _GXFifoObj {
 #endif
 } GXFifoObj;
 
+<<<<<<< HEAD
 typedef struct __GXFifoObj {
     u8* base;
     u8* top;
@@ -34,6 +35,8 @@ typedef struct __GXFifoObj {
     GXBool bind_gp;
 } __GXFifoObj;
 
+=======
+>>>>>>> upstream/main
 GXBool GXGetCPUFifo(GXFifoObj*);
 GXBool GXGetGPFifo(GXFifoObj*);
 

@@ -3,12 +3,73 @@
 #include "JSystem/JAudio2/JASCriticalSection.hpp"
 #include "JSystem/JAudio2/JASHeapCtrl.hpp"
 #include "JSystem/JAudio2/JASWaveInfo.hpp"
+<<<<<<< HEAD
 #include "JSystem/JAudio2/dspproc.hpp"
 #include "JSystem/JAudio2/dsptask.hpp"
 #include "JSystem/JAudio2/osdsp_task.hpp"
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
 #include <revolution/os.h>
 
+=======
+#include "JSystem/JKernel/JKRAram.hpp"
+#include "JSystem/JKernel/JKRSolidHeap.hpp"
+#include <revolution/os.h>
+
+#include <nebula_game_api.h>
+
+// The mixer is the host's (on the console a DSP program the game mailed command words): JASDsp hands it the channel
+// records, each frame's output planes and each channel group's readiness through typed calls (jaudio_*).
+extern "C" const NebulaHostServices* nebula_host(void);
+void JASAudioThread_postDSPMessage();
+
+// FX_BUF is the API's FX line record.
+static_assert(sizeof(JASDsp::FxBuf) == sizeof(NebulaJAudioFxLine), "FxBuf layout");
+static_assert(offsetof(JASDsp::FxBuf, _4) == offsetof(NebulaJAudioFxLine, buffer), "FxBuf layout");
+static_assert(offsetof(JASDsp::FxBuf, _8) == offsetof(NebulaJAudioFxLine, dest_a), "FxBuf layout");
+static_assert(offsetof(JASDsp::FxBuf, _E) == offsetof(NebulaJAudioFxLine, volume_b), "FxBuf layout");
+// The host's mixer reads the channels as NebulaJAudioChannel.
+static_assert(sizeof(JASDsp::TChannel) == sizeof(NebulaJAudioChannel), "TChannel size");
+static_assert(offsetof(JASDsp::TChannel, mIsActive) == offsetof(NebulaJAudioChannel, active), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, mIsFinished) == offsetof(NebulaJAudioChannel, finished), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, mPitch) == offsetof(NebulaJAudioChannel, pitch), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _8) == offsetof(NebulaJAudioChannel, starting), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, mPauseFlag) == offsetof(NebulaJAudioChannel, paused), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _E) == offsetof(NebulaJAudioChannel, delay_history), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _10) == offsetof(NebulaJAudioChannel, buses), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _50) == offsetof(NebulaJAudioChannel, auto_pan), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _52) == offsetof(NebulaJAudioChannel, auto_send), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _54) == offsetof(NebulaJAudioChannel, auto_volume), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _56) == offsetof(NebulaJAudioChannel, auto_target), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _58) == offsetof(NebulaJAudioChannel, auto_mixer), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _60) == offsetof(NebulaJAudioChannel, phase), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _64) == offsetof(NebulaJAudioChannel, leftover), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _66) == offsetof(NebulaJAudioChannel, last_sample), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _68) == offsetof(NebulaJAudioChannel, restart), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _70) == offsetof(NebulaJAudioChannel, address), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _74) == offsetof(NebulaJAudioChannel, left), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _78) == offsetof(NebulaJAudioChannel, resample_history), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _80) == offsetof(NebulaJAudioChannel, fir_history), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _A8) == offsetof(NebulaJAudioChannel, iir_state), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _B0) == offsetof(NebulaJAudioChannel, block), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _100) == offsetof(NebulaJAudioChannel, format), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _102) == offsetof(NebulaJAudioChannel, loop), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _104) == offsetof(NebulaJAudioChannel, loop_history1), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _106) == offsetof(NebulaJAudioChannel, loop_history2), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, mFilterMode) == offsetof(NebulaJAudioChannel, filter_mode), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, mForcedStop) == offsetof(NebulaJAudioChannel, forced_stop), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _110) == offsetof(NebulaJAudioChannel, loop_start), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _114) == offsetof(NebulaJAudioChannel, end), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, _118) == offsetof(NebulaJAudioChannel, wave), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, fir_filter_params) == offsetof(NebulaJAudioChannel, fir_coefficients), "TChannel layout");
+static_assert(offsetof(JASDsp::TChannel, iir_filter_params) == offsetof(NebulaJAudioChannel, iir_coefficients), "TChannel layout");
+static_assert(offsetof(JASDsp::FxBuf, _10) == offsetof(NebulaJAudioFxLine, coefficients), "FxBuf layout");
+
+namespace {
+    // The mixer's output level, 4096 = 1 (DSP_MIXERLEVEL; 4 before the game first sets it).
+    u16 sMixerLevel = 0x4000;
+}  // namespace
+
+>>>>>>> upstream/main
 JASDsp::TChannel* JASDsp::CH_BUF;
 
 JASDsp::FxBuf* JASDsp::FX_BUF;
@@ -21,15 +82,26 @@ u16 ATTRIBUTE_ALIGN(32) JASDsp::SEND_TABLE[] = {
 
 u32 JASWaveInfo::one = 1;
 
+<<<<<<< HEAD
 void JASDsp::boot(void (*param_0)(void*)) {
     static bool sDspInit = true;
     if (sDspInit) {
         DspBoot(param_0);
         DsetVARAM(JKRHeap::getAltAramStartAdr());
+=======
+void JASDsp::boot() {
+    static bool sDspInit = true;
+    if (sDspInit) {
+        const NebulaHostServices* const host = nebula_host();
+        const JKRAram* const aram = JKRAram::getManager();
+        host->jaudio_aux(host->user, reinterpret_cast< const void* >(JKRHeap::getAltAramStartAdr()),
+                         aram->getAudioMemory() + aram->getAudioMemSize());
+>>>>>>> upstream/main
         sDspInit = false;
     }
 }
 
+<<<<<<< HEAD
 void JASDsp::releaseHalt(u32 param_0) {
     DSPReleaseHalt2(param_0);
 }
@@ -40,12 +112,29 @@ void JASDsp::finishWork(u16 param_0) {
 
 void JASDsp::syncFrame(u32 param_0, uintptr_t param_1, uintptr_t param_2) {
     DsyncFrame2(param_0, param_1, param_2);
+=======
+// Group 3's release mixes a subframe; the audio thread then runs the next (AUDIOMSG_DSP, the DSP's mail).
+void JASDsp::releaseHalt(u32 group) {
+    const NebulaHostServices* const host = nebula_host();
+    if (host->jaudio_mix(host->user, group, DSP_CreateMap2(group))) {
+        JASAudioThread_postDSPMessage();
+    }
+}
+
+void JASDsp::syncFrame(u32 subframes, uintptr_t left, uintptr_t right) {
+    const NebulaHostServices* const host = nebula_host();
+    host->jaudio_frame(host->user, subframes, sMixerLevel, reinterpret_cast< s16* >(left), reinterpret_cast< s16* >(right));
+>>>>>>> upstream/main
 }
 
 void JASDsp::setDSPMixerLevel(f32 dsp_level) {
     sDSPVolume = dsp_level;
     dsp_level *= 4.0f;
+<<<<<<< HEAD
     DsetMixerLevel(dsp_level);
+=======
+    sMixerLevel = static_cast< u16 >(static_cast< s32 >(4096.0f * dsp_level));
+>>>>>>> upstream/main
 }
 
 f32 JASDsp::getDSPMixerLevel() {
@@ -56,13 +145,18 @@ JASDsp::TChannel* JASDsp::getDSPHandle(int param_0) {
     return CH_BUF + param_0;
 }
 
+<<<<<<< HEAD
 void JASDsp::setFilterTable(NEBULA_BE(s16)* param_0, s16* param_1, u32 param_2) {
+=======
+void JASDsp::setFilterTable(s16* param_0, s16* param_1, u32 param_2) {
+>>>>>>> upstream/main
     for (int i = 0; i < param_2; i++) {
         *param_0++ = *param_1++;
     }
 }
 
 void JASDsp::flushBuffer() {
+<<<<<<< HEAD
     DCFlushRange(CH_BUF, sizeof(TChannel) * 64);
     DCFlushRange(FX_BUF, sizeof(FxBuf) * 4);
 }
@@ -192,6 +286,61 @@ u32 const ATTRIBUTE_ALIGN(32) JASDsp::DSPRES_FILTER[320] = {
     0x7D897DD5, 0x7E1D7E5F, 0x7E9C7ED5, 0x7F097F37, 0x7F617F86, 0x7FA67FC1, 0x7FD87FE9, 0x7FF57FFD,
 };
 #endif
+=======
+}
+
+void JASDsp::invalChannelAll() {
+}
+
+// The ADPCM decoder's coefficient pairs and the resampler's taps, wave tables and pan law, as the mixer reads them.
+s16 const ATTRIBUTE_ALIGN(32) JASDsp::DSPADPCM_FILTER[32] = {
+    0, 0, 2048, 0, 0, 2048, 1024, 1024, 4096, -2048, 3584, -1536, 3072, -1024, 4608, -2560,
+    4200, -2248, 4800, -2300, 5120, -3072, 2048, -2048, 1024, -1024, -1024, 1024, -1024, 0, -2048, 0,
+};
+
+s16 const ATTRIBUTE_ALIGN(32) JASDsp::DSPRES_FILTER[640] = {
+    3129, 26285, 3398, -33, 2873, 26262, 3679, -40, 2628, 26217, 3971, -48, 2394, 26150, 4276, -56,
+    2173, 26061, 4592, -65, 1963, 25950, 4920, -74, 1764, 25817, 5260, -84, 1576, 25663, 5611, -95,
+    1399, 25487, 5974, -106, 1233, 25291, 6347, -118, 1077, 25075, 6732, -130, 932, 24838, 7127, -143,
+    796, 24583, 7532, -156, 671, 24309, 7947, -170, 554, 24016, 8371, -184, 446, 23706, 8804, -198,
+    347, 23379, 9246, -212, 257, 23036, 9696, -226, 174, 22678, 10153, -240, 99, 22304, 10618, -254,
+    31, 21917, 11088, -268, -30, 21517, 11564, -280, -84, 21104, 12045, -293, -132, 20679, 12531, -304,
+    -173, 20244, 13020, -314, -210, 19799, 13512, -323, -241, 19345, 14006, -330, -267, 18882, 14501, -336,
+    -289, 18413, 14997, -340, -306, 17937, 15493, -341, -320, 17456, 15988, -340, -330, 16970, 16480, -337,
+    -337, 16480, 16970, -330, -340, 15988, 17456, -320, -341, 15493, 17937, -306, -340, 14997, 18413, -289,
+    -336, 14501, 18882, -267, -330, 14006, 19345, -241, -323, 13512, 19799, -210, -314, 13020, 20244, -173,
+    -304, 12531, 20679, -132, -293, 12045, 21104, -84, -280, 11564, 21517, -30, -268, 11088, 21917, 31,
+    -254, 10618, 22304, 99, -240, 10153, 22678, 174, -226, 9696, 23036, 257, -212, 9246, 23379, 347,
+    -198, 8804, 23706, 446, -184, 8371, 24016, 554, -170, 7947, 24309, 671, -156, 7532, 24583, 796,
+    -143, 7127, 24838, 932, -130, 6732, 25075, 1077, -118, 6347, 25291, 1233, -106, 5974, 25487, 1399,
+    -95, 5611, 25663, 1576, -84, 5260, 25817, 1764, -74, 4920, 25950, 1963, -65, 4592, 26061, 2173,
+    -56, 4276, 26150, 2394, -48, 3971, 26217, 2628, -40, 3679, 26262, 2873, -33, 3398, 26285, 3129,
+    0, 3211, 6392, 9511, 12539, 15446, 18204, 20787, 23170, 25329, 27245, 28898, 30273, 31356, 32137, 32609,
+    32767, 32609, 32137, 31356, 30273, 28898, 27245, 25329, 23170, 20787, 18204, 15446, 12539, 9511, 6392, 3211,
+    0, -3211, -6392, -9511, -12539, -15446, -18204, -20787, -23170, -25329, -27245, -28898, -30273, -31356, -32137, -32609,
+    -32767, -32609, -32137, -31356, -30273, -28898, -27245, -25329, -23170, -20787, -18204, -15446, -12539, -9511, -6392, -3211,
+    0, 2047, 4095, 6143, 8191, 10239, 12287, 14335, 16383, 18431, 20479, 22527, 24575, 26623, 28671, 30719,
+    32767, 30720, 28672, 26624, 24576, 22528, 20480, 18432, 16384, 14336, 12288, 10240, 8192, 6144, 4096, 2048,
+    0, -2047, -4095, -6143, -8191, -10239, -12287, -14335, -16383, -18431, -20479, -22527, -24575, -26623, -28671, -30719,
+    -32767, -30720, -28672, -26624, -24576, -22528, -20480, -18432, -16384, -14336, -12288, -10240, -8192, -6144, -4096, -2048,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8191, 16383,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8191, -16383,
+    0, 402, 804, 1206, 1607, 2009, 2410, 2811, 3211, 3611, 4011, 4409, 4807, 5205, 5601, 5997,
+    6392, 6786, 7179, 7571, 7961, 8351, 8739, 9126, 9511, 9895, 10278, 10659, 11039, 11416, 11792, 12167,
+    12539, 12910, 13278, 13645, 14009, 14372, 14732, 15090, 15446, 15799, 16151, 16499, 16845, 17189, 17530, 17868,
+    18204, 18537, 18867, 19195, 19519, 19841, 20159, 20475, 20787, 21096, 21402, 21705, 22005, 22301, 22594, 22884,
+    23170, 23452, 23731, 24007, 24279, 24547, 24811, 25072, 25329, 25582, 25832, 26077, 26319, 26556, 26790, 27019,
+    27245, 27466, 27683, 27896, 28105, 28310, 28510, 28706, 28898, 29085, 29268, 29447, 29621, 29791, 29956, 30117,
+    30273, 30424, 30571, 30714, 30852, 30985, 31113, 31237, 31356, 31470, 31580, 31685, 31785, 31880, 31971, 32057,
+    32137, 32213, 32285, 32351, 32412, 32469, 32521, 32567, 32609, 32646, 32678, 32705, 32728, 32745, 32757, 32765,
+};
+>>>>>>> upstream/main
 
 void JASDsp::initBuffer() {
     CH_BUF = new (JASDram, 0x20) TChannel[64];
@@ -201,7 +350,12 @@ void JASDsp::initBuffer() {
     for (u8 i = 0; i < 4; i++) {
         setFXLine(i, NULL, NULL);
     }
+<<<<<<< HEAD
     DsetupTable(0x40, uintptr_t(CH_BUF), uintptr_t(&DSPRES_FILTER), uintptr_t(&DSPADPCM_FILTER), uintptr_t(FX_BUF));
+=======
+    const NebulaHostServices* const host = nebula_host();
+    host->jaudio_setup(host->user, 0x40, reinterpret_cast< NebulaJAudioChannel* >(CH_BUF), DSPRES_FILTER, DSPADPCM_FILTER, reinterpret_cast< NebulaJAudioFxLine* >(FX_BUF));
+>>>>>>> upstream/main
     flushBuffer();
 }
 
@@ -215,6 +369,7 @@ int JASDsp::setFXLine(u8 param_0, s16* buffer, JASDsp::FxlineConfig_* param_2) {
         puVar3->_E = param_2->_8;
         puVar3->_C = SEND_TABLE[param_2->_6];
         puVar3->_2 = param_2->_C;
+<<<<<<< HEAD
         setFilterTable((NEBULA_BE(s16)*)puVar3->_10, param_2->_10, 8);
     }
 #ifdef TARGET_PC
@@ -229,6 +384,16 @@ int JASDsp::setFXLine(u8 param_0, s16* buffer, JASDsp::FxlineConfig_* param_2) {
         DCFlushRange(buffer, bufsize);
     } else if (param_2 == NULL || buffer != NULL) {
         puVar3->_4 = FX_LINE_ADDR(buffer);
+=======
+        setFilterTable((s16*)puVar3->_10, param_2->_10, 8);
+    }
+    if (buffer != NULL && param_2 != NULL) {
+        u32 bufsize = param_2->_C * 0xa0;
+        puVar3->_4 = buffer;
+        JASCalc::bzero(buffer, bufsize);
+    } else if (param_2 == NULL || buffer != NULL) {
+        puVar3->_4 = buffer;
+>>>>>>> upstream/main
     }
 
     if (puVar3->_4 != 0) {
@@ -236,7 +401,10 @@ int JASDsp::setFXLine(u8 param_0, s16* buffer, JASDsp::FxlineConfig_* param_2) {
     } else {
         puVar3->_0 = 0;
     }
+<<<<<<< HEAD
     DCFlushRange(puVar3, sizeof(FxBuf));
+=======
+>>>>>>> upstream/main
     return 1;
 }
 
@@ -360,14 +528,22 @@ void JASDsp::TChannel::setPitch(u16 pitch) {
 }
 
 void JASDsp::TChannel::setMixerInitVolume(u8 param_0, s16 param_1) {
+<<<<<<< HEAD
     NEBULA_BE(u16)* tmp = _10[param_0];
+=======
+    u16* tmp = _10[param_0];
+>>>>>>> upstream/main
     tmp[2] = param_1;
     tmp[1] = param_1;
     tmp[3] = 0;
 }
 
 void JASDsp::TChannel::setMixerVolume(u8 param_0, s16 param_1) {
+<<<<<<< HEAD
     NEBULA_BE(u16)* tmp;
+=======
+    u16* tmp;
+>>>>>>> upstream/main
     if (mForcedStop == 0) {
         tmp = _10[param_0];
         tmp[1] = param_1;
@@ -380,7 +556,10 @@ void JASDsp::TChannel::setPauseFlag(u8 flag) {
 }
 
 void JASDsp::TChannel::flush() {
+<<<<<<< HEAD
     DCFlushRange(this, sizeof(*this));
+=======
+>>>>>>> upstream/main
 }
 
 void JASDsp::TChannel::initFilter() {
@@ -424,7 +603,11 @@ void JASDsp::TChannel::setDistFilter(s16 param_0) {
 }
 
 void JASDsp::TChannel::setBusConnect(u8 param_0, u8 param_1) {
+<<<<<<< HEAD
     NEBULA_BE(u16)* tmp = _10[param_0];
+=======
+    u16* tmp = _10[param_0];
+>>>>>>> upstream/main
     static u16 const connect_table[12] = {
         0x0000, 0x0D00, 0x0D60, 0x0DC0, 0x0E20, 0x0E80, 0x0EE0, 0x0CA0, 0x0F40, 0x0FA0, 0x0B00, 0x09A0,
     };

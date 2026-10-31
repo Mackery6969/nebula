@@ -5,6 +5,7 @@
 class JPADrawInfo {
 public:
     JPADrawInfo(const Mtx pCameraMtx) {
+<<<<<<< HEAD
         PSMTXCopy(pCameraMtx, mCamMtx);
         PSMTXIdentity(mPrjMtx);
     }
@@ -17,12 +18,27 @@ public:
     JPADrawInfo(const Mtx pCameraMtx, f32 top, f32 bottom, f32 left, f32 right) {
         PSMTXCopy(pCameraMtx, mCamMtx);
         C_MTXLightOrtho(mPrjMtx, top, bottom, left, right, 0.5f, 0.5f, 0.5f, 0.5f);
+=======
+        NebulaMtxCopy(pCameraMtx, mCamMtx);
+        NebulaMtxIdentity(mPrjMtx);
+    }
+
+    JPADrawInfo(const Mtx pCameraMtx, f32 fovY, f32 aspect) {
+        NebulaMtxCopy(pCameraMtx, mCamMtx);
+        NebulaMtxLightPerspective(mPrjMtx, fovY, aspect, 0.5f, -0.5f, 0.5f, 0.5f);
+    }
+
+    JPADrawInfo(const Mtx pCameraMtx, f32 top, f32 bottom, f32 left, f32 right) {
+        NebulaMtxCopy(pCameraMtx, mCamMtx);
+        NebulaMtxLightOrtho(mPrjMtx, top, bottom, left, right, 0.5f, 0.5f, 0.5f, 0.5f);
+>>>>>>> upstream/main
     }
 
     /* 0x00 */ Mtx mCamMtx;
     /* 0x30 */ Mtx mPrjMtx;
 
     void getCamMtx(Mtx pDst) const {
+<<<<<<< HEAD
         PSMTXCopy(mCamMtx, pDst);
     }
 
@@ -32,5 +48,16 @@ public:
 
     void setPrjMtx(const Mtx pSrc) {
         PSMTXCopy(pSrc, mPrjMtx);
+=======
+        NebulaMtxCopy(mCamMtx, pDst);
+    }
+
+    void getPrjMtx(Mtx pDst) const {
+        NebulaMtxCopy(mPrjMtx, pDst);
+    }
+
+    void setPrjMtx(const Mtx pSrc) {
+        NebulaMtxCopy(pSrc, mPrjMtx);
+>>>>>>> upstream/main
     }
 };

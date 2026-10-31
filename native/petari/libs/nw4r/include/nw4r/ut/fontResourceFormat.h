@@ -1,7 +1,13 @@
 #pragma once
 
 #include "nebula_disc.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 // BRFNT, read in place: big-endian fields; the pointer-typed slots hold file offsets until ResFont::Rebuild relocates
 // them (SelfRel natively).

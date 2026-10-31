@@ -1,4 +1,11 @@
 #include "Game/LiveActor/HitSensor.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Player/DLchanger.hpp"
 #include "Game/Player/J3DModelX.hpp"
 #include "Game/Player/MarioActor.hpp"
@@ -14,10 +21,14 @@
 #include <JSystem/JGeometry/TBox.hpp>
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <new>
+<<<<<<< HEAD
 #include <revolution/gd.h>
 #include <revolution/gx/GXEnum.h>
 #include <revolution/gx/GXFrameBuf.h>
 #include <revolution/gx/GXPixel.h>
+=======
+#include <revolution/gx/GXEnum.h>
+>>>>>>> upstream/main
 #include <revolution/os.h>
 
 void MarioActorSpecialDraw_FORCE_MATCH_SDATA2() {
@@ -134,6 +145,7 @@ void MarioActor::captureScreenBox() const {
         return;
     }
 
+<<<<<<< HEAD
     GXSetTexCopyDst((s32)(_B3C), (s32)(_B40), GX_TF_RGB565, GX_FALSE);
     GXSetTexCopySrc((s32)(_B34), (s32)(_B38), (s32)(_B3C), (s32)(_B40));
     GXSetColorUpdate(GX_FALSE);
@@ -146,6 +158,20 @@ void MarioActor::captureScreenBox() const {
     GXSetColorUpdate(GX_ENABLE);
     GXSetAlphaUpdate(GX_FALSE);
     GXSetDstAlpha(GX_FALSE, 0);
+=======
+    J3DNativeState::setTexCopyDst((s32)(_B3C), (s32)(_B40), GX_TF_RGB565, GX_FALSE);
+    J3DNativeState::setTexCopySrc((s32)(_B34), (s32)(_B38), (s32)(_B3C), (s32)(_B40));
+    J3DNativeState::setColorUpdate(GX_FALSE);
+    J3DNativeState::setAlphaUpdate(GX_TRUE);
+
+    GXColor clear = {};
+
+    J3DNativeState::setCopyClear(clear, 0xFFFFFF);
+    J3DNativeState::copyTex(_B44, GX_TRUE);
+    J3DNativeState::setColorUpdate(GX_ENABLE);
+    J3DNativeState::setAlphaUpdate(GX_FALSE);
+    J3DNativeState::setDstAlpha(GX_FALSE, 0);
+>>>>>>> upstream/main
 }
 
 void MarioActor::writeBackScreenBox() const {
@@ -161,6 +187,7 @@ void MarioActor::writeBackScreenBox() const {
     TVec2f minimum;
     TVec2f maximum;
     TDDraw::setup(1, 0, 2);
+<<<<<<< HEAD
     GXInitTexObj(&texture, _B44, (s32)(_B3C), (s32)(_B40), GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
     GXLoadTexObj(&texture, GX_TEXMAP0);
     MR::convertFrameBufferPosToScreenPos(&minimum, mScreenBoxPos);
@@ -184,6 +211,28 @@ void MarioActor::writeBackScreenBox() const {
     GXEnd();
     GXSetDstAlpha(GX_FALSE, 0);
     GXSetAlphaUpdate(GX_FALSE);
+=======
+    J3DNativeTexture::init(&texture, _B44, (s32)(_B3C), (s32)(_B40), GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    J3DNativeTexture::load(&texture, GX_TEXMAP0);
+    MR::convertFrameBufferPosToScreenPos(&minimum, mScreenBoxPos);
+    MR::convertFrameBufferPosToScreenPos(&maximum, mScreenBoxPos + mScreenBoxSize + TVec2f(0.99f, 0.99f));
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_INVDSTALPHA, GX_BL_DSTALPHA, GX_LO_NOOP);
+    J3DNativeState::setDstAlpha(GX_TRUE, 0);
+    J3DNativeState::setAlphaUpdate(GX_TRUE);
+    maximum.x = static_cast< s16 >(static_cast< s16 >(static_cast< s32 >(maximum.x) + 1) & ~1);
+    J3DNativeState::setZMode(GX_TRUE, GX_ALWAYS, GX_TRUE);
+    J3DNativeDraw::begin(GX_QUADS, 4, NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(minimum.x, minimum.y, 0.9999f);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+    J3DNativeDraw::position(maximum.x, minimum.y, 0.9999f);
+    J3DNativeDraw::texCoord(1.0f, 0.0f);
+    J3DNativeDraw::position(maximum.x, maximum.y, 0.9999f);
+    J3DNativeDraw::texCoord(1.0f, 1.0f);
+    J3DNativeDraw::position(minimum.x, maximum.y, 0.9999f);
+    J3DNativeDraw::texCoord(0.0f, 1.0f);
+    J3DNativeState::setDstAlpha(GX_FALSE, 0);
+    J3DNativeState::setAlphaUpdate(GX_FALSE);
+>>>>>>> upstream/main
     TDDraw::close();
 }
 
@@ -268,6 +317,7 @@ void MarioActor::resetFog() {
 }
 
 void MarioActor::updateAlphaDL(u8 alpha) {
+<<<<<<< HEAD
     u8 buffer[256] ATTRIBUTE_ALIGN(32);
     GDLObj displayList;
     MR::ProhibitSchedulerAndInterrupts lock(false);
@@ -338,6 +388,51 @@ void MarioActor::updateLightDL(const Color8& rAmbient, const Color8& rMaterial, 
     GXColor materialColor = rMaterial.mGXColor;
     GDSetChanMatColor(GX_COLOR0A0, materialColor);
     GDSetChanCtrl(GX_COLOR1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
+=======
+    NebulaStateOp storage[16];
+    J3DStateList list(storage, 16);
+    GXColor color = {0, 0, 0, 255};
+    color.a = alpha;
+    list.setTevColor(GX_TEVREG2, color);
+    list.setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    list.setGenMode2(1, 0, 1, 0, GX_CULL_BACK);
+    list.setChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
+    list.setChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
+    list.setAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+    list.setTevAlphaCalcAndSwap(GX_TEVSTAGE0, GX_CA_A2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV,
+                             GX_TEV_SWAP0, GX_TEV_SWAP0);
+    list.setTevColorCalc(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    list.setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR_NULL);
+    mDLchanger->swap()->mList.copy(list);
+}
+
+void MarioActor::updateSimpleAlphaDL(u8 alpha) {
+    NebulaStateOp storage[16];
+    J3DStateList list(storage, 16);
+    list.setDstAlpha(GX_TRUE, alpha);
+    mDLchanger->swap()->mList.copy(list);
+}
+
+void MarioActor::updateReflectAlphaDL(u8 alpha) {
+    NebulaStateOp storage[16];
+    J3DStateList list(storage, 16);
+    GXColor color = {0, 0, 0, 255};
+    color.a = alpha;
+    list.setTevColor(GX_TEVREG2, color);
+    list.setTevAlphaCalcAndSwap(GX_TEVSTAGE0, GX_CA_A2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV,
+                             GX_TEV_SWAP0, GX_TEV_SWAP0);
+    mDLchanger->swap()->mList.copy(list);
+}
+
+void MarioActor::updateLightDL(const Color8& rAmbient, const Color8& rMaterial, const Color8& rFog, f32 strength) {
+    NebulaStateOp storage[16];
+    J3DStateList list(storage, 16);
+    GXColor ambientColor = rAmbient.mGXColor;
+    list.setChanAmbColor(GX_COLOR0A0, ambientColor);
+    GXColor materialColor = rMaterial.mGXColor;
+    list.setChanMatColor(GX_COLOR0A0, materialColor);
+    list.setChanCtrl(GX_COLOR1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
+>>>>>>> upstream/main
 
     if (!MR::isNearZero(strength)) {
         f32 nearZ = MR::getNearZ();
@@ -346,6 +441,7 @@ void MarioActor::updateLightDL(const Color8& rAmbient, const Color8& rMaterial, 
         f32 start;
         f32 end;
         MR::calcFogStartEnd(mPosition, strength, &start, &end);
+<<<<<<< HEAD
         GDSetFog(GX_FOG_LIN, start, end, nearZ, farZ, color);
     }
 
@@ -369,6 +465,22 @@ void MarioActor::createRainbowDL() {
             _94[alpha * 8 + index] = new DLchanger(1, 32);
             GDInitGDLObj(&displayList, buffer, sizeof(buffer));
             __GDCurrentDL = &displayList;
+=======
+        list.setFog(GX_FOG_LIN, start, end, nearZ, farZ, color);
+    }
+
+    mCurrDL = 1 - mCurrDL;
+    mDL[mCurrDL].copy(list);
+}
+
+void MarioActor::createRainbowDL() {
+    NebulaStateOp storage[1];
+    J3DStateList list(storage, 1);
+
+    for (u32 alpha = 0; alpha < 8; alpha++) {
+        for (u32 index = 0; index < 8; index++) {
+            _94[alpha * 8 + index] = new DLchanger(1, 1);
+>>>>>>> upstream/main
             GXColor color = {0, 0, 0, 0};
 
             if (index & 1) {
@@ -390,6 +502,7 @@ void MarioActor::createRainbowDL() {
             }
 
             color.a = 16 + (alpha + 1) * 24;
+<<<<<<< HEAD
             GDSetTevColor(GX_TEVREG0, color);
             GDPadCurr32();
             u32 length = displayList.ptr - displayList.start;
@@ -399,6 +512,12 @@ void MarioActor::createRainbowDL() {
             holder->mSize = length;
             MR::copyMemory(holder->mDL, buffer, size);
             DCStoreRange(holder->mDL, size);
+=======
+            list.setTevColor(GX_TEVREG0, color);
+            DLchanger* changer = _94[alpha * 8 + index];
+            changer->mBuffers[changer->mCurrentBuffer].mList.copy(list);
+            list.clear();
+>>>>>>> upstream/main
         }
     }
 }
@@ -440,6 +559,7 @@ void MarioActor::drawScreenBlend() const {
         position = minimum + TVec2f(-10.0f, -10.0f);
         opposite = maximum + TVec2f(10.0f, 10.0f);
         TDDraw::setup(0, 0, 2);
+<<<<<<< HEAD
         GXSetCullMode(GX_CULL_NONE);
         GXSetAlphaUpdate(GX_FALSE);
         GXSetColorUpdate(GX_TRUE);
@@ -447,6 +567,15 @@ void MarioActor::drawScreenBlend() const {
         GXSetDstAlpha(GX_TRUE, 0);
         TDDraw::drawFillBox(position, opposite, 0);
         GXSetAlphaUpdate(GX_FALSE);
+=======
+        J3DNativeState::setCullMode(GX_CULL_NONE);
+        J3DNativeState::setAlphaUpdate(GX_FALSE);
+        J3DNativeState::setColorUpdate(GX_TRUE);
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_INVDSTALPHA, GX_LO_NOOP);
+        J3DNativeState::setDstAlpha(GX_TRUE, 0);
+        TDDraw::drawFillBox(position, opposite, 0);
+        J3DNativeState::setAlphaUpdate(GX_FALSE);
+>>>>>>> upstream/main
         MR::loadProjectionMtx();
         MR::loadViewMtx();
     }
@@ -490,7 +619,11 @@ void MarioActor::updateRandomTexture(f32 distance) {
         }
     }
 
+<<<<<<< HEAD
     DCStoreRange(image, 64);
+=======
+    J3DNativeTexture::registerImage(image, GX_TF_IA4, 8, 8, 1);
+>>>>>>> upstream/main
 }
 
 namespace {
@@ -505,6 +638,7 @@ namespace {
 void MarioActor::drawWallShade(const TVec3f& rPosition, const TVec3f& rNormal, f32 unused) const {
     f32 radius = 100.0f;
     TDDraw::setup(1, 1, 0);
+<<<<<<< HEAD
     GXSetZMode(GX_TRUE, GX_GREATER, GX_FALSE);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
     GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
@@ -519,6 +653,15 @@ void MarioActor::drawWallShade(const TVec3f& rPosition, const TVec3f& rNormal, f
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+=======
+    J3DNativeState::setZMode(GX_TRUE, GX_GREATER, GX_FALSE);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    mMaskTextures[_B88]->load(GX_TEXMAP0);
+>>>>>>> upstream/main
     Mtx rotation;
     TVec3f tangent(0.0f, rNormal.z, -rNormal.y);
 
@@ -527,15 +670,24 @@ void MarioActor::drawWallShade(const TVec3f& rPosition, const TVec3f& rNormal, f
     }
 
     MR::normalizeOrZero(&tangent);
+<<<<<<< HEAD
     PSMTXRotAxisRad(rotation, &rNormal, 0.3926991f);
     GXBegin(GX_TRIANGLEFAN, GX_VTXFMT0, 18);
     GXPosition3f32(rPosition.x - 5.0f * rNormal.x, rPosition.y - 5.0f * rNormal.y, rPosition.z - 5.0f * rNormal.z);
     GXColor1u32(128);
     GXTexCoord2f32(0.0f, 0.0f);
+=======
+    NebulaMtxRotAxisRad(rotation, &rNormal, 0.3926991f);
+    J3DNativeDraw::begin(GX_TRIANGLEFAN, 18, NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(rPosition.x - 5.0f * rNormal.x, rPosition.y - 5.0f * rNormal.y, rPosition.z - 5.0f * rNormal.z);
+    J3DNativeDraw::color(128);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+>>>>>>> upstream/main
 
     for (u32 i = 0; i <= 16; i++) {
         f32 angle = 2.0f * ((i / 16.0f) * JGeometry::TUtil< f32 >::PI());
         TVec3f point = subtractOffset(rPosition, rNormal * 5.0f) + tangent * radius;
+<<<<<<< HEAD
         GXPosition3f32(point.x, point.y, point.z);
         GXColor1u32(1);
         GXTexCoord2f32(10.0f * JMACosRadian(angle), 10.0f * MR::sin(angle));
@@ -543,6 +695,13 @@ void MarioActor::drawWallShade(const TVec3f& rPosition, const TVec3f& rNormal, f
     }
 
     GXEnd();
+=======
+        J3DNativeDraw::position(point.x, point.y, point.z);
+        J3DNativeDraw::color(1);
+        J3DNativeDraw::texCoord(10.0f * JMACosRadian(angle), 10.0f * MR::sin(angle));
+        NebulaMtxMultVecSR(rotation, &tangent, &tangent);
+    }
+>>>>>>> upstream/main
 }
 #pragma pop
 
@@ -553,6 +712,7 @@ void MarioActor::drawColdWaterDamage() const {
     u32 next;
     u32 stripHeight = 4;
     GXTexObj textures[2];
+<<<<<<< HEAD
     GXDrawDone();
     GXTexModeSync();
     GXPixModeSync();
@@ -565,6 +725,17 @@ void MarioActor::drawColdWaterDamage() const {
     GXSetTexCopyDst(width, 4, GX_TF_RGB565, GX_FALSE);
     GXSetTexCopySrc(0, 0, width, 4);
     GXCopyTex(_1D8, GX_FALSE);
+=======
+    u16 width = MR::getFrameBufferWidth();
+    TDDraw::setup(1, 0, 2);
+    u16 current = 0;
+    J3DNativeTexture::init(&textures[0], _1D8, width, 4, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    J3DNativeTexture::init(&textures[1], _1DC, width, 4, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    J3DNativeState::setLineWidth(6, GX_TO_ZERO);
+    J3DNativeState::setTexCopyDst(width, 4, GX_TF_RGB565, GX_FALSE);
+    J3DNativeState::setTexCopySrc(0, 0, width, 4);
+    J3DNativeState::copyTex(_1D8, GX_FALSE);
+>>>>>>> upstream/main
     f32 textureStep = 1.0f / static_cast< f32 >(stripHeight);
     f32 frequency = 89.0f * MR::sin((TWO_PI * mMario->mSwim->mColdWaterDamageInterval) / 120.0f);
 
@@ -573,29 +744,47 @@ void MarioActor::drawColdWaterDamage() const {
     }
 
     for (u32 y = 0; y < MR::getScreenHeight(); y += 4) {
+<<<<<<< HEAD
         GXTexModeSync();
         GXPixModeSync();
         GXSetTexCopySrc(0, y + 4, width, 4);
         next = 1 - current;
         GXCopyTex(mRasterBuffers[next], GX_FALSE);
         GXLoadTexObj(&textures[current], GX_TEXMAP0);
+=======
+        J3DNativeState::setTexCopySrc(0, y + 4, width, 4);
+        next = 1 - current;
+        J3DNativeState::copyTex(mRasterBuffers[next], GX_FALSE);
+        J3DNativeTexture::load(&textures[current], GX_TEXMAP0);
+>>>>>>> upstream/main
         f32 v = 0.0f;
 
         for (u32 row = y; row < y + 4; row++) {
             f32 offset = 5.0f * MR::sin(2.0f * (((_37C + row * frequency) / MR::getScreenHeight()) * JGeometry::TUtil< f32 >::PI()));
+<<<<<<< HEAD
             GXBegin(GX_LINES, GX_VTXFMT0, 2);
             GXPosition3f32(offset, row, 0.0f);
             GXTexCoord2f32(0.0f, v);
             GXPosition3f32(offset + MR::getScreenWidth(), row, 0.0f);
             GXTexCoord2f32(1.0f, v);
             GXEnd();
+=======
+            J3DNativeDraw::begin(GX_LINES, 2, NEBULA_SHAPE_TEXCOORD0);
+            J3DNativeDraw::position(offset, row, 0.0f);
+            J3DNativeDraw::texCoord(0.0f, v);
+            J3DNativeDraw::position(offset + MR::getScreenWidth(), row, 0.0f);
+            J3DNativeDraw::texCoord(1.0f, v);
+>>>>>>> upstream/main
             v += textureStep;
         }
 
         current = next;
     }
+<<<<<<< HEAD
 
     GXDrawDone();
+=======
+>>>>>>> upstream/main
 }
 
 void MarioActor::setRasterScroll(s32 i1, s32 i2, s32 i3) {
@@ -635,6 +824,7 @@ void MarioActor::drawRasterScroll(f32 amplitude, s16 period, f32 wavelength) con
     u32 next;
     u32 stripHeight = 4;
     GXTexObj textures[2];
+<<<<<<< HEAD
     GXDrawDone();
     GXTexModeSync();
     GXPixModeSync();
@@ -647,35 +837,64 @@ void MarioActor::drawRasterScroll(f32 amplitude, s16 period, f32 wavelength) con
     GXSetTexCopyDst(width, 4, GX_TF_RGB565, GX_FALSE);
     GXSetTexCopySrc(0, 0, width, 4);
     GXCopyTex(_1D8, GX_FALSE);
+=======
+    u16 width = MR::getFrameBufferWidth();
+    TDDraw::setup(1, 0, 2);
+    u16 current = 0;
+    J3DNativeTexture::init(&textures[0], _1D8, width, 4, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    J3DNativeTexture::init(&textures[1], _1DC, width, 4, GX_TF_RGB565, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    J3DNativeState::setLineWidth(6, GX_TO_ZERO);
+    J3DNativeState::setTexCopyDst(width, 4, GX_TF_RGB565, GX_FALSE);
+    J3DNativeState::setTexCopySrc(0, 0, width, 4);
+    J3DNativeState::copyTex(_1D8, GX_FALSE);
+>>>>>>> upstream/main
     f32 textureStep = 1.0f / static_cast< f32 >(stripHeight);
     f32 phase = (_37C * JMath::TAngleConstant_< f32 >::RADIAN_DEG360()) / period;
     f32 spatialPhase = TWO_PI / wavelength;
 
     for (u32 y = 0; y < MR::getScreenHeight(); y += 4) {
+<<<<<<< HEAD
         GXTexModeSync();
         GXPixModeSync();
         GXSetTexCopySrc(0, y + 4, width, 4);
         next = 1 - current;
         GXCopyTex(mRasterBuffers[next], GX_FALSE);
         GXLoadTexObj(&textures[current], GX_TEXMAP0);
+=======
+        J3DNativeState::setTexCopySrc(0, y + 4, width, 4);
+        next = 1 - current;
+        J3DNativeState::copyTex(mRasterBuffers[next], GX_FALSE);
+        J3DNativeTexture::load(&textures[current], GX_TEXMAP0);
+>>>>>>> upstream/main
         f32 v = 0.0f;
 
         for (u32 row = y; row < y + 4; row++) {
             f32 angle = MR::sin(spatialPhase * row) * JGeometry::TUtil< f32 >::PI();
             f32 offset = amplitude * MR::sin(angle + phase);
+<<<<<<< HEAD
             GXBegin(GX_LINES, GX_VTXFMT0, 2);
             GXPosition3f32(offset, row, 0.0f);
             GXTexCoord2f32(0.0f, v);
             GXPosition3f32(offset + MR::getScreenWidth(), row, 0.0f);
             GXTexCoord2f32(1.0f, v);
             GXEnd();
+=======
+            J3DNativeDraw::begin(GX_LINES, 2, NEBULA_SHAPE_TEXCOORD0);
+            J3DNativeDraw::position(offset, row, 0.0f);
+            J3DNativeDraw::texCoord(0.0f, v);
+            J3DNativeDraw::position(offset + MR::getScreenWidth(), row, 0.0f);
+            J3DNativeDraw::texCoord(1.0f, v);
+>>>>>>> upstream/main
             v += textureStep;
         }
 
         current = next;
     }
+<<<<<<< HEAD
 
     GXDrawDone();
+=======
+>>>>>>> upstream/main
 }
 
 void MarioActor::drawMosaic() const {
@@ -733,13 +952,22 @@ void MarioActor::drawSpinEffect() const {
     }
 
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+=======
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+>>>>>>> upstream/main
     Mtx rotation;
     TVec3f center = _2A0 + mMario->mHeadVec * _6D8;
     TVec3f direction(mMario->mFrontVec);
     TVec3f previous;
+<<<<<<< HEAD
     PSMTXRotAxisRad(rotation, &mMario->mHeadVec, 0.09817477f);
     GXSetLineWidth(36, GX_TO_ZERO);
+=======
+    NebulaMtxRotAxisRad(rotation, &mMario->mHeadVec, 0.09817477f);
+    J3DNativeState::setLineWidth(36, GX_TO_ZERO);
+>>>>>>> upstream/main
 
     for (u32 i = 0; i <= 64; i++) {
         TVec3f point(direction);
@@ -751,10 +979,17 @@ void MarioActor::drawSpinEffect() const {
         }
 
         previous = point;
+<<<<<<< HEAD
         PSMTXMultVecSR(rotation, &direction, &direction);
     }
 
     GXSetLineWidth(18, GX_TO_ZERO);
+=======
+        NebulaMtxMultVecSR(rotation, &direction, &direction);
+    }
+
+    J3DNativeState::setLineWidth(18, GX_TO_ZERO);
+>>>>>>> upstream/main
 
     for (u32 i = 0; i <= 64; i++) {
         TVec3f point(direction);
@@ -769,7 +1004,11 @@ void MarioActor::drawSpinEffect() const {
         }
 
         previous = point;
+<<<<<<< HEAD
         PSMTXMultVecSR(rotation, &direction, &direction);
+=======
+        NebulaMtxMultVecSR(rotation, &direction, &direction);
+>>>>>>> upstream/main
     }
 
     TDDraw::close();
@@ -781,6 +1020,7 @@ void MarioActor::drawSphereMask() const {
     }
 
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetZScaleOffset(1.0f, 0.00001f);
     GXSetCullMode(GX_CULL_FRONT);
     GXSetZMode(GX_TRUE, GX_GREATER, GX_TRUE);
@@ -789,6 +1029,16 @@ void MarioActor::drawSphereMask() const {
     getRealPos("Spine1", &position);
     TDDraw::drawSphere3D(position, 180.0f, 0xFFFFFF30, 16);
     GXSetZScaleOffset(1.0f, 0.0f);
+=======
+    J3DNativeView::setZScaleOffset(1.0f, 0.00001f);
+    J3DNativeState::setCullMode(GX_CULL_FRONT);
+    J3DNativeState::setZMode(GX_TRUE, GX_GREATER, GX_TRUE);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+    TVec3f position;
+    getRealPos("Spine1", &position);
+    TDDraw::drawSphere3D(position, 180.0f, 0xFFFFFF30, 16);
+    J3DNativeView::setZScaleOffset(1.0f, 0.0f);
+>>>>>>> upstream/main
 }
 
 void MarioActor::initDarkMask() {
@@ -821,7 +1071,11 @@ void MarioActor::updateDarkMask(u16 unused) {
     s32 index = x + y * 8;
     image[index] = 0xF0;
     previous[index] = 0xF0;
+<<<<<<< HEAD
     DCStoreRange(image, 64);
+=======
+    J3DNativeTexture::registerImage(image, GX_TF_IA4, 8, 8, 1);
+>>>>>>> upstream/main
     _1C4++;
 }
 
@@ -831,6 +1085,7 @@ bool MarioActor::drawDarkMask() const {
     }
 
     TDDraw::setup(1, 0, 2);
+<<<<<<< HEAD
     GXSetAlphaUpdate(GX_TRUE);
     GXSetColorUpdate(GX_FALSE);
     GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
@@ -838,6 +1093,15 @@ bool MarioActor::drawDarkMask() const {
     GXSetZCompLoc(GX_FALSE);
     GXSetAlphaCompare(GX_GREATER, 1, GX_AOP_AND, GX_ALWAYS, 0);
     GXSetDstAlpha(GX_TRUE, 255);
+=======
+    J3DNativeState::setAlphaUpdate(GX_TRUE);
+    J3DNativeState::setColorUpdate(GX_FALSE);
+    J3DNativeState::setZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    mMaskTextures[_B88]->load(GX_TEXMAP0);
+    J3DNativeState::setZCompLoc(GX_FALSE);
+    J3DNativeState::setAlphaCompare(GX_GREATER, 1, GX_AOP_AND, GX_ALWAYS, 0);
+    J3DNativeState::setDstAlpha(GX_TRUE, 255);
+>>>>>>> upstream/main
     TVec3f spine;
     TVec2f center;
     TVec2f screenX;
@@ -869,6 +1133,7 @@ bool MarioActor::drawDarkMask() const {
     left &= ~1;
     MR::convertFrameBufferPosToScreenPos(&minimum, TVec2f(left, top));
     MR::convertFrameBufferPosToScreenPos(&maximum, TVec2f(left + width, top + height));
+<<<<<<< HEAD
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
     GXPosition3f32(minimum.x, minimum.y, 0.0f);
     GXTexCoord2f32(0.0f, 0.0f);
@@ -883,6 +1148,21 @@ bool MarioActor::drawDarkMask() const {
     GXSetColorUpdate(GX_TRUE);
     GXSetZCompLoc(GX_TRUE);
     GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+=======
+    J3DNativeDraw::begin(GX_QUADS, 4, NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(minimum.x, minimum.y, 0.0f);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+    J3DNativeDraw::position(maximum.x, minimum.y, 0.0f);
+    J3DNativeDraw::texCoord(4.0f, 0.0f);
+    J3DNativeDraw::position(maximum.x, maximum.y, 0.0f);
+    J3DNativeDraw::texCoord(4.0f, 4.0f);
+    J3DNativeDraw::position(minimum.x, maximum.y, 0.0f);
+    J3DNativeDraw::texCoord(0.0f, 4.0f);
+    J3DNativeState::setDstAlpha(GX_FALSE, 0);
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setZCompLoc(GX_TRUE);
+    J3DNativeState::setAlphaCompare(GX_ALWAYS, 0, GX_AOP_AND, GX_ALWAYS, 0);
+>>>>>>> upstream/main
     TDDraw::close();
     return true;
 }

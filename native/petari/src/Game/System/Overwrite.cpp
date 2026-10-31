@@ -1,4 +1,11 @@
 #include "Game/System/ShapePacketUserData.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/System/WPad.hpp"
 #include "Game/Util/MathUtil.hpp"
 #ifdef TARGET_PC
@@ -13,13 +20,19 @@
 #include <JSystem/JKernel/JKRUnitHeap.hpp>
 
 #include <JSystem/JUtility/JUTConsole.hpp>
+<<<<<<< HEAD
 #include <JSystem/JUtility/JUTException.hpp>
+=======
+>>>>>>> upstream/main
 #include <JSystem/JUtility/JUTTexture.hpp>
 
 #include <JSystem/JSupport/JSUInputStream.hpp>
 #include <JSystem/JSupport/JSUOutputStream.hpp>
 
+<<<<<<< HEAD
 #include <JSystem/J3DGraphBase/J3DFifo.hpp>
+=======
+>>>>>>> upstream/main
 #include <JSystem/J3DGraphBase/J3DPacket.hpp>
 #include <JSystem/J3DGraphBase/J3DShapeMtx.hpp>
 #include <JSystem/J3DGraphBase/J3DSys.hpp>
@@ -40,7 +53,12 @@
 #include <JSystem/JAudio2/JAUInitializer.hpp>
 
 #include <cstdarg>
+<<<<<<< HEAD
 #include <revolution/sc.h>
+=======
+#include "Game/System/NebulaAuxMemory.hpp"
+#include "Game/System/NebulaSystemSettings.hpp"
+>>>>>>> upstream/main
 
 void Overwrite_FORCE_MATCH_SDATA2() {
     (void)-2607.5945f;
@@ -194,6 +212,7 @@ extern "C" void JUTWarningConsole(const char* pMessage) {
 
 void JUTTexture::captureDolTexture(void* pBuffer, int width, int height, int x, int y, bool mipmap, GXTexFmt format) {
     if (mipmap) {
+<<<<<<< HEAD
         GXSetTexCopySrc(x, y, width * 2, height * 2);
     } else {
         GXSetTexCopySrc(x, y, width, height);
@@ -202,6 +221,15 @@ void JUTTexture::captureDolTexture(void* pBuffer, int width, int height, int x, 
     GXSetTexCopyDst(width, height, format, mipmap);
     GXCopyTex(pBuffer, GX_FALSE);
     GXPixModeSync();
+=======
+        J3DNativeState::setTexCopySrc(x, y, width * 2, height * 2);
+    } else {
+        J3DNativeState::setTexCopySrc(x, y, width, height);
+    }
+
+    J3DNativeState::setTexCopyDst(width, height, format, mipmap);
+    J3DNativeState::copyTex(pBuffer, GX_FALSE);
+>>>>>>> upstream/main
 }
 
 JSUOutputStream::~JSUOutputStream() {
@@ -210,6 +238,7 @@ JSUOutputStream::~JSUOutputStream() {
 JSUInputStream::~JSUInputStream() {
 }
 
+<<<<<<< HEAD
 extern "C" void PSMTXRotRad(Mtx pMtx, char axis, f32 radians) {
     f32 sin = JMASinRadian(radians);
     f32 cos = JMACosRadian(radians);
@@ -243,6 +272,17 @@ bool JUTException::queryMapAddress_single(char* pMap, u32 address, s32 section, 
 void J3DShapeMtx::loadMtxIndx_PNGP(int slot, u16 index) const {
     J3DFifoLoadIndx(0x20, index, 0xB000 | static_cast< u16 >(slot * 12));
     J3DFifoLoadNrmMtxIndx3x3(index, slot * 3);
+=======
+extern "C" void NebulaMtxRotRad(Mtx pMtx, char axis, f32 radians) {
+    f32 sin = JMASinRadian(radians);
+    f32 cos = JMACosRadian(radians);
+    NebulaMtxRotTrig(pMtx, axis, sin, cos);
+}
+
+void J3DShapeMtx::loadMtxIndx_PNGP(int slot, u16 index) const {
+    j3dSys.loadPosMtxIndx(slot, index);
+    j3dSys.loadNrmMtxIndx(slot, index);
+>>>>>>> upstream/main
     ShapePacketUserData* pData = MR::getJ3DShapePacketUserData(j3dSys.getShapePacket());
     if (pData != nullptr) {
         pData->loadTexMtx(j3dSys.getShapePacket()->getShape()->getMaterial(), slot, index);
@@ -255,8 +295,13 @@ namespace {
 
     void loadPrj(JPAEmitterWorkData const* pWork, const Mtx pSrt) {
         Mtx mtx;
+<<<<<<< HEAD
         PSMTXConcat(pWork->mPrjMtx, pSrt, mtx);
         GXLoadTexMtxImm(mtx, GX_TEXMTX0, GX_MTX3x4);
+=======
+        NebulaMtxConcat(pWork->mPrjMtx, pSrt, mtx);
+        J3DNativeShape::sendTexture(mtx, GX_TEXMTX0, GX_MTX3x4);
+>>>>>>> upstream/main
     }
 
 // only way I can get these to match
@@ -288,6 +333,7 @@ namespace {
         matrix[2][1] = 0.0f;
         matrix[2][2] = 1.0f;
         matrix[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXConcat(matrix, pWork->mPrjMtx, matrix);
         PSMTXConcat(matrix, pSrt, matrix);
         GXLoadTexMtxImm(matrix, 0x1e, GX_MTX3x4);
@@ -308,6 +354,14 @@ namespace {
         jpa_dl,
         jpa_dl_x,
     };
+=======
+        NebulaMtxConcat(matrix, pWork->mPrjMtx, matrix);
+        NebulaMtxConcat(matrix, pSrt, matrix);
+        J3DNativeShape::sendTexture(matrix, 0x1e, GX_MTX3x4);
+    }
+#pragma pop
+
+>>>>>>> upstream/main
 
     typedef void (*projectionFunc)(JPAEmitterWorkData const*, const Mtx);
 
@@ -504,7 +558,11 @@ void JPABaseEmitter::init(JPAEmitterManager* pManager, JPAResource* pResource) {
     mRndmDirSpeed = mpRes->getDyn()->getInitVelRndm();
     mAirResist = mpRes->getDyn()->getAirRes();
     mRndm.set_seed(mpEmtrMgr->pWd->mRndm.get_rndm_u());
+<<<<<<< HEAD
     PSMTXIdentity(mGlobalRot);
+=======
+    NebulaMtxIdentity(mGlobalRot);
+>>>>>>> upstream/main
     mGlobalScl.set(1.0f, 1.0f, 1.0f);
     mGlobalTrs.zero();
     mGlobalPScl.set(1.0f, 1.0f);
@@ -560,10 +618,17 @@ void JPADrawDirection(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     matrix[2][2] = side.z;
     matrix[2][3] = pParticle->mPosition.z;
     p_plane[pWork->mPlaneType](matrix, scaleX, scaleY);
+<<<<<<< HEAD
     PSMTXConcat(pWork->mPosCamMtx, matrix, matrix);
     GXLoadPosMtxImm(matrix, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, matrix);
     GXCallDisplayList(p_dl[pWork->mDLType], 32);
+=======
+    NebulaMtxConcat(pWork->mPosCamMtx, matrix, matrix);
+    J3DNativeShape::sendPosition(matrix, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, matrix);
+    JPADrawQuad(pWork->mDLType);
+>>>>>>> upstream/main
 }
 
 void JPADrawRotDirection(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
@@ -607,11 +672,19 @@ void JPADrawRotDirection(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) 
     matrix[2][1] = direction.z;
     matrix[2][2] = side.z;
     matrix[2][3] = pParticle->mPosition.z;
+<<<<<<< HEAD
     PSMTXConcat(matrix, rotation, rotation);
     PSMTXConcat(pWork->mPosCamMtx, rotation, matrix);
     GXLoadPosMtxImm(matrix, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, matrix);
     GXCallDisplayList(p_dl[pWork->mDLType], 32);
+=======
+    NebulaMtxConcat(matrix, rotation, rotation);
+    NebulaMtxConcat(pWork->mPosCamMtx, rotation, matrix);
+    J3DNativeShape::sendPosition(matrix, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, matrix);
+    JPADrawQuad(pWork->mDLType);
+>>>>>>> upstream/main
 }
 
 void JPADrawDBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
@@ -622,15 +695,25 @@ void JPADrawDBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     TVec3f direction;
     p_direction[pWork->mDirType](pWork, pParticle, &direction);
     TVec3f camera(pWork->mPosCamMtx[2][0], pWork->mPosCamMtx[2][1], pWork->mPosCamMtx[2][2]);
+<<<<<<< HEAD
     PSVECCrossProduct(&direction, &camera, &direction);
+=======
+    NebulaVecCrossProduct(&direction, &camera, &direction);
+>>>>>>> upstream/main
     if (MR::isNearZero(direction)) {
         return;
     }
 
     MR::normalize(&direction);
+<<<<<<< HEAD
     PSMTXMultVecSR(pWork->mPosCamMtx, &direction, &direction);
     TVec3f position;
     PSMTXMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+=======
+    NebulaMtxMultVecSR(pWork->mPosCamMtx, &direction, &direction);
+    TVec3f position;
+    NebulaMtxMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+>>>>>>> upstream/main
     f32 scaleX = pWork->mGlobalPtclScl.x * pParticle->mParticleScaleX;
     f32 scaleY = pWork->mGlobalPtclScl.y * pParticle->mParticleScaleY;
     Mtx matrix;
@@ -643,9 +726,15 @@ void JPADrawDBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     matrix[2][2] = 1.0f;
     matrix[2][3] = position.z;
     matrix[0][2] = matrix[1][2] = matrix[2][0] = matrix[2][1] = 0.0f;
+<<<<<<< HEAD
     GXLoadPosMtxImm(matrix, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, matrix);
     GXCallDisplayList(jpa_dl, 32);
+=======
+    J3DNativeShape::sendPosition(matrix, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, matrix);
+    JPADrawQuad(0);
+>>>>>>> upstream/main
 }
 
 void JPADrawLine(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
@@ -662,6 +751,7 @@ void JPADrawLine(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
 
     end.setLength(pWork->mGlobalPtclScl.y * (25.0f * pParticle->mParticleScaleY));
     end.sub(position, end);
+<<<<<<< HEAD
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GXBegin(GX_LINES, GX_VTXFMT1, 2);
@@ -672,6 +762,13 @@ void JPADrawLine(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+    J3DNativeDraw::begin(GX_LINES, 2, NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(position.x, position.y, position.z);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+    J3DNativeDraw::position(end.x, end.y, end.z);
+    J3DNativeDraw::texCoord(0.0f, 1.0f);
+>>>>>>> upstream/main
 }
 
 // only way I can get these to match
@@ -704,16 +801,25 @@ void JPADrawStripe(JPAEmitterWorkData* pWork) {
         pNext = ::getNext;
     }
 
+<<<<<<< HEAD
     GXLoadPosMtxImm(pWork->mPosCamMtx, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, pWork->mPosCamMtx);
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+=======
+    J3DNativeShape::sendPosition(pWork->mPosCamMtx, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, pWork->mPosCamMtx);
+>>>>>>> upstream/main
     TVec3f position;
     TVec3f direction;
     TVec3f side;
     TVec3f vertices[2];
     Mtx matrix;
+<<<<<<< HEAD
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, count * 2);
+=======
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, count * 2, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* pNode = pFirst; pNode != pWork->mpAlivePtcl->getEnd();) {
         JPABaseParticle* pParticle = pNode->getObject();
         pWork->mpCurNode = pNode;
@@ -734,14 +840,22 @@ void JPADrawStripe(JPAEmitterWorkData* pWork) {
             MR::normalize(&direction);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+=======
+        NebulaVecCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+>>>>>>> upstream/main
         if (MR::isNearZero(side)) {
             side.set< f32 >(1.0f, 0.0f, 0.0f);
         } else {
             MR::normalize(&side);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+=======
+        NebulaVecCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+>>>>>>> upstream/main
         MR::normalize(&pParticle->mBaseAxis);
         matrix[0][0] = side.x;
         matrix[0][1] = direction.x;
@@ -755,18 +869,29 @@ void JPADrawStripe(JPAEmitterWorkData* pWork) {
         matrix[2][1] = direction.z;
         matrix[2][2] = pParticle->mBaseAxis.z;
         matrix[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(matrix, vertices, vertices, 2);
         GXPosition3f32(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
         GXTexCoord2f32(0.0f, texCoord);
         GXPosition3f32(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
         GXTexCoord2f32(1.0f, texCoord);
+=======
+        NebulaMtxMultVecArraySR(matrix, vertices, vertices, 2);
+        J3DNativeDraw::position(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
+        J3DNativeDraw::texCoord(0.0f, texCoord);
+        J3DNativeDraw::position(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
+        J3DNativeDraw::texCoord(1.0f, texCoord);
+>>>>>>> upstream/main
         pNode = pNext(pNode);
         texCoord += texStep;
     }
 
+<<<<<<< HEAD
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+>>>>>>> upstream/main
 }
 #pragma pop
 
@@ -802,16 +927,25 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
         pNext = ::getNext;
     }
 
+<<<<<<< HEAD
     GXLoadPosMtxImm(pWork->mPosCamMtx, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, pWork->mPosCamMtx);
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+=======
+    J3DNativeShape::sendPosition(pWork->mPosCamMtx, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, pWork->mPosCamMtx);
+>>>>>>> upstream/main
     TVec3f position;
     TVec3f direction;
     TVec3f side;
     TVec3f vertices[2];
     Mtx matrix;
+<<<<<<< HEAD
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, count * 2);
+=======
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, count * 2, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* pNode = pFirst; pNode != pWork->mpAlivePtcl->getEnd();) {
         JPABaseParticle* pParticle = pNode->getObject();
         pWork->mpCurNode = pNode;
@@ -832,7 +966,11 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
             MR::normalize(&direction);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+=======
+        NebulaVecCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+>>>>>>> upstream/main
         if (MR::isNearZero(side)) {
             side.set< f32 >(1.0f, 0.0f, 0.0f);
         } else {
@@ -843,7 +981,11 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
             side.set< f32 >(0.0f, 1.0f, 0.0f);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+=======
+        NebulaVecCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+>>>>>>> upstream/main
         MR::normalize(&pParticle->mBaseAxis);
         matrix[0][0] = side.x;
         matrix[0][1] = direction.x;
@@ -857,18 +999,31 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
         matrix[2][1] = direction.z;
         matrix[2][2] = pParticle->mBaseAxis.z;
         matrix[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(matrix, vertices, vertices, 2);
         GXPosition3f32(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
         GXTexCoord2f32(0.0f, texCoord);
         GXPosition3f32(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
         GXTexCoord2f32(1.0f, texCoord);
+=======
+        NebulaMtxMultVecArraySR(matrix, vertices, vertices, 2);
+        J3DNativeDraw::position(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
+        J3DNativeDraw::texCoord(0.0f, texCoord);
+        J3DNativeDraw::position(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
+        J3DNativeDraw::texCoord(1.0f, texCoord);
+>>>>>>> upstream/main
         pNode = pNext(pNode);
         texCoord += texStep;
     }
 
+<<<<<<< HEAD
     GXEnd();
     texCoord = startTexCoord;
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, count * 2);
+=======
+    texCoord = startTexCoord;
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, count * 2, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* pNode = pFirst; pNode != pWork->mpAlivePtcl->getEnd();) {
         JPABaseParticle* pParticle = pNode->getObject();
         pWork->mpCurNode = pNode;
@@ -889,7 +1044,11 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
             MR::normalize(&direction);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+=======
+        NebulaVecCrossProduct(&pParticle->mBaseAxis, &direction, &side);
+>>>>>>> upstream/main
         if (MR::isNearZero(side)) {
             side.set< f32 >(1.0f, 0.0f, 0.0f);
         } else {
@@ -900,7 +1059,11 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
             side.set< f32 >(0.0f, 1.0f, 0.0f);
         }
 
+<<<<<<< HEAD
         PSVECCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+=======
+        NebulaVecCrossProduct(&direction, &side, &pParticle->mBaseAxis);
+>>>>>>> upstream/main
         MR::normalize(&pParticle->mBaseAxis);
         matrix[0][0] = side.x;
         matrix[0][1] = direction.x;
@@ -914,18 +1077,29 @@ void JPADrawStripeX(JPAEmitterWorkData* pWork) {
         matrix[2][1] = direction.z;
         matrix[2][2] = pParticle->mBaseAxis.z;
         matrix[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(matrix, vertices, vertices, 2);
         GXPosition3f32(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
         GXTexCoord2f32(0.0f, texCoord);
         GXPosition3f32(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
         GXTexCoord2f32(1.0f, texCoord);
+=======
+        NebulaMtxMultVecArraySR(matrix, vertices, vertices, 2);
+        J3DNativeDraw::position(vertices[0].x + position.x, vertices[0].y + position.y, vertices[0].z + position.z);
+        J3DNativeDraw::texCoord(0.0f, texCoord);
+        J3DNativeDraw::position(vertices[1].x + position.x, vertices[1].y + position.y, vertices[1].z + position.z);
+        J3DNativeDraw::texCoord(1.0f, texCoord);
+>>>>>>> upstream/main
         pNode = pNext(pNode);
         texCoord += texStep;
     }
 
+<<<<<<< HEAD
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+>>>>>>> upstream/main
 }
 #pragma pop
 
@@ -935,13 +1109,21 @@ void JPAFieldAir::prepare(JPAEmitterWorkData* pWork, JPAFieldBlock* pBlock) {
     if (pBlock->checkStatus(2)) {
         mAccel.scale(pBlock->getMag(), direction);
     } else {
+<<<<<<< HEAD
         PSMTXMultVecSR(pWork->mRotationMtx, &direction, &mAccel);
+=======
+        NebulaMtxMultVecSR(pWork->mRotationMtx, &direction, &mAccel);
+>>>>>>> upstream/main
         mAccel.scale(pBlock->getMag());
     }
 }
 
 void JPAFieldVortex::prepare(JPAEmitterWorkData* pWork, JPAFieldBlock* pBlock) {
+<<<<<<< HEAD
     PSMTXMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &field_0x10);
+=======
+    NebulaMtxMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &field_0x10);
+>>>>>>> upstream/main
     MR::normalizeOrZero(&field_0x10);
     field_0x1c = pBlock->getPos().z * pBlock->getPos().z;
     field_0x20 = 1.0f / field_0x1c;
@@ -971,9 +1153,15 @@ void JPAFieldConvection::prepare(JPAEmitterWorkData* pWork, JPAFieldBlock* pBloc
     TVec3f tangent;
     tangent.cross(pBlock->getPos(), pBlock->getDir());
     radial.cross(pBlock->getDir(), tangent);
+<<<<<<< HEAD
     PSMTXMultVecSR(pWork->mGlobalRot, &radial, &field_0x10);
     PSMTXMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &field_0x1c);
     PSMTXMultVecSR(pWork->mGlobalRot, &tangent, &field_0x28);
+=======
+    NebulaMtxMultVecSR(pWork->mGlobalRot, &radial, &field_0x10);
+    NebulaMtxMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &field_0x1c);
+    NebulaMtxMultVecSR(pWork->mGlobalRot, &tangent, &field_0x28);
+>>>>>>> upstream/main
     MR::normalizeOrZero(&field_0x10);
     MR::normalizeOrZero(&field_0x1c);
     MR::normalizeOrZero(&field_0x28);
@@ -982,9 +1170,15 @@ void JPAFieldConvection::prepare(JPAEmitterWorkData* pWork, JPAFieldBlock* pBloc
 void JPAFieldSpin::prepare(JPAEmitterWorkData* pWork, JPAFieldBlock* pBlock) {
     TVec3f axis;
     Mtx rotation;
+<<<<<<< HEAD
     PSMTXMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &axis);
     MR::normalizeOrZero(&axis);
     PSMTXRotAxisRad(rotation, &axis, pBlock->getMag());
+=======
+    NebulaMtxMultVecSR(pWork->mGlobalRot, &pBlock->getDir(), &axis);
+    MR::normalizeOrZero(&axis);
+    NebulaMtxRotAxisRad(rotation, &axis, pBlock->getMag());
+>>>>>>> upstream/main
     field_0x10.set< f32 >(rotation[0][0], rotation[1][0], rotation[2][0]);
     field_0x1c.set< f32 >(rotation[0][1], rotation[1][1], rotation[2][1]);
     field_0x28.set< f32 >(rotation[0][2], rotation[1][2], rotation[2][2]);
@@ -1020,7 +1214,11 @@ void JPADrawYBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     }
 
     TVec3f position;
+<<<<<<< HEAD
     PSMTXMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+=======
+    NebulaMtxMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+>>>>>>> upstream/main
     f32 scaleX = pWork->mGlobalPtclScl.x * pParticle->mParticleScaleX;
     f32 scaleY = pWork->mGlobalPtclScl.y * pParticle->mParticleScaleY;
     Mtx matrix;
@@ -1033,9 +1231,15 @@ void JPADrawYBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
     matrix[2][2] = pWork->mYBBCamMtx[2][2];
     matrix[2][3] = position.z;
     matrix[0][1] = matrix[0][2] = matrix[1][0] = matrix[2][0] = 0.0f;
+<<<<<<< HEAD
     GXLoadPosMtxImm(matrix, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, matrix);
     GXCallDisplayList(jpa_dl, 32);
+=======
+    J3DNativeShape::sendPosition(matrix, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, matrix);
+    JPADrawQuad(0);
+>>>>>>> upstream/main
 }
 
 void JPADrawRotYBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle) {
@@ -1049,7 +1253,11 @@ void JPADrawRotYBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle)
     }
 
     TVec3f position;
+<<<<<<< HEAD
     PSMTXMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+=======
+    NebulaMtxMultVec(pWork->mPosCamMtx, &pParticle->mPosition, &position);
+>>>>>>> upstream/main
     f32 scaleX = pWork->mGlobalPtclScl.x * pParticle->mParticleScaleX;
     f32 scaleY = pWork->mGlobalPtclScl.y * pParticle->mParticleScaleY;
     Mtx matrix;
@@ -1071,9 +1279,15 @@ void JPADrawRotYBillboard(JPAEmitterWorkData* pWork, JPABaseParticle* pParticle)
     matrix[2][1] = cosY * z;
     matrix[2][2] = y;
     matrix[2][3] = position.z;
+<<<<<<< HEAD
     GXLoadPosMtxImm(matrix, GX_PNMTX0);
     p_prj[pWork->mPrjType](pWork, matrix);
     GXCallDisplayList(jpa_dl, 32);
+=======
+    J3DNativeShape::sendPosition(matrix, GX_PNMTX0);
+    p_prj[pWork->mPrjType](pWork, matrix);
+    JPADrawQuad(0);
+>>>>>>> upstream/main
 }
 
 void JKRAramPiece::startDMA(JKRAMCommand* pCommand) {
@@ -1098,7 +1312,11 @@ void JKRAramPiece::startDMA(JKRAMCommand* pCommand) {
         return;
     }
 
+<<<<<<< HEAD
     ARStartDMA(pCommand->mTransferDirection, pCommand->mSrc, pCommand->mDst, pCommand->mDataLength);
+=======
+    NebulaAuxMemory::write(pCommand->mDst, reinterpret_cast< const void* >(pCommand->mSrc), pCommand->mDataLength);
+>>>>>>> upstream/main
     doneDMA(reinterpret_cast< uintptr_t >(pCommand));
 }
 
@@ -1140,6 +1358,7 @@ void JAU_JASInitializer::initJASystem(JKRSolidHeap* pHeap) {
         JASWaveArcLoader::setCurrentDir(waveArcDir_);
     }
 
+<<<<<<< HEAD
     switch (SCGetSoundMode()) {
     case 0:
         JASDriver::setOutputMode(0);
@@ -1148,6 +1367,16 @@ void JAU_JASInitializer::initJASystem(JKRSolidHeap* pHeap) {
         JASDriver::setOutputMode(1);
         break;
     case 2:
+=======
+    switch (NebulaSystemSettings::soundMode()) {
+    case NebulaSystemSettings::SoundModeMono:
+        JASDriver::setOutputMode(0);
+        break;
+    case NebulaSystemSettings::SoundModeStereo:
+        JASDriver::setOutputMode(1);
+        break;
+    case NebulaSystemSettings::SoundModeSurround:
+>>>>>>> upstream/main
         JASDriver::setOutputMode(2);
         break;
     }
@@ -1162,6 +1391,7 @@ namespace {
 
 JASAudioThread::JASAudioThread(int priority, int, u32)
     : JKRThread(JASDram, ::sAudioThreadStackSize, ::sAudioThreadMsgSize, priority), JASGlobalInstance< JASAudioThread >(true), sbPauseFlag() {
+<<<<<<< HEAD
     OSInitThreadQueue(&sThreadQueue);
 }
 
@@ -1169,6 +1399,14 @@ JKRAram::JKRAram(u32 audioSize, u32 graphSize, s32 priority) : JKRThread(::sAram
     u32 reserved = ARInit(mStackArray, 3);
     ARQInit();
     u32 total = ARGetSize();
+=======
+    sThreadQueue.init();
+}
+
+JKRAram::JKRAram(u32 audioSize, u32 graphSize, s32 priority) : JKRThread(::sAramThreadStackSize, ::sAramThreadMsgSize, priority) {
+    const u32 reserved = NebulaAuxMemory::cReserved;
+    const u32 total = NebulaAuxMemory::size();
+>>>>>>> upstream/main
     mAudioMemorySize = audioSize;
     if (graphSize == 0xFFFFFFFF) {
         mGraphMemorySize = total - audioSize - reserved;
@@ -1178,10 +1416,17 @@ JKRAram::JKRAram(u32 audioSize, u32 graphSize, s32 priority) : JKRThread(::sAram
         mAramMemorySize = total - (audioSize + graphSize) - reserved;
     }
 
+<<<<<<< HEAD
     mAudioMemoryPtr = ARAlloc(mAudioMemorySize);
     mGraphMemoryPtr = ARAlloc(mGraphMemorySize);
     if (mAramMemorySize != 0) {
         mAramMemoryPtr = ARAlloc(mAramMemorySize);
+=======
+    mAudioMemoryPtr = NebulaAuxMemory::alloc(mAudioMemorySize);
+    mGraphMemoryPtr = NebulaAuxMemory::alloc(mGraphMemorySize);
+    if (mAramMemorySize != 0) {
+        mAramMemoryPtr = NebulaAuxMemory::alloc(mAramMemorySize);
+>>>>>>> upstream/main
     } else {
         mAramMemoryPtr = 0;
     }

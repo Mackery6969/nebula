@@ -39,7 +39,11 @@ void JPAFieldGravity::prepare(JPAEmitterWorkData* work, JPAFieldBlock* block) {
     if (block->checkStatus(2)) {
         mAccel.scale(block->getMag(), block->getDir());
     } else {
+<<<<<<< HEAD
         PSMTXMultVecSR(work->mRotationMtx, &block->getDir(), &mAccel);
+=======
+        NebulaMtxMultVecSR(work->mRotationMtx, &block->getDir(), &mAccel);
+>>>>>>> upstream/main
         mAccel.scale(block->getMag());
     }
 }
@@ -60,7 +64,11 @@ void JPAFieldAir::calc(JPAEmitterWorkData* work, JPAFieldBlock* block, JPABasePa
 
 void JPAFieldMagnet::prepare(JPAEmitterWorkData* work, JPAFieldBlock* block) {
     mDir.sub(block->getPos(), work->mEmitterPos);
+<<<<<<< HEAD
     PSMTXMultVecSR(work->mRotationMtx, &mDir, &mDir);
+=======
+    NebulaMtxMultVecSR(work->mRotationMtx, &mDir, &mDir);
+>>>>>>> upstream/main
 }
 
 void JPAFieldMagnet::calc(JPAEmitterWorkData* work, JPAFieldBlock* block, JPABaseParticle* ptcl) {
@@ -71,7 +79,11 @@ void JPAFieldMagnet::calc(JPAEmitterWorkData* work, JPAFieldBlock* block, JPABas
 
 void JPAFieldNewton::prepare(JPAEmitterWorkData* work, JPAFieldBlock* block) {
     mDir.sub(block->getPos(), work->mEmitterPos);
+<<<<<<< HEAD
     PSMTXMultVecSR(work->mRotationMtx, &mDir, &mDir);
+=======
+    NebulaMtxMultVecSR(work->mRotationMtx, &mDir, &mDir);
+>>>>>>> upstream/main
     mCutoff = block->getVal1() * block->getVal1();
 }
 
@@ -130,7 +142,11 @@ void JPAFieldSpin::calc(JPAEmitterWorkData* work, JPAFieldBlock* block, JPABaseP
     mtx[2][2] = field_0x28.z;
     mtx[0][3] = mtx[1][3] = mtx[2][3] = 0.0f;
     Vec vec;
+<<<<<<< HEAD
     PSMTXMultVecSR(mtx, &ptcl->mLocalPosition, &vec);
+=======
+    NebulaMtxMultVecSR(mtx, &ptcl->mLocalPosition, &vec);
+>>>>>>> upstream/main
     mAccel.set< f32 >(vec.x - ptcl->mLocalPosition.x, vec.y - ptcl->mLocalPosition.y, vec.z - ptcl->mLocalPosition.z);
     calcAffect(block, ptcl);
 }

@@ -1,8 +1,14 @@
 #include "JSystem/JAudio2/JASHeapCtrl.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASMutex.hpp"
 #include "JSystem/JAudio2/JASWaveArcLoader.hpp"
 #include "JSystem/JKernel/JKRExpHeap.hpp"
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
+<<<<<<< HEAD
 #include <revolution/aralt.h>
 #include <revolution/os/OSMutex.h>
 
@@ -16,6 +22,21 @@ void JASHeap::initRootHeap(void* pBase, u32 size) {
     mHeap = nullptr;
     mSize = size - (u32)(mBase - static_cast< u8* >(pBase));
     OSUnlockMutex(&mMutex);
+=======
+#include "Game/System/NebulaAuxMemory.hpp"
+#include "Game/System/NebulaClock.hpp"
+
+JASHeap::JASHeap(JASDisposer* pDisposer) : mTree(this), mDisposer(pDisposer), mBase(), mSize(), mHeap() {
+    mMutex.init();
+}
+
+void JASHeap::initRootHeap(void* pBase, u32 size) {
+    mMutex.lock();
+    mBase = (u8*)NebulaAlignUp32(pBase);
+    mHeap = nullptr;
+    mSize = size - (u32)(mBase - static_cast< u8* >(pBase));
+    mMutex.unlock();
+>>>>>>> upstream/main
 }
 
 bool JASHeap::alloc(JASHeap* pParent, u32 size) {
@@ -28,7 +49,11 @@ bool JASHeap::alloc(JASHeap* pParent, u32 size) {
         return false;
     }
 
+<<<<<<< HEAD
     size = OSRoundUp32B(size);
+=======
+    size = NebulaAlignUp32(size);
+>>>>>>> upstream/main
     u32 curOffset = pParent->getCurOffset();
     u32 tailOffset = pParent->getTailOffset();
     if (curOffset + size <= tailOffset) {
@@ -274,8 +299,13 @@ JASMemChunkPool< 1024, JASThreadingModel::ObjectLevelLockable >* JASKernel::getC
 JASHeap JASKernel::audioAramHeap;
 
 void JASKernel::setupAramHeap(u32 base, u32 size) {
+<<<<<<< HEAD
     OSReport("setupAramHeap %x, %x, %x\n", base, ARGetBaseAddress(), size);
     base = ARGetBaseAddress();
+=======
+    JUTNativeLog("setupAramHeap %x, %x, %x\n", base, NebulaAuxMemory::cReserved, size);
+    base = NebulaAuxMemory::cReserved;
+>>>>>>> upstream/main
     sAramBase = base;
     // An ARAM address, not a pointer: the heap only does arithmetic on it.
     audioAramHeap.initRootHeap((void*)(uintptr_t)sAramBase, size);

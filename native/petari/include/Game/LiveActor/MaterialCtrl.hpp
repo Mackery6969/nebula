@@ -5,7 +5,13 @@
 #include <JSystem/J3DGraphBase/J3DStruct.hpp>
 #include <JSystem/J3DGraphBase/J3DTexture.hpp>
 #include <JSystem/JUtility/JUTNameTab.hpp>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DTexMtx;
 class ResourceHolder;

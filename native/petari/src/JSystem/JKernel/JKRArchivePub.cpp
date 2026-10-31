@@ -1,11 +1,22 @@
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRAramArchive.hpp"
 #include "JSystem/JKernel/JKRArchive.hpp"
 #include "JSystem/JKernel/JKRCompArchive.hpp"
+=======
+#include "JSystem/JKernel/JKRArchive.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRDvdArchive.hpp"
 #include "JSystem/JKernel/JKRFileFinder.hpp"
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JKernel/JKRMemArchive.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 JKRArchive* JKRArchive::check_mount_already(s32 entryNum) {
     JSUPtrLink* current = JKRFileLoader::sVolumeList.mHead;
@@ -46,7 +57,11 @@ JKRArchive* JKRArchive::check_mount_already(s32 entryNum, JKRHeap* pHeap) {
 }
 
 JKRArchive* JKRArchive::mount(const char* pName, EMountMode mountMode, JKRHeap* pHeap, EMountDirection mountDir) {
+<<<<<<< HEAD
     s32 entryNum = DVDConvertPathToEntrynum(pName);
+=======
+    s32 entryNum = NebulaDisc::find(pName);
+>>>>>>> upstream/main
 
     if (entryNum < 0) {
         return nullptr;
@@ -72,6 +87,7 @@ JKRArchive* JKRArchive::mount(s32 entryNum, EMountMode mountMode, JKRHeap* pHeap
     case MOUNT_MODE_MEM:
         archive = new (pHeap, uVar1) JKRMemArchive(entryNum, mountDir);
         break;
+<<<<<<< HEAD
     case MOUNT_MODE_ARAM:
         archive = new (pHeap, uVar1) JKRAramArchive(entryNum, mountDir);
         break;
@@ -81,6 +97,11 @@ JKRArchive* JKRArchive::mount(s32 entryNum, EMountMode mountMode, JKRHeap* pHeap
     case MOUNT_MODE_COMP:
         archive = new (pHeap, uVar1) JKRCompArchive(entryNum, mountDir);
         break;
+=======
+    case MOUNT_MODE_DVD:
+        archive = new (pHeap, uVar1) JKRDvdArchive(entryNum, mountDir);
+        break;
+>>>>>>> upstream/main
     }
 
     if (archive != nullptr && archive->mMountMode == MOUNT_MODE_0) {

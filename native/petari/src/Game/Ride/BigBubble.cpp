@@ -1,4 +1,8 @@
 #include "Game/Ride/BigBubble.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/AreaObj/BigBubbleGoalArea.hpp"
 #include "Game/LiveActor/HitSensor.hpp"
 #include "Game/LiveActor/Nerve.hpp"
@@ -9,7 +13,10 @@
 #include "Game/Util.hpp"
 #include "Game/Util/OctahedronBezierSurface.hpp"
 #include <JSystem/JMath/JMATrigonometric.hpp>
+<<<<<<< HEAD
 #include <revolution/gx/GXTev.h>
+=======
+>>>>>>> upstream/main
 #include <revolution/mtx.h>
 #include <revolution/types.h>
 
@@ -233,7 +240,11 @@ void BigBubble::calcAnim() {
 
 void BigBubble::draw() const {
     if (isDraw()) {
+<<<<<<< HEAD
         GXSetTevColor(GX_TEVREG1, mWarningColor);
+=======
+        J3DNativeState::setTevColor(GX_TEVREG1, mWarningColor);
+>>>>>>> upstream/main
         mSurface->draw();
     }
 }

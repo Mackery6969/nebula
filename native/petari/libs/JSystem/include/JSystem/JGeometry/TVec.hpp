@@ -537,11 +537,19 @@ namespace JGeometry {
         }
 
         void add(const TVec3< f32 >& b) {
+<<<<<<< HEAD
             JMathInlineVEC::PSVECAdd(this, &b, this);
         }
 
         void add(const TVec3& a, const TVec3& b) {
             JMathInlineVEC::PSVECAdd(&a, &b, this);
+=======
+            NebulaVecAdd(this, &b, this);
+        }
+
+        void add(const TVec3& a, const TVec3& b) {
+            NebulaVecAdd(&a, &b, this);
+>>>>>>> upstream/main
         }
 
         TVec3 operator-(const TVec3& op) const {
@@ -555,11 +563,19 @@ namespace JGeometry {
         }
 
         void sub(const TVec3< f32 >& b) {
+<<<<<<< HEAD
             JMathInlineVEC::PSVECSubtract(this, &b, this);
         }
 
         void sub(const TVec3& a, const TVec3& b) {
             JMathInlineVEC::PSVECSubtract(&a, &b, this);
+=======
+            NebulaVecSubtract(this, &b, this);
+        }
+
+        void sub(const TVec3& a, const TVec3& b) {
+            NebulaVecSubtract(&a, &b, this);
+>>>>>>> upstream/main
         }
 
         TVec3 operator*(f32 scalar) const {
@@ -813,7 +829,11 @@ namespace JGeometry {
 
         f32 normalize() {
             f32 magnitude = length();
+<<<<<<< HEAD
             PSVECNormalize(this, this);
+=======
+            NebulaVecNormalize(this, this);
+>>>>>>> upstream/main
             return magnitude;
         }
 
@@ -823,17 +843,29 @@ namespace JGeometry {
         }
 
         void cross(const TVec3< f32 >& a, const TVec3< f32 >& b) {
+<<<<<<< HEAD
             PSVECCrossProduct(a, b, *this);
+=======
+            NebulaVecCrossProduct(a, b, *this);
+>>>>>>> upstream/main
         }
 
         TVec3 cross(const TVec3& b) const {
             TVec3 ret;
+<<<<<<< HEAD
             PSVECCrossProduct(this, &b, &ret);
+=======
+            NebulaVecCrossProduct(this, &b, &ret);
+>>>>>>> upstream/main
             return ret;
         }
 
         f32 squared() const {
+<<<<<<< HEAD
             return JMathInlineVEC::PSVECSquareMag(this);
+=======
+            return NebulaVecSquareMag(this);
+>>>>>>> upstream/main
         };
 
         operator f32*(void) {
@@ -845,7 +877,11 @@ namespace JGeometry {
         }
 
 #ifdef __MWERKS__
+<<<<<<< HEAD
         // this theoretically should just forward JMathInlineVEC::PSVECSquareDistance,
+=======
+        // this theoretically should just forward NebulaVecSquareDistance,
+>>>>>>> upstream/main
         // however using the exact same asm causes mismatches. Keeping it here instead
         // keeps the exact matches, and even allows for more use cases that match.
         f32 squared(const TVec3& rB) const {
@@ -912,11 +948,19 @@ namespace JGeometry {
         };
 
         f32 length() const {
+<<<<<<< HEAD
             return PSVECMag(this);
         }
 
         inline f32 distance(const TVec3& rOther) const {
             return PSVECDistance(this, &rOther);
+=======
+            return NebulaVecMag(this);
+        }
+
+        inline f32 distance(const TVec3& rOther) const {
+            return NebulaVecDistance(this, &rOther);
+>>>>>>> upstream/main
         }
 
         template < typename T >
@@ -1214,7 +1258,11 @@ namespace JGeometry {
             if (crossPart <= TUtil< f32 >::epsilon()) {
                 this->template set< f32 >(0.0f, 0.0f, 0.0f, 1.0f);
             } else {
+<<<<<<< HEAD
                 f32 dotPart = JMathInlineVEC::PSVECDotProduct(&rA, &rB);
+=======
+                f32 dotPart = NebulaVecDotProduct(&rA, &rB);
+>>>>>>> upstream/main
                 f32 halfAngle = 0.5f * JMAATan2(crossPart, dotPart);
                 f32 scale = static_cast< f32 >(sin(halfAngle)) / crossPart;
                 this->x = dir.x * scale;
@@ -1308,6 +1356,7 @@ namespace JGeometry {
         }
 
         void mult(const TQuat4& q) {
+<<<<<<< HEAD
             PSQUATMultiply(&q, this, this);
         }
 
@@ -1321,6 +1370,21 @@ namespace JGeometry {
 
         f32 squared() const {
             return PSQUATDotProduct(this, this);
+=======
+            NebulaQuatMultiply(&q, this, this);
+        }
+
+        void mult(const TQuat4& q1, const TQuat4& q2) {
+            NebulaQuatMultiply(q1, q2, this);
+        }
+
+        f32 dot(const TQuat4& q) const {
+            return NebulaQuatDotProduct(this, &q);
+        }
+
+        f32 squared() const {
+            return NebulaQuatDotProduct(this, this);
+>>>>>>> upstream/main
         }
 
         void makeMtx(MtxPtr pMtx) const {

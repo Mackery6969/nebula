@@ -1,6 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace AudUtil {
     /// @brief Maps a number from the interval `[0, max]` to the interval `[0.0f, end]`.

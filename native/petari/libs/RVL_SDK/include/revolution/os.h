@@ -8,8 +8,11 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define OSHalt(msg) OSPanic(__FILE__, __LINE__, msg)
 
+=======
+>>>>>>> upstream/main
 #ifdef __MWERKS__
 u32 __OSBusClock : (0x8000 << 16 | 0x00F8);
 u32 __MEM2End : (0x8000 << 16 | 0x3128);
@@ -32,17 +35,22 @@ u32 __MEM2End = 0x80003128;
 #define OS_TIMER_CLOCK (OS_BUS_CLOCK / 4)
 #endif
 
+<<<<<<< HEAD
 #define OSNanosecondsToTicks(nsec) (((nsec) * (OS_TIMER_CLOCK / 125000)) / 8000)
 
 #define OSTicksToSeconds(ticks) ((ticks) / OS_TIMER_CLOCK)
 #define OSTicksToMilliseconds(ticks) ((ticks) / (OS_TIMER_CLOCK / 1000))
 #define OSTicksToMicroseconds(ticks) (((ticks)*8) / (OS_TIMER_CLOCK / 125000))
 #define OSSecondsToTicks(sec) ((sec)*OS_TIMER_CLOCK)
+=======
+#define OSTicksToMilliseconds(ticks) ((ticks) / (OS_TIMER_CLOCK / 1000))
+>>>>>>> upstream/main
 #define OSMillisecondsToTicks(msec) ((msec) * (OS_TIMER_CLOCK / 1000))
 #define OSMicrosecondsToTicks(usec) (((usec) * (OS_TIMER_CLOCK / 125000)) / 8)
 
 void* OSPhysicalToUncached(u32);
 
+<<<<<<< HEAD
 #define OS_CACHED_REGION_PREFIX 0x8000
 #define OS_UNCACHED_REGION_PREFIX 0xC000
 
@@ -138,6 +146,16 @@ void __NebulaCurvedSurface(u32 arrayAddress, const void* pArray, u32 arrayBytes,
 // A native equivalent of a mod's code patch (NEBULA_PATCH_* in nebula_game_api.h): 1 with `pValue` set (when not
 // null) while an enabled mod carries it, else 0.
 int __NebulaCodePatch(u32 id, u32* pValue);
+=======
+#define OS_UNCACHED_REGION_PREFIX 0xC000
+
+#define OS_BASE_UNCACHED (OS_UNCACHED_REGION_PREFIX << 16)
+
+#ifdef TARGET_PC
+#ifdef __cplusplus
+extern "C" {
+#endif
+>>>>>>> upstream/main
 // main.dol's version of a table the game compiles in (comet schedules, event flags): `pCompiled` while they match,
 // else the DOL's, its strings read from main.dol (a mod's memory patches over main.dol's data change it).
 const void* __NebulaDolTable(u32 kind, const void* pCompiled);
@@ -147,6 +165,7 @@ void __NebulaMovieFrame(const char* pName, s32 frame, f32 frameRate, const void*
 // A wait on another thread's work (a busy loop the console's interrupts preempt): runs what is pending, or sleeps until
 // a host thread raises something.
 void __NebulaPoll(void);
+<<<<<<< HEAD
 void* __NebulaFromPhysical(u32 paddr);
 // A scene bound in the GX stream (NEBULA_SCENE_* in nebula_game_api.h; the 3D scene's begin with the camera's
 // world-to-eye matrix and the player's up as a fourth row). The begins ask whether the renderer wants host markers
@@ -172,11 +191,19 @@ void __NebulaGXPeekToken(u16 token);
 #define OSPhysicalToCached(paddr) ((void*)((u32)(paddr) + OS_BASE_CACHED))
 #define OSCachedToPhysical(caddr) ((u32)((u8*)(caddr)-OS_BASE_CACHED))
 #define OSUncachedToPhysical(ucaddr) ((u32)((u32)(ucaddr) & (~OS_BASE_UNCACHED)))
+=======
+// A stable 32-bit name for a game object: its offset in the game's memory.
+#ifdef __cplusplus
+}
+#endif
+#else
+>>>>>>> upstream/main
 #define OSPhysicalToUncached(paddr) ((void*)((u32)(paddr) + OS_BASE_UNCACHED))
 #endif
 
 #ifndef TARGET_PC
 // Console address tests; host addresses carry no MEM1/MEM2 bits (native/tools/console_address_audit.py).
+<<<<<<< HEAD
 #define OSIsMEM1Region(addr) (((u32)(addr)&0x30000000) == 0x00000000)
 #define OSIsMEM2Region(addr) (((u32)(addr)&0x30000000) == 0x10000000)
 #endif
@@ -191,6 +218,15 @@ void __NebulaGXPeekToken(u16 token);
 #define OSDiffTick(tick1, tick0) ((s32)(tick1) - (s32)(tick0))
 
 #define OS_TICKS_DELTA(x, y) ((s32)x - (s32)y)
+=======
+#endif
+
+#ifdef TARGET_PC
+#define OSRoundDown32B(x) (((uintptr_t)(x)) & ~(uintptr_t)(32 - 1))
+#else
+#define OSRoundDown32B(x) (((u32)(x)) & ~(32 - 1))
+#endif
+>>>>>>> upstream/main
 
 u32 OSGetSoundMode(void);
 void OSSetSoundMode(u32 mode);
@@ -251,8 +287,11 @@ const char* OSGetAppGamename(void);
 void* OSAllocFromArenaLo(u32 size, u32 align);
 void* OSAllocFromArenaHi(u32 size, u32 align);
 
+<<<<<<< HEAD
 #define OSAssert_Line(line_, exp_)
 
+=======
+>>>>>>> upstream/main
 #ifndef ASSERT
 #define ASSERT(exp) ((void)0)
 #endif
@@ -321,15 +360,21 @@ inline void OSf32tou8(f32* f, u8* out) {
 }
 #endif
 
+<<<<<<< HEAD
 #include "revolution/base/PPCArch.h"
 #include "revolution/gx.h"
 #include "revolution/os/OSAlarm.h"
 #include "revolution/os/OSAlloc.h"
 #include "revolution/os/OSCache.h"
+=======
+#include "revolution/gx.h"
+#include "revolution/os/OSAlarm.h"
+>>>>>>> upstream/main
 #include "revolution/os/OSContext.h"
 #include "revolution/os/OSException.h"
 #include "revolution/os/OSExecParams.h"
 #include "revolution/os/OSFastCast.h"
+<<<<<<< HEAD
 #include "revolution/os/OSFont.h"
 #include "revolution/os/OSInterrupt.h"
 #include "revolution/os/OSMessage.h"
@@ -341,6 +386,12 @@ inline void OSf32tou8(f32* f, u8* out) {
 #include "revolution/os/OSRtc.h"
 #include "revolution/os/OSStateFlags.h"
 #include "revolution/os/OSStateTM.h"
+=======
+#include "revolution/os/OSInterrupt.h"
+#include "revolution/os/OSMessage.h"
+#include "revolution/os/OSPlayRecord.h"
+#include "revolution/os/OSStateFlags.h"
+>>>>>>> upstream/main
 #include "revolution/os/OSThread.h"
 #include "revolution/os/OSTime.h"
 

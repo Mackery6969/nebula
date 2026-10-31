@@ -1,4 +1,8 @@
 #include "JSystem/J3DGraphBase/J3DShapeMtx.hpp"
+<<<<<<< HEAD
+=======
+#include "JSystem/J3DGraphBase/J3DNativeShape.hpp"
+>>>>>>> upstream/main
 #include "JSystem/J3DGraphAnimator/J3DModel.hpp"
 #include "JSystem/J3DGraphAnimator/J3DModelData.hpp"
 #include "JSystem/J3DGraphBase/J3DMatBlock.hpp"
@@ -37,18 +41,31 @@ void J3DShapeMtx::resetMtxLoadCache() {
 }
 
 void J3DShapeMtx::loadMtxIndx_PCPU(int slot, u16 indx) const {
+<<<<<<< HEAD
     J3DFifoLoadPosMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+=======
+    J3DNativeShape::loadPosition(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+>>>>>>> upstream/main
     j3dSys.loadNrmMtxIndx(slot, indx);
 }
 
 void J3DShapeMtx::loadMtxIndx_NCPU(int slot, u16 indx) const {
     j3dSys.loadPosMtxIndx(slot, indx);
+<<<<<<< HEAD
     J3DFifoLoadNrmMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
 }
 
 void J3DShapeMtx::loadMtxIndx_PNCPU(int slot, u16 indx) const {
     J3DFifoLoadPosMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
     J3DFifoLoadNrmMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+=======
+    J3DNativeShape::loadNormal(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+}
+
+void J3DShapeMtx::loadMtxIndx_PNCPU(int slot, u16 indx) const {
+    J3DNativeShape::loadPosition(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+    J3DNativeShape::loadNormal(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+>>>>>>> upstream/main
 }
 
 void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
@@ -99,8 +116,13 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                 }
                 case 2:
                 case 8: {
+<<<<<<< HEAD
                     PSMTXInverse(j3dSys.getViewMtx(), sp_e8);
                     PSMTXConcat(tex_mtx_obj->getMtx(i), sp_e8, sp_e8);
+=======
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_e8);
+                    NebulaMtxConcat(tex_mtx_obj->getMtx(i), sp_e8, sp_e8);
+>>>>>>> upstream/main
                     mtx = &sp_e8;
                     break;
                 }
@@ -113,8 +135,13 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                         J3DGetTextureMtxMayaOld(tex_mtx_info_2->mSRT, sp_68);
                     }
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+<<<<<<< HEAD
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
+=======
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[0][3] = sp_e8[1][3] = sp_e8[2][3] = 0.0f;
                     mtx = &sp_e8;
                     break;
@@ -128,10 +155,17 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                         J3DGetTextureMtxMaya(tex_mtx_info_2->mSRT, sp_68);
                     }
 
+<<<<<<< HEAD
                     PSMTXConcat(sp_68, qMtx, sp_68);
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
+=======
+                    NebulaMtxConcat(sp_68, qMtx, sp_68);
+                    J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[0][3] = sp_e8[1][3] = sp_e8[2][3] = 0.0f;
                     mtx = &sp_e8;
                     break;
@@ -145,10 +179,17 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                         J3DGetTextureMtxMaya(tex_mtx_info_2->mSRT, sp_68);
                     }
 
+<<<<<<< HEAD
                     PSMTXConcat(sp_68, qMtx2, sp_68);
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
+=======
+                    NebulaMtxConcat(sp_68, qMtx2, sp_68);
+                    J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[0][3] = sp_e8[1][3] = sp_e8[2][3] = 0.0f;
                     mtx = &sp_e8;
                     break;
@@ -159,7 +200,11 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                     mtx = &tex_mtx_obj->getMtx(i);
                 }
                 }
+<<<<<<< HEAD
                 GXLoadTexMtxImm(*mtx, i * 3 + 0x40, GX_MTX3x4);
+=======
+                J3DNativeShape::loadTexture(*mtx, i * 3 + 0x40, GX_MTX3x4);
+>>>>>>> upstream/main
             }
         }
     } else {
@@ -176,15 +221,25 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                 switch (tex_gen_src) {
                 case 3:
                 case 9:
+<<<<<<< HEAD
                     PSMTXConcat(tex_mtx_obj->getMtx(i), param_0, sp_e8);
+=======
+                    NebulaMtxConcat(tex_mtx_obj->getMtx(i), param_0, sp_e8);
+>>>>>>> upstream/main
                     mtx = &sp_e8;
                     break;
                 case 1:
                 case 6:
                 case 7:
+<<<<<<< HEAD
                     PSMTXCopy(param_0, sp_a8);
                     sp_a8[0][3] = sp_a8[1][3] = sp_a8[2][3] = 0.0f;
                     PSMTXConcat(tex_mtx_obj->getMtx(i), sp_a8, sp_e8);
+=======
+                    NebulaMtxCopy(param_0, sp_a8);
+                    sp_a8[0][3] = sp_a8[1][3] = sp_a8[2][3] = 0.0f;
+                    NebulaMtxConcat(tex_mtx_obj->getMtx(i), sp_a8, sp_e8);
+>>>>>>> upstream/main
                     mtx = &sp_e8;
                     break;
                 case 2:
@@ -201,9 +256,15 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                     }
 
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+<<<<<<< HEAD
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
                     PSMTXConcat(sp_e8, param_0, sp_e8);
+=======
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+                    NebulaMtxConcat(sp_e8, param_0, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[0][3] = sp_e8[1][3] = sp_e8[2][3] = 0.0f;
                     mtx = &sp_e8;
                     break;
@@ -217,11 +278,19 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                         J3DGetTextureMtxMaya(tex_mtx_info_2->mSRT, sp_68);
                     }
 
+<<<<<<< HEAD
                     PSMTXConcat(sp_68, qMtx, sp_68);
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
                     PSMTXConcat(sp_e8, param_0, sp_e8);
+=======
+                    NebulaMtxConcat(sp_68, qMtx, sp_68);
+                    J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+                    NebulaMtxConcat(sp_e8, param_0, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[0][3] = sp_e8[1][3] = sp_e8[2][3] = 0.0f;
                     mtx = &sp_e8;
                     break;
@@ -235,11 +304,19 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                         J3DGetTextureMtxMaya(tex_mtx_info_2->mSRT, sp_68);
                     }
 
+<<<<<<< HEAD
                     PSMTXConcat(sp_68, qMtx2, sp_68);
                     J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
                     PSMTXInverse(j3dSys.getViewMtx(), sp_a8);
                     PSMTXConcat(sp_e8, sp_a8, sp_e8);
                     PSMTXConcat(sp_e8, param_0, sp_e8);
+=======
+                    NebulaMtxConcat(sp_68, qMtx2, sp_68);
+                    J3DMtxProjConcat(sp_68, tex_mtx_obj->getEffectMtx(i), sp_e8);
+                    NebulaMtxInverse(j3dSys.getViewMtx(), sp_a8);
+                    NebulaMtxConcat(sp_e8, sp_a8, sp_e8);
+                    NebulaMtxConcat(sp_e8, param_0, sp_e8);
+>>>>>>> upstream/main
                     sp_e8[2][3] = 0.0f;
                     sp_e8[1][3] = 0.0f;
                     sp_e8[0][3] = 0.0f;
@@ -253,7 +330,11 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
                     break;
                 }
                 }
+<<<<<<< HEAD
                 GXLoadTexMtxImm(*mtx, i * 3 + 30, (GXTexMtxType)tex_mtx_info_1->mProjection);
+=======
+                J3DNativeShape::loadTexture(*mtx, i * 3 + 30, (GXTexMtxType)tex_mtx_info_1->mProjection);
+>>>>>>> upstream/main
             }
         }
     }
@@ -261,22 +342,35 @@ void J3DDifferedTexMtx::loadExecute(f32 const (*param_0)[4]) {
 
 void J3DShapeMtxConcatView::loadMtxConcatView_PNGP(int slot, u16 drw) const {
     Mtx m;
+<<<<<<< HEAD
     PSMTXConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
     J3DDifferedTexMtx::load(m);
     J3DFifoLoadPosMtxImm(m, slot * 3);
+=======
+    NebulaMtxConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
+    J3DDifferedTexMtx::load(m);
+    J3DNativeShape::loadPosition(m, slot * 3);
+>>>>>>> upstream/main
     loadNrmMtx(slot, drw, m);
 }
 
 void J3DShapeMtxConcatView::loadMtxConcatView_PCPU(int slot, u16 drw) const {
     Mtx m;
+<<<<<<< HEAD
     PSMTXConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
     J3DDifferedTexMtx::load(m);
     J3DFifoLoadPosMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+=======
+    NebulaMtxConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
+    J3DDifferedTexMtx::load(m);
+    J3DNativeShape::loadPosition(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+>>>>>>> upstream/main
     loadNrmMtx(slot, drw, m);
 }
 
 void J3DShapeMtxConcatView::loadMtxConcatView_NCPU(int slot, u16 drw) const {
     Mtx m;
+<<<<<<< HEAD
     PSMTXConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
     J3DDifferedTexMtx::load(m);
     J3DFifoLoadPosMtxImm(m, slot * 3);
@@ -284,11 +378,21 @@ void J3DShapeMtxConcatView::loadMtxConcatView_NCPU(int slot, u16 drw) const {
 
     if (J3DShapeMtx::sTexMtxLoadType == 0x2000)
         J3DFifoLoadNrmMtxToTexMtx(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3 + GX_TEXMTX0);
+=======
+    NebulaMtxConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
+    J3DDifferedTexMtx::load(m);
+    J3DNativeShape::loadPosition(m, slot * 3);
+    J3DNativeShape::loadNormal(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+
+    if (J3DShapeMtx::sTexMtxLoadType == 0x2000)
+        J3DNativeShape::loadNormalToTexture(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3 + GX_TEXMTX0);
+>>>>>>> upstream/main
 }
 
 void J3DShapeMtxConcatView::loadMtxConcatView_PNCPU(int slot, u16 drw) const {
     if (J3DDifferedTexMtx::sTexGenBlock != NULL) {
         Mtx m;
+<<<<<<< HEAD
         PSMTXConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
         J3DDifferedTexMtx::loadExecute(m);
     }
@@ -298,14 +402,32 @@ void J3DShapeMtxConcatView::loadMtxConcatView_PNCPU(int slot, u16 drw) const {
 
     if (J3DShapeMtx::sTexMtxLoadType == 0x2000)
         J3DFifoLoadNrmMtxToTexMtx(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3 + GX_TEXMTX0);
+=======
+        NebulaMtxConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
+        J3DDifferedTexMtx::loadExecute(m);
+    }
+
+    J3DNativeShape::loadPosition(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+    J3DNativeShape::loadNormal(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3);
+
+    if (J3DShapeMtx::sTexMtxLoadType == 0x2000)
+        J3DNativeShape::loadNormalToTexture(*j3dSys.getShapePacket()->getBaseMtxPtr(), slot * 3 + GX_TEXMTX0);
+>>>>>>> upstream/main
 }
 
 void J3DShapeMtxConcatView::loadMtxConcatView_PNGP_LOD(int slot, u16 drw) const {
     Mtx m;
+<<<<<<< HEAD
     PSMTXConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
     PSMTXConcat(m, j3dSys.getModel()->getModelData()->getInvJointMtx(drw), m);
     J3DDifferedTexMtx::load(m);
     J3DFifoLoadPosMtxImm(m, slot * 3);
+=======
+    NebulaMtxConcat(*j3dSys.getShapePacket()->getBaseMtxPtr(), j3dSys.getModelDrawMtx(drw), m);
+    NebulaMtxConcat(m, j3dSys.getModel()->getModelData()->getInvJointMtx(drw), m);
+    J3DDifferedTexMtx::load(m);
+    J3DNativeShape::loadPosition(m, slot * 3);
+>>>>>>> upstream/main
     loadNrmMtx(slot, drw, m);
 }
 
@@ -335,22 +457,35 @@ void J3DShapeMtxConcatView::load() const {
 void J3DShapeMtxConcatView::loadNrmMtx(int param_0, u16 param_1, MtxPtr param_2) const {
     if (sCurrentScaleFlag[param_1] == 1) {
         if (sTexMtxLoadType == 0x2000) {
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxToTexMtx(param_2, 0x1e);
         }
 
         if (!sNBTFlag) {
             J3DFifoLoadNrmMtxImm(param_2, 0);
+=======
+            J3DNativeShape::loadNormalToTexture(param_2, 0x1e);
+        }
+
+        if (!sNBTFlag) {
+            J3DNativeShape::loadNormal(param_2, 0);
+>>>>>>> upstream/main
         } else {
             Mtx33 mtx;
             Vec* scale = j3dSys.getNBTScale();
             J3DPSMtx33CopyFrom34(param_2, mtx);
             J3DScaleNrmMtx33(mtx, *scale);
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxImm3x3(mtx, 0);
+=======
+            J3DNativeShape::loadNormal33(mtx, 0);
+>>>>>>> upstream/main
         }
     } else {
         Mtx33 mtx;
         J3DPSCalcInverseTranspose(param_2, mtx);
         if (sTexMtxLoadType == 0x2000) {
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxToTexMtx3x3(mtx, 0x1e);
         }
 
@@ -360,6 +495,17 @@ void J3DShapeMtxConcatView::loadNrmMtx(int param_0, u16 param_1, MtxPtr param_2)
             Vec* scale = j3dSys.getNBTScale();
             J3DScaleNrmMtx33(mtx, *scale);
             J3DFifoLoadNrmMtxImm3x3(mtx, 0);
+=======
+            J3DNativeShape::loadNormal33ToTexture(mtx, 0x1e);
+        }
+
+        if (!sNBTFlag) {
+            J3DNativeShape::loadNormal33(mtx, 0);
+        } else {
+            Vec* scale = j3dSys.getNBTScale();
+            J3DScaleNrmMtx33(mtx, *scale);
+            J3DNativeShape::loadNormal33(mtx, 0);
+>>>>>>> upstream/main
         }
     }
 }
@@ -427,19 +573,31 @@ void J3DShapeMtxMultiConcatView::loadNrmMtx(int param_0, u16 param_1, MtxPtr par
     Mtx33 mtx1, mtx2;
     if (sCurrentScaleFlag[param_1] == 1) {
         if (sTexMtxLoadType == 0x2000) {
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxToTexMtx(param_2, param_0 * 3 + 0x1e);
         }
         if (!sNBTFlag) {
             J3DFifoLoadNrmMtxImm(param_2, param_0 * 3);
+=======
+            J3DNativeShape::loadNormalToTexture(param_2, param_0 * 3 + 0x1e);
+        }
+        if (!sNBTFlag) {
+            J3DNativeShape::loadNormal(param_2, param_0 * 3);
+>>>>>>> upstream/main
         } else {
             Vec* nbt_scale = j3dSys.getNBTScale();
             J3DPSMtx33CopyFrom34(param_2, mtx1);
             J3DScaleNrmMtx33(mtx1, *nbt_scale);
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxImm3x3(mtx1, 0);
+=======
+            J3DNativeShape::loadNormal33(mtx1, 0);
+>>>>>>> upstream/main
         }
     } else {
         J3DPSCalcInverseTranspose(param_2, mtx2);
         if (sTexMtxLoadType == 0x2000) {
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxToTexMtx3x3(mtx2, param_0 * 3 + 0x1e);
         }
         if (!sNBTFlag) {
@@ -448,6 +606,16 @@ void J3DShapeMtxMultiConcatView::loadNrmMtx(int param_0, u16 param_1, MtxPtr par
             Vec* nbt_scale = j3dSys.getNBTScale();
             J3DScaleNrmMtx33(mtx2, *nbt_scale);
             J3DFifoLoadNrmMtxImm3x3(mtx2, param_0 * 3);
+=======
+            J3DNativeShape::loadNormal33ToTexture(mtx2, param_0 * 3 + 0x1e);
+        }
+        if (!sNBTFlag) {
+            J3DNativeShape::loadNormal33(mtx2, param_0 * 3);
+        } else {
+            Vec* nbt_scale = j3dSys.getNBTScale();
+            J3DScaleNrmMtx33(mtx2, *nbt_scale);
+            J3DNativeShape::loadNormal33(mtx2, param_0 * 3);
+>>>>>>> upstream/main
         }
     }
 }
@@ -457,6 +625,7 @@ void J3DShapeMtxBBoardConcatView::load() const {
     u16 draw_mtx_index = j3dSys.getModel()->getModelData()->getDrawMtxIndex(mUseMtxIndex);
 
     if (j3dSys.getModel()->getModelData()->getDrawMtxFlag(mUseMtxIndex) == 0) {
+<<<<<<< HEAD
         PSMTXConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getMtxBuffer()->getUserAnmMtx(draw_mtx_index), mtx);
     } else {
         PSMTXConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getWeightAnmMtx(draw_mtx_index), mtx);
@@ -464,6 +633,15 @@ void J3DShapeMtxBBoardConcatView::load() const {
 
     J3DCalcBBoardMtx(mtx);
     J3DFifoLoadPosMtxImm(mtx, 0);
+=======
+        NebulaMtxConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getMtxBuffer()->getUserAnmMtx(draw_mtx_index), mtx);
+    } else {
+        NebulaMtxConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getWeightAnmMtx(draw_mtx_index), mtx);
+    }
+
+    J3DCalcBBoardMtx(mtx);
+    J3DNativeShape::loadPosition(mtx, 0);
+>>>>>>> upstream/main
 
     mtx[0][0] = 1.0f / mtx[0][0];
     mtx[1][1] = 1.0f / mtx[1][1];
@@ -473,11 +651,19 @@ void J3DShapeMtxBBoardConcatView::load() const {
     mtx[2][3] = 0.0f;
 
     if (!sNBTFlag) {
+<<<<<<< HEAD
         J3DFifoLoadNrmMtxImm(mtx, 0);
     } else {
         Vec* nbt_scale = j3dSys.getNBTScale();
         J3DScaleNrmMtx(mtx, *nbt_scale);
         J3DFifoLoadNrmMtxImm(mtx, 0);
+=======
+        J3DNativeShape::loadNormal(mtx, 0);
+    } else {
+        Vec* nbt_scale = j3dSys.getNBTScale();
+        J3DScaleNrmMtx(mtx, *nbt_scale);
+        J3DNativeShape::loadNormal(mtx, 0);
+>>>>>>> upstream/main
     }
 }
 
@@ -487,6 +673,7 @@ void J3DShapeMtxYBBoardConcatView::load() const {
     u16 draw_mtx_index = j3dSys.getModel()->getModelData()->getDrawMtxIndex(mUseMtxIndex);
 
     if (j3dSys.getModel()->getModelData()->getDrawMtxFlag(mUseMtxIndex) == 0) {
+<<<<<<< HEAD
         PSMTXConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getMtxBuffer()->getUserAnmMtx(draw_mtx_index), mtx1);
     } else {
         PSMTXConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getWeightAnmMtx(draw_mtx_index), mtx1);
@@ -502,15 +689,40 @@ void J3DShapeMtxYBBoardConcatView::load() const {
             Vec* nbt_scale = j3dSys.getNBTScale();
             J3DScaleNrmMtx(mtx1, *nbt_scale);
             J3DFifoLoadNrmMtxImm(mtx1, 0);
+=======
+        NebulaMtxConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getMtxBuffer()->getUserAnmMtx(draw_mtx_index), mtx1);
+    } else {
+        NebulaMtxConcat(j3dSys.getViewMtx(), j3dSys.getModel()->getWeightAnmMtx(draw_mtx_index), mtx1);
+    }
+
+    J3DCalcYBBoardMtx(mtx1);
+    J3DNativeShape::loadPosition(mtx1, 0);
+
+    if (sCurrentScaleFlag[mUseMtxIndex] == 1) {
+        if (!sNBTFlag) {
+            J3DNativeShape::loadNormal(mtx1, 0);
+        } else {
+            Vec* nbt_scale = j3dSys.getNBTScale();
+            J3DScaleNrmMtx(mtx1, *nbt_scale);
+            J3DNativeShape::loadNormal(mtx1, 0);
+>>>>>>> upstream/main
         }
     } else {
         J3DPSCalcInverseTranspose(mtx1, mtx2);
         if (!sNBTFlag) {
+<<<<<<< HEAD
             J3DFifoLoadNrmMtxImm3x3(mtx2, 0);
         } else {
             Vec* nbt_scale = j3dSys.getNBTScale();
             J3DScaleNrmMtx33(mtx2, *nbt_scale);
             J3DFifoLoadNrmMtxImm3x3(mtx2, 0);
+=======
+            J3DNativeShape::loadNormal33(mtx2, 0);
+        } else {
+            Vec* nbt_scale = j3dSys.getNBTScale();
+            J3DScaleNrmMtx33(mtx2, *nbt_scale);
+            J3DNativeShape::loadNormal33(mtx2, 0);
+>>>>>>> upstream/main
         }
     }
 }

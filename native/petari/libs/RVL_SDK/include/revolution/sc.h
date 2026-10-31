@@ -1,8 +1,13 @@
 #ifndef SC_H
 #define SC_H
 
+<<<<<<< HEAD
 #include "revolution/bte.h"
 #include "revolution/nand.h"
+=======
+#include "revolution/types.h"
+#include <revolution/bte/data_types.h>
+>>>>>>> upstream/main
 #include "revolution/os.h"
 
 #ifdef __cplusplus
@@ -13,8 +18,11 @@ extern "C" {
 #define SC_MAX_DEV_ENTRY_FOR_SMP 6
 #define SC_MAX_DEV_ENTRY (SC_MAX_DEV_ENTRY_FOR_STD + SC_MAX_DEV_ENTRY_FOR_SMP)
 
+<<<<<<< HEAD
 typedef u8 SCType;
 
+=======
+>>>>>>> upstream/main
 typedef enum { SC_STATUS_OK, SC_STATUS_BUSY, SC_STATUS_FATAL, SC_STATUS_PARSE } SCStatus;
 
 typedef struct {
@@ -22,6 +30,7 @@ typedef struct {
     u8 led;
 } SCIdleModeInfo;
 
+<<<<<<< HEAD
 typedef struct {
     union {
         u8 type_u8;
@@ -44,6 +53,8 @@ typedef struct {
     u32 packedSize;
 } SCItem;
 
+=======
+>>>>>>> upstream/main
 typedef UINT8 BD_ADDR[6];
 typedef UINT8 LINK_KEY[16];
 
@@ -63,6 +74,7 @@ typedef struct {
     SCBtCmpDevInfoSingle info[6];
 } SCBtCmpDevInfoArray;
 
+<<<<<<< HEAD
 typedef struct SCDevInfo {
     char devName[20];  // at 0x0
     char at_0x14[1];
@@ -76,6 +88,8 @@ typedef struct SCBtDeviceInfo {
     SCDevInfo info;  // at 0x6
 } SCBtDeviceInfo;
 
+=======
+>>>>>>> upstream/main
 typedef struct {
     u8 num;
     SCBtDeviceInfoSingle info[16];
@@ -124,6 +138,7 @@ typedef enum {
     SC_ITEM_ID_MAX_PLUS1
 } SCItemID;
 
+<<<<<<< HEAD
 typedef struct {
     OSThreadQueue threadQueue;
     NANDFileInfo nandFileInfo;
@@ -148,6 +163,8 @@ typedef struct {
     u32 flushSize;
 } SCControl;
 
+=======
+>>>>>>> upstream/main
 s32 SCReloadConfFileAsync(u8*, u32, SCReloadConfFileCallback);
 
 #define SC_LANG_JAPANESE 0u
@@ -158,7 +175,10 @@ s32 SCReloadConfFileAsync(u8*, u32, SCReloadConfFileCallback);
 #define SC_LANG_ITALIAN 5u
 #define SC_LANG_DUTCH 6u
 #define SC_LANG_SIMP_CHINESE 7u
+<<<<<<< HEAD
 #define SC_LANG_TRAD_CHINESE 8u
+=======
+>>>>>>> upstream/main
 #define SC_LANG_KOREAN 9u
 
 u8 SCGetLanguage(void);
@@ -170,11 +190,15 @@ void SCInit(void);
 
 #define SC_STATUS_OK 0
 #define SC_STATUS_BUSY 1
+<<<<<<< HEAD
 #define SC_STATUS_ERROR 2
+=======
+>>>>>>> upstream/main
 
 u32 SCCheckStatus(void);
 u32 SCGetCounterBias(void);
 
+<<<<<<< HEAD
 #define SC_SOUND_MODE_MONO 0u
 #define SC_SOUND_MODE_STEREO 1u
 #define SC_SOUND_MODE_SURROUND 2u
@@ -198,6 +222,14 @@ u8 SCGetProgressiveMode(void);
 #define SC_EURGB60_MODE_ON 1u
 #define SC_EURGB60_MODE_DEFAULT SC_EURGB60_MODE_OFF
 
+=======
+u8 SCGetSoundMode(void);
+
+u8 SCGetAspectRatio(void);
+
+u8 SCGetProgressiveMode(void);
+
+>>>>>>> upstream/main
 u8 SCGetEuRgb60Mode(void);
 
 BOOL SCGetIdleMode(SCIdleModeInfo*);

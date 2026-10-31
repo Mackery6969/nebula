@@ -5,7 +5,13 @@
 #include "nw4r/ut/LinkList.h"
 #include <cstddef>
 #include <mem.h>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace lyt {

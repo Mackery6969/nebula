@@ -185,6 +185,7 @@ RFLErrcode RFLiPickupCharInfo(RFLiCharInfo* info, RFLDataSource source,
     case RFLDataSource_Official:
         err = RFLiGetCharInfo(info, index);
         break;
+<<<<<<< HEAD
     case RFLDataSource_Controller1:
     case RFLDataSource_Controller2:
     case RFLDataSource_Controller3:
@@ -203,10 +204,21 @@ RFLErrcode RFLiPickupCharInfo(RFLiCharInfo* info, RFLDataSource source,
             err = RFLErrcode_Broken;
         }
         break;
+=======
+>>>>>>> upstream/main
     case RFLDataSource_Default:
         RFLiGetDefaultData(info, index);
         err = RFLErrcode_Success;
         break;
+<<<<<<< HEAD
+=======
+    default:
+        // The game keeps its Miis in the official database (and the library's defaults): no remote's Miis, no
+        // middle database.
+        (void)db;
+        err = RFLErrcode_Broken;
+        break;
+>>>>>>> upstream/main
     }
 
     if (err == RFLErrcode_Success) {

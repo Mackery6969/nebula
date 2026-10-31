@@ -8,6 +8,10 @@
 #include "Game/Util/StringUtil.hpp"
 #include "Game/Util/SystemUtil.hpp"
 #include <cstdio>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 namespace MR {
     bool isFileExist(const char* pFilePath, bool considerLanguage) {
@@ -16,7 +20,11 @@ namespace MR {
         if (considerLanguage) {
             entryNum = convertPathToEntrynumConsideringLanguage(pFilePath);
         } else {
+<<<<<<< HEAD
             entryNum = DVDConvertPathToEntrynum(pFilePath);
+=======
+            entryNum = NebulaDisc::find(pFilePath);
+>>>>>>> upstream/main
         }
 
         return entryNum >= 0;
@@ -28,6 +36,7 @@ namespace MR {
         if (considerLanguage) {
             entryNum = convertPathToEntrynumConsideringLanguage(pFilePath);
         } else {
+<<<<<<< HEAD
             entryNum = DVDConvertPathToEntrynum(pFilePath);
         }
 
@@ -37,13 +46,24 @@ namespace MR {
         DVDClose(&fileInfo);
 
         return size;
+=======
+            entryNum = NebulaDisc::find(pFilePath);
+        }
+
+        NebulaDisc::File file;
+        return NebulaDisc::open(entryNum, &file) ? file.mLength : 0;
+>>>>>>> upstream/main
     }
 
     s32 convertPathToEntrynumConsideringLanguage(const char* pFilePath) {
         char filePath[256];
         makeFileNameConsideringLanguage(filePath, sizeof(filePath), pFilePath);
 
+<<<<<<< HEAD
         return DVDConvertPathToEntrynum(filePath);
+=======
+        return NebulaDisc::find(filePath);
+>>>>>>> upstream/main
     }
 
     void* loadToMainRAM(const char* pFilePath, u8* pDst, JKRHeap* pHeap, JKRDvdRipper::EAllocDirection allocDir) {

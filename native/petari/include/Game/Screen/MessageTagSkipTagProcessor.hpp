@@ -38,12 +38,18 @@ public:
     u16 getParam16(int) const;
     u32 getParam32(int) const;
     wchar_t* getParamPtr(int) const;
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // A string argument (group 7): the console stored its pointer in the tag's first, 4-byte parameter; natively the
     // string's console address (NEBULA_CONSOLE_ADDRESS), the same bytes.
     void setParamString(const wchar_t* pString) const;
     const wchar_t* getParamString() const;
 #endif
+=======
+    // A string argument (group 7), in the tag's first, 4-byte parameter (the console stored the pointer there).
+    void setParamString(const wchar_t* pString) const;
+    const wchar_t* getParamString() const;
+>>>>>>> upstream/main
 
     /* 0x00 */ const wchar_t* mMessage;
 };

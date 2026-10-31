@@ -1,4 +1,5 @@
 #include "JSystem/JUtility/JUTVideo.hpp"
+<<<<<<< HEAD
 #include "JSystem/JUtility/JUTDirectPrint.hpp"
 #include "JSystem/JUtility/JUTXfb.hpp"
 
@@ -9,6 +10,15 @@ OSTick JUTVideo::sVideoLastTick;
 OSTick JUTVideo::sVideoInterval;
 
 static bool data_80451544;
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include "Game/System/NebulaFrameClock.hpp"
+
+JUTVideo* JUTVideo::sManager;
+
+
+>>>>>>> upstream/main
 
 JUTVideo* JUTVideo::createManager(_GXRenderModeObj const* param_0) {
     if (sManager == nullptr) {
@@ -26,6 +36,7 @@ void JUTVideo::destroyManager() {
 
 JUTVideo::JUTVideo(GXRenderModeObj const* param_0) {
     mRenderObj = nullptr;
+<<<<<<< HEAD
     VIInit();
     mSetBlack = true;
     mSetBlackFrameCount = 2;
@@ -49,6 +60,27 @@ JUTVideo::JUTVideo(GXRenderModeObj const* param_0) {
 JUTVideo::~JUTVideo() {
     VISetPreRetraceCallback(mPreRetraceCallback);
     VISetPostRetraceCallback(mPostRetraceCallback);
+=======
+    NebulaFrameClock::init();
+    mSetBlack = true;
+    mSetBlackFrameCount = 2;
+    setRenderMode(param_0);
+    NebulaFrameClock::show(false);
+    field_0x8 = 0;
+    mRetraceCount = NebulaFrameClock::count();
+    field_0x10 = 1;
+    field_0x18 = 0;
+    mPreRetraceCallback = NebulaFrameClock::setPreHook(preRetraceProc);
+    mPostRetraceCallback = NebulaFrameClock::setPostHook(postRetraceProc);
+    mPreCallback = nullptr;
+    mPostCallback = nullptr;
+    mMessageQueue.init(&mMessage, 1);
+}
+
+JUTVideo::~JUTVideo() {
+    NebulaFrameClock::setPreHook(mPreRetraceCallback);
+    NebulaFrameClock::setPostHook(mPostRetraceCallback);
+>>>>>>> upstream/main
 }
 
 void JUTVideo::preRetraceProc(u32 retrace_count) {
@@ -56,6 +88,7 @@ void JUTVideo::preRetraceProc(u32 retrace_count) {
         (*sManager->mPreCallback)(retrace_count);
     }
 
+<<<<<<< HEAD
     OSTick tick = OSGetTick();
     sVideoInterval = tick - sVideoLastTick;
     sVideoLastTick = tick;
@@ -76,6 +109,9 @@ void JUTVideo::preRetraceProc(u32 retrace_count) {
         directPrint->changeFrameBuffer(frameBuffer, renderMode->fbWidth, renderMode->efbHeight);
     }
 
+=======
+    // The picture shown is the renderer's newest; black for the first retraces.
+>>>>>>> upstream/main
     if (sManager->mSetBlack == 1) {
         s32 frame_count = sManager->mSetBlackFrameCount;
         if (frame_count > 0) {
@@ -84,6 +120,7 @@ void JUTVideo::preRetraceProc(u32 retrace_count) {
 
         sManager->mSetBlackFrameCount = frame_count;
         sManager->mSetBlack = frame_count != 0;
+<<<<<<< HEAD
         VISetBlack(TRUE);
         VIFlush();
         return;
@@ -157,6 +194,12 @@ void JUTVideo::drawDoneCallback() {
             }
         }
     }
+=======
+        NebulaFrameClock::show(false);
+        return;
+    }
+    NebulaFrameClock::show(true);
+>>>>>>> upstream/main
 }
 
 void JUTVideo::postRetraceProc(u32 retrace_count) {
@@ -164,8 +207,13 @@ void JUTVideo::postRetraceProc(u32 retrace_count) {
         sManager->mPostCallback(retrace_count);
     }
 
+<<<<<<< HEAD
     OSMessage message = reinterpret_cast< OSMessage >(VIGetRetraceCount());
     OSSendMessage(&sManager->mMessageQueue, message, OS_MESSAGE_NOBLOCK);
+=======
+    void* message = reinterpret_cast< void* >(NebulaFrameClock::count());
+    sManager->mMessageQueue.send(message, false);
+>>>>>>> upstream/main
 }
 
 void JUTVideo::setRenderMode(GXRenderModeObj const* pObj) {
@@ -174,12 +222,19 @@ void JUTVideo::setRenderMode(GXRenderModeObj const* pObj) {
         mSetBlackFrameCount = 4;
     }
     mRenderObj = const_cast< GXRenderModeObj* >(pObj);
+<<<<<<< HEAD
     VIConfigure(mRenderObj);
     VIFlush();
 
     if (mSetBlack) {
         VIWaitForRetrace();
         VIWaitForRetrace();
+=======
+
+    if (mSetBlack) {
+        NebulaFrameClock::waitFrame();
+        NebulaFrameClock::waitFrame();
+>>>>>>> upstream/main
     }
 }
 

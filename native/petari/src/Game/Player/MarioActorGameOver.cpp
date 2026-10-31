@@ -96,7 +96,11 @@ void MarioActor::exeGameOver() {
 
     _46C = nullptr;
 
+<<<<<<< HEAD
     PSMTXIdentity(mMarioAnim->_7C);
+=======
+    NebulaMtxIdentity(mMarioAnim->_7C);
+>>>>>>> upstream/main
 
     damageDropThrowMemoSensor();
 

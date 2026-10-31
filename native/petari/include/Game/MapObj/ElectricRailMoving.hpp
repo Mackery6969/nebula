@@ -1,11 +1,17 @@
 #pragma once
 
 #include "Game/LiveActor/LiveActor.hpp"
+<<<<<<< HEAD
 #include <JSystem/JGeometry.hpp>
 
 typedef void (*PosAttrFunc)(f32, f32, f32);
 typedef void (*TexAttrFunc)(f32, f32);
 
+=======
+#include "Game/Util/NativeMesh.hpp"
+#include <JSystem/JGeometry.hpp>
+
+>>>>>>> upstream/main
 class ElectricRailMovingPoint : public LiveActor {
 public:
     ElectricRailMovingPoint(const char* pName = "\210\332\223\256\223\144\214\202\203\214\201\133\203\213\223\137" /* 移動電撃レール点 */);
@@ -35,9 +41,16 @@ public:
     void initPoints();
     void initDisplayList();
     void drawRailGX(f32) const;
+<<<<<<< HEAD
     void drawPlane(f32, f32, f32, f32) const;
     void drawPlaneGX(f32, f32, f32, f32) const;
     void setVertexAttribute(int, int, f32, f32, f32, f32, PosAttrFunc, TexAttrFunc) const;
+=======
+    void drawPlane(NativeMesh&, f32, f32, f32, f32) const;
+    void drawPlaneGX(f32, f32, f32, f32) const;
+    // A segment's two corners into `pMesh`, or drawn now when it is null.
+    void setVertexAttribute(int, int, f32, f32, f32, f32, NativeMesh* pMesh) const;
+>>>>>>> upstream/main
     void updateHitSensorPos();
     bool updatePointPos();
     void updatePointPosAndModel();
@@ -61,8 +74,13 @@ public:
     /* 0xD0 */ TVec3f* mSensorOffsets;
     /* 0xD4 */ ElectricRailMovingPoint* mMovingPoints;
     s32 _D8;
+<<<<<<< HEAD
     void* _DC;
     u32 _E0;
+=======
+    // The rail as the renderer draws it while it waits.
+    NativeMesh mMesh;
+>>>>>>> upstream/main
     s32 _E4;
     TVec3f* _E8;
     f32 _EC;

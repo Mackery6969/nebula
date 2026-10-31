@@ -1,4 +1,5 @@
 #include "JSystem/JKernel/JKRDecomp.hpp"
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRAramPiece.hpp"
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include <revolution.h>
@@ -6,6 +7,18 @@
 JKRDecomp* JKRDecomp::sDecompObject;
 OSMessage JKRDecomp::sMessageBuffer[8];
 OSMessageQueue JKRDecomp::sMessageQueue;
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "JSystem/JKernel/JKRAramPiece.hpp"
+#include "JSystem/JKernel/JKRHeap.hpp"
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+
+JKRDecomp* JKRDecomp::sDecompObject;
+void* JKRDecomp::sMessageBuffer[8];
+NebulaMessageQueue JKRDecomp::sMessageQueue;
+>>>>>>> upstream/main
 
 JKRDecomp* JKRDecomp::create(s32 a1) {
     if (sDecompObject == nullptr) {
@@ -16,19 +29,31 @@ JKRDecomp* JKRDecomp::create(s32 a1) {
 }
 
 JKRDecomp::JKRDecomp(s32 a1) : JKRThread(0x4000, 0x10, a1) {
+<<<<<<< HEAD
     OSResumeThread(mThread);
+=======
+    NebulaKernel::resume(mThread);
+>>>>>>> upstream/main
 }
 
 JKRDecomp::~JKRDecomp() {
 }
 
 void* JKRDecomp::run() {
+<<<<<<< HEAD
     OSInitMessageQueue(&sMessageQueue, sMessageBuffer, 8);
+=======
+    sMessageQueue.init(sMessageBuffer, 8);
+>>>>>>> upstream/main
 
     JKRDecompCommand* commandPtr;
 
     while (true) {
+<<<<<<< HEAD
         OSReceiveMessage(&sMessageQueue, reinterpret_cast< OSMessage* >(&commandPtr), OS_MESSAGE_BLOCK);
+=======
+        sMessageQueue.receive(reinterpret_cast< void** >(&commandPtr), true);
+>>>>>>> upstream/main
 
         JKRDecompCommand& command = *commandPtr;
 
@@ -48,9 +73,15 @@ void* JKRDecomp::run() {
         }
 
         if (command._1C != nullptr) {
+<<<<<<< HEAD
             OSSendMessage(command._1C, reinterpret_cast< OSMessage >(1), OS_MESSAGE_NOBLOCK);
         } else {
             OSSendMessage(&command.mMessageQueue, reinterpret_cast< OSMessage >(1), OS_MESSAGE_NOBLOCK);
+=======
+            command._1C->send(reinterpret_cast< void* >(1), false);
+        } else {
+            command.mMessageQueue.send(reinterpret_cast< void* >(1), false);
+>>>>>>> upstream/main
         }
     }
 }
@@ -69,6 +100,7 @@ JKRDecompCommand* JKRDecomp::prepareCommand(unsigned char* pSrc, unsigned char* 
 }
 
 void JKRDecomp::sendCommand(JKRDecompCommand* pCommand) {
+<<<<<<< HEAD
     OSSendMessage(&sMessageQueue, pCommand, OS_MESSAGE_NOBLOCK);
 }
 
@@ -80,13 +112,30 @@ bool JKRDecomp::sync(JKRDecompCommand* pCommand, int noBlock) {
         return true;
     } else {
         return OSReceiveMessage(&pCommand->mMessageQueue, &message, OS_MESSAGE_NOBLOCK);
+=======
+    sMessageQueue.send(pCommand, false);
+}
+
+bool JKRDecomp::sync(JKRDecompCommand* pCommand, int noBlock) {
+    void* message;
+
+    if (noBlock == 0) {
+        pCommand->mMessageQueue.receive(&message, true);
+        return true;
+    } else {
+        return pCommand->mMessageQueue.receive(&message, false);
+>>>>>>> upstream/main
     }
 }
 
 bool JKRDecomp::orderSync(unsigned char* pSrc, unsigned char* pDst, u32 compressedSize, u32 decompressedSize) {
     JKRDecompCommand* command = prepareCommand(pSrc, pDst, compressedSize, decompressedSize, nullptr);
 
+<<<<<<< HEAD
     OSSendMessage(&sMessageQueue, command, OS_MESSAGE_NOBLOCK);
+=======
+    sMessageQueue.send(command, false);
+>>>>>>> upstream/main
     bool received = sync(command, 0);
 
     if (command != nullptr) {
@@ -294,7 +343,11 @@ EJKRCompression JKRDecomp::checkCompressed(unsigned char* pSrc) {
 }
 
 JKRDecompCommand::JKRDecompCommand() {
+<<<<<<< HEAD
     OSInitMessageQueue(&mMessageQueue, &mMessage, 1);
+=======
+    mMessageQueue.init(&mMessage, 1);
+>>>>>>> upstream/main
     mThis = this;  // Probably a pointer to the data stored at 0x00 instead
     _14 = 0;
     _1C = nullptr;

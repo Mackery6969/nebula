@@ -1,7 +1,13 @@
 #pragma once
 
 #include "Game/Gravity/PlanetGravity.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class GravityInfo {
 public:

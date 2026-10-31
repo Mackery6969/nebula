@@ -15,7 +15,10 @@ public:
     void writeSendSize();
     void reset();
     void prepareMessage();
+<<<<<<< HEAD
     u8 calcDelayHours() const;
+=======
+>>>>>>> upstream/main
 
 private:
     /// @brief The number of characters in the message describing Luigi as having gone missing.

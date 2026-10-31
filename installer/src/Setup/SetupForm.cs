@@ -16,7 +16,12 @@ namespace Nebula.Setup
         private InstalledInfo installed;
         private readonly Panel choose = new Panel(), work = new Panel();
         private readonly TextBox input = new TextBox(), root = new TextBox(), log = new TextBox();
+<<<<<<< HEAD
         private readonly CheckBox desktop = new CheckBox(), dlss = new CheckBox(), dlssLicense = new CheckBox();
+=======
+        private readonly CheckBox desktop = new CheckBox(), dlss = new CheckBox(), dlssLicense = new CheckBox(),
+            prepareRayTracing = new CheckBox();
+>>>>>>> upstream/main
         private readonly RadioButton modeRepair = new RadioButton(), modeRestore = new RadioButton(), modeUninstall = new RadioButton(), modeInstall = new RadioButton();
         private readonly Label summary = new Label(), step = new Label(), elapsed = new Label();
         private readonly ProgressBar overall = new ProgressBar(), stepBar = new ProgressBar();
@@ -77,7 +82,11 @@ namespace Nebula.Setup
             choose.Dock = DockStyle.Fill;
             var title = AddLabel(choose, "Nebula", 20, 14, 700, 34);
             title.Font = new Font("Segoe UI Semibold", 17f);
+<<<<<<< HEAD
             AddLabel(choose, "Unofficial native PC port of Super Mario Galaxy (USA, RMGE01).", 20, 50, 720, 40);
+=======
+            AddLabel(choose, "Unofficial native PC port of Super Mario Galaxy (North America, Europe and Japan).", 20, 50, 720, 40);
+>>>>>>> upstream/main
 
             int y = 98;
             if (installed != null)
@@ -164,6 +173,18 @@ namespace Nebula.Setup
             choose.Controls.Add(desktop);
             y += 28;
 
+<<<<<<< HEAD
+=======
+            if (RayTracingPreparation.Offered())
+            {
+                prepareRayTracing.Text = "Prepare ray tracing shaders";
+                prepareRayTracing.Location = new Point(20, y);
+                prepareRayTracing.Size = new Size(700, 24);
+                choose.Controls.Add(prepareRayTracing);
+                y += 28;
+            }
+
+>>>>>>> upstream/main
             if (DlssPackage.RtxAdapterPresent() && !DlssPackage.Installed())
             {
                 dlss.Text = "Install NVIDIA DLSS (" + FileUtil.FormatBytes(DlssPackage.DownloadBytes) + " download from NVIDIA)";
@@ -332,6 +353,10 @@ namespace Nebula.Setup
             if (failure == null)
             {
                 step.Text = "Nebula " + BuildInfo.Version + " is installed.";
+<<<<<<< HEAD
+=======
+                if (prepareRayTracing.Checked) RayTracingPreparation.Request();
+>>>>>>> upstream/main
                 if (engine.DlssFailure != null)
                     MessageBox.Show(this, "NVIDIA DLSS was not installed: " + engine.DlssFailure + "\r\n\r\nYou can install it later from the game's graphics settings.",
                         "Nebula Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -359,7 +384,11 @@ namespace Nebula.Setup
                 var release = Updater.FindNewer();
                 Cursor = Cursors.Default;
                 if (release == null) { MessageBox.Show(this, "Nebula " + BuildInfo.Version + " is the newest release.", "Nebula Update"); return; }
+<<<<<<< HEAD
                 string notes = release.Notes.Length > 1200 ? release.Notes.Substring(0, 1200) + "…" : release.Notes;
+=======
+                string notes = ReleaseNotes.Plain(release.Notes, 1200);
+>>>>>>> upstream/main
                 if (MessageBox.Show(this, "Nebula " + release.Version + (release.Prerelease ? " (prerelease)" : "") + " is available. You have " +
                     BuildInfo.Version + ".\r\n\r\n" + notes + "\r\n\r\nDownload and install it? Your current version stays available until the new one is ready.",
                     "Nebula Update", MessageBoxButtons.YesNo, MessageBoxIcon.Information) != DialogResult.Yes) return;

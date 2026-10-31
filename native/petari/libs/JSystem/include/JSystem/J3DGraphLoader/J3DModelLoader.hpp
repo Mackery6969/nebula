@@ -1,7 +1,13 @@
 #pragma once
 
 #include "nebula_disc.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DModelData;
 class J3DMaterialTable;

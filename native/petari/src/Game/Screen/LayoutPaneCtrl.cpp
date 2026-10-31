@@ -83,7 +83,11 @@ void LayoutPaneCtrl::reflectFollowPos() {
     case 2: {
         nw4r::math::MTX34 local = mPane->mMtx;
         nw4r::math::MTX34 inverse;
+<<<<<<< HEAD
         PSMTXInverse(local, inverse);
+=======
+        NebulaMtxInverse(local, inverse);
+>>>>>>> upstream/main
         nw4r::math::MTX34Mult(&global, &global, &inverse);
 
         nw4r::math::MTX34 replacement;
@@ -91,7 +95,11 @@ void LayoutPaneCtrl::reflectFollowPos() {
         replacement._03 = mFollowPos->x;
         replacement._13 = mFollowPos->y;
         MtxPtr pGlobal = global;
+<<<<<<< HEAD
         PSMTXConcat(pGlobal, replacement, pGlobal);
+=======
+        NebulaMtxConcat(pGlobal, replacement, pGlobal);
+>>>>>>> upstream/main
         break;
     }
     case 3: {

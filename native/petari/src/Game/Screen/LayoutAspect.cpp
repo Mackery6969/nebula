@@ -1,5 +1,9 @@
 #ifdef TARGET_PC
 #include "Game/Screen/LayoutAspect.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "Game/Screen/LayoutManager.hpp"
 #include "Game/Screen/LayoutPaneCtrl.hpp"
 #include "Game/Util/ScreenUtil.hpp"
@@ -8,6 +12,10 @@
 #include <revolution/os.h>
 #include <nw4r/lyt/layout.h>
 #include <nw4r/lyt/pane.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     // How a pane follows a canvas wider or taller than the authored 608x456.
@@ -210,7 +218,11 @@ namespace {
         if (depth > 16) {
             return;
         }
+<<<<<<< HEAD
         OSReport("layout %s: %*s%s t=(%.1f,%.1f) size=(%.1f,%.1f) base=%u %s\n", pLayout, depth * 2, "", pPane->mName,
+=======
+        JUTNativeLog("layout %s: %*s%s t=(%.1f,%.1f) size=(%.1f,%.1f) base=%u %s\n", pLayout, depth * 2, "", pPane->mName,
+>>>>>>> upstream/main
                  pPane->mTranslate.x, pPane->mTranslate.y, pPane->mSize.width, pPane->mSize.height,
                  (u32)pPane->mBasePosition, pPane->IsVisible() ? "" : "hidden");
         nw4r::lyt::PaneList& children = const_cast< nw4r::lyt::Pane* >(pPane)->GetChildList();
@@ -345,7 +357,11 @@ namespace LayoutAspect {
 
         // This layout's rules and panes, looked up once.
         if (pManager->mFitRuleCount < 0) {
+<<<<<<< HEAD
             if (__NebulaOption(NEBULA_OPTION_TEST_DUMP_LAYOUTS) != 0) {
+=======
+            if (NebulaHost::option(NEBULA_OPTION_TEST_DUMP_LAYOUTS) != 0) {
+>>>>>>> upstream/main
                 dumpPane(pManager->mLayoutName != nullptr ? pManager->mLayoutName : "?", pRoot, 0);
             }
             pManager->mFitRuleCount = 0;
@@ -383,7 +399,11 @@ namespace LayoutAspect {
             }
             nw4r::lyt::Pane* pPane = pManager->mPaneInfoList[i].mPaneCtrl != nullptr ? pManager->mPaneInfoList[i].mPaneCtrl->mPane
                                                                                      : pManager->findPaneByName(pManager->mPaneInfoList[i].mName);
+<<<<<<< HEAD
             PSMTXCopy(pPane->mGlbMtx, pManager->mPaneInfoList[i].mMtxRef);
+=======
+            NebulaMtxCopy(pPane->mGlbMtx, pManager->mPaneInfoList[i].mMtxRef);
+>>>>>>> upstream/main
             if (MR::isScreen16Per9()) {
                 pManager->mPaneInfoList[i].mMtxRef[0][3] *= MR::getScreenWidth() / 608.0f;
             }

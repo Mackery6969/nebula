@@ -7,8 +7,11 @@ extern "C" {
 
 #include "revolution/types.h"
 
+<<<<<<< HEAD
 #define VI_DISPLAY_PIX_SZ 2
 
+=======
+>>>>>>> upstream/main
 #define VI_INTERLACE 0
 #define VI_NON_INTERLACE 1
 #define VI_PROGRESSIVE 2
@@ -46,15 +49,19 @@ typedef enum {
 
 typedef enum { VI_XFBMODE_SF = 0, VI_XFBMODE_DF } VIXFBMode;
 
+<<<<<<< HEAD
 #define VI_FIELD_ABOVE 0
 #define VI_FIELD_BELOW 1
 
+=======
+>>>>>>> upstream/main
 #define VI_MAX_WIDTH_NTSC 720
 #define VI_MAX_HEIGHT_NTSC 480
 
 #define VI_MAX_WIDTH_PAL 720
 #define VI_MAX_HEIGHT_PAL 574
 
+<<<<<<< HEAD
 #define VI_MAX_WIDTH_MPAL 720
 #define VI_MAX_HEIGHT_MPAL 480
 
@@ -63,6 +70,11 @@ typedef enum { VI_XFBMODE_SF = 0, VI_XFBMODE_DF } VIXFBMode;
 
 typedef void (*VIRetraceCallback)(u32 retraceCount);
 
+=======
+#define VI_MAX_WIDTH_EURGB60 VI_MAX_WIDTH_NTSC
+#define VI_MAX_HEIGHT_EURGB60 VI_MAX_HEIGHT_NTSC
+
+>>>>>>> upstream/main
 #ifdef __cplusplus
 }
 #endif

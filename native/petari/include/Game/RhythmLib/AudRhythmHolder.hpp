@@ -2,7 +2,13 @@
 
 // TODO
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 #define NUM_RHYTHM_INFO 6
 

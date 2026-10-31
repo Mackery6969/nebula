@@ -5,9 +5,12 @@
 #include "Game/MapObj/PurpleCoinHolder.hpp"
 #include "Game/NameObj/NameObjArchiveListCollector.hpp"
 #include "Game/Util.hpp"
+<<<<<<< HEAD
 #ifdef TARGET_PC
 #include "Game/System/NebulaCoopWorld.hpp"
 #endif
+=======
+>>>>>>> upstream/main
 #include <JSystem/JMath/JMath.hpp>
 
 namespace NrvCoin {
@@ -535,10 +538,13 @@ bool Coin::requestHide() {
 }
 
 void Coin::noticeGetCoin() {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // Online co-op: it counts for the others in the instance too.
     NebulaCoopWorld::noticeCoinGot(this);
 #endif
+=======
+>>>>>>> upstream/main
     if (mIsNeedBubble) {
         MR::emitEffect(mAirBubble, "RecoveryBubbleBreak");
         MR::incPlayerOxygen(8);

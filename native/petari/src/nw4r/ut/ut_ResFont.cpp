@@ -1,4 +1,8 @@
 #include "nw4r/ut/ResFont.h"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+>>>>>>> upstream/main
 #include "nw4r/ut/binaryFileFormat.h"
 
 namespace nw4r {
@@ -63,6 +67,16 @@ namespace nw4r {
                 return false;
             }
 
+<<<<<<< HEAD
+=======
+            // Every glyph lookup divides by the sheet's rows, lines and size: a font without them is not used.
+            const FontTextureGlyph* pGlyph = pFontInfo->pGlyph;
+            if (pGlyph == NULL || pGlyph->sheetRow == 0 || pGlyph->sheetLine == 0 || pGlyph->sheetWidth == 0 ||
+                pGlyph->sheetHeight == 0) {
+                return false;
+            }
+
+>>>>>>> upstream/main
             SetResourceBuffer(brfnt, pFontInfo);
             InitReaderFunc(GetEncoding());
 
@@ -97,6 +111,14 @@ namespace nw4r {
                 case 'TGLP': {
                     FontTextureGlyph* glyph = reinterpret_cast< FontTextureGlyph* >(reinterpret_cast< u8* >(blockHeader) + sizeof(*blockHeader));
                     ResolveOffset(glyph->sheetImage, fileHeader);
+<<<<<<< HEAD
+=======
+                    for (u32 sheet = 0; sheet < glyph->sheetNum; sheet++) {
+                        J3DNativeTexture::registerImage(glyph->sheetImage + sheet * glyph->sheetSize,
+                                                        static_cast< u8 >((u16)glyph->sheetFormat), glyph->sheetWidth,
+                                                        glyph->sheetHeight, 1);
+                    }
+>>>>>>> upstream/main
                 } break;
 
                 case 'CWDH': {

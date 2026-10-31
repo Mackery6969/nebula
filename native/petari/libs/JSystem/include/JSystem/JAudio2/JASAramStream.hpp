@@ -1,6 +1,11 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASTaskThread.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 class JASChannel;
 
@@ -69,7 +74,10 @@ public:
     bool headerLoad(u32, int);
     bool load();
     static s32 channelProcCallback(void*);
+<<<<<<< HEAD
     static s32 dvdErrorCheck(void*);
+=======
+>>>>>>> upstream/main
     static void channelCallback(u32, JASChannel*, JASDsp::TChannel*, void*);
     void updateChannel(u32, JASChannel*, JASDsp::TChannel*);
     s32 channelProc();
@@ -124,8 +132,13 @@ public:
         return sBlockSize;
     }
 
+<<<<<<< HEAD
     /* 0x000 */ OSMessageQueue _000;
     /* 0x020 */ OSMessageQueue _020;
+=======
+    /* 0x000 */ NebulaMessageQueue _000;
+    /* 0x020 */ NebulaMessageQueue _020;
+>>>>>>> upstream/main
     /* 0x040 */ void* _040[16];
     /* 0x080 */ void* _080[4];
     /* 0x090 */ JASChannel* mChannels[CHANNEL_MAX];
@@ -140,7 +153,11 @@ public:
     /* 0x0C0 */ bool _0C0;
     /* 0x0C4 */ volatile u32 _0C4;
     /* 0x0C8 */ volatile f32 _0C8;
+<<<<<<< HEAD
     /* 0x0CC */ DVDFileInfo mDvdFileInfo;
+=======
+    /* 0x0CC */ NebulaDisc::File mDvdFile;
+>>>>>>> upstream/main
     /* 0x108 */ u32 _108;
     /* 0x10C */ int _10C;
     /* 0x110 */ u32 mBlock;

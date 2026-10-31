@@ -36,9 +36,15 @@ void ItemBubble::init(const JMapInfoIter& rIter) {
     initModelManagerWithAnm("ItemBubble", nullptr, false);
     MR::connectToSceneMapObj(this);
     mScale.mult(1.2f);
+<<<<<<< HEAD
     PSMTXScale(_9C, mScale.x, mScale.y, mScale.z);
     MR::setMtxTrans(_9C, mPosition.x, mPosition.y, mPosition.z);
     PSMTXCopy(_9C, _CC);
+=======
+    NebulaMtxScale(_9C, mScale.x, mScale.y, mScale.z);
+    MR::setMtxTrans(_9C, mPosition.x, mPosition.y, mPosition.z);
+    NebulaMtxCopy(_9C, _CC);
+>>>>>>> upstream/main
     _108 = mPosition;
     initHitSensor(1);
     MR::addHitSensorMapObj(this, "body", 8, mScale.x * ::cHitSensorRadius, TVec3f(0.0f, 0.0f, 0.0f));
@@ -138,7 +144,11 @@ void ItemBubble::init(const JMapInfoIter& rIter) {
         vec2.zero();
 
         TRot3f mtx;
+<<<<<<< HEAD
         PSMTXRotRad(mtx, (char)90, TWO_PI / static_cast< f32 >(itemCount));
+=======
+        NebulaMtxRotRad(mtx, (char)90, TWO_PI / static_cast< f32 >(itemCount));
+>>>>>>> upstream/main
 
         if (itemType == 0) {
             vec3.set< f32 >(0.0f, -60.0f, 0.0f);
@@ -152,7 +162,11 @@ void ItemBubble::init(const JMapInfoIter& rIter) {
             }
 
             _90[i]->initFixedPosition(_CC, vec + vec3, vec2);
+<<<<<<< HEAD
             PSMTXMultVec(mtx, vec, vec);
+=======
+            NebulaMtxMultVec(mtx, vec, vec);
+>>>>>>> upstream/main
         }
     }
 
@@ -264,7 +278,11 @@ void ItemBubble::exeWait() {
         MR::moveCoordAndFollowTrans(this, mRailSpeed);
     }
 
+<<<<<<< HEAD
     PSMTXScale(_9C, mScale.x, mScale.y, mScale.z);
+=======
+    NebulaMtxScale(_9C, mScale.x, mScale.y, mScale.z);
+>>>>>>> upstream/main
     MtxPtr pMtx = MR::tmpMtxRotZDeg(mRotation.z);
     MR::multMtx(_9C, pMtx, _9C);
 
@@ -273,7 +291,11 @@ void ItemBubble::exeWait() {
     MR::setMtxTrans(_9C, mPosition.x, mPosition.y, mPosition.z);
 
     if (mUseRail) {
+<<<<<<< HEAD
         PSMTXCopy(_9C, _CC);
+=======
+        NebulaMtxCopy(_9C, _CC);
+>>>>>>> upstream/main
     } else {
         MR::blendMtx(_CC, _9C, 0.1f, _CC);
     }

@@ -116,9 +116,15 @@ void StarPointerController::updateAdditionalInfo() {
     mScreenSpeed = mScreenVel.length();
     mWorldVel.set< f32 >(mScreenVel.x, -mScreenVel.y, 0.0f);
     TPos3f mtx;
+<<<<<<< HEAD
     PSMTXCopy(MR::getStarPointerViewMtx(), mtx);
     PSMTXInverse(mtx, mtx);
     PSMTXMultVecSR(mtx, &mWorldVel, &mWorldVel);
+=======
+    NebulaMtxCopy(MR::getStarPointerViewMtx(), mtx);
+    NebulaMtxInverse(mtx, mtx);
+    NebulaMtxMultVecSR(mtx, &mWorldVel, &mWorldVel);
+>>>>>>> upstream/main
     MR::normalizeOrZero(&mWorldVel);
 }
 

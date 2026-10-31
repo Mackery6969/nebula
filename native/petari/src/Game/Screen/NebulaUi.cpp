@@ -1,4 +1,8 @@
 #include "Game/Screen/NebulaUi.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/Screen/LayoutCoreUtil.hpp"
@@ -12,6 +16,10 @@
 #include <nw4r/ut/Font.h>
 #include <nw4r/ut/Rect.h>
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NebulaUi {
     nw4r::ut::Color color(u32 rgba) {
@@ -495,7 +503,11 @@ namespace NebulaUi {
         static u32 sShown = 0;
         const u32 next = shown ? (sShown | screen) : (sShown & ~screen);
         if ((next != 0) != (sShown != 0)) {
+<<<<<<< HEAD
             __NebulaSharp2D(next != 0 ? 1 : 0);
+=======
+            NebulaHost::sharp2D(next != 0 ? 1 : 0);
+>>>>>>> upstream/main
         }
         sShown = next;
     }
@@ -520,9 +532,15 @@ namespace NebulaUi {
         if (x1 <= x0 || y1 <= y0) {
             return;
         }
+<<<<<<< HEAD
         GXSetScissor(x0, y0, x1 - x0, y1 - y0);
         pPane->Draw(rDrawInfo);
         GXSetScissor(0, 0, static_cast< u32 >(frameWidth), static_cast< u32 >(frameHeight));
+=======
+        J3DNativeView::setScissor(x0, y0, x1 - x0, y1 - y0);
+        pPane->Draw(rDrawInfo);
+        J3DNativeView::setScissor(0, 0, static_cast< u32 >(frameWidth), static_cast< u32 >(frameHeight));
+>>>>>>> upstream/main
     }
 };  // namespace NebulaUi
 #endif

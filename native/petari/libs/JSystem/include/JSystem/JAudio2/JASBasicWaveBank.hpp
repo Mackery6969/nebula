@@ -1,6 +1,10 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASWaveArcLoader.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASWaveInfo.hpp"
 
 struct JASBasicWaveBank : public JASWaveBank {
@@ -80,7 +84,11 @@ struct JASBasicWaveBank : public JASWaveBank {
         return mGroupCount;
     }
 
+<<<<<<< HEAD
     /* 0x04 */ OSMutex mMutex;
+=======
+    /* 0x04 */ NebulaMutex mMutex;
+>>>>>>> upstream/main
     /* 0x1C */ TWaveInfo** mWaveTable;
     /* 0x20 */ u32 mHandleCount;
     /* 0x24 */ TWaveGroup** mWaveGroupArray;

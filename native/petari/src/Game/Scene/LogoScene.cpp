@@ -12,6 +12,10 @@
 #include "Game/Util/LayoutUtil.hpp"
 #ifdef TARGET_PC
 #include "Game/Screen/LayoutManager.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/Screen/NebulaRtPrepare.hpp"
+>>>>>>> upstream/main
 #include <cstring>
 #include <nw4r/lyt/layout.h>
 #include <nw4r/lyt/pane.h>
@@ -47,6 +51,7 @@ namespace {
 #endif
 #include "Game/Util/NerveUtil.hpp"
 #include "Game/Util/ObjUtil.hpp"
+<<<<<<< HEAD
 
 #if (VERSION == RMGK01)
 #include "Game/Screen/IsbnManager.hpp"
@@ -60,6 +65,10 @@ const wchar_t* pIsbnNumber = L"0000000000000";
 const wchar_t* pRegistNumber = L"0000000000";
 const wchar_t* pOtherNumber = L"0000000";
 #endif
+=======
+#include "Game/System/NebulaHost.hpp"
+
+>>>>>>> upstream/main
 
 namespace {
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
@@ -71,25 +80,37 @@ namespace {
     const s32 STRAP_DISPLAY_MIN_FRAME = 450;
     const s32 STRAP_DISPLAY_MAX_FRAME = 1200;
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
     NEW_NERVE(LogoSceneCensorshipFadein, LogoScene, CensorshipFadein);
     NEW_NERVE(LogoSceneCensorshipDisplay, LogoScene, CensorshipDisplay);
     NEW_NERVE(LogoSceneCensorshipFadeout, LogoScene, CensorshipFadeout);
 #endif
+=======
+>>>>>>> upstream/main
 
     NEW_NERVE(LogoSceneStrapFadein, LogoScene, StrapFadein);
     NEW_NERVE(LogoSceneStrapDisplay, LogoScene, StrapDisplay);
     NEW_NERVE(LogoSceneStrapFadeout, LogoScene, StrapFadeout);
     NEW_NERVE(LogoSceneMountGameData, LogoScene, MountGameData);
+<<<<<<< HEAD
+=======
+#ifdef TARGET_PC
+    NEW_NERVE(LogoSceneWaitRayTracing, LogoScene, WaitRayTracing);
+#endif
+>>>>>>> upstream/main
     NEW_NERVE(LogoSceneWaitReadDoneSystemArchive, LogoScene, WaitReadDoneSystemArchive);
     NEW_NERVE(LogoSceneDeactive, LogoScene, Deactive);
 };  // namespace
 
 LogoScene::LogoScene()
     : Scene("LogoScene"),
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
       mIsbnManager(),
 #endif
+=======
+>>>>>>> upstream/main
       mStrapLayout(), mLogoFader() {
     MainLoopFramework::getManager()->mUseVFilter = false;
     MainLoopFramework::getManager()->mUseAlpha = false;
@@ -101,11 +122,14 @@ LogoScene::~LogoScene() {
 }
 
 void LogoScene::init() {
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
     if (MR::isEqualString(MR::getCurrentRegionPrefix(), "Cn")) {
         initNerve(GET_NERVE_ANON(LogoSceneCensorshipFadein));
     } else
 #endif
+=======
+>>>>>>> upstream/main
 #ifdef TARGET_PC
         // The console's strap screen covers the system archive's load and asks for a button press. Natively the load
         // runs behind black (the fader starts blank) and the title follows as soon as it and the save data are ready.
@@ -134,7 +158,11 @@ void LogoScene::calcAnim() {
 
 void LogoScene::draw() const {
 #ifdef TARGET_PC
+<<<<<<< HEAD
     __NebulaSceneSurround(getStrapSurround(mStrapLayout, mLogoFader));
+=======
+    NebulaHost::sceneSurround(getStrapSurround(mStrapLayout, mLogoFader));
+>>>>>>> upstream/main
 #endif
     MR::drawInit();
 
@@ -154,6 +182,7 @@ void LogoScene::draw() const {
     MR::clearZBuffer();
     MR::drawInitFor2DModel();
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
     bool isCensorship = isNerve(GET_NERVE_ANON(LogoSceneCensorshipFadein)) || isNerve(GET_NERVE_ANON(LogoSceneCensorshipDisplay)) ||
                         isNerve(GET_NERVE_ANON(LogoSceneCensorshipFadeout));
@@ -163,6 +192,8 @@ void LogoScene::draw() const {
         mIsbnManager->draw();
     }
 #endif
+=======
+>>>>>>> upstream/main
 
     CategoryList::drawOpa(MR::DrawBufferType_Model3DFor2D);
     CategoryList::drawXlu(MR::DrawBufferType_Model3DFor2D);
@@ -175,14 +206,18 @@ void LogoScene::draw() const {
 
 bool LogoScene::isDisplayStrapRemineder() const {
     return isNerve(GET_NERVE_ANON(LogoSceneDeactive)) ||
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
            isNerve(GET_NERVE_ANON(LogoSceneCensorshipFadein)) || isNerve(GET_NERVE_ANON(LogoSceneCensorshipDisplay)) ||
            isNerve(GET_NERVE_ANON(LogoSceneCensorshipFadeout)) ||
 #endif
+=======
+>>>>>>> upstream/main
            isNerve(GET_NERVE_ANON(LogoSceneStrapFadein)) || isNerve(GET_NERVE_ANON(LogoSceneStrapDisplay)) ||
            isNerve(GET_NERVE_ANON(LogoSceneStrapFadeout)) || isNerve(GET_NERVE_ANON(LogoSceneWaitReadDoneSystemArchive));
 }
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
 void LogoScene::exeCensorshipFadein() {
     if (MR::isFirstStep(this)) {
@@ -216,6 +251,8 @@ void LogoScene::exeCensorshipFadeout() {
     }
 }
 #endif
+=======
+>>>>>>> upstream/main
 
 void LogoScene::exeStrapFadein() {
     if (MR::isFirstStep(this)) {
@@ -260,9 +297,28 @@ void LogoScene::exeMountGameData() {
         return;
     }
 
+<<<<<<< HEAD
     setNerve(GET_NERVE_ANON(LogoSceneDeactive));
 }
 
+=======
+#ifdef TARGET_PC
+    setNerve(GET_NERVE_ANON(LogoSceneWaitRayTracing));
+#else
+    setNerve(GET_NERVE_ANON(LogoSceneDeactive));
+#endif
+}
+
+#ifdef TARGET_PC
+// Ray tracing's shaders compile before the title (NebulaRtPrepare): the title waits for them and their screen.
+void LogoScene::exeWaitRayTracing() {
+    if (!NebulaRtPrepare::isHolding()) {
+        setNerve(GET_NERVE_ANON(LogoSceneDeactive));
+    }
+}
+#endif
+
+>>>>>>> upstream/main
 void LogoScene::exeWaitReadDoneSystemArchive() {
     if (GameSystemFunction::isDoneLoadSystemArchive()) {
         setNerve(GET_NERVE_ANON(LogoSceneMountGameData));
@@ -285,6 +341,7 @@ void LogoScene::initLayout() {
     mLogoFader->appear();
     MR::connectToSceneLayout(mLogoFader);
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
     if (!MR::isEqualString(MR::getCurrentRegionPrefix(), "Cn")) {
         return;
@@ -299,6 +356,8 @@ void LogoScene::initLayout() {
         mIsbnManager->setAdjustRate(0.75f, 1.0f);
     }
 #endif
+=======
+>>>>>>> upstream/main
 }
 
 bool LogoScene::tryFadeinLayout(LayoutActor* pActor) {
@@ -348,6 +407,7 @@ bool LogoScene::tryFadeoutLayout(LayoutActor* pActor) {
 #endif
 }
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
 bool LogoScene::tryFadeinLayout() {
     if (MR::isFirstStep(this)) {
@@ -373,3 +433,5 @@ bool LogoScene::tryFadeoutLayout() {
     return false;
 }
 #endif
+=======
+>>>>>>> upstream/main

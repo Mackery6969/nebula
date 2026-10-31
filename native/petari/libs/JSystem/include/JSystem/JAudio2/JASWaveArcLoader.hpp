@@ -1,6 +1,10 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASHeapCtrl.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 
 class JKRHeap;
 class JKRSolidHeap;
@@ -69,5 +73,9 @@ struct JASWaveArc : JASDisposer {
     /* 0x54 */ u32 mFileLength;
     /* 0x58 */ u16 _58;
     /* 0x5A */ u16 _5A;
+<<<<<<< HEAD
     /* 0x5C */ OSMutex mMutex;
+=======
+    /* 0x5C */ NebulaMutex mMutex;
+>>>>>>> upstream/main
 };

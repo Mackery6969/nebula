@@ -1,8 +1,15 @@
 #include "Game/Screen/LensFlare.hpp"
+<<<<<<< HEAD
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/MapObj/BrightObj.hpp"
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/System/DrawSyncManager.hpp"
+=======
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+#include "Game/LiveActor/Nerve.hpp"
+#include "Game/MapObj/BrightObj.hpp"
+#include "Game/Scene/SceneObjHolder.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/AreaObjUtil.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/LiveActorUtil.hpp"
@@ -177,7 +184,10 @@ void LensFlareLine::controlAnim() {
 LensFlareDirector::LensFlareDirector()
     : NameObj("\203\214\203\223\203\131\203\164\203\214\203\101\212\307\227\235" /* レンズフレア管理 */), mRing(), mGlow(), mLine(), mBrightObjCount(), _60(0.0f, 0.0f), _68(), _6C(0.0f, 0.0f), _74(0.0f, 0.0f), _7C(),
       mDrawSyncTokenIndex(), mBrightCamInfo() {
+<<<<<<< HEAD
     _7C = DrawSyncManager::sInstance->setCallback(3, 2, this);
+=======
+>>>>>>> upstream/main
 }
 
 LensFlareDirector::~LensFlareDirector() {
@@ -199,6 +209,7 @@ void LensFlareDirector::movement() {
     mBrightCamInfo->write(mDrawSyncTokenIndex, MR::getCameraViewMtx(), MR::getCameraProjectionMtx(), MR::getCamYdir(), MR::getCamPos());
 }
 
+<<<<<<< HEAD
 void LensFlareDirector::drawSyncCallback(u16 val) {
     u32 i;
     s32 val2 = val - _7C;
@@ -207,6 +218,8 @@ void LensFlareDirector::drawSyncCallback(u16 val) {
     }
 }
 
+=======
+>>>>>>> upstream/main
 void LensFlareDirector::pauseOff() {
     MR::requestMovementOn(this);
     MR::requestMovementOn(mRing);
@@ -215,9 +228,17 @@ void LensFlareDirector::pauseOff() {
 }
 
 void LensFlareDirector::setDrawSyncToken() {
+<<<<<<< HEAD
     DrawSyncManager::sInstance->pushBreakPoint();
 
     GXSetDrawSync(_7C + mDrawSyncTokenIndex);
+=======
+    // Two readbacks alternate, each with its frame's camera (BrightCamInfo).
+    J3DNativeView::captureReadback(BrightObjBase::cReadbackChannel + mDrawSyncTokenIndex);
+    for (u32 i = 0; i < mBrightObjCount; i++) {
+        mBrightObjArray[i]->calcBrightInfo(mDrawSyncTokenIndex, *mBrightCamInfo);
+    }
+>>>>>>> upstream/main
 
     mDrawSyncTokenIndex = mDrawSyncTokenIndex ^ 0x1;
 }

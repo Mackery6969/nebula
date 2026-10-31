@@ -180,11 +180,19 @@ void MarioActor::drawHand() const {
     }
 
     J3DModelX* model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(_A48));
+<<<<<<< HEAD
     model->setDynamicDL(mDL[mCurrDL], mDLSize);
     model->directDraw(nullptr);
 
     model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(_A4C));
     model->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+    model->setDynamicDL(&mDL[mCurrDL]);
+    model->directDraw(nullptr);
+
+    model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(_A4C));
+    model->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
     model->directDraw(nullptr);
 }
 
@@ -203,10 +211,18 @@ void MarioActor::drawIndirectHand() const {
         return;
     }
 
+<<<<<<< HEAD
     model->setDynamicDL(mDL[mCurrDL], mDLSize);
     model->directDraw(nullptr);
 
     model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(_A44));
     model->setDynamicDL(mDL[mCurrDL], mDLSize);
+=======
+    model->setDynamicDL(&mDL[mCurrDL]);
+    model->directDraw(nullptr);
+
+    model = reinterpret_cast< J3DModelX* >(MR::getJ3DModel(_A44));
+    model->setDynamicDL(&mDL[mCurrDL]);
+>>>>>>> upstream/main
     model->directDraw(nullptr);
 }

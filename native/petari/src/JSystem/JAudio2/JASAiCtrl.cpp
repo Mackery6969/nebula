@@ -13,9 +13,26 @@
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
 #include "JSystem/JUtility/JUTAssert.hpp"
 
+<<<<<<< HEAD
 // #include <ai.h>
 // #include <os.h>
 #include <stdint.h>
+=======
+#include <stdint.h>
+#include <nebula_game_api.h>
+#include <nebula_kernel.h>
+#include "Game/System/NebulaClock.hpp"
+#include "Game/System/NebulaKernel.hpp"
+
+// The host's audio output plays the DAC blocks (on the console the AI's DMA engine): the driver hands it each block,
+// and when the output takes one (the console's DMA end) the host calls nebula_game_ai_interrupt, whose audio event
+// runs the driver's callback.
+extern "C" const NebulaHostServices* nebula_host(void);
+
+extern "C" NEBULA_GAME_API void nebula_game_ai_interrupt(void) {
+    nebula_raise_event(NEBULA_EVENT_AUDIO);
+}
+>>>>>>> upstream/main
 
 static u8 sDspDacBufferSize = 3;
 
@@ -52,18 +69,25 @@ void JASDriver::initAI(void (*param_0)(void)) {
     for (int i = 0; i < 3; i++) {
         sDmaDacBuffer[i] = new (JASDram, 0x20) s16[dacSize];
         JASCalc::bzero(sDmaDacBuffer[i], size);
+<<<<<<< HEAD
         DCStoreRange(sDmaDacBuffer[i], size);
+=======
+>>>>>>> upstream/main
     }
     sDspDacBuffer = new (JASDram, 0) s16*[sDspDacBufferSize];
     for (int i = 0; i < sDspDacBufferSize; i++) {
         sDspDacBuffer[i] = new (JASDram, 0x20) s16[getDacSize()];
         JASCalc::bzero(sDspDacBuffer[i], size);
+<<<<<<< HEAD
         DCStoreRange(sDspDacBuffer[i], size);
+=======
+>>>>>>> upstream/main
     }
     sDspDacWriteBuffer = sDspDacBufferSize - 1;
     sDspDacReadBuffer = 0;
     sDspStatus = 0;
     JASChannel::initBankDisposeMsgQueue();
+<<<<<<< HEAD
     AIInit(nullptr);
     AIInitDMA((uintptr_t)sDmaDacBuffer[2], size);
     BOOL isOutputRate;
@@ -82,6 +106,21 @@ void JASDriver::startDMA() {
 
 void JASDriver::stopDMA() {
     AIStopDMA();
+=======
+    const NebulaHostServices* const host = nebula_host();
+    host->ai_dma(host->user, sDmaDacBuffer[2], size);
+    host->ai_control(host->user, NEBULA_AI_RATE, sOutputRate != 0 ? 48000 : 32000);
+    NebulaKernel::setEventHandler(NEBULA_EVENT_AUDIO, param_0);
+    NebulaKernel::enableEvent(NEBULA_EVENT_AUDIO);
+}
+
+void JASDriver::startDMA() {
+    nebula_host()->ai_control(nebula_host()->user, NEBULA_AI_START, 0);
+}
+
+void JASDriver::stopDMA() {
+    nebula_host()->ai_control(nebula_host()->user, NEBULA_AI_STOP, 0);
+>>>>>>> upstream/main
 }
 
 void JASDriver::setOutputRate(JASOutputRate param_0) {
@@ -105,15 +144,22 @@ const JASDriver::MixFunc JASDriver::sMixFuncs[4] = {
 
 volatile u32 JASDriver::sSubFrameCounter;
 
+<<<<<<< HEAD
 // The DAC buffers hold the AI's samples as the DSP program writes them: natively in the console's byte order.
 typedef NEBULA_BE(s16) DacSample;
 
+=======
+>>>>>>> upstream/main
 void JASDriver::updateDac() {
     static u32 dacp = 0;
     s16* r30 = lastRspMadep;
     lastRspMadep = nullptr;
     if (r30) {
+<<<<<<< HEAD
         AIInitDMA((uintptr_t)r30, getDacSize() * 2);
+=======
+        nebula_host()->ai_dma(nebula_host()->user, r30, getDacSize() * 2);
+>>>>>>> upstream/main
     }
     s32 frameSamples = getFrameSamples();
     readDspBuffer(sDmaDacBuffer[dacp], frameSamples);
@@ -125,7 +171,10 @@ void JASDriver::updateDac() {
     }
     {
         JASCriticalSection cs;
+<<<<<<< HEAD
         DCStoreRange(sDmaDacBuffer[dacp], getDacSize() * 2);
+=======
+>>>>>>> upstream/main
     }
     lastRspMadep = sDmaDacBuffer[dacp];
     dacp++;
@@ -145,7 +194,11 @@ void JASDriver::updateDSP() {
     DSPSyncCallback();
     static u32 old_time = 0;
     static u32 history[10] = {0x000F4240};
+<<<<<<< HEAD
     u32 r28 = OSGetTick();
+=======
+    u32 r28 = NebulaClock::nowNs();  // a subframe's length, compared with the last ones'
+>>>>>>> upstream/main
     u32 r27 = r28 - old_time;
     old_time = r28;
     u32 subFrame = getSubFrames();
@@ -181,7 +234,10 @@ void JASDriver::readDspBuffer(s16* param_0, u32 param_1) {
         }
     } else {
         sDspDacReadBuffer = nbuf;
+<<<<<<< HEAD
         DCInvalidateRange(sDspDacBuffer[sDspDacReadBuffer], param_1 * 2 * 2);
+=======
+>>>>>>> upstream/main
     }
     s16* dacBuffer = sDspDacBuffer[sDspDacReadBuffer];
     s16* endDacBuffer = dacBuffer + param_1;
@@ -243,7 +299,11 @@ void JASDriver::mixMonoTrack(s16* buffer, u32 param_1, MixCallback callback) {
         return;
     }
     JASProbe::stop(5);
+<<<<<<< HEAD
     DacSample* pTrack = (DacSample*)buffer;
+=======
+    s16* pTrack = buffer;
+>>>>>>> upstream/main
     s16* r28 = r26;
     for (u32 i = param_1; i != 0; i--) {
         s32 src = pTrack[0];
@@ -265,7 +325,11 @@ void JASDriver::mixMonoTrackWide(s16* buffer, u32 param_1, MixCallback callback)
         return;
     }
     JASProbe::stop(5);
+<<<<<<< HEAD
     DacSample* pTrack = (DacSample*)buffer;
+=======
+    s16* pTrack = buffer;
+>>>>>>> upstream/main
     s16* r28 = r26;
     for (u32 i = param_1; i != 0; i--) {
         s32 src = pTrack[0];
@@ -288,7 +352,11 @@ void JASDriver::mixExtraTrack(s16* buffer, u32 param_1, MixCallback callback) {
     }
     JASProbe::stop(5);
     JASProbe::start(6, "MIXING");
+<<<<<<< HEAD
     DacSample* pTrack = (DacSample*)buffer;
+=======
+    s16* pTrack = buffer;
+>>>>>>> upstream/main
     s16* r29 = r27;
     s16* r28 = r27 + getFrameSamples();
     for (u32 i = param_1; i != 0; i--) {
@@ -309,7 +377,11 @@ void JASDriver::mixInterleaveTrack(s16* buffer, u32 param_1, MixCallback callbac
     if (!r31) {
         return;
     }
+<<<<<<< HEAD
     DacSample* pTrack = (DacSample*)buffer;
+=======
+    s16* pTrack = buffer;
+>>>>>>> upstream/main
     s16* r30 = r31;
     for (u32 i = param_1 * 2; i != 0; i--) {
         s32 r26 = pTrack[0] + r30[0];

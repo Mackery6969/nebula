@@ -1,10 +1,19 @@
 #include "JSystem/JKernel/JKRHeap.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "JSystem/JUtility/JUTPalette.hpp"
 #include "JSystem/JUtility/JUTTexture.hpp"
 
 JUTTexture::JUTTexture(int width, int height, GXTexFmt format) {
     mFlag = mFlag & 2 | 1;
+<<<<<<< HEAD
     u32 bufSize = GXGetTexBufferSize(width, height, format, GX_FALSE, 1);
+=======
+    u32 bufSize = J3DNativeTexture::imageSize(format, width, height, 1);
+>>>>>>> upstream/main
 
     ResTIMG* texBuf = reinterpret_cast< ResTIMG* >(new (sizeof(ResTIMG)) u8[bufSize + sizeof(ResTIMG)]);
     _3C = texBuf;
@@ -31,7 +40,10 @@ JUTTexture::JUTTexture(int width, int height, GXTexFmt format) {
     texBuf->mImageDataOffset = sizeof(ResTIMG);
     mEmbPalette = nullptr;
     storeTIMG(texBuf, static_cast< u8 >(0));
+<<<<<<< HEAD
     DCFlushRange(mImage, bufSize);
+=======
+>>>>>>> upstream/main
 }
 
 JUTTexture::~JUTTexture() {
@@ -164,10 +176,19 @@ void JUTTexture::initTexObj() {
     }
     u8* image = reinterpret_cast< u8* >(const_cast< ResTIMG* >(mTIMG));
     image += (mTIMG->mImageDataOffset ? (s32)mTIMG->mImageDataOffset : 0x20);
+<<<<<<< HEAD
     GXInitTexObj(&mObj, image, mTIMG->mWidth, mTIMG->mHeight, static_cast< GXTexFmt >(mTIMG->mFormat), static_cast< GXTexWrapMode >(mWrapS),
                  static_cast< GXTexWrapMode >(mWrapT), mipmapEnabled);
 
     GXInitTexObjLOD(&mObj, static_cast< GXTexFilter >(mMinType), static_cast< GXTexFilter >(mMagType), mMinLod / 8.0f, mMaxLod / 8.0f,
+=======
+    J3DNativeTexture::registerImage(image, mTIMG->mFormat, mTIMG->mWidth, mTIMG->mHeight,
+                                    mTIMG->mImageNum != 0 ? mTIMG->mImageNum : 1);
+    J3DNativeTexture::init(&mObj, image, mTIMG->mWidth, mTIMG->mHeight, static_cast< GXTexFmt >(mTIMG->mFormat), static_cast< GXTexWrapMode >(mWrapS),
+                 static_cast< GXTexWrapMode >(mWrapT), mipmapEnabled);
+
+    J3DNativeTexture::initLOD(&mObj, static_cast< GXTexFilter >(mMinType), static_cast< GXTexFilter >(mMagType), mMinLod / 8.0f, mMaxLod / 8.0f,
+>>>>>>> upstream/main
                     mLodBias / 100.0f, mTIMG->mBiasClamp, mTIMG->mDoEdgeLod, static_cast< GXAnisotropy >(mTIMG->mMaxAnisotropy));
 }
 
@@ -181,10 +202,19 @@ void JUTTexture::initTexObj(GXTlut lut) {
     mTlutName = lut;
     u8* image = reinterpret_cast< u8* >(const_cast< ResTIMG* >(mTIMG));
     image += (mTIMG->mImageDataOffset ? (s32)mTIMG->mImageDataOffset : 0x20);
+<<<<<<< HEAD
     GXInitTexObjCI(&mObj, image, mTIMG->mWidth, mTIMG->mHeight, static_cast< GXCITexFmt >(mTIMG->mFormat), static_cast< GXTexWrapMode >(mWrapS),
                    static_cast< GXTexWrapMode >(mWrapT), mipmapEnabled, lut);
 
     GXInitTexObjLOD(&mObj, static_cast< GXTexFilter >(mMinType), static_cast< GXTexFilter >(mMagType), mMinLod / 8.0f, mMaxLod / 8.0f,
+=======
+    J3DNativeTexture::registerImage(image, mTIMG->mFormat, mTIMG->mWidth, mTIMG->mHeight,
+                                    mTIMG->mImageNum != 0 ? mTIMG->mImageNum : 1);
+    J3DNativeTexture::initCI(&mObj, image, mTIMG->mWidth, mTIMG->mHeight, static_cast< GXCITexFmt >(mTIMG->mFormat), static_cast< GXTexWrapMode >(mWrapS),
+                   static_cast< GXTexWrapMode >(mWrapT), mipmapEnabled, lut);
+
+    J3DNativeTexture::initLOD(&mObj, static_cast< GXTexFilter >(mMinType), static_cast< GXTexFilter >(mMagType), mMinLod / 8.0f, mMaxLod / 8.0f,
+>>>>>>> upstream/main
                     mLodBias / 100.0f, mTIMG->mBiasClamp, mTIMG->mDoEdgeLod, static_cast< GXAnisotropy >(mTIMG->mMaxAnisotropy));
 }
 
@@ -193,12 +223,17 @@ void JUTTexture::load(GXTexMapID texMapID) {
         mPalette->load();
     }
 
+<<<<<<< HEAD
     GXLoadTexObj(&mObj, texMapID);
+=======
+    J3DNativeTexture::load(&mObj, texMapID);
+>>>>>>> upstream/main
 }
 
 void JUTTexture::capture(int width, int height, GXTexFmt format, bool mipmap, GXBool clear) {
     if (mFlag & 0x1) {
         if (mipmap) {
+<<<<<<< HEAD
             GXSetTexCopySrc(width, height, mTIMG->mWidth * 2, mTIMG->mHeight * 2);
         } else {
             GXSetTexCopySrc(width, height, mTIMG->mWidth, mTIMG->mHeight);
@@ -207,5 +242,14 @@ void JUTTexture::capture(int width, int height, GXTexFmt format, bool mipmap, GX
         GXSetTexCopyDst(mTIMG->mWidth, mTIMG->mHeight, format, mipmap);
         GXCopyTex(mImage, clear);
         GXPixModeSync();
+=======
+            J3DNativeState::setTexCopySrc(width, height, mTIMG->mWidth * 2, mTIMG->mHeight * 2);
+        } else {
+            J3DNativeState::setTexCopySrc(width, height, mTIMG->mWidth, mTIMG->mHeight);
+        }
+
+        J3DNativeState::setTexCopyDst(mTIMG->mWidth, mTIMG->mHeight, format, mipmap);
+        J3DNativeState::copyTex(mImage, clear);
+>>>>>>> upstream/main
     }
 }

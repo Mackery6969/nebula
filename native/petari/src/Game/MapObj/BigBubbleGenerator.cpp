@@ -125,7 +125,11 @@ void BigBubbleGenerator::exeActive() {
             attach = true;
         }
     } else {
+<<<<<<< HEAD
         if (getNerveStep() % mSpawnTimer == 0) {
+=======
+        if ((mSpawnTimer != 0 ? getNerveStep() % mSpawnTimer : getNerveStep()) == 0) {
+>>>>>>> upstream/main
             spawn = true;
             attach = false;
         }

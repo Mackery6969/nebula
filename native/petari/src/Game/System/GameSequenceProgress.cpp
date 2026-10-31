@@ -10,9 +10,12 @@
 #include "Game/System/GameSequenceFunction.hpp"
 #include "Game/System/GameSystem.hpp"
 #include "Game/System/GameSystemFunction.hpp"
+<<<<<<< HEAD
 #ifdef TARGET_PC
 #include "Game/System/NebulaCoopDemos.hpp"
 #endif
+=======
+>>>>>>> upstream/main
 #include "Game/System/GameSystemSceneController.hpp"
 #include "Game/System/LuigiLeftSupplier.hpp"
 #include "Game/System/StarPointerOnOffController.hpp"
@@ -157,11 +160,14 @@ void GameSequenceProgress::requestGalaxyMove(const GalaxyMoveArgument& rMoveArg)
     GameSequenceFunction::storeSceneStartGameDataHolder();
 
     if (rMoveArg.mMoveType == 4) {
+<<<<<<< HEAD
 #ifdef TARGET_PC
         // Online co-op: a star the room gave, taken now by this player, returns as its first.
         NebulaCoopDemos::beforeStageResult(GameSequenceFunction::getClearedStageName(),
                                            GameSequenceFunction::getClearedPowerStarId());
 #endif
+=======
+>>>>>>> upstream/main
         GameSequenceFunction::updateGameDataAndSequenceAfterStageResultSequence();
         mFindingLuigiEventScheduler->updateOnStageResult(GameSequenceFunction::getClearedStageName(), GameSequenceFunction::getClearedPowerStarId());
 

@@ -1,9 +1,15 @@
 import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+<<<<<<< HEAD
 // Kotlin is built into the Android Gradle plugin from 9.0, which refuses org.jetbrains.kotlin.android.
 plugins {
     id("com.android.application")
+=======
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+>>>>>>> upstream/main
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -28,8 +34,13 @@ android {
         applicationId = "dev.nebula.galaxy"
         minSdk = 31
         targetSdk = 36
+<<<<<<< HEAD
         versionCode = 9
         versionName = "1.0.0-test9"
+=======
+        versionCode = 10
+        versionName = "1.0.0-test10"
+>>>>>>> upstream/main
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
@@ -89,7 +100,10 @@ kotlin {
 }
 
 dependencies {
+<<<<<<< HEAD
     // 1.19 needs compileSdk 37 (checkReleaseAarMetadata); this stays until the app compiles against 37.
+=======
+>>>>>>> upstream/main
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
@@ -99,5 +113,9 @@ dependencies {
     implementation("androidx.compose.animation:animation:1.11.3")
     implementation("androidx.compose.material3:material3:1.4.0")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
+<<<<<<< HEAD
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
+=======
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+>>>>>>> upstream/main
 }

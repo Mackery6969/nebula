@@ -68,7 +68,11 @@ namespace MR {
 
         if (pOut != nullptr) {
             if (distance > 0.0f) {
+<<<<<<< HEAD
                 PSVECScale(&toSensorB, pOut, 1.0f / distance);
+=======
+                NebulaVecScale(&toSensorB, pOut, 1.0f / distance);
+>>>>>>> upstream/main
             } else {
                 pOut->zero();
             }
@@ -488,12 +492,21 @@ namespace MR {
         cross.cross(direction, front);
         Mtx rotate;
         if (up.dot(cross) < 0.0f) {
+<<<<<<< HEAD
             PSMTXRotAxisRad(rotate, &axis, PI_180 * degree);
         } else {
             PSMTXRotAxisRad(rotate, &axis, -(PI_180 * degree));
         }
 
         PSMTXConcat(pMtx, rotate, pMtx);
+=======
+            NebulaMtxRotAxisRad(rotate, &axis, PI_180 * degree);
+        } else {
+            NebulaMtxRotAxisRad(rotate, &axis, -(PI_180 * degree));
+        }
+
+        NebulaMtxConcat(pMtx, rotate, pMtx);
+>>>>>>> upstream/main
         return false;
     }
 
@@ -525,7 +538,11 @@ namespace MR {
             q1.setRotate(yDir, -pActor->mGravity);
         }
 
+<<<<<<< HEAD
         PSQUATMultiply(reinterpret_cast< const Quaternion* >(&q1), reinterpret_cast< const Quaternion* >(&rPQuatSrc),
+=======
+        NebulaQuatMultiply(reinterpret_cast< const Quaternion* >(&q1), reinterpret_cast< const Quaternion* >(&rPQuatSrc),
+>>>>>>> upstream/main
                        reinterpret_cast< Quaternion* >(pQuatDest));
         pQuatDest->normalize();
     }

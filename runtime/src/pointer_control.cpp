@@ -12,10 +12,22 @@ PointerSource PointerOwner::update(const PointerActivity& activity, std::uint64_
         case PointerSource::Keys: return activity.keys;
         case PointerSource::Stick: return activity.stick;
         case PointerSource::Gyro: return activity.gyro;
+<<<<<<< HEAD
+=======
+        case PointerSource::Touch: return activity.touch;
+>>>>>>> upstream/main
         case PointerSource::None: break;
         }
         return false;
     };
+<<<<<<< HEAD
+=======
+    if (activity.touch) {
+        owner = PointerSource::Touch;
+        last_active_us = now_us;
+        return owner;
+    }
+>>>>>>> upstream/main
     if (owner != PointerSource::None && active(owner)) {
         last_active_us = now_us;
         return owner;
@@ -42,6 +54,10 @@ const char* pointer_source_name(PointerSource source) noexcept {
     case PointerSource::Keys: return "keys";
     case PointerSource::Stick: return "stick";
     case PointerSource::Gyro: return "gyro";
+<<<<<<< HEAD
+=======
+    case PointerSource::Touch: return "touch";
+>>>>>>> upstream/main
     case PointerSource::None: break;
     }
     return "none";

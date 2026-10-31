@@ -18,8 +18,13 @@ void J3DModel::initialize() {
     mBaseScale.y = 1.0f;
     mBaseScale.z = 1.0f;
 
+<<<<<<< HEAD
     PSMTXIdentity(mBaseTransformMtx);
     PSMTXIdentity(mInternalView);
+=======
+    NebulaMtxIdentity(mBaseTransformMtx);
+    NebulaMtxIdentity(mInternalView);
+>>>>>>> upstream/main
 
     mMtxBuffer = NULL;
     mMatPacket = NULL;
@@ -127,32 +132,51 @@ s32 J3DModel::createMatPacket(J3DModelData* pModelData, u32 mdlFlags) {
                     matPacket->setDisplayListObj(matPacket->mpDisplayListObj);
                 } else {
                     J3DDisplayListObj* dlobj = materialNode->getSharedDisplayListObj();
+<<<<<<< HEAD
                     s32 ret = dlobj->single_To_Double();
                     if (ret != kJ3DError_Success) {
                         return ret;
                     }
+=======
+>>>>>>> upstream/main
 
                     matPacket->setDisplayListObj(dlobj);
                 }
             } else if (mdlFlags & J3DMdlFlag_UseSharedDL) {
                 if (mdlFlags & J3DMdlFlag_UseSingleDL) {
+<<<<<<< HEAD
                     materialNode->newSingleSharedDisplayList(materialNode->countDLSize());
+=======
+                    materialNode->newSharedDisplayList();
+>>>>>>> upstream/main
 
                     J3DDisplayListObj* dlobj = materialNode->getSharedDisplayListObj();
                     matPacket->setDisplayListObj(dlobj);
                 } else {
+<<<<<<< HEAD
                     materialNode->newSharedDisplayList(materialNode->countDLSize());
 
                     J3DDisplayListObj* dlobj = materialNode->getSharedDisplayListObj();
                     dlobj->single_To_Double();
+=======
+                    materialNode->newSharedDisplayList();
+
+                    J3DDisplayListObj* dlobj = materialNode->getSharedDisplayListObj();
+>>>>>>> upstream/main
 
                     matPacket->setDisplayListObj(dlobj);
                 }
             } else {
                 if (mdlFlags & J3DMdlFlag_UseSingleDL) {
+<<<<<<< HEAD
                     matPacket->newSingleDisplayList(materialNode->countDLSize());
                 } else {
                     matPacket->newDisplayList(materialNode->countDLSize());
+=======
+                    matPacket->newDisplayList();
+                } else {
+                    matPacket->newDisplayList();
+>>>>>>> upstream/main
                 }
             }
         }
@@ -355,19 +379,28 @@ void J3DModel::viewCalc() {
         mMtxBuffer->calcDrawMtx(getMtxCalcMode(), mBaseScale, mBaseTransformMtx);
         calcNrmMtx();
         calcBumpMtx();
+<<<<<<< HEAD
         DCStoreRangeNoSync(getDrawMtxPtr(), mModelData->getDrawMtxNum() * sizeof(Mtx));
         DCStoreRange(getNrmMtxPtr(), mModelData->getDrawMtxNum() * sizeof(Mtx33));
     } else if (checkFlag(J3DMdlFlag_SkinNrmCpu)) {
         mMtxBuffer->calcDrawMtx(getMtxCalcMode(), mBaseScale, mBaseTransformMtx);
         calcBBoardMtx();
         DCStoreRange(getDrawMtxPtr(), mModelData->getDrawMtxNum() * sizeof(Mtx));
+=======
+    } else if (checkFlag(J3DMdlFlag_SkinNrmCpu)) {
+        mMtxBuffer->calcDrawMtx(getMtxCalcMode(), mBaseScale, mBaseTransformMtx);
+        calcBBoardMtx();
+>>>>>>> upstream/main
     } else {
         mMtxBuffer->calcDrawMtx(getMtxCalcMode(), mBaseScale, mBaseTransformMtx);
         calcNrmMtx();
         calcBBoardMtx();
         calcBumpMtx();
+<<<<<<< HEAD
         DCStoreRangeNoSync(getDrawMtxPtr(), mModelData->getDrawMtxNum() * sizeof(Mtx));
         DCStoreRange(getNrmMtxPtr(), mModelData->getDrawMtxNum() * sizeof(Mtx33));
+=======
+>>>>>>> upstream/main
     }
 
     prepareShapePackets();
@@ -382,7 +415,10 @@ void J3DModel::calcBumpMtx() {
             J3DMaterial* material = getModelData()->getMaterialNodePointer(i);
             if (material->getNBTScale()->mbHasScale == TRUE) {
                 material->getShape()->calcNBTScale(*material->getNBTScale()->getScale(), getNrmMtxPtr(), getBumpMtxPtr(bumpMtxIdx));
+<<<<<<< HEAD
                 DCStoreRange(getBumpMtxPtr(bumpMtxIdx), mModelData->getDrawMtxNum() * sizeof(Mtx33));
+=======
+>>>>>>> upstream/main
                 bumpMtxIdx++;
             }
         }

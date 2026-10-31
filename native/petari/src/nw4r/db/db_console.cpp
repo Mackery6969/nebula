@@ -1,4 +1,8 @@
 #include "nw4r/db/console.h"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include <va_list.h>
 
 namespace nw4r {
@@ -34,9 +38,15 @@ namespace nw4r {
 
         s32 Console_GetTotalLines(ConsoleHandle console) {
             s32 count;
+<<<<<<< HEAD
             BOOL enabled = OSDisableInterrupts();
             count = console->ringTopLineCnt + GetActiveLines_(console);
             OSRestoreInterrupts(enabled);
+=======
+            BOOL enabled = NebulaKernel::disableInterrupts();
+            count = console->ringTopLineCnt + GetActiveLines_(console);
+            NebulaKernel::restoreInterrupts(enabled);
+>>>>>>> upstream/main
             return count;
         }
     };  // namespace db

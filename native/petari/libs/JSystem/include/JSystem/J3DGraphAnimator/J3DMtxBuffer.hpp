@@ -3,7 +3,13 @@
 #include "JSystem/J3DGraphAnimator/J3DModelData.hpp"
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
 #include "JSystem/J3DGraphBase/J3DTransform.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DJointTree;
 
@@ -29,13 +35,21 @@ public:
         return mpAnmMtx[idx];
     }
     void setAnmMtx(int i, Mtx m) {
+<<<<<<< HEAD
         PSMTXCopy(m, (MtxPtr)mpAnmMtx[i]);
+=======
+        NebulaMtxCopy(m, (MtxPtr)mpAnmMtx[i]);
+>>>>>>> upstream/main
     }
     MtxPtr getWeightAnmMtx(int idx) {
         return mpWeightEvlpMtx[idx];
     }
     void setWeightAnmMtx(int i, Mtx m) {
+<<<<<<< HEAD
         PSMTXCopy(m, (MtxPtr)mpWeightEvlpMtx[i]);
+=======
+        NebulaMtxCopy(m, (MtxPtr)mpWeightEvlpMtx[i]);
+>>>>>>> upstream/main
     }
     MtxPtr getUserAnmMtx(int idx) {
         return mpUserAnmMtx[idx];

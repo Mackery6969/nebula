@@ -609,8 +609,13 @@ bool MarioWall::startJump() {
             Mtx rotation;
             TVec3f axis;
             axis.cross(-_30, velocity);
+<<<<<<< HEAD
             PSMTXRotAxisRad(rotation, &axis, MR::acos(dot));
             PSMTXMultVec(rotation, &velocity, &velocity);
+=======
+            NebulaMtxRotAxisRad(rotation, &axis, MR::acos(dot));
+            NebulaMtxMultVec(rotation, &velocity, &velocity);
+>>>>>>> upstream/main
         }
     }
 

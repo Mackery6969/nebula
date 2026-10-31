@@ -1,4 +1,8 @@
 #include "Game/Player/MarioModule.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "Game/Animation/XanimeCore.hpp"
 #include "Game/Enemy/KarikariDirector.hpp"
 #include "Game/Map/HitInfo.hpp"
@@ -12,7 +16,11 @@
 #include "revolution/os.h"
 
 void MarioModule_FORCE_EMIT_STRING() {
+<<<<<<< HEAD
     OSReport("P_PlanetMap");
+=======
+    JUTNativeLog("P_PlanetMap");
+>>>>>>> upstream/main
 }
 
 bool MarioModule::isInputDisable() const {

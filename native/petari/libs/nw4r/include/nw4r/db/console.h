@@ -1,7 +1,13 @@
 #pragma once
 
 #include "nw4r/ut/TextWriter.h"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace db {

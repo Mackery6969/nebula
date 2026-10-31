@@ -143,6 +143,7 @@ bool WPadHVSwing::updateNebulaShake() {
 }
 #endif
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 // No swing for the rest of the frame (WPad::holdForMenu), and the shake presses made meanwhile dropped.
 void WPadHVSwing::holdForMenu() {
@@ -159,6 +160,8 @@ void WPadHVSwing::holdForMenu() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 void WPadHVSwing::update() {
 #ifdef TARGET_PC
     if (updateNebulaShake()) {

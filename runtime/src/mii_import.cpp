@@ -97,6 +97,11 @@ struct Library {
     MiiPreparer prepare;
     std::vector<std::pair<unsigned, MiiRecord>> installs;
     std::atomic<bool> pending{false};
+<<<<<<< HEAD
+=======
+    std::vector<std::byte> cache;  // the database as last read or written (mii_library_slot)
+    bool cached = false;
+>>>>>>> upstream/main
 };
 
 Library& library() {
@@ -250,6 +255,10 @@ void set_mii_library(const std::filesystem::path& database, const std::filesyste
     lib.database = database;
     lib.folder = import_folder;
     lib.prepare = std::move(prepare);
+<<<<<<< HEAD
+=======
+    lib.cached = false;
+>>>>>>> upstream/main
 }
 
 std::filesystem::path mii_import_folder() {
@@ -300,6 +309,11 @@ MiiMergeResult import_mii_files(std::span<const std::filesystem::path> files, st
             return MiiMergeResult{};
         }
         lib.installs.insert(lib.installs.end(), placed.begin(), placed.end());
+<<<<<<< HEAD
+=======
+        lib.cache = database;
+        lib.cached = true;
+>>>>>>> upstream/main
         lib.pending.store(true, std::memory_order_release);
     }
     if (message != nullptr) {
@@ -334,6 +348,28 @@ unsigned mii_library_count() {
     return count_miis(read_file(lib.database));
 }
 
+<<<<<<< HEAD
+=======
+std::optional<MiiRecord> mii_library_slot(unsigned slot) {
+    Library& lib = library();
+    const std::lock_guard<std::mutex> lock(lib.mutex);
+    if (!lib.cached) {
+        lib.cache = lib.database.empty() ? std::vector<std::byte>{} : read_file(lib.database);
+        lib.cached = true;
+    }
+    if (slot >= kMiiDatabaseSlots || !is_database(lib.cache)) {
+        return std::nullopt;
+    }
+    const auto record = std::span<const std::byte>(lib.cache).subspan(kDatabaseFirst + slot * kMiiRecordSize, kMiiRecordSize);
+    if (!has_id(record)) {
+        return std::nullopt;
+    }
+    MiiRecord out;
+    std::copy(record.begin(), record.end(), out.begin());
+    return out;
+}
+
+>>>>>>> upstream/main
 std::vector<std::pair<unsigned, MiiRecord>> take_mii_installs() {
     Library& lib = library();
     if (!lib.pending.load(std::memory_order_acquire)) return {};

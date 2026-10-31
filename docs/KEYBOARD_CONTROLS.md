@@ -329,14 +329,19 @@ Graphics page.
 
 On Switch controllers the menu uses the console's meaning: A changes, B closes. PlayStation: Cross changes, Circle
 closes, Square clears, Triangle applies. Pages: Display, Graphics, Controls, Audio, General (text speed, button
+<<<<<<< HEAD
 icons, language, Discord, Miis), Player (your name and Mario or Luigi), System, Online and Mods. The name is typed in
 place: Space, Right, A or a click starts it, then type it or pick each letter with Up and Down (Left and Right move,
 X or Backspace deletes); Enter or A keeps it, Escape or B drops it. Every change waits for Apply, the mix and text speed included;
+=======
+icons, language, Discord, Miis), Mods and System. Every change waits for Apply, the mix and text speed included;
+>>>>>>> upstream/main
 closing the menu or Undo drops what was not applied. A new language applies when Nebula next starts, as the game
 reads it once at boot. Settings files are written through flushed sibling temporaries
 and atomically replaced; a failed save stays dirty and is retried on the next
 close or at shutdown.
 
+<<<<<<< HEAD
 ## Online co-op chat
 
 In a room's game, `T` opens a line at the screen's bottom left (whatever `T` is bound to; it isn't by default). While
@@ -344,6 +349,8 @@ it is open the keyboard types into it and the game gets no keys: `Enter` sends i
 it, `Backspace`, `Delete`, the arrows, `Home` and `End` edit it. A controller can't type: the room's lines show over
 play for ten seconds whatever is played with. Nebula's settings menu or the main menu coming up closes the line.
 
+=======
+>>>>>>> upstream/main
 ## HOME Menu
 
 Home (`H`; Home on Switch, PS on PlayStation, Steam on Steam controllers) opens the HOME Menu over the paused game:

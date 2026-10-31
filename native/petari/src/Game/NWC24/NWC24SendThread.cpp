@@ -1,4 +1,8 @@
 #include "Game/NWC24/NWC24SendThread.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/NWC24/NWC24Function.hpp"
 #include "Game/NWC24/UTF16Util.hpp"
 #include "Game/Util/MemoryUtil.hpp"
@@ -6,15 +10,22 @@
 
 #define STACK_SIZE 0x8000
 
+<<<<<<< HEAD
 OSMessage* NWC24SendThread::mMessage;
 s32 NWC24SendThread::mMessageMax = 1;
 OSMessageQueue NWC24SendThread::mMessageQueue;
+=======
+void** NWC24SendThread::mMessage;
+s32 NWC24SendThread::mMessageMax = 1;
+NebulaMessageQueue NWC24SendThread::mMessageQueue;
+>>>>>>> upstream/main
 
 NWC24SendThread::NWC24SendThread(s32 priority, JKRHeap* pHeap) {
     if (pHeap == nullptr) {
         pHeap = MR::getCurrentHeap();
     }
 
+<<<<<<< HEAD
     mMessage = new (pHeap, 0) OSMessage[mMessageMax];
 
     initMsgSendStatus();
@@ -24,6 +35,17 @@ NWC24SendThread::NWC24SendThread(s32 priority, JKRHeap* pHeap) {
 
     OSCreateThread(this, &NWC24SendThread::threadProc, nullptr, &pStackBase[STACK_SIZE], STACK_SIZE, priority, 1 /* OS_THREAD_ATTR_DETACH */);
     OSResumeThread(this);
+=======
+    mMessage = new (pHeap, 0) void*[mMessageMax];
+
+    initMsgSendStatus();
+    mMessageQueue.init(mMessage, mMessageMax);
+
+    u8* pStackBase = new (pHeap, 0) u8[STACK_SIZE];
+
+    NebulaKernel::create(this, &NWC24SendThread::threadProc, nullptr, STACK_SIZE, priority, true /* detached */);
+    NebulaKernel::resume(this);
+>>>>>>> upstream/main
 }
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01 || VERSION == RMGP01)
@@ -32,10 +54,17 @@ bool NWC24SendThread::requestSend(const u16* pText, const u16* pAltName, const u
 bool NWC24SendThread::requestSend(const u16* pText, const u16* pAltName, const u8* pLetter, u32 letterSize, const u8* pPicture, u32 pictureSize,
                                   u16 tag, bool isMsgLedPattern, u8 delayHours) {
 #endif
+<<<<<<< HEAD
     BOOL status = OSDisableInterrupts();
 
     if (mMessageQueue.usedCount >= mMessageQueue.msgCount) {
         OSRestoreInterrupts(status);
+=======
+    BOOL status = NebulaKernel::disableInterrupts();
+
+    if (mMessageQueue.isFull()) {
+        NebulaKernel::restoreInterrupts(status);
+>>>>>>> upstream/main
 
         return false;
     }
@@ -57,26 +86,43 @@ bool NWC24SendThread::requestSend(const u16* pText, const u16* pAltName, const u
     mMsgSendStatus.mDelayHours = delayHours;
 #endif
 
+<<<<<<< HEAD
     OSSendMessage(&mMessageQueue, &mMsgSendStatus, OS_MESSAGE_NOBLOCK);
     OSRestoreInterrupts(status);
+=======
+    mMessageQueue.send(&mMsgSendStatus, false);
+    NebulaKernel::restoreInterrupts(status);
+>>>>>>> upstream/main
 
     return true;
 }
 
 bool NWC24SendThread::isDone(NWC24Err* pErr, u32* pSize) {
+<<<<<<< HEAD
     BOOL status = OSDisableInterrupts();
+=======
+    BOOL status = NebulaKernel::disableInterrupts();
+>>>>>>> upstream/main
 
     if (mMsgSendStatus._18) {
         *pErr = mMsgSendStatus.mSentErr;
         *pSize = mMsgSendStatus.mSentSize;
 
+<<<<<<< HEAD
         OSRestoreInterrupts(status);
+=======
+        NebulaKernel::restoreInterrupts(status);
+>>>>>>> upstream/main
 
         return true;
     } else {
         *pErr = NWC24_OK;
 
+<<<<<<< HEAD
         OSRestoreInterrupts(status);
+=======
+        NebulaKernel::restoreInterrupts(status);
+>>>>>>> upstream/main
 
         return false;
     }
@@ -85,7 +131,11 @@ bool NWC24SendThread::isDone(NWC24Err* pErr, u32* pSize) {
 void* NWC24SendThread::threadProc(void*) {
     while (true) {
         MsgSendStatus* pMsgSendStatus = nullptr;
+<<<<<<< HEAD
         OSReceiveMessage(&mMessageQueue, reinterpret_cast< void** >(&pMsgSendStatus), OS_MESSAGE_BLOCK);
+=======
+        mMessageQueue.receive(reinterpret_cast< void** >(&pMsgSendStatus), true);
+>>>>>>> upstream/main
 
         pMsgSendStatus->mSentErr = sendMessage(pMsgSendStatus, &pMsgSendStatus->mSentSize);
         pMsgSendStatus->_18 = true;

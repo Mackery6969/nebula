@@ -1,5 +1,9 @@
 #pragma inline_max_size(250)
 #include "Inline.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRAram.hpp"
 #include "JSystem/JKernel/JKRAramPiece.hpp"
 #include "JSystem/JKernel/JKRAramStream.hpp"
@@ -7,7 +11,14 @@
 #include "JSystem/JKernel/JKRExpHeap.hpp"
 #include "JSystem/JUtility/JUTException.hpp"
 #include <cstring>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#include "Game/Util/RenderSignals.hpp"
+>>>>>>> upstream/main
 
 static u8* firstSrcData();
 static u8* nextSrcData(u8* param_0);
@@ -27,14 +38,22 @@ JKRAram* JKRAram::create(u32 aram_audio_buffer_size, u32 aram_audio_graph_size, 
     return sAramObject;
 }
 
+<<<<<<< HEAD
 OSMessage JKRAram::sMessageBuffer[4] = {
+=======
+void* JKRAram::sMessageBuffer[4] = {
+>>>>>>> upstream/main
     nullptr,
     nullptr,
     nullptr,
     nullptr,
 };
 
+<<<<<<< HEAD
 OSMessageQueue JKRAram::sMessageQueue = {0};
+=======
+NebulaMessageQueue JKRAram::sMessageQueue = {0};
+>>>>>>> upstream/main
 
 JKRAram::~JKRAram() {
     sAramObject = nullptr;
@@ -43,10 +62,17 @@ JKRAram::~JKRAram() {
 }
 
 void* JKRAram::run(void) {
+<<<<<<< HEAD
     OSInitMessageQueue(&sMessageQueue, sMessageBuffer, 4);
     do {
         OSMessage msg;
         OSReceiveMessage(&sMessageQueue, &msg, OS_MESSAGE_BLOCK);
+=======
+    sMessageQueue.init(sMessageBuffer, 4);
+    do {
+        void* msg;
+        sMessageQueue.receive(&msg, true);
+>>>>>>> upstream/main
         JKRAramCommand* message = reinterpret_cast< JKRAramCommand* >(msg);
         int result = message->field_0x00;
         JKRAMCommand* command = reinterpret_cast< JKRAMCommand* >(message->command);
@@ -216,7 +242,11 @@ u8* JKRAram::aramToMainRam(u32 address, u8* buf, u32 p3, JKRExpandSwitch expandS
 
 JSUList< JKRAMCommand > JKRAram::sAramCommandList;
 
+<<<<<<< HEAD
 static OSMutex decompMutex;
+=======
+static NebulaMutex decompMutex;
+>>>>>>> upstream/main
 
 u32 JKRAram::sSZSBufferSize = 0x00000400;
 
@@ -406,6 +436,7 @@ static inline int decompSZS_subroutine(u8* src, u8* dest) {
 }
 
 int JKRDecompressFromAramToMainRam(u32 src, void* dst, u32 srcLength, u32 dstLength, u32 offset, u32* resourceSize) {
+<<<<<<< HEAD
     BOOL interrupts = OSDisableInterrupts();
     if (s_is_decompress_mutex_initialized == false) {
         OSInitMutex(&decompMutex);
@@ -413,6 +444,15 @@ int JKRDecompressFromAramToMainRam(u32 src, void* dst, u32 srcLength, u32 dstLen
     }
     OSRestoreInterrupts(interrupts);
     OSLockMutex(&decompMutex);
+=======
+    BOOL interrupts = NebulaKernel::disableInterrupts();
+    if (s_is_decompress_mutex_initialized == false) {
+        decompMutex.init();
+        s_is_decompress_mutex_initialized = true;
+    }
+    NebulaKernel::restoreInterrupts(interrupts);
+    decompMutex.lock();
+>>>>>>> upstream/main
 
     u32 szsBufferSize = JKRAram::getSZSBufferSize();
     szpBuf = reinterpret_cast< u8* >(JKRAllocFromSysHeap(szsBufferSize, 32));
@@ -441,8 +481,13 @@ int JKRDecompressFromAramToMainRam(u32 src, void* dst, u32 srcLength, u32 dstLen
         JKRFree(refBuf);
     }
 
+<<<<<<< HEAD
     DCStoreRangeNoSync(dst, *tsPtr);
     OSUnlockMutex(&decompMutex);
+=======
+    NebulaRender::memoryRewritten(dst, *tsPtr);
+    decompMutex.unlock();
+>>>>>>> upstream/main
 
     return 0;
 }

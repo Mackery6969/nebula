@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Game/Screen/LayoutActor.hpp"
+<<<<<<< HEAD
 #include <revolution/hbm.h>
 
 class HomeButtonMenuContext {
@@ -14,6 +15,8 @@ public:
     /* 0x00 */ HBMDataInfo* mHomeButtonInfo;
     /* 0x04 */ HBMControllerData* mControllerData;
 };
+=======
+>>>>>>> upstream/main
 
 class HomeButtonLayout : public LayoutActor {
 public:
@@ -26,13 +29,20 @@ public:
 
     void forceToDeactive();
     bool isActive() const;
+<<<<<<< HEAD
     void updateController();
+=======
+>>>>>>> upstream/main
     bool tryCorePadTriggerHome();
 
     void exeDeactive();
     void exeActive();
 
+<<<<<<< HEAD
     /* 0x20 */ HomeButtonMenuContext* mMenuContext;
+=======
+    bool mIsInitialized;
+>>>>>>> upstream/main
     /* 0x24 */ bool _24;
     /* 0x25 */ bool _25;
 };

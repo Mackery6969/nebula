@@ -1,4 +1,8 @@
 #include "Game/System/DrawBuffer.hpp"
+<<<<<<< HEAD
+=======
+#include "JSystem/J3DGraphBase/J3DNativeMaterial.hpp"
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorLightCtrl.hpp"
 #include "Game/System/ShapePacketUserData.hpp"
 #include "Game/Util/LiveActorUtil.hpp"
@@ -39,12 +43,20 @@ void DrawBufferShapeDrawer::swap(DrawBufferShapeDrawer* pOther) {
 }
 
 void DrawBufferShapeDrawer::draw() const {
+<<<<<<< HEAD
     mMatPacket->mpDisplayListObj->callDL();
+=======
+    J3DNativeMaterial::send(mMatPacket->getMaterial(), mMatPacket->mpTexture, mMatPacket->mpDisplayListObj);
+>>>>>>> upstream/main
 
     J3DShapePacket* firstPacket = mPackets[0]->mShapePacket;
     firstPacket->mpShape->loadPreDrawSetting();
     if (MR::getJ3DShapePacketUserData(firstPacket) != nullptr) {
+<<<<<<< HEAD
         MR::getJ3DShapePacketUserData(firstPacket)->callDL();
+=======
+        MR::getJ3DShapePacketUserData(firstPacket)->load();
+>>>>>>> upstream/main
     }
 
     for (s32 idx = 0; idx < mNumPackets; idx++) {
@@ -56,7 +68,11 @@ void DrawBufferShapeDrawer::draw() const {
 
         if ((packet->mpShape->mFlags & 1) == 0) {
             if (packet->mpDisplayListObj != nullptr) {
+<<<<<<< HEAD
                 packet->mpDisplayListObj->callDL();
+=======
+                J3DNativeMaterial::sendDiffered(packet->mpDisplayListObj);
+>>>>>>> upstream/main
             }
             packet->drawFast();
         }
@@ -186,7 +202,10 @@ void DrawBuffer::resetLightSort(const ActorLightCtrl* pLightCtrl) {
 
 void DrawBuffer::drawOpa() const {
     if (mNumActors > 0) {
+<<<<<<< HEAD
         J3DShape::sOldVcdVatCmd = nullptr;
+=======
+>>>>>>> upstream/main
         for (s32 idx = 0; idx < mNumOpaShapeDrawers; idx++) {
             getShapeDrawerByIndex(idx)->draw();
         }
@@ -195,7 +214,10 @@ void DrawBuffer::drawOpa() const {
 
 void DrawBuffer::drawXlu() const {
     if (mNumActors > 0) {
+<<<<<<< HEAD
         J3DShape::sOldVcdVatCmd = nullptr;
+=======
+>>>>>>> upstream/main
         for (s32 idx = mNumOpaShapeDrawers; idx < mNumShapeDrawers; idx++) {
             getShapeDrawerByIndex(idx)->draw();
         }

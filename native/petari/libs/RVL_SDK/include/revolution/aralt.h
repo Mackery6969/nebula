@@ -7,7 +7,10 @@ extern "C" {
 
 #include "revolution/types.h"
 
+<<<<<<< HEAD
 typedef void (*ARCallback)(void);
+=======
+>>>>>>> upstream/main
 typedef void (*ARQCallback)(u32);
 
 typedef struct ARQRequest {

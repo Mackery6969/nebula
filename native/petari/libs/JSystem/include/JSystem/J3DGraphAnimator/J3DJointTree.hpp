@@ -1,7 +1,13 @@
 #pragma once
 
 #include "JSystem/J3DGraphBase/J3DVertex.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DMtxBuffer;
 class JUTNameTab;

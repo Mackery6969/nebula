@@ -19,11 +19,14 @@
 #include "Game/Util/SequenceUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
+<<<<<<< HEAD
 #ifdef TARGET_PC
 #include "Game/LiveActor/LiveActorGroup.hpp"
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/Screen/NebulaSelectPlayers.hpp"
 #endif
+=======
+>>>>>>> upstream/main
 
 namespace {
     const char* const cDemoNameDomeLecture = "\203\150\201\133\203\200\203\214\203\116\203\140\203\203\201\133\202\121" /* ドームレクチャー２ */;
@@ -51,9 +54,12 @@ namespace NrvAstroDomeGalaxySelector {
 
 AstroDomeGalaxySelector::AstroDomeGalaxySelector(const char* pName)
     : LiveActor(pName), mCameraController(), mBackButton(), mInfo(), mConfirmLayout(), _9C() {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     mCoopPlayers = nullptr;
 #endif
+=======
+>>>>>>> upstream/main
 }
 
 void AstroDomeGalaxySelector::init(const JMapInfoIter& rIter) {
@@ -72,11 +78,14 @@ void AstroDomeGalaxySelector::init(const JMapInfoIter& rIter) {
     mConfirmLayout = new GalaxyConfirmLayout();
     mConfirmLayout->initWithoutIter();
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
     mCoopPlayers = new NebulaSelectPlayers(true);
     mCoopPlayers->initWithoutIter();
 #endif
 
+=======
+>>>>>>> upstream/main
     MR::needStageSwitchWriteA(this, rIter);
     MR::onSwitchA(this);
     initNerve(GET_NERVE(AstroDomeGalaxySelector, AstroDomeGalaxySelectorNrvGalaxySelectStart));
@@ -139,6 +148,7 @@ void AstroDomeGalaxySelector::showGalaxyInfo(const MiniatureGalaxy* pMiniGalaxy)
     mInfo->show(pMiniGalaxy->mGalaxyName, state, cometID);
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 // Online co-op: the other players in each galaxy of the dome, under its miniature, as long as the player picks or
 // confirms one (sm64coopdx shows them on its act select).
@@ -157,6 +167,8 @@ void AstroDomeGalaxySelector::showCoopPlayers() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 bool AstroDomeGalaxySelector::tryStartLectureDemo(const Nerve* pNerve) {
     if (isNerve(GET_NERVE(AstroDomeGalaxySelector, AstroDomeGalaxySelectorNrvGalaxySelectStart))) {
         if (!MR::isOnGameEventFlagEndButlerDomeLecture()) {
@@ -230,10 +242,13 @@ void AstroDomeGalaxySelector::exeGalaxySelect() {
         if (pointingMiniatureGalaxy != nullptr) {
             showGalaxyInfo(pointingMiniatureGalaxy);
         }
+<<<<<<< HEAD
 
 #ifdef TARGET_PC
         showCoopPlayers();
 #endif
+=======
+>>>>>>> upstream/main
     }
 }
 
@@ -250,9 +265,12 @@ void AstroDomeGalaxySelector::exeGalaxyConfirmStart() {
     }
 
     showGalaxyInfo(::getSelectedMiniatureGalaxy());
+<<<<<<< HEAD
 #ifdef TARGET_PC
     showCoopPlayers();
 #endif
+=======
+>>>>>>> upstream/main
 
     if (SphereSelectorFunction::isConfirmWait() &&
         !tryStartLectureDemo(GET_NERVE(AstroDomeGalaxySelector, AstroDomeGalaxySelectorNrvGalaxyMoveLecture))) {
@@ -266,9 +284,12 @@ void AstroDomeGalaxySelector::exeGalaxyConfirm() {
     }
 
     showGalaxyInfo(::getSelectedMiniatureGalaxy());
+<<<<<<< HEAD
 #ifdef TARGET_PC
     showCoopPlayers();
 #endif
+=======
+>>>>>>> upstream/main
 
     if (!mConfirmLayout->isSelected()) {
         return;

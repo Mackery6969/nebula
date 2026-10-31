@@ -1,5 +1,9 @@
 #pragma once
 
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DStateList.hpp>
+>>>>>>> upstream/main
 #include "Game/NameObj/NameObj.hpp"
 #include <JSystem/JGeometry/TVec.hpp>
 
@@ -77,6 +81,11 @@ public:
     /* 0x33A */ u16 _33A;
     /* 0x33C */ u16 _33C;
     /* 0x340 */ J3DModelX* _340;
+<<<<<<< HEAD
     /* 0x344 */ u8* _344;
     /* 0x348 */ u16 _348;
+=======
+    // The volume's drawing state (built; nothing in the game draws with it).
+    J3DStateList _344;
+>>>>>>> upstream/main
 };

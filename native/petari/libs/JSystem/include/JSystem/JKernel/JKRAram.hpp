@@ -1,9 +1,18 @@
 #pragma once
 
 #include "JSystem/JKernel/JKRAramHeap.hpp"
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRDvdRipper.hpp"
 #include "JSystem/JKernel/JKRThread.hpp"
 #include <revolution.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "JSystem/JKernel/JKRDvdRipper.hpp"
+#include "JSystem/JKernel/JKRThread.hpp"
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "JSystem/JKernel/JKRDecomp.hpp"
@@ -63,8 +72,13 @@ public:
 
     static JKRAram* sAramObject;
     static u32 sSZSBufferSize;
+<<<<<<< HEAD
     static OSMessageQueue sMessageQueue;
     static OSMessage sMessageBuffer[4];
+=======
+    static NebulaMessageQueue sMessageQueue;
+    static void* sMessageBuffer[4];
+>>>>>>> upstream/main
     static JSUList< JKRAMCommand > sAramCommandList;
 
     /* 0x7C */ u32 mAudioMemoryPtr;

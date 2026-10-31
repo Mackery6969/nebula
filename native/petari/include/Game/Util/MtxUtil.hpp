@@ -2,7 +2,13 @@
 
 #include <JSystem/JGeometry.hpp>
 #include <revolution/mtx.h>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class LiveActor;
 
@@ -95,6 +101,10 @@ namespace MR {
 
     // Non-official symbol.
     inline void multMtx(Mtx pOut, const Mtx pA, const Mtx pB) {
+<<<<<<< HEAD
         PSMTXConcat(pB, pA, pOut);
+=======
+        NebulaMtxConcat(pB, pA, pOut);
+>>>>>>> upstream/main
     }
 };  // namespace MR

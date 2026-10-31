@@ -1,6 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 /// @brief The controller for linearly interpolating a value over time.
 class ValueControl {

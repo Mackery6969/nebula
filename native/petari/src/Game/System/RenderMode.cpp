@@ -1,7 +1,11 @@
 #include "Game/System/RenderMode.hpp"
 #include <revolution/gx.h>
+<<<<<<< HEAD
 #include <revolution/sc.h>
 #include <revolution/vi.h>
+=======
+#include "Game/System/NebulaSystemSettings.hpp"
+>>>>>>> upstream/main
 
 const GXRenderModeObj GXNtscIntDf[] = {
     {
@@ -304,6 +308,7 @@ const GXRenderModeObj GXEurgb60HzProg[] = {
 };
 
 namespace MR {
+<<<<<<< HEAD
     const GXRenderModeObj* getSuitableRenderMode() {
         const GXRenderModeObj* result = nullptr;
         bool is16Per9 = isAspectRatioFlag16Per9();
@@ -350,10 +355,21 @@ namespace MR {
 
     u32 getRequiredExternalFrameBufferSize() {
         return 0xA9600;
+=======
+    // The native output's mode: a 60 Hz NTSC frame in the shape of the display's aspect (what the game has always
+    // taken natively: no PAL television, no progressive switch).
+    const GXRenderModeObj* getSuitableRenderMode() {
+        return &GXNtscIntDf[isAspectRatioFlag16Per9()];
+    }
+
+    bool isAspectRatioFlag16Per9() {
+        return NebulaSystemSettings::isWidescreen();
+>>>>>>> upstream/main
     }
 };  // namespace MR
 
 u32 RenderModeObj::getViWidthMax() {
+<<<<<<< HEAD
     switch (VIGetTvFormat()) {
     case VI_PAL:
         return VI_MAX_WIDTH_PAL;
@@ -365,4 +381,7 @@ u32 RenderModeObj::getViWidthMax() {
     default:
         return VI_MAX_WIDTH_NTSC;
     }
+=======
+    return VI_MAX_WIDTH_NTSC;
+>>>>>>> upstream/main
 }

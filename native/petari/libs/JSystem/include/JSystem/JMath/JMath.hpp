@@ -171,6 +171,7 @@ namespace JMath {
     }
 };  // namespace JMath
 
+<<<<<<< HEAD
 namespace JMathInlineVEC {
 #ifdef __MWERKS__
 
@@ -346,6 +347,8 @@ namespace JMathInlineVEC {
 #endif
 };  // namespace JMathInlineVEC
 
+=======
+>>>>>>> upstream/main
 template < typename T >
 inline T JMAMax(T param_0, T param_1) {
     T ret;

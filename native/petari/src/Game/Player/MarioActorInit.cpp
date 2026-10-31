@@ -7,9 +7,12 @@ void MarioActor::initMember() {
         _94[i] = 0;
     }
 
+<<<<<<< HEAD
     mDL[0] = nullptr;
     mDL[1] = nullptr;
     mDLSize = 0;
+=======
+>>>>>>> upstream/main
     mCurrDL = 0;
     _1A1 = 0;
     _1A4 = 0.0f;
@@ -132,7 +135,11 @@ void MarioActor::initMember() {
     _3E6 = 0;
     _3E7 = 0;
     _3E8 = 0;
+<<<<<<< HEAD
     PSMTXIdentity(_3EC.toMtxPtr());
+=======
+    NebulaMtxIdentity(_3EC.toMtxPtr());
+>>>>>>> upstream/main
     _420 = 0;
     _424 = 0;
     for (int i = 0; i < ARRAY_SIZE(_428); i++) {
@@ -276,8 +283,13 @@ void MarioActor::initMember() {
         _A90[i] = nullptr;
     }
 
+<<<<<<< HEAD
     PSMTXIdentity(_AB0.toMtxPtr());
     PSMTXIdentity(_AE0.toMtxPtr());
+=======
+    NebulaMtxIdentity(_AB0.toMtxPtr());
+    NebulaMtxIdentity(_AE0.toMtxPtr());
+>>>>>>> upstream/main
     _B10 = 0;
     _B12 = 0;
     _B14 = 0;
@@ -325,6 +337,7 @@ void MarioActor::initMember() {
     _BAC.zero();
     _BB8.zero();
     _BC4 = 0;
+<<<<<<< HEAD
     PSMTXIdentity(_BC8.toMtxPtr());
     PSMTXIdentity(_BF8.toMtxPtr());
     _C28 = nullptr;
@@ -341,12 +354,34 @@ void MarioActor::initMember() {
     PSMTXIdentity(_E0C.toMtxPtr());
     PSMTXIdentity(_E3C.toMtxPtr());
     PSMTXIdentity(_E6C.toMtxPtr());
+=======
+    NebulaMtxIdentity(_BC8.toMtxPtr());
+    NebulaMtxIdentity(_BF8.toMtxPtr());
+    _C28 = nullptr;
+    NebulaMtxIdentity(_C2C.toMtxPtr());
+    NebulaMtxIdentity(_C5C.toMtxPtr());
+    NebulaMtxIdentity(_C8C.toMtxPtr());
+    NebulaMtxIdentity(_CBC.toMtxPtr());
+    NebulaMtxIdentity(_CEC.toMtxPtr());
+    NebulaMtxIdentity(_D1C.toMtxPtr());
+    NebulaMtxIdentity(_D4C.toMtxPtr());
+    NebulaMtxIdentity(_D7C.toMtxPtr());
+    NebulaMtxIdentity(_DAC.toMtxPtr());
+    NebulaMtxIdentity(_DDC.toMtxPtr());
+    NebulaMtxIdentity(_E0C.toMtxPtr());
+    NebulaMtxIdentity(_E3C.toMtxPtr());
+    NebulaMtxIdentity(_E6C.toMtxPtr());
+>>>>>>> upstream/main
     mBlendMtxTimer = 0;
     _EA0 = 0.0f;
     _EA4 = 0;
     _EA5 = 0;
     _EA6 = 0;
+<<<<<<< HEAD
     PSMTXIdentity(_EA8.toMtxPtr());
+=======
+    NebulaMtxIdentity(_EA8.toMtxPtr());
+>>>>>>> upstream/main
     _ED8.zero();
     _EE4 = nullptr;
     mSuperKinokoCollected = false;

@@ -15,7 +15,11 @@
 #include "JSystem/JKernel/JKRDvdRipper.hpp"
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
 #include <cstring>
+<<<<<<< HEAD
 #include <revolution/dvd.h>
+=======
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 namespace {
     class TPushCurrentHeap {
@@ -53,7 +57,11 @@ namespace {
             }
 
             for (u32 i = 0; i < field_0x4; i++) {
+<<<<<<< HEAD
                 field_0x8[i] = DVDConvertPathToEntrynum(stack_14.getFilePath(i));
+=======
+                field_0x8[i] = NebulaDisc::find(stack_14.getFilePath(i));
+>>>>>>> upstream/main
             }
         }
 

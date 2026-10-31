@@ -1,6 +1,7 @@
 #ifndef D_VF_H
 #define D_VF_H
 
+<<<<<<< HEAD
 #include "revolution.h"
 
 typedef void* VFFile;
@@ -13,6 +14,11 @@ typedef enum {
 } VFError;
 
 s32 VFIsAvailable();
+=======
+#include "revolution/gx.h"
+#include "revolution/mtx.h"
+#include "revolution/os.h"
+>>>>>>> upstream/main
 
 #ifdef __cplusplus
 extern "C" {

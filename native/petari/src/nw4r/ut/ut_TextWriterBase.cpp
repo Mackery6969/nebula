@@ -239,7 +239,10 @@ namespace nw4r {
             return textWidth;
         }
 
+<<<<<<< HEAD
         template class TextWriterBase< char >;
+=======
+>>>>>>> upstream/main
         template class TextWriterBase< wchar_t >;
     };  // namespace ut
 };  // namespace nw4r

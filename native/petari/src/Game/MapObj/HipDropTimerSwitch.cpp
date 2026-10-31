@@ -97,7 +97,11 @@ void HipDropTimerSwitch::calcAnim() {
         MR::calcUpVec(&up, this);
         pos += up * val;
         mtx2.setTrans(pos);
+<<<<<<< HEAD
         PSMTXCopy(mtx2, mtx);
+=======
+        NebulaMtxCopy(mtx2, mtx);
+>>>>>>> upstream/main
     }
 
     mCollisionParts->setMtx(mtx2);

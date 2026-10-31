@@ -1,4 +1,8 @@
 #include "Game/System/FileLoader.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/MemoryUtil.hpp"
 #include "Game/Util/StringUtil.hpp"
 #include <JSystem/JKernel/JKRExpHeap.hpp>
@@ -10,8 +14,13 @@ FileLoader::FileLoader() {
     mFileHolder = nullptr;
     mArchiveHolder = nullptr;
     mLoaderThread = new FileLoaderThread(13, 320, MR::getStationedHeapNapa());
+<<<<<<< HEAD
     OSResumeThread(mLoaderThread->mThread);
     OSInitMutex(&mMutex);
+=======
+    NebulaKernel::resume(mLoaderThread->mThread);
+    mMutex.init();
+>>>>>>> upstream/main
     mRequestFileInfos = new RequestFileInfo[0x140];
     mFileHolder = new FileHolder();
     mArchiveHolder = new ArchiveHolder();
@@ -30,9 +39,15 @@ void FileLoader::requestLoadToMainRAM(const char* pName, u8* pData, JKRHeap* pHe
         info->mFileEntry = mFileHolder->add(pName, pHeap, pData);
 
         if (jam) {
+<<<<<<< HEAD
             OSJamMessage(&mLoaderThread->mQueue, info, OS_MESSAGE_NOBLOCK);
         } else {
             OSSendMessage(&mLoaderThread->mQueue, info, OS_MESSAGE_NOBLOCK);
+=======
+            mLoaderThread->mQueue.jam(info, false);
+        } else {
+            mLoaderThread->mQueue.send(info, false);
+>>>>>>> upstream/main
         }
     }
 }
@@ -49,9 +64,15 @@ void FileLoader::requestMountArchive(const char* pName, JKRHeap* pHeap, bool jam
         info->mFileEntry = mFileHolder->add(pName, pHeap, nullptr);
 
         if (jam) {
+<<<<<<< HEAD
             OSJamMessage(&mLoaderThread->mQueue, info, OS_MESSAGE_NOBLOCK);
         } else {
             OSSendMessage(&mLoaderThread->mQueue, info, OS_MESSAGE_NOBLOCK);
+=======
+            mLoaderThread->mQueue.jam(info, false);
+        } else {
+            mLoaderThread->mQueue.send(info, false);
+>>>>>>> upstream/main
         }
     }
 }
@@ -131,8 +152,13 @@ const RequestFileInfo* FileLoader::getRequestFileInfoConst(const char* pName) co
 
 // string load is in the wrong spot for some reason
 RequestFileInfo* FileLoader::addRequest(const char* pName) {
+<<<<<<< HEAD
     OSMutex* mutex = &mMutex;
     OSLockMutex(mutex);
+=======
+    NebulaMutex* mutex = &mMutex;
+    mutex->lock();
+>>>>>>> upstream/main
 
     RequestFileInfo* info = &mRequestFileInfos[mRequestedFileCount];
     mRequestedFileCount++;
@@ -140,7 +166,11 @@ RequestFileInfo* FileLoader::addRequest(const char* pName) {
     info->_88 = 0;
     snprintf(info->mFileName, sizeof(info->mFileName), "%s", pName);
 
+<<<<<<< HEAD
     OSUnlockMutex(mutex);
+=======
+    mutex->unlock();
+>>>>>>> upstream/main
 
     return info;
 }

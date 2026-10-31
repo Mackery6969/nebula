@@ -6,9 +6,12 @@
 #include "Game/Util/JMapUtil.hpp"
 #include "Game/Util/MemoryUtil.hpp"
 #include "Game/Util/SceneUtil.hpp"
+<<<<<<< HEAD
 #ifdef TARGET_PC
 #include "Game/System/NebulaCoopWorld.hpp"
 #endif
+=======
+>>>>>>> upstream/main
 
 namespace {
     CreationFuncPtr getCreator(const PlacementInfoOrdered::Identifier& rIdentifier) {
@@ -100,10 +103,13 @@ void PlacementInfoOrdered::initPlacement() {
                 pObj = creator(pName);
                 MR::initLiveActorSystemInfo(rIter);
                 pObj->init(rIter);
+<<<<<<< HEAD
 #ifdef TARGET_PC
                 // Online co-op: the placed things the instance's record follows.
                 NebulaCoopWorld::notePlaced(pSet->mName, pObj, rIter);
 #endif
+=======
+>>>>>>> upstream/main
                 MR::initLiveActorSystemInfo(rIter);
                 MR::clearCurrentPlacementZoneId();
             }

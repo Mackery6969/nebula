@@ -1,7 +1,13 @@
 #pragma once
 
 #include <RVLFaceLib.h>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 /// @brief The resource creator for the head of a Mii character.
 class MiiFaceRecipe {

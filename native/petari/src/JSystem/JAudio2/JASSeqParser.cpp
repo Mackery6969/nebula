@@ -655,7 +655,11 @@ s32 JASSeqParser::cmdReg(JASTrack* track, u32* args) {
         break;
     case 8:
         static JMath::TRandom_fast_ oRandom(0);
+<<<<<<< HEAD
         val = (oRandom.rand() >> 9) % val;
+=======
+        val = val != 0 ? (oRandom.rand() >> 9) % val : oRandom.rand() >> 9;
+>>>>>>> upstream/main
         break;
     case 9:
         val = readReg(track, reg) << val;

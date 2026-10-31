@@ -7,6 +7,7 @@ void J3DShapeTable::initShapeNodes(J3DDrawMtxData* pMtxData, J3DVertexData* pVtx
 
         shapeNode->setDrawMtxDataPointer(pMtxData);
         shapeNode->setVertexDataPointer(pVtxData);
+<<<<<<< HEAD
         shapeNode->makeVcdVatCmd();
     }
 }
@@ -19,5 +20,8 @@ void J3DShapeTable::sortVcdVatCmd() {
                 mShapeNodePointer[next]->setVcdVatCmd(mShapeNodePointer[prev]->getVcdVatCmd());
             }
         }
+=======
+        shapeNode->initVtxAttr();
+>>>>>>> upstream/main
     }
 }

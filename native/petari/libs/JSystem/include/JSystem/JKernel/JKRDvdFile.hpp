@@ -1,5 +1,10 @@
 #pragma once
 
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaDisc.hpp"
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRDisposer.hpp"
 
 class JKRADCommand;
@@ -39,6 +44,7 @@ public:
     virtual s32 readData(void*, s32, s32);
     virtual s32 writeData(const void*, s32, s32);
     virtual s32 getFileSize() const {
+<<<<<<< HEAD
         return mFileInfo.length;
     }
     virtual bool open(s32);
@@ -73,5 +79,27 @@ public:
 
     static JSUList< JKRDvdFile > sDvdList;
     static void doneProcess(s32, DVDFileInfo*);
+=======
+        return mFile.mLength;
+    }
+    virtual bool open(s32);
+
+    void initiate();
+
+    const NebulaDisc::File* getFile() const {
+        return &mFile;
+    }
+
+    /* 0x1C */ NebulaMutex mMutex1;
+    /* 0x34 */ NebulaMutex mMutex2;
+    /* 0x4C */ JKRAramBlock* mBlock;
+    /* 0x50 */ NebulaThread* field_0x50;
+    /* 0x54 */ JSUFileInputStream* mFileStream;
+    /* 0x58 */ u32 field_0x58;
+    NebulaDisc::File mFile;
+    JSULink< JKRDvdFile > mDvdLink;
+
+    static JSUList< JKRDvdFile > sDvdList;
+>>>>>>> upstream/main
 };
 

@@ -8,6 +8,7 @@
 #include "Game/Util/SingletonHolder.hpp"
 #include "Game/Util/StringUtil.hpp"
 #include "Game/Util/SystemUtil.hpp"
+<<<<<<< HEAD
 #include <revolution/gd/GDBase.h>
 
 namespace {
@@ -24,6 +25,9 @@ namespace {
         /* 0x0 */ GDLObj* mObj;
     };
 };  // namespace
+=======
+
+>>>>>>> upstream/main
 
 ResourceHolderManager::ResourceHolderManager() {
     mResourceArray.clear();
@@ -129,7 +133,10 @@ ResourceHolderManagerName2Resource* ResourceHolderManager::createAndAddInnerStat
 }
 
 void ResourceHolderManager::createResourceHolder(const char* pParam1, CreateResourceHolderArgs* pArgs) {
+<<<<<<< HEAD
     ::GDCurrentRestorer gdRestorer = ::GDCurrentRestorer();
+=======
+>>>>>>> upstream/main
     JKRArchive* pArchive;
 
     MR::getMountedArchiveAndHeap(pParam1, &pArchive, &pArgs->mHeap);
@@ -139,7 +146,10 @@ void ResourceHolderManager::createResourceHolder(const char* pParam1, CreateReso
 }
 
 void ResourceHolderManager::createLayoutHolder(const char* pParam1, CreateResourceHolderArgs* pArgs) {
+<<<<<<< HEAD
     ::GDCurrentRestorer gdRestorer = ::GDCurrentRestorer();
+=======
+>>>>>>> upstream/main
     JKRArchive* pArchive;
 
     MR::getMountedArchiveAndHeap(pParam1, &pArchive, &pArgs->mHeap);

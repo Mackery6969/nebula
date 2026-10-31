@@ -85,8 +85,13 @@ void Mario::checkStep() {
             }
         } else if (MR::abs(frontDot) < 1.0471976f) {
             Mtx rotMtx;
+<<<<<<< HEAD
             PSMTXRotAxisRad(rotMtx, &mSideVec, frontDot);
             PSMTXMultVec(rotMtx, &mVelocity, &mVelocity);
+=======
+            NebulaMtxRotAxisRad(rotMtx, &mSideVec, frontDot);
+            NebulaMtxMultVec(rotMtx, &mVelocity, &mVelocity);
+>>>>>>> upstream/main
         }
 
         return;

@@ -13,6 +13,10 @@
 #include <nw4r/lyt/pane.h>
 #include <nw4r/lyt/textBox.h>
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -21,9 +25,15 @@ namespace {
         {MR::setTextBoxGameMessageRecursive},
     };
 #ifdef TARGET_PC
+<<<<<<< HEAD
     // The dim a closing or closed system window still shows, and when it last did (OSGetTime); the hand-overs so far.
     f32 sDimLeft = 0.0f;
     OSTime sDimLeftTime = 0;
+=======
+    // The dim a closing or closed system window still shows, and when it last did (NebulaClock); the hand-overs so far.
+    f32 sDimLeft = 0.0f;
+    s64 sDimLeftTime = 0;
+>>>>>>> upstream/main
     u32 sDimEpoch = 0;
     // A closed window's dim holds this many frames for the next window (the pause menu's question opens 9 frames
     // after the save's last window closes), then lifts over 10, as the windows' own end animations do.
@@ -139,7 +149,11 @@ void SysInfoWindow::appear() {
 #ifdef TARGET_PC
     // The dim a window closing or just closed left takes this one's place until its own is as deep.
     mDimFloor = 0.0f;
+<<<<<<< HEAD
     if (sDimLeft > 0.0f && OSTicksToMilliseconds(OSGetTime() - sDimLeftTime) < cDimHandOverMs) {
+=======
+    if (sDimLeft > 0.0f && (NebulaClock::nowNs() - sDimLeftTime) / 1000000 < cDimHandOverMs) {
+>>>>>>> upstream/main
         mDimFloor = sDimLeft;
     }
     mDimEpoch = ++sDimEpoch;
@@ -345,7 +359,11 @@ void SysInfoWindow::updateDim() {
     }
     if (mDim > 0.0f) {
         sDimLeft = mDim;
+<<<<<<< HEAD
         sDimLeftTime = OSGetTime();
+=======
+        sDimLeftTime = NebulaClock::nowNs();
+>>>>>>> upstream/main
     }
 }
 
@@ -424,7 +442,11 @@ void SysInfoWindow::exeDisappear() {
         mDimHanding = (mDimHandOver & answer) != 0 && mDimEpoch == sDimEpoch;
         if (mDimHanding && mDim > 0.0f) {
             sDimLeft = mDim;
+<<<<<<< HEAD
             sDimLeftTime = OSGetTime();
+=======
+            sDimLeftTime = NebulaClock::nowNs();
+>>>>>>> upstream/main
         }
 #endif
     }
