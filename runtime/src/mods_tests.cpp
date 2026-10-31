@@ -543,6 +543,7 @@ bool importing() {
     return ok;
 }
 
+<<<<<<< HEAD
 // An online room's mods (set_room_mods): played in place of the player's own that change the game, the player's
 // texture packs kept, for one start.
 bool room_mods() {
@@ -597,6 +598,12 @@ bool room_mods() {
 
 int main() {
     const bool ok = xml() & disc() & riivolution() & layouts() & room_mods() & importing();
+=======
+}  // namespace
+
+int main() {
+    const bool ok = xml() & disc() & riivolution() & layouts() & importing();
+>>>>>>> upstream/main
     std::cout << (ok ? "mods tests passed" : "mods tests FAILED") << '\n';
     return ok ? 0 : 1;
 }

@@ -874,6 +874,7 @@ namespace MR {
         },
         {
             StationedFileInfo::HEAP_TYPE_GDDR,
+<<<<<<< HEAD
             StationedFileInfo::LOAD_TYPE_FILE,
             "/HomeButton2/SpeakerSe.arc",
         },
@@ -889,6 +890,8 @@ namespace MR {
         },
         {
             StationedFileInfo::HEAP_TYPE_GDDR,
+=======
+>>>>>>> upstream/main
             StationedFileInfo::LOAD_TYPE_MOUNT,
             "/ParticleData/Effect.arc",
         },
@@ -919,6 +922,7 @@ namespace MR {
         },
         {
             StationedFileInfo::HEAP_TYPE_GDDR,
+<<<<<<< HEAD
             StationedFileInfo::LOAD_TYPE_FILE,
             "/ModuleData/HomeButtonMenuWrapperRSO.rso",
         },
@@ -939,6 +943,8 @@ namespace MR {
         },
         {
             StationedFileInfo::HEAP_TYPE_GDDR,
+=======
+>>>>>>> upstream/main
             StationedFileInfo::LOAD_TYPE_MOUNT,
             "/LayoutData/Font.arc",
         },

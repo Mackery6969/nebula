@@ -1,4 +1,8 @@
 #include "Game/MapObj/ClipArea.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/MapObj/ClipAreaHolder.hpp"
 #include "Game/MapObj/ClipAreaShape.hpp"
 #include "Game/Scene/SceneFunction.hpp"
@@ -30,6 +34,7 @@ void ClipArea::draw() const {
         return;
     }
 
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, ::sShapeColor);
     GXSetColorUpdate(GX_FALSE);
     GXSetDstAlpha(GX_FALSE, 0);
@@ -38,6 +43,16 @@ void ClipArea::draw() const {
     mShape->drawVolumeShape(mBaseMtx, mScale);
     GXSetCullMode(GX_CULL_BACK);
     GXSetBlendMode(GX_BM_SUBTRACT, GX_BL_ZERO, GX_BL_ZERO, GX_LO_COPY);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, ::sShapeColor);
+    J3DNativeState::setColorUpdate(GX_FALSE);
+    J3DNativeState::setDstAlpha(GX_FALSE, 0);
+    J3DNativeState::setCullMode(GX_CULL_FRONT);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_COPY);
+    mShape->drawVolumeShape(mBaseMtx, mScale);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+    J3DNativeState::setBlendMode(GX_BM_SUBTRACT, GX_BL_ZERO, GX_BL_ZERO, GX_LO_COPY);
+>>>>>>> upstream/main
     mShape->drawVolumeShape(mBaseMtx, mScale);
 }
 

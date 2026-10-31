@@ -6,6 +6,10 @@
 #include <JSystem/JAudio2/JASSeqParser.hpp>
 #include <JSystem/JAudio2/JASTrack.hpp>
 #include <revolution/os/OSTime.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+>>>>>>> upstream/main
 
 AudRhythmSeqParser::AudRhythmSeqParser()
     : JASSeqParser(), mTempo(120.0f), mModifiedTempo(120.0f), mChordId(), mScaleId(), mTempoAdjuster(), mCallDepth(), _1A4(), mIsUsed(true),
@@ -389,7 +393,11 @@ void AudRhythmSeqParser::setNoteInfo(u32 channel, u32 pitch, u32 velocity, u32 n
     mNoteInfo[channel].mNoteOff = noteOff;
     mNoteInfo[channel].mPitch = pitch;
     mNoteInfo[channel].mVelocity = velocity;
+<<<<<<< HEAD
     mNoteInfo[channel].mTime = OSGetTime();
+=======
+    mNoteInfo[channel].mTime = NebulaClock::nowNs();
+>>>>>>> upstream/main
 }
 
 bool AudRhythmSeqParser::registChordNumToInfo() {

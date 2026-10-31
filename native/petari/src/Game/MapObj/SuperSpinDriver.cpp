@@ -963,7 +963,11 @@ void SuperSpinDriver::calcShootMotionTime() {
         temp = 90;
     }
 
+<<<<<<< HEAD
     _154 = (temp / ::cSpaceFlyStartFrame) * ::cSpaceFlyStartFrame;
+=======
+    _154 = ::cSpaceFlyStartFrame != 0 ? (temp / ::cSpaceFlyStartFrame) * ::cSpaceFlyStartFrame : 0;
+>>>>>>> upstream/main
 
     if (_158 <= _154) {
         _154 = 0;

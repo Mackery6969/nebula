@@ -24,6 +24,10 @@
 #include "Game/Util/SingletonHolder.hpp"
 #include "Game/Util/StringUtil.hpp"
 #include <cstdio>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     const JMapIdInfo cInitializeStartIdInfo(0, 0);
@@ -161,7 +165,11 @@ namespace MR {
 
     bool isStageSuddenDeathDodoryu() {
 #ifdef TARGET_PC
+<<<<<<< HEAD
         if (__NebulaCodePatch(NEBULA_PATCH_NO_SUDDEN_DEATH_DODORYU, nullptr)) {
+=======
+        if (NebulaHost::codePatch(NEBULA_PATCH_NO_SUDDEN_DEATH_DODORYU, nullptr)) {
+>>>>>>> upstream/main
             return false;
         }
 #endif
@@ -284,7 +292,11 @@ namespace MR {
     s32 getPlacedHiddenStarScenarioNo(const char* pStageName, s32 starId) {
         GalaxyStatusAccessor accessor = makeGalaxyStatusAccessor(pStageName);
 #ifdef TARGET_PC
+<<<<<<< HEAD
         s32 scenarioNo = __NebulaCodePatch(NEBULA_PATCH_NO_HIDDEN_STAR_TABLE, nullptr)
+=======
+        s32 scenarioNo = NebulaHost::codePatch(NEBULA_PATCH_NO_HIDDEN_STAR_TABLE, nullptr)
+>>>>>>> upstream/main
                              ? 0
                              : getPlacedHiddenStarScenarioNoFromTable(pStageName, starId);
 #else
@@ -387,12 +399,15 @@ namespace MR {
         ::getScenePlayingResult()->incPurpleCoin();
     }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
     void incCoinOfOtherPlayer(int term) {
         ::getScenePlayingResult()->incCoinOfOtherPlayer(term);
     }
 #endif
 
+=======
+>>>>>>> upstream/main
     s32 getCoinNum() {
         return ::getScenePlayingResult()->getCoinNum();
     }

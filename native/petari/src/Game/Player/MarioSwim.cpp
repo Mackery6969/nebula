@@ -313,7 +313,11 @@ MarioSwim::MarioSwim(MarioActor* pActor) : MarioState(pActor, MarioStatus_Swim),
     mDamageType = 0;
     _AD = 0;
     mKnockbackTimer = 0;
+<<<<<<< HEAD
     PSMTXIdentity(mUpperBodyJointMtx.toMtxPtr());
+=======
+    NebulaMtxIdentity(mUpperBodyJointMtx.toMtxPtr());
+>>>>>>> upstream/main
     mDrownTimer = 0;
     mCurrentTiltX = 0.0f;
     mCurrentTiltY = 0.0f;
@@ -1214,12 +1218,21 @@ bool MarioSwim::update() {
         f32 cmp = DEG_TO_RAD(60);
         if (angleDiff > cmp) {
             Mtx stack_1D0;
+<<<<<<< HEAD
             PSMTXRotAxisRad(stack_1D0, &mUpVec, angleDiff - DEG_TO_RAD(60));
             PSMTXMultVecSR(stack_1D0, &mFrontVec, &mFrontVec);
         } else if (angleDiff < -cmp) {
             Mtx stack_1A0;
             PSMTXRotAxisRad(stack_1A0, &mUpVec, -(-angleDiff - DEG_TO_RAD(60)));
             PSMTXMultVecSR(stack_1A0, &mFrontVec, &mFrontVec);
+=======
+            NebulaMtxRotAxisRad(stack_1D0, &mUpVec, angleDiff - DEG_TO_RAD(60));
+            NebulaMtxMultVecSR(stack_1D0, &mFrontVec, &mFrontVec);
+        } else if (angleDiff < -cmp) {
+            Mtx stack_1A0;
+            NebulaMtxRotAxisRad(stack_1A0, &mUpVec, -(-angleDiff - DEG_TO_RAD(60)));
+            NebulaMtxMultVecSR(stack_1A0, &mFrontVec, &mFrontVec);
+>>>>>>> upstream/main
         }
     }
 
@@ -2622,8 +2635,13 @@ void MarioSwim::updateTilt() {
     mCurrentTiltY = (0.1f * targetTiltY) + (0.9f * mCurrentTiltY);
 
     Mtx mtxRotX, mtxRotZ;
+<<<<<<< HEAD
     PSMTXRotRad(mtxRotX, 'X', mCurrentTiltX);
     PSMTXRotRad(mtxRotZ, 'Z', mCurrentTiltY);
+=======
+    NebulaMtxRotRad(mtxRotX, 'X', mCurrentTiltX);
+    NebulaMtxRotRad(mtxRotZ, 'Z', mCurrentTiltY);
+>>>>>>> upstream/main
     MR::multMtx(mUpperBodyJointMtx, mtxRotZ, mtxRotX);
 
     u16 jointID = getAnimator()->getUpperJointID();

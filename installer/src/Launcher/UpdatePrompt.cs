@@ -31,6 +31,10 @@ namespace Nebula.Launcher
             }
             catch (Exception) { return false; }
             if (release == null) return false;
+<<<<<<< HEAD
+=======
+            bool prepareRayTracing;
+>>>>>>> upstream/main
             using (var prompt = new UpdatePromptForm(release))
             {
                 if (prompt.ShowDialog() != DialogResult.Yes)
@@ -42,6 +46,10 @@ namespace Nebula.Launcher
                     }
                     return false;
                 }
+<<<<<<< HEAD
+=======
+                prepareRayTracing = prompt.PrepareRayTracing;
+>>>>>>> upstream/main
             }
             string setup;
             using (var download = new UpdateDownloadForm(release, new InstallLayout(session.Root).Staging))
@@ -49,6 +57,10 @@ namespace Nebula.Launcher
                 if (download.ShowDialog() != DialogResult.OK) return false;
                 setup = download.SetupPath;
             }
+<<<<<<< HEAD
+=======
+            if (prepareRayTracing) RayTracingPreparation.Request();
+>>>>>>> upstream/main
             Process.Start(new ProcessStartInfo(setup, "--apply-update --launch --root " + ProcessRunner.Quote(session.Root))
             {
                 UseShellExecute = false, WorkingDirectory = Path.GetDirectoryName(setup)
@@ -59,9 +71,16 @@ namespace Nebula.Launcher
 
     internal sealed class UpdatePromptForm : Form
     {
+<<<<<<< HEAD
         private readonly CheckBox dontAsk = new CheckBox();
 
         public bool DontAskAgain { get { return dontAsk.Checked; } }
+=======
+        private readonly CheckBox dontAsk = new CheckBox(), prepare = new CheckBox();
+
+        public bool DontAskAgain { get { return dontAsk.Checked; } }
+        public bool PrepareRayTracing { get { return prepare.Checked; } }
+>>>>>>> upstream/main
 
         // Update never turns the offer off, whatever the box says; Not now keeps the box.
         internal void Choose(bool update)
@@ -88,12 +107,30 @@ namespace Nebula.Launcher
                 Text = "Nebula " + release.Version + " is available",
                 Font = new Font("Segoe UI", 11f, FontStyle.Bold), Location = new Point(16, 14), Size = new Size(488, 26)
             });
+<<<<<<< HEAD
             string notes = release.Notes.Length > 1500 ? release.Notes.Substring(0, 1500) + "…" : release.Notes;
             Controls.Add(new TextBox
             {
                 Text = notes.Replace("\r\n", "\n").Replace("\n", "\r\n"), Multiline = true, ReadOnly = true,
                 ScrollBars = ScrollBars.Vertical, Location = new Point(16, 46), Size = new Size(488, 190), TabStop = false
             });
+=======
+            bool offerRayTracing = RayTracingPreparation.Offered();
+            string notes = ReleaseNotes.Plain(release.Notes, 1500);
+            Controls.Add(new TextBox
+            {
+                Text = notes, Multiline = true, ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical, Location = new Point(16, 46), Size = new Size(488, offerRayTracing ? 162 : 190),
+                TabStop = false
+            });
+            if (offerRayTracing)
+            {
+                prepare.Text = "Prepare ray tracing shaders";
+                prepare.Location = new Point(16, 218);
+                prepare.Size = new Size(488, 24);
+                Controls.Add(prepare);
+            }
+>>>>>>> upstream/main
             dontAsk.Text = "Don't ask again";
             dontAsk.Location = new Point(16, 250);
             dontAsk.Size = new Size(200, 24);

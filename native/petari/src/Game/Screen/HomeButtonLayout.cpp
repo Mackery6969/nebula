@@ -1,10 +1,19 @@
 #include "Game/Screen/HomeButtonLayout.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/Screen/NebulaHomeMenu.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 #include "Game/AudioLib/AudSystem.hpp"
 #include "Game/AudioLib/AudWrap.hpp"
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Speaker/SpkSystem.hpp"
 #include "Game/System/GameSystemFunction.hpp"
+<<<<<<< HEAD
 #include "Game/System/HomeButtonMenuWrapper.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/Language.hpp"
 #include "Game/System/WPadHolder.hpp"
 #include "Game/Util/FileUtil.hpp"
@@ -17,6 +26,7 @@
 #include "Game/Util/SystemUtil.hpp"
 #include <JSystem/JUtility/JUTVideo.hpp>
 
+<<<<<<< HEAD
 namespace {
     int SoundCallback(int evt, int num) {
         switch (evt) {
@@ -29,11 +39,14 @@ namespace {
     }
 };  // namespace
 
+=======
+>>>>>>> upstream/main
 namespace NrvHomeButtonLayout {
     NEW_NERVE(HomeButtonLayoutDeactive, HomeButtonLayout, Deactive);
     NEW_NERVE(HomeButtonLayoutActive, HomeButtonLayout, Active);
 };  // namespace NrvHomeButtonLayout
 
+<<<<<<< HEAD
 HomeButtonMenuContext::HomeButtonMenuContext() : mHomeButtonInfo(), mControllerData() {
     mHomeButtonInfo = new HBMDataInfo;
     mControllerData = new HBMControllerData;
@@ -82,6 +95,15 @@ void HomeButtonLayout::init(const JMapInfoIter& rIter) {
     RSO::HBMCreate(mMenuContext->mHomeButtonInfo);
     MR::setLayoutDefaultAllocator();
     RSO::HBMSetAdjustFlag(MR::isScreen16Per9());
+=======
+HomeButtonLayout::HomeButtonLayout() : LayoutActor("HOME\203\173\203\136\203\223" /* HOMEボタン */, false), mIsInitialized(false), _24(), _25() {
+}
+
+void HomeButtonLayout::init(const JMapInfoIter& rIter) {
+    // The console loaded the HOME button library's layout, sounds, messages and settings from the disc here; the
+    // host keeps the menu (NebulaHomeMenu).
+    mIsInitialized = true;
+>>>>>>> upstream/main
     initNerve(GET_NERVE(HomeButtonLayout, HomeButtonLayoutDeactive));
     appear();
 
@@ -135,6 +157,7 @@ void HomeButtonLayout::exeActive() {
         mFlag.mIsHidden = false;
         mFlag.mIsOffCalcAnim = false;
 
+<<<<<<< HEAD
         RSO::HBMInit();
         RSO::HBMSetAdjustFlag(MR::isScreen16Per9());
     }
@@ -143,23 +166,42 @@ void HomeButtonLayout::exeActive() {
     RSO::HBMCalc(mMenuContext->mControllerData);
 
     if (RSO::HBMGetSelectBtnNum() == HBM_SELECT_NULL) {
+=======
+        NebulaHomeMenu::open(MR::isScreen16Per9());
+    }
+
+    const NebulaHomeMenu::Choice choice = NebulaHomeMenu::update();
+    if (choice == NebulaHomeMenu::cChoiceNone) {
+>>>>>>> upstream/main
         return;
     }
 
     bool bVar1 = false;
 
+<<<<<<< HEAD
     switch (RSO::HBMGetSelectBtnNum()) {
     case HBM_SELECT_HOMEBTN:
         GameSystemFunction::onHomeButtonMenuCloseAllRumble();
         break;
     case HBM_SELECT_BTN1:
+=======
+    switch (choice) {
+    case NebulaHomeMenu::cChoiceClose:
+        GameSystemFunction::onHomeButtonMenuCloseAllRumble();
+        break;
+    case NebulaHomeMenu::cChoiceLeaveGame:
+>>>>>>> upstream/main
         AudWrap::getSystem()->preProcessToReset();
         bVar1 = true;
         GameSystemFunction::requestGoWiiMenu(true);
         GameSystemFunction::onHomeButtonMenuEndAllRumble();
         MR::setStarPointerModeBase();
         break;
+<<<<<<< HEAD
     case HBM_SELECT_BTN2:
+=======
+    case NebulaHomeMenu::cChoiceReset:
+>>>>>>> upstream/main
         if (!_25) {
             AudWrap::getSystem()->preProcessToReset();
         }
@@ -197,6 +239,7 @@ void HomeButtonLayout::draw() const {
         return;
     }
 
+<<<<<<< HEAD
     GXClearVtxDesc();
     GXSetVtxAttrFmt(GX_VTXFMT4, GX_VA_POS, GX_POS_XY, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT4, GX_VA_CLR0, GX_CLR_RGB, GX_S8, 0);
@@ -207,10 +250,18 @@ void HomeButtonLayout::draw() const {
     GXSetNumTevStages(1);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
     GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+=======
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setNumTexGens(0);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    J3DNativeState::setTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+>>>>>>> upstream/main
 
     Mtx44 projectionMtx;
     f32 screenHalfHeight = static_cast< s32 >(JUTGetVideoManager()->getEfbHeight()) / 2.0f;
     f32 screenHalfWidth = MR::getScreenWidth() / 2.0f;
+<<<<<<< HEAD
     C_MTXOrtho(projectionMtx, screenHalfHeight, -screenHalfHeight, -screenHalfWidth, screenHalfWidth, 0.0f, 500.0f);
     GXSetProjection(projectionMtx, GX_ORTHOGRAPHIC);
 
@@ -225,6 +276,22 @@ void HomeButtonLayout::forceToDeactive() {
     }
 
     RSO::HBMStartBlackOut();
+=======
+    NebulaMtxOrtho(projectionMtx, screenHalfHeight, -screenHalfHeight, -screenHalfWidth, screenHalfWidth, 0.0f, 500.0f);
+    J3DNativeView::setProjection(projectionMtx, GX_ORTHOGRAPHIC);
+
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+    J3DNativeState::setZMode(GX_FALSE, GX_NEVER, GX_FALSE);
+    // The library drew the menu here; the game draws it with its settings menu (NebulaSettingsMenu).
+}
+
+void HomeButtonLayout::forceToDeactive() {
+    if (!mIsInitialized) {
+        return;
+    }
+
+    NebulaHomeMenu::close();
+>>>>>>> upstream/main
     _25 = true;
 }
 
@@ -236,11 +303,14 @@ bool HomeButtonLayout::isActive() const {
     return isNerve(GET_NERVE(HomeButtonLayout, HomeButtonLayoutActive)) && !MR::isNewNerve(this);
 }
 
+<<<<<<< HEAD
 void HomeButtonLayout::updateController() {
     for (s32 chan = WPAD_CHAN0; chan < WPAD_MAX_CONTROLLERS; chan++) {
         MR::getHBMKPadData(&mMenuContext->mControllerData->wiiCon[chan], chan);
     }
 }
+=======
+>>>>>>> upstream/main
 
 bool HomeButtonLayout::tryCorePadTriggerHome() {
     for (s32 i = 0; i < MR::getWPadMaxCount(); i++) {

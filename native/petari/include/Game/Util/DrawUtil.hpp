@@ -22,7 +22,10 @@ public:
 namespace MR {
     void drawInit();
     void reinitGX();
+<<<<<<< HEAD
     void resetTextureCacheSize();
+=======
+>>>>>>> upstream/main
     void loadViewMtxFor2DModel();
     void drawInitFor2DModel();
     void setDefaultViewportAndScissor();

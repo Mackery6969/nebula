@@ -1,4 +1,8 @@
 #include "Game/Map/Air.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
 #endif
@@ -119,7 +123,11 @@ void SceneFunction::executeCalcAnimListOnPlayingMovie() {
 void SceneFunction::executeCalcViewAndEntryList() {
     TMtx34f mtx;
     mtx.identity();
+<<<<<<< HEAD
     PSMTXCopy(mtx, j3dSys.mViewMtx);
+=======
+    NebulaMtxCopy(mtx, j3dSys.mViewMtx);
+>>>>>>> upstream/main
     CategoryList::entryDrawBuffer2D();
     MR::loadViewMtx();
     CategoryList::entryDrawBuffer3D();
@@ -128,7 +136,11 @@ void SceneFunction::executeCalcViewAndEntryList() {
 void SceneFunction::executeCalcViewAndEntryList2D() {
     TMtx34f mtx;
     mtx.identity();
+<<<<<<< HEAD
     PSMTXCopy(mtx, j3dSys.mViewMtx);
+=======
+    NebulaMtxCopy(mtx, j3dSys.mViewMtx);
+>>>>>>> upstream/main
     CategoryList::entryDrawBuffer2D();
 }
 
@@ -241,10 +253,17 @@ void SceneFunction::executeDrawListOpa() {
     CategoryList::execute(MR::DrawType_SpaceCocoon);
     CategoryList::execute(MR::DrawType_0x17);
     CategoryList::execute(MR::DrawType_WarpPodPath);
+<<<<<<< HEAD
     GXSetTevDirect(GX_TEVSTAGE0);
     GXSetTevDirect(GX_TEVSTAGE1);
     GXSetTevDirect(GX_TEVSTAGE2);
     GXSetTevDirect(GX_TEVSTAGE3);
+=======
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE2);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE3);
+>>>>>>> upstream/main
     CategoryList::execute(MR::DrawType_KirairaChain);
     CategoryList::execute(MR::DrawType_WaterPlant);
     CategoryList::execute(MR::DrawType_BigBubbleGoal);
@@ -256,7 +275,10 @@ void SceneFunction::executeDrawListOpa() {
     CategoryList::execute(MR::DrawType_Fur);
     CategoryList::execute(MR::DrawType_OceanSphere);
     CategoryList::execute(MR::DrawType_Flag);
+<<<<<<< HEAD
     MR::resetTextureCacheSize();
+=======
+>>>>>>> upstream/main
 }
 
 void SceneFunction::executeDrawListXlu() {
@@ -272,7 +294,10 @@ void SceneFunction::executeDrawListXlu() {
     CategoryList::execute(MR::DrawType_ClipAreaDropLaser);
     CategoryList::execute(MR::DrawType_SpiderThread);
     CategoryList::execute(MR::DrawType_DashRing);
+<<<<<<< HEAD
     MR::resetTextureCacheSize();
+=======
+>>>>>>> upstream/main
 }
 
 void SceneFunction::executeDrawSilhouetteAndFillShadow() {
@@ -325,7 +350,10 @@ void SceneFunction::executeDrawAfterIndirect() {
     CategoryList::execute(MR::DrawType_EffectDrawAfterIndirect);
     CategoryList::execute(MR::DrawType_OceanRingPipeInside);
     CategoryList::execute(MR::DrawType_WaterCameraFilter);
+<<<<<<< HEAD
     MR::resetTextureCacheSize();
+=======
+>>>>>>> upstream/main
 }
 
 void SceneFunction::executeDrawImageEffect() {

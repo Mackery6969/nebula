@@ -2,7 +2,10 @@
 
 #include "Game/Scene/Scene.hpp"
 
+<<<<<<< HEAD
 class IsbnManager;
+=======
+>>>>>>> upstream/main
 class LayoutActor;
 class LogoFader;
 class SimpleLayout;
@@ -22,16 +25,25 @@ public:
 
     bool isDisplayStrapRemineder() const;
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
     void exeCensorshipFadein();
     void exeCensorshipDisplay();
     void exeCensorshipFadeout();
 #endif
+=======
+>>>>>>> upstream/main
 
     void exeStrapFadein();
     void exeStrapDisplay();
     void exeStrapFadeout();
     void exeMountGameData();
+<<<<<<< HEAD
+=======
+#ifdef TARGET_PC
+    void exeWaitRayTracing();
+#endif
+>>>>>>> upstream/main
     void exeWaitReadDoneSystemArchive();
     void exeDeactive();
     void initLayout();
@@ -41,6 +53,7 @@ public:
     bool tryFadeoutLayout();
 
 private:
+<<<<<<< HEAD
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01 || VERSION == RMGP01)
     /* 0x14 */ SimpleLayout* mStrapLayout;
     /* 0x18 */ LogoFader* mLogoFader;
@@ -49,4 +62,8 @@ private:
     /* 0x18 */ SimpleLayout* mStrapLayout;
     /* 0x1C */ LogoFader* mLogoFader;
 #endif
+=======
+    /* 0x14 */ SimpleLayout* mStrapLayout;
+    /* 0x18 */ LogoFader* mLogoFader;
+>>>>>>> upstream/main
 };

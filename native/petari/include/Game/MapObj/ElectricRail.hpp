@@ -2,6 +2,10 @@
 
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/LiveActor/ShadowVolumeDrawer.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/Util/NativeMesh.hpp"
+>>>>>>> upstream/main
 
 class ElectricRailPoint : public LiveActor {
 public:
@@ -36,11 +40,19 @@ public:
     virtual void drawShape() const;
     virtual bool isDraw() const;
 
+<<<<<<< HEAD
     void drawShadowVolumeShape(ElectricRailSeparator*, s32) const;
 
     /* 0x1C */ const LiveActor* mHost;
     /* 0x20 */ void* mDisplayListBuffer;
     /* 0x24 */ u32 mDisplayListBufferSize;
+=======
+    void drawShadowVolumeShape(NativeMesh&, ElectricRailSeparator*, s32) const;
+
+    /* 0x1C */ const LiveActor* mHost;
+    // The shadow volume as the renderer draws it.
+    NativeMesh mMesh;
+>>>>>>> upstream/main
 };
 
 class ElectricRail : public LiveActor {
@@ -61,7 +73,11 @@ public:
     void initSeparators();
     void initDisplayList();
     void drawRailGX(f32) const;
+<<<<<<< HEAD
     void drawPlane(f32, f32, f32, f32) const;
+=======
+    void drawPlane(NativeMesh&, f32, f32, f32, f32) const;
+>>>>>>> upstream/main
     void drawPlaneGX(f32, f32, f32, f32) const;
     void initShadow(const JMapInfoIter&);
     void updateHitSensorPos();
@@ -76,8 +92,13 @@ public:
     /* 0x94 */ TVec3f* _94;
     /* 0x98 */ ElectricRailSeparator* mSeparators;
     /* 0x9C */ s32 mSeparatorCount;
+<<<<<<< HEAD
     /* 0xA0 */ void* mDisplayListBuffer;
     /* 0xA4 */ u32 mDisplayListSize;
+=======
+    // The rail as the renderer draws it while it waits.
+    NativeMesh mMesh;
+>>>>>>> upstream/main
     /* 0xA8 */ s32 mRailHeight;  // Obj_arg0
     /* 0xAC */ f32 mEaseIn;
     /* 0xB0 */ ElectricRailShadowDrawer* mShadowDrawer;

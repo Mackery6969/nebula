@@ -1,4 +1,8 @@
 #include "JSystem/J3DGraphBase/J3DPacket.hpp"
+<<<<<<< HEAD
+=======
+#include "JSystem/J3DGraphBase/J3DNativeMaterial.hpp"
+>>>>>>> upstream/main
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
 #endif
@@ -12,6 +16,7 @@
 #include <cstdio>
 #include <mem.h>
 
+<<<<<<< HEAD
 J3DError J3DDisplayListObj::newDisplayList(u32 maxSize) {
     mMaxSize = ALIGN_NEXT(maxSize, 0x20);
     mpDisplayList[0] = new (0x20) char[mMaxSize];
@@ -84,6 +89,13 @@ u32 J3DDisplayListObj::endPatch() {
     return mSize;
 }
 
+=======
+J3DError J3DDisplayListObj::newDisplayList() {
+    mpNebulaMaterial = J3DNativeMaterial::create();
+    return kJ3DError_Success;
+}
+
+>>>>>>> upstream/main
 int J3DPacket::entry(J3DDrawBuffer* pBuffer) {
     return 1;
 }
@@ -106,12 +118,17 @@ J3DDrawPacket::J3DDrawPacket() {
 J3DDrawPacket::~J3DDrawPacket() {
 }
 
+<<<<<<< HEAD
 J3DError J3DDrawPacket::newDisplayList(u32 size) {
+=======
+J3DError J3DDrawPacket::newDisplayList() {
+>>>>>>> upstream/main
     mpDisplayListObj = new J3DDisplayListObj();
 
     if (mpDisplayListObj == NULL)
         return kJ3DError_Alloc;
 
+<<<<<<< HEAD
     J3DError ret = mpDisplayListObj->newDisplayList(size);
     if (ret != kJ3DError_Success)
         return ret;
@@ -134,6 +151,12 @@ J3DError J3DDrawPacket::newSingleDisplayList(u32 size) {
 
 void J3DDrawPacket::draw() {
     callDL();
+=======
+    return mpDisplayListObj->newDisplayList();
+}
+
+void J3DDrawPacket::draw() {
+>>>>>>> upstream/main
 }
 
 J3DMatPacket::J3DMatPacket() {
@@ -156,6 +179,7 @@ void J3DMatPacket::addShapePacket(J3DShapePacket* pShape) {
     }
 }
 
+<<<<<<< HEAD
 void J3DMatPacket::beginDiff() {
     mpInitShapePacket->beginDL();
 }
@@ -164,27 +188,40 @@ void J3DMatPacket::endDiff() {
     mpInitShapePacket->endDL();
 }
 
+=======
+>>>>>>> upstream/main
 bool J3DMatPacket::isSame(J3DMatPacket* pOther) const {
     return mDiffFlag == pOther->mDiffFlag && (mDiffFlag >> 31) == 0;
 }
 
 void J3DMatPacket::draw() {
     mpMaterial->load();
+<<<<<<< HEAD
     callDL();
+=======
+    J3DNativeMaterial::send(mpMaterial, mpTexture, mpDisplayListObj);
+>>>>>>> upstream/main
 
     J3DShapePacket* packet = getShapePacket();
     packet->getShape()->loadPreDrawSetting();
 
     while (packet != NULL) {
         if (packet->getDisplayListObj() != NULL) {
+<<<<<<< HEAD
             packet->getDisplayListObj()->callDL();
+=======
+            J3DNativeMaterial::sendDiffered(packet->getDisplayListObj());
+>>>>>>> upstream/main
         }
 
         packet->drawFast();
         packet = (J3DShapePacket*)packet->getNextPacket();
     }
+<<<<<<< HEAD
 
     J3DShape::resetVcdVatCache();
+=======
+>>>>>>> upstream/main
 }
 
 static u32 sDifferedRegister[7] = {
@@ -207,6 +244,7 @@ J3DShapePacket::J3DShapePacket() {
 J3DShapePacket::~J3DShapePacket() {
 }
 
+<<<<<<< HEAD
 u32 J3DShapePacket::calcDifferedBufferSize(u32 diffFlags) {
     u32 bufferSize = 0;
 
@@ -271,12 +309,18 @@ u32 J3DShapePacket::calcDifferedBufferSize(u32 diffFlags) {
 
     return OSRoundUp32B(bufferSize);
 }
+=======
+>>>>>>> upstream/main
 
 J3DError J3DShapePacket::newDifferedDisplayList(u32 diffFlags) {
     mDiffFlag = diffFlags;
 
+<<<<<<< HEAD
     u32 bufSize = calcDifferedBufferSize(diffFlags);
     J3DError ret = newDisplayList(bufSize);
+=======
+    J3DError ret = newDisplayList();
+>>>>>>> upstream/main
     if (ret != kJ3DError_Success) {
         return ret;
     }
@@ -332,7 +376,11 @@ void J3DShapePacket::draw() {
         }
 
         if (mpDisplayListObj != NULL) {
+<<<<<<< HEAD
             mpDisplayListObj->callDL();
+=======
+            J3DNativeMaterial::sendDiffered(mpDisplayListObj);
+>>>>>>> upstream/main
         }
 
         mpShape->draw();
@@ -361,5 +409,8 @@ int J3DMatPacket::entry(J3DDrawBuffer* pBuffer) {
     return (pBuffer->*func)(this);
 }
 
+<<<<<<< HEAD
 GDLObj J3DDisplayListObj::sGDLObj;
 s32 J3DDisplayListObj::sInterruptFlag;
+=======
+>>>>>>> upstream/main

@@ -1,4 +1,8 @@
 #include "Game/Screen/GalaxyMapController.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/NPC/TalkDirector.hpp"
 #include "Game/Scene/SceneObjHolder.hpp"
@@ -633,8 +637,13 @@ void GalaxyMapController::capture() {
     Mtx44 projectionMtx;
     f32 halfHeight = MR::getScreenHeight() * 0.5f;
     f32 halfWidth = 304.0f;
+<<<<<<< HEAD
     C_MTXOrtho(projectionMtx, halfHeight, -halfHeight, -halfWidth, halfWidth, -1000.0f, 1000.0f);
     GXSetProjection(projectionMtx, GX_ORTHOGRAPHIC);
+=======
+    NebulaMtxOrtho(projectionMtx, halfHeight, -halfHeight, -halfWidth, halfWidth, -1000.0f, 1000.0f);
+    J3DNativeView::setProjection(projectionMtx, GX_ORTHOGRAPHIC);
+>>>>>>> upstream/main
     drawForCapture();
     _38->capture(0, 0, GX_TF_RGB565, true, 0);
 }

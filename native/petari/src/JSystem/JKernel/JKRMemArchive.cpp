@@ -4,7 +4,13 @@
 #include "JSystem/JKernel/JKRDvdRipper.hpp"
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JUtility/JUTException.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 #include <cstring>
 
 JKRMemArchive::JKRMemArchive() {
@@ -54,6 +60,7 @@ void JKRMemArchive::fixedInit(s32 entryNum) {
 }
 
 bool JKRMemArchive::mountFixed(void* a1, JKRMemBreakFlag breakFlag) {
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // The archive's identity is its address, as the console's cached address (0x80000000 | physical): never a disc
     // entry number, and unique per archive.
@@ -66,6 +73,19 @@ bool JKRMemArchive::mountFixed(void* a1, JKRMemBreakFlag breakFlag) {
     }
 
     fixedInit(identity);
+=======
+    // An archive mounted from memory has no disc entry (-1): mounting the same data again finds it.
+    for (JSUPtrLink* link = sVolumeList.mHead; link != nullptr; link = link->mNext) {
+        JKRArchive* const archive = reinterpret_cast< JKRArchive* >(link->mData);
+        if (archive->mLoaderType == RARC_MAGIC && archive->mMountMode == MOUNT_MODE_MEM && archive->mEntryNum < 0 &&
+            static_cast< JKRMemArchive* >(archive)->mHeader == a1) {
+            archive->_34++;
+            return false;
+        }
+    }
+
+    fixedInit(-1);
+>>>>>>> upstream/main
 
     if (!open(a1, 0xFFFF, breakFlag)) {
         return false;
@@ -104,7 +124,10 @@ bool JKRMemArchive::open(s32 entryNum, EMountDirection mountDir) {
         mHeader = reinterpret_cast< RarcHeader* >(pData);
 
         if (pData != nullptr) {
+<<<<<<< HEAD
             DCInvalidateRange(pData, size);
+=======
+>>>>>>> upstream/main
         }
     } else {
         u32 size;
@@ -115,7 +138,10 @@ bool JKRMemArchive::open(s32 entryNum, EMountDirection mountDir) {
         mHeader = reinterpret_cast< RarcHeader* >(pData);
 
         if (pData != nullptr) {
+<<<<<<< HEAD
             DCInvalidateRange(pData, size);
+=======
+>>>>>>> upstream/main
         }
     }
 

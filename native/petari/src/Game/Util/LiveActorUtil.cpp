@@ -748,18 +748,30 @@ namespace MR {
     }
 
     void setBaseTRMtx(LiveActor* pActor, MtxPtr pMtx) {
+<<<<<<< HEAD
         PSMTXCopy(pMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
     }
 
     void setBaseTRMtx(LiveActor* pActor, const TPos3f& rMtx) {
         PSMTXCopy((MtxPtr)rMtx.mMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
+=======
+        NebulaMtxCopy(pMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
+    }
+
+    void setBaseTRMtx(LiveActor* pActor, const TPos3f& rMtx) {
+        NebulaMtxCopy((MtxPtr)rMtx.mMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
+>>>>>>> upstream/main
     }
 
     void setBaseTRMtx(LiveActor* pActor, const TQuat4f& rQuat) {
         TPos3f mtx;
         mtx.setQT(rQuat, pActor->mPosition);
 
+<<<<<<< HEAD
         PSMTXCopy((MtxPtr)mtx.mMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
+=======
+        NebulaMtxCopy((MtxPtr)mtx.mMtx, (MtxPtr)&getJ3DModel(pActor)->mBaseTransformMtx);
+>>>>>>> upstream/main
     }
 
     void setBaseScale(LiveActor* pActor, const TVec3f& rScale) {
@@ -1807,7 +1819,11 @@ namespace MR {
     }
 
     bool isIntervalStep(const LiveActor* pActor, s32 step) {
+<<<<<<< HEAD
         return pActor->getNerveStep() % step == 0;
+=======
+        return (step != 0 ? pActor->getNerveStep() % step : pActor->getNerveStep()) == 0;
+>>>>>>> upstream/main
     }
 
     bool isNewNerve(const LiveActor* pActor) {

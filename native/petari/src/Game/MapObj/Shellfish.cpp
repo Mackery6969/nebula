@@ -318,7 +318,11 @@ void Shellfish::putItem() {
         pOffset = &::sKinokoOneUpOffset;
     }
 
+<<<<<<< HEAD
     PSMTXMultVec(getBaseMtx(), pOffset, &mItem->mPosition);
+=======
+    NebulaMtxMultVec(getBaseMtx(), pOffset, &mItem->mPosition);
+>>>>>>> upstream/main
 }
 
 Shellfish::~Shellfish() {

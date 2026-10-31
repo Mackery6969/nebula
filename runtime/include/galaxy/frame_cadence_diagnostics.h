@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // Phase timers and frame-token counters for the GX pipeline (gx_backend.cpp). They record into the active Session;
+=======
+// Phase timers and frame-token counters for the GX pipeline (render_core.cpp). They record into the active Session;
+>>>>>>> upstream/main
 // the host installs none, so each timer costs a null check.
 #pragma once
 
@@ -27,8 +31,11 @@ enum class TimingPhase : std::uint8_t {
     WorkerSnapshotCopy,
     RenderTextureInvalidation,
     RenderParserLockWait,
+<<<<<<< HEAD
     RenderDisplayListInvalidation,
     RenderDecodedVertexInvalidation,
+=======
+>>>>>>> upstream/main
     Count,
 };
 

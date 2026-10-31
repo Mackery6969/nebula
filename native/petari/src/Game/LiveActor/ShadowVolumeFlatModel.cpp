@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ShadowVolumeFlatModel.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/ModelUtil.hpp"
@@ -51,15 +55,25 @@ void ShadowVolumeFlatModel::loadModelDrawMtx() const {
         MR::preScaleMtx(rootMtx, controller->getHost()->mScale);
     }
 
+<<<<<<< HEAD
     PSMTXConcat(MR::getCameraViewMtx(), rootMtx, rootMtx);
     GXLoadPosMtxImm(rootMtx, mRootDrawMtxIndex);
+=======
+    NebulaMtxConcat(MR::getCameraViewMtx(), rootMtx, rootMtx);
+    J3DNativeShape::sendPosition(rootMtx, mRootDrawMtxIndex);
+>>>>>>> upstream/main
     calcDropJoint(&dropMtx, displacement);
     if (controller->isFollowHostScale()) {
         MR::preScaleMtx(dropMtx, controller->getHost()->mScale);
     }
 
+<<<<<<< HEAD
     PSMTXConcat(MR::getCameraViewMtx(), dropMtx, dropMtx);
     GXLoadPosMtxImm(dropMtx, mDropDrawMtxIndex);
+=======
+    NebulaMtxConcat(MR::getCameraViewMtx(), dropMtx, dropMtx);
+    J3DNativeShape::sendPosition(dropMtx, mDropDrawMtxIndex);
+>>>>>>> upstream/main
 }
 
 void ShadowVolumeFlatModel::calcRootJoint(TPos3f* pMtx, const TVec3f& rDisplacement) const {

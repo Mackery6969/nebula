@@ -23,6 +23,10 @@
 #include "Game/Util/SoundUtil.hpp"
 #include <revolution/mtx.h>
 #include <revolution/wpad.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     static const f32 mBaseRadius = 150.0f;
@@ -280,7 +284,11 @@ bool Tamakoro::receiveMsgEnemyAttack(u32 msg, HitSensor* pSender, HitSensor* pRe
 bool Tamakoro::receiveOtherMsg(u32 msg, HitSensor* pSender, HitSensor* pReceiver) {
     if (MR::isMsgAutoRushBegin(msg) && requestBind(pSender)) {
 #ifdef TARGET_PC
+<<<<<<< HEAD
         __NebulaGameContext(NEBULA_CONTEXT_TILT_SECTION, 1);
+=======
+        NebulaHost::gameContext(NEBULA_CONTEXT_TILT_SECTION, 1);
+>>>>>>> upstream/main
 #endif
         return true;
     }

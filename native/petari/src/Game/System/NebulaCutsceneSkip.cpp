@@ -1,4 +1,8 @@
 #include "Game/System/NebulaCutsceneSkip.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/AudioLib/AudSystem.hpp"
@@ -24,6 +28,10 @@
 #include "Game/Util/StarPointerUtil.hpp"
 #include <cstring>
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+>>>>>>> upstream/main
 
 namespace {
     enum State {
@@ -79,8 +87,13 @@ namespace {
     s32 sSteps = 0;
     s32 sFadeFrames = 0;
     s32 sFrameSteps = 0;
+<<<<<<< HEAD
     OSTick sFrameStart = 0;
     OSTime sSkipStart = 0;
+=======
+    s64 sFrameStart = 0;  // NebulaClock
+    s64 sSkipStart = 0;
+>>>>>>> upstream/main
 
     bool isGameSceneRunning() {
         GameSystem* pSystem = SingletonHolder< GameSystem >::get();
@@ -163,7 +176,11 @@ namespace {
         const bool isScene = isGameSceneRunning();
         const DemoDirector* pDirector = isScene ? getActiveDemo() : nullptr;
         const DemoExecutor* pExecutor = pDirector != nullptr ? getExecutor(pDirector) : nullptr;
+<<<<<<< HEAD
         OSReport("cutscene skip: %s (%s%s%s%s)\n", pWhat, MR::isActiveMoviePlayer() ? "movie" : "",
+=======
+        JUTNativeLog("cutscene skip: %s (%s%s%s%s)\n", pWhat, MR::isActiveMoviePlayer() ? "movie" : "",
+>>>>>>> upstream/main
                  isScene && GameSceneFunction::isExecScenarioOpeningCamera() ? "opening camera" : "",
                  pExecutor != nullptr && pExecutor->mSheetName != nullptr ? pExecutor->mSheetName : "",
                  pExecutor == nullptr && pDirector != nullptr && pDirector->_2C != nullptr ? pDirector->_2C->mName : "");
@@ -219,7 +236,11 @@ namespace {
         MR::openSystemWipeFade();
         mute(false);
         silenceSe(false);
+<<<<<<< HEAD
         OSReport("cutscene skip: done after %d steps (%s)\n", sSteps, pWhy);
+=======
+        JUTNativeLog("cutscene skip: done after %d steps (%s)\n", sSteps, pWhy);
+>>>>>>> upstream/main
     }
 };  // namespace
 
@@ -279,7 +300,11 @@ namespace NebulaCutsceneSkip {
             if (!sWindow->isSelectedYes() || !isSkippableNow()) {
                 sState = State_Idle;
                 mute(false);
+<<<<<<< HEAD
                 OSReport("cutscene skip: declined\n");
+=======
+                JUTNativeLog("cutscene skip: declined\n");
+>>>>>>> upstream/main
                 break;
             }
             sState = State_FadeOut;
@@ -301,7 +326,11 @@ namespace NebulaCutsceneSkip {
             sStallSteps = 0;
             sMovieSkip = MR::isActiveMoviePlayer();
             sSkipDemo = !sMovieSkip;
+<<<<<<< HEAD
             sSkipStart = OSGetTime();
+=======
+            sSkipStart = NebulaClock::nowNs();
+>>>>>>> upstream/main
             silenceSe(true);
             report("skipping");
             break;
@@ -314,7 +343,11 @@ namespace NebulaCutsceneSkip {
                 pEnd = "the scene ended";
             } else if (GameSequenceFunction::isActiveSaveDataHandleSequence()) {
                 pEnd = "a save";
+<<<<<<< HEAD
             } else if (OSTicksToMicroseconds(OSGetTime() - sSkipStart) >= cSkipMaxMicros) {
+=======
+            } else if ((NebulaClock::nowNs() - sSkipStart) / 1000 >= cSkipMaxMicros) {
+>>>>>>> upstream/main
                 pEnd = "time";
             } else if (sSkipDemo && isStalled()) {
                 pEnd = "waits on the player";
@@ -351,10 +384,17 @@ namespace NebulaCutsceneSkip {
             return false;
         }
         if (sFrameSteps == 0) {
+<<<<<<< HEAD
             sFrameStart = OSGetTick();
         }
         if (sFrameSteps >= cStepsPerFrameMax ||
             OSTicksToMicroseconds(OSDiffTick(OSGetTick(), sFrameStart)) >= cStepBudgetMicros) {
+=======
+            sFrameStart = NebulaClock::nowNs();
+        }
+        if (sFrameSteps >= cStepsPerFrameMax ||
+            (NebulaClock::nowNs() - sFrameStart) / 1000 >= cStepBudgetMicros) {
+>>>>>>> upstream/main
             sFrameSteps = 0;
             return false;
         }

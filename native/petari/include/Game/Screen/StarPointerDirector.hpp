@@ -1,13 +1,17 @@
 #pragma once
 
 #include "Game/Screen/StarPointerGuidance.hpp"
+<<<<<<< HEAD
 #include "Game/System/DrawSyncManager.hpp"
+=======
+>>>>>>> upstream/main
 #include <JSystem/JGeometry/TMatrix.hpp>
 
 class StarPointerController;
 class StarPointerLayout;
 class DpdInfo;
 
+<<<<<<< HEAD
 class StarPointerPeekZ : public DrawSyncCallback {
 public:
     StarPointerPeekZ();
@@ -17,6 +21,17 @@ public:
     void setDrawSyncToken();
 
     /* 0x04 */ u16 mToken;
+=======
+class StarPointerPeekZ {
+public:
+    StarPointerPeekZ();
+
+    // The depth under each pointer, from the picture where the drawing has reached (its readback channel).
+    void setDrawSyncToken();
+
+    static const u32 cReadbackChannel = 1;
+
+>>>>>>> upstream/main
     /* 0x08 */ DpdInfo** mInfos;
     /* 0x0C */ f32 mProjectionParameters[7];
     /* 0x28 */ f32 mViewportParameters[6];

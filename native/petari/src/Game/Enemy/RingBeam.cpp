@@ -1,4 +1,10 @@
 #include "Game/Enemy/RingBeam.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/AudioLib/AudAnmSoundObject.hpp"
 #include "Game/LiveActor/HitSensor.hpp"
 #include "Game/LiveActor/ModelObj.hpp"
@@ -54,7 +60,11 @@ void RingBeamShadowDrawer::drawShape() const {
     baseMtxCopy.getXDir(XDir);
     baseMtxCopy.getYDir(YDir);
     baseMtxCopy.getTrans(Trans);
+<<<<<<< HEAD
     PSMTXRotAxisRad(mtx, &YDir, f1);
+=======
+    NebulaMtxRotAxisRad(mtx, &YDir, f1);
+>>>>>>> upstream/main
     XDirScaled.scale(_20, XDir);
     f32 f2 = 0.0f;
     for (int i = 0; i < 32; i++) {
@@ -74,10 +84,17 @@ void RingBeamShadowDrawer::drawShape() const {
         MtxList[i][1][3] = temp.y;
         MtxList[i][2][3] = temp.z;
 
+<<<<<<< HEAD
         PSMTXMultVec(mtx, &XDirScaled, &XDirScaled);
     }
 
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 64);
+=======
+        NebulaMtxMultVec(mtx, &XDirScaled, &XDirScaled);
+    }
+
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 64, 0);
+>>>>>>> upstream/main
     for (int i = 0; i < 32; i++) {
         MtxList[i].getXDir(listXDir);
         MtxList[i].getTrans(Trans);
@@ -85,12 +102,20 @@ void RingBeamShadowDrawer::drawShape() const {
         listXDirScaledPos.scale(5.0f, listXDir);
         temp.add(Trans, listXDirScaledNeg);
         temp2.add(Trans, listXDirScaledPos);
+<<<<<<< HEAD
         GXPosition3f32(temp2.x, temp2.y, temp2.z);
         GXPosition3f32(temp.x, temp.y, temp.z);
     }
     GXEnd();
 
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 64);
+=======
+        J3DNativeDraw::position(temp2.x, temp2.y, temp2.z);
+        J3DNativeDraw::position(temp.x, temp.y, temp.z);
+    }
+
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 64, 0);
+>>>>>>> upstream/main
     for (int i = 0; i < 32; i++) {
         MtxList[i].getXDir(listXDir);
         MtxList[i].getYDir(listYDir);
@@ -103,12 +128,20 @@ void RingBeamShadowDrawer::drawShape() const {
         temp2.add(Trans, listXDirScaledPos);
         temp.add(negYDirScaled);
         temp2.add(negYDirScaled);
+<<<<<<< HEAD
         GXPosition3f32(temp.x, temp.y, temp.z);
         GXPosition3f32(temp2.x, temp2.y, temp2.z);
     }
     GXEnd();
 
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 64);
+=======
+        J3DNativeDraw::position(temp.x, temp.y, temp.z);
+        J3DNativeDraw::position(temp2.x, temp2.y, temp2.z);
+    }
+
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 64, 0);
+>>>>>>> upstream/main
     for (int i = 0; i < 32; i++) {
         MtxList[i].getXDir(listXDir);
         MtxList[i].getYDir(listYDir);
@@ -119,12 +152,20 @@ void RingBeamShadowDrawer::drawShape() const {
         temp.add(Trans, listXDirScaledNeg);
         temp2.add(Trans, listXDirScaledNeg);
         temp2.add(negYDirScaled);
+<<<<<<< HEAD
         GXPosition3f32(temp.x, temp.y, temp.z);
         GXPosition3f32(temp2.x, temp2.y, temp2.z);
     }
     GXEnd();
 
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 64);
+=======
+        J3DNativeDraw::position(temp.x, temp.y, temp.z);
+        J3DNativeDraw::position(temp2.x, temp2.y, temp2.z);
+    }
+
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, 64, 0);
+>>>>>>> upstream/main
     for (int i = 0; i < 32; i++) {
         MtxList[i].getXDir(listXDir);
         MtxList[i].getYDir(listYDir);
@@ -135,6 +176,7 @@ void RingBeamShadowDrawer::drawShape() const {
         temp.add(Trans, listXDirScaledPos);
         temp2.add(Trans, listXDirScaledPos);
         temp2.add(negYDirScaled);
+<<<<<<< HEAD
         GXPosition3f32(temp2.x, temp2.y, temp2.z);
         GXPosition3f32(temp.x, temp.y, temp.z);
     }
@@ -147,6 +189,16 @@ void RingBeamShadowDrawer::loadModelDrawMtx() const {
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
+=======
+        J3DNativeDraw::position(temp2.x, temp2.y, temp2.z);
+        J3DNativeDraw::position(temp.x, temp.y, temp.z);
+    }
+}
+
+void RingBeamShadowDrawer::loadModelDrawMtx() const {
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+>>>>>>> upstream/main
 };
 
 bool RingBeamShadowDrawer::isDraw() const {

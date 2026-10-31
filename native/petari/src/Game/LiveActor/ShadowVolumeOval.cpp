@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ShadowVolumeOval.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include "Game/Util/MathUtil.hpp"
@@ -73,8 +77,13 @@ void ShadowVolumeOval::loadModelDrawMtx() const {
 
     mtx.setXDir(side);
     mtx.setZDir(front);
+<<<<<<< HEAD
     PSMTXConcat(MR::getCameraViewMtx(), mtx, mtx);
     GXLoadPosMtxImm(mtx, 0);
+=======
+    NebulaMtxConcat(MR::getCameraViewMtx(), mtx, mtx);
+    J3DNativeShape::sendPosition(mtx, 0);
+>>>>>>> upstream/main
 }
 
 void ShadowVolumeOval::setSize(const TVec3f& rSize) {

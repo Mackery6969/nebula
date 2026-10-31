@@ -181,7 +181,11 @@ void FireBar::updateHitSensor(HitSensor* pSensor) {
 
     TVec3f position = mPosition;
 
+<<<<<<< HEAD
     s32 fireBallCount = mFireBallCount / mStickCount;
+=======
+    s32 fireBallCount = mStickCount != 0 ? mFireBallCount / mStickCount : 0;
+>>>>>>> upstream/main
 
     TVec3f up;
     MR::calcUpVec(&up, this);
@@ -224,18 +228,31 @@ void FireBar::updateHitSensor(HitSensor* pSensor) {
 // meh
 void FireBar::initFireBarBall(const JMapInfoIter& rIter) {
     mFireBalls = new FireBarBall*[mFireBallCount];
+<<<<<<< HEAD
     s32 totalNum = mFireBallCount / mStickCount;
+=======
+    s32 totalNum = mStickCount != 0 ? mFireBallCount / mStickCount : 0;
+>>>>>>> upstream/main
     f32 startVal = 0.0f;
 
     for (s32 i = 0; i < mFireBallCount; i++) {
         mFireBalls[i] = new FireBarBall(this);
         mFireBalls[i]->init(rIter);
         MR::startBtk(mFireBalls[i], "FireBarBall");
+<<<<<<< HEAD
         s32 div = i / totalNum;
         div *= totalNum;
 
         startVal = !(i - div) ? 0.0f : 25.0f + startVal;
         startVal = static_cast< s32 >(startVal) % static_cast< s32 >(MR::getBtkFrameMax(mFireBalls[i]));
+=======
+        s32 div = totalNum != 0 ? i / totalNum : 0;
+        div *= totalNum;
+
+        startVal = !(i - div) ? 0.0f : 25.0f + startVal;
+        const s32 frameMax = MR::getBtkFrameMax(mFireBalls[i]);
+        startVal = frameMax != 0 ? static_cast< s32 >(startVal) % frameMax : static_cast< s32 >(startVal);
+>>>>>>> upstream/main
         MR::setBtkFrame(mFireBalls[i], startVal);
     }
 
@@ -249,10 +266,17 @@ void FireBar::fixFireBarBall() {
     TVec3f final_pos;
     final_pos.zero();
 
+<<<<<<< HEAD
     s32 totalNum = mFireBallCount / mStickCount;
 
     for (s32 i = 0; i < mFireBallCount; i++) {
         s32 div = i / totalNum;
+=======
+    s32 totalNum = mStickCount != 0 ? mFireBallCount / mStickCount : 0;
+
+    for (s32 i = 0; i < mFireBallCount; i++) {
+        s32 div = totalNum != 0 ? i / totalNum : 0;
+>>>>>>> upstream/main
         div *= totalNum;
 
         if (i - div == 0) {

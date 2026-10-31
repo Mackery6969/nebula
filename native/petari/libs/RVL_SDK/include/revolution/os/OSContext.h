@@ -29,6 +29,7 @@ typedef struct OSContext {
 #endif
 } OSContext;
 
+<<<<<<< HEAD
 #define OS_CONTEXT_R0       0
 #define OS_CONTEXT_R1       4
 #define OS_CONTEXT_R2       8
@@ -104,6 +105,8 @@ typedef struct OSContext {
 #define OS_CONTEXT_PSF30    696
 #define OS_CONTEXT_PSF31    704
 
+=======
+>>>>>>> upstream/main
 void OSSetCurrentContext(OSContext *);
 OSContext* OSGetCurrentContext(void);
 u32 OSSaveContext(OSContext *);

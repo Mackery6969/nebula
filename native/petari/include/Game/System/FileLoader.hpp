@@ -1,12 +1,22 @@
 #pragma once
 
 #include "Game/System/ArchiveHolder.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/System/FileHolder.hpp"
 #include "Game/System/FileLoaderThread.hpp"
 #include <JSystem/JKernel/JKRDvdRipper.hpp>
 #include <JSystem/JKernel/JKRHeap.hpp>
 #include <cstdio>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class JKRArchive;
 
@@ -31,7 +41,11 @@ public:
     RequestFileInfo* addRequest(const char*);
 
     /* 0x00 */ FileLoaderThread* mLoaderThread;
+<<<<<<< HEAD
     /* 0x04 */ OSMutex mMutex;
+=======
+    /* 0x04 */ NebulaMutex mMutex;
+>>>>>>> upstream/main
     /* 0x1C */ RequestFileInfo* mRequestFileInfos;
     /* 0x20 */ s32 mRequestedFileCount;
     /* 0x24 */ FileHolder* mFileHolder;

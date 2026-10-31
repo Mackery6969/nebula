@@ -4,9 +4,12 @@
 
 class CoinCounter;
 class MarioMeter;
+<<<<<<< HEAD
 #ifdef TARGET_PC
 class NebulaStarCounter;
 #endif
+=======
+>>>>>>> upstream/main
 class PlayerLeft;
 class StarCounter;
 class StarPieceCounter;
@@ -43,10 +46,13 @@ public:
     /* 0x30 */ PlayerLeft* mPlayerLeft;
     /* 0x34 */ StarCounter* mStarCounter;
     /* 0x38 */ MarioMeter* mHPMeter;
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // The Personal Star Counter's two under the save's star counter (this room's, every star's): shown and hidden
     // with it.
     NebulaStarCounter* mRoomStarCounter;
     NebulaStarCounter* mAllTimeStarCounter;
 #endif
+=======
+>>>>>>> upstream/main
 };

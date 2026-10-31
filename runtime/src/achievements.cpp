@@ -10,7 +10,10 @@
 #include <iomanip>
 #include <map>
 #include <mutex>
+<<<<<<< HEAD
 #include <optional>
+=======
+>>>>>>> upstream/main
 #include <sstream>
 #include <string>
 #include <thread>
@@ -95,6 +98,7 @@ void load_locked(State& s) {
     }
 }
 
+<<<<<<< HEAD
 // A time as the file keeps it: ISO 8601, UTC.
 std::string format_utc(std::time_t time) {
     std::tm utc{};
@@ -122,6 +126,8 @@ std::optional<std::time_t> parse_utc(const std::string& text) {
     return time;
 }
 
+=======
+>>>>>>> upstream/main
 void write_waiting() {
     State& s = state();
     const std::lock_guard<std::mutex> io(s.io);
@@ -165,18 +171,34 @@ const Info* find(std::string_view id) noexcept {
 }
 
 bool unlock(std::string_view id) {
+<<<<<<< HEAD
     const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     return unlock_at(id, static_cast<std::int64_t>(now));
 }
 
 bool unlock_at(std::string_view id, std::int64_t when) {
+=======
+>>>>>>> upstream/main
     if (find(id) == nullptr) return false;
     State& s = state();
     {
         const std::lock_guard<std::mutex> lock(s.mutex);
         load_locked(s);
         if (s.unlocked.count(std::string(id)) != 0u) return false;
+<<<<<<< HEAD
         s.unlocked[std::string(id)] = format_utc(static_cast<std::time_t>(when));
+=======
+        const std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        std::tm utc{};
+#if defined(_WIN32)
+        gmtime_s(&utc, &now);
+#else
+        gmtime_r(&now, &utc);
+#endif
+        char when[32];
+        std::strftime(when, sizeof(when), "%Y-%m-%dT%H:%M:%SZ", &utc);
+        s.unlocked[std::string(id)] = when;
+>>>>>>> upstream/main
         s.dirty = true;
         if (!s.writer) {
             s.writer = true;
@@ -194,7 +216,11 @@ bool unlocked(std::string_view id) {
     return s.unlocked.count(std::string(id)) != 0u;
 }
 
+<<<<<<< HEAD
 std::int64_t unlocked_time(std::string_view id) {
+=======
+int unlocked_date(std::string_view id) {
+>>>>>>> upstream/main
     std::string when;
     {
         State& s = state();
@@ -204,6 +230,7 @@ std::int64_t unlocked_time(std::string_view id) {
         if (it == s.unlocked.end()) return 0;
         when = it->second;
     }
+<<<<<<< HEAD
     return static_cast<std::int64_t>(parse_utc(when).value_or(0));
 }
 
@@ -216,6 +243,23 @@ int unlocked_date(std::string_view id) {
     if (time <= 0 || localtime_s(&local, &time) != 0) return 1;
 #else
     if (time <= 0 || localtime_r(&time, &local) == nullptr) return 1;
+=======
+    // Unlocked on a day that cannot be read (an edited file): 1, still unlocked.
+    std::tm utc{};
+    std::istringstream in(when);
+    in >> std::get_time(&utc, "%Y-%m-%dT%H:%M:%SZ");
+    if (in.fail()) return 1;
+#if defined(_WIN32)
+    const std::time_t time = _mkgmtime(&utc);
+#else
+    const std::time_t time = timegm(&utc);
+#endif
+    std::tm local{};
+#if defined(_WIN32)
+    if (time == static_cast<std::time_t>(-1) || localtime_s(&local, &time) != 0) return 1;
+#else
+    if (time == static_cast<std::time_t>(-1) || localtime_r(&time, &local) == nullptr) return 1;
+>>>>>>> upstream/main
 #endif
     return (local.tm_year + 1900) * 10000 + (local.tm_mon + 1) * 100 + local.tm_mday;
 }
@@ -224,7 +268,11 @@ void flush() {
     write_waiting();
 }
 
+<<<<<<< HEAD
 void set_file(const std::filesystem::path& path) {
+=======
+void set_path_for_tests(const std::filesystem::path& path) {
+>>>>>>> upstream/main
     write_waiting();
     State& s = state();
     const std::lock_guard<std::mutex> io(s.io);
@@ -234,8 +282,11 @@ void set_file(const std::filesystem::path& path) {
     s.dirty = false;
     s.unlocked.clear();
 }
+<<<<<<< HEAD
 
 void set_path_for_tests(const std::filesystem::path& path) {
     set_file(path);
 }
+=======
+>>>>>>> upstream/main
 }  // namespace galaxy::achievements

@@ -6,7 +6,10 @@
 #include "nw4r/ut/LinkList.h"
 #include <cstddef>
 #include <new>
+<<<<<<< HEAD
 #include <revolution/mem.h>
+=======
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace ut {
@@ -45,9 +48,16 @@ namespace nw4r {
         public:
             Layout();
 
+<<<<<<< HEAD
             static void* AllocMemory(u32 size) { return MEMAllocFromAllocator(mspAllocator, size); }
 
             static void FreeMemory(void* mem) { MEMFreeToAllocator(mspAllocator, mem); }
+=======
+            // From the game's current heap (the console took an allocator the game set; it always set new/delete).
+            static void* AllocMemory(u32 size) { return new u8[size]; }
+
+            static void FreeMemory(void* mem) { delete[] static_cast< u8* >(mem); }
+>>>>>>> upstream/main
 
             virtual ~Layout();
             virtual bool Build(const void*, ResourceAccessor*);
@@ -69,8 +79,11 @@ namespace nw4r {
 
             GroupContainer* GetGroupContainer() const { return mpGroupContainer; }
 
+<<<<<<< HEAD
             static MEMAllocator* mspAllocator;
 
+=======
+>>>>>>> upstream/main
             template < typename T >
             static T* NewObj();
 

@@ -1,4 +1,10 @@
 #include "Game/Ride/SwingRope.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/HitSensor.hpp"
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Ride/SledRopePoint.hpp"
@@ -17,6 +23,7 @@
 #include "Game/Util/PlayerUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include <JSystem/JUtility/JUTTexture.hpp>
+<<<<<<< HEAD
 #include <revolution/gx/GXCull.h>
 #include <revolution/gx/GXEnum.h>
 #include <revolution/gx/GXGeometry.h>
@@ -25,6 +32,11 @@
 #include <revolution/gx/GXTev.h>
 #include <revolution/gx/GXTransform.h>
 #include <revolution/gx/GXVert.h>
+=======
+#include <revolution/gx/GXEnum.h>
+#include <revolution/gx/GXGeometry.h>
+#include <revolution/gx/GXTransform.h>
+>>>>>>> upstream/main
 #include <revolution/mtx.h>
 #include <revolution/wpad.h>
 
@@ -702,25 +714,42 @@ void SwingRope::updateHangLowerPointPos(s32 index) {
 
 namespace {
     void sendPoint(const TVec3f& pos, const TVec3f& side, const TVec3f& front, f32 x, f32 y, u32 color, f32 texX, f32 texY) {
+<<<<<<< HEAD
         GXPosition3f32(pos.x + side.x * x + front.x * y, pos.y + side.y * x + front.y * y, pos.z + side.z * x + front.z * y);
         GXColor1u32(color);
         GXTexCoord2f32(texX, texY);
+=======
+        J3DNativeDraw::position(pos.x + side.x * x + front.x * y, pos.y + side.y * x + front.y * y, pos.z + side.z * x + front.z * y);
+        J3DNativeDraw::color(color);
+        J3DNativeDraw::texCoord(texX, texY);
+>>>>>>> upstream/main
     }
 
     void drawPolygon(const TVec3f& posA, const TVec3f& posB, const TVec3f& side, const TVec3f& front, f32 x1, f32 y1, f32 x2, f32 y2, u32 color1,
                      u32 color2, f32 texY1, f32 texY2) {
+<<<<<<< HEAD
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 4);
+=======
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 4, NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
         {
             sendPoint(posA, side, front, x1, y1, color1, 0.0f, texY1);
             sendPoint(posA, side, front, x2, y2, color2, 1.0f, texY1);
             sendPoint(posB, side, front, x1, y1, color1, 0.0f, texY2);
             sendPoint(posB, side, front, x2, y2, color2, 1.0f, texY2);
         }
+<<<<<<< HEAD
         GXEnd();
     }
 
     void drawLine(const SwingRope* pRope, u32 color1, u32 color2, f32 x1, f32 y1, f32 x2, f32 y2) {
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, (pRope->mNumPoints + 1) * 2);
+=======
+    }
+
+    void drawLine(const SwingRope* pRope, u32 color1, u32 color2, f32 x1, f32 y1, f32 x2, f32 y2) {
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, (pRope->mNumPoints + 1) * 2, NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
         {
             const TVec3f& front = pRope->mPoints[0]->getFront();
             const TVec3f& side = pRope->mPoints[0]->getSide();
@@ -740,11 +769,18 @@ namespace {
                 sendPoint(pos, side, front, x2, y2, color2, 1.0f, ::sTexRate * (idx + 1));
             }
         }
+<<<<<<< HEAD
         GXEnd();
     }
 
     void drawLineAtHanging(const SwingRope* pRope, u32 color1, u32 color2, f32 texY1, f32 texY2, f32 x1, f32 y1, f32 x2, f32 y2) {
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, (pRope->mNumPoints + 1) * 2);
+=======
+    }
+
+    void drawLineAtHanging(const SwingRope* pRope, u32 color1, u32 color2, f32 texY1, f32 texY2, f32 x1, f32 y1, f32 x2, f32 y2) {
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, (pRope->mNumPoints + 1) * 2, NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
         {
             const TVec3f& front = pRope->mPoints[0]->getFront();
             const TVec3f& side = pRope->mPoints[0]->getSide();
@@ -764,7 +800,10 @@ namespace {
                 sendPoint(pos, side, front, x2, y2, color2, 1.0f, ::sTexRate * (idx + 1));
             }
         }
+<<<<<<< HEAD
         GXEnd();
+=======
+>>>>>>> upstream/main
     }
 };  // namespace
 
@@ -813,6 +852,7 @@ SwingRopeGroup::SwingRopeGroup(const char* pName) : NameObj(pName) {
 }
 
 void SwingRopeGroup::initDraw() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_POS_XYZ, GX_RGBA8, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_POS_XYZ, GX_F32, 0);
@@ -846,4 +886,30 @@ void SwingRopeGroup::initDraw() const {
     GXSetZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
     GXSetZCompLoc(GX_DISABLE);
     GXSetCullMode(GX_CULL_NONE);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_DISABLE, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_DISABLE, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, 60, GX_FALSE, 125);
+    mTexture->load(GX_TEXMAP0);
+
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    J3DNativeState::setAlphaCompare(GX_GREATER, 0, GX_AOP_OR, GX_GREATER, 0);
+
+    J3DNativeState::setZMode(GX_ENABLE, GX_LEQUAL, GX_ENABLE);
+    J3DNativeState::setZCompLoc(GX_DISABLE);
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+>>>>>>> upstream/main
 }

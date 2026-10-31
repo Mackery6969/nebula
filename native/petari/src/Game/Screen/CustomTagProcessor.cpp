@@ -1,4 +1,8 @@
 #include "Game/Screen/CustomTagProcessor.hpp"
+<<<<<<< HEAD
+=======
+#include <revolution/sc.h>
+>>>>>>> upstream/main
 #include "Game/Screen/ReplaceTagProcessor.hpp"
 #include "Game/System/Language.hpp"
 #include "Game/Util/MemoryUtil.hpp"
@@ -425,11 +429,15 @@ void CustomTagProcessor::setArgString(const wchar_t* string, s32 index) {
             break;
         }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
         tag.setParamString(string);
 #else
         *reinterpret_cast< const wchar_t** >(tag.getParamPtr(0)) = string;
 #endif
+=======
+        tag.setParamString(string);
+>>>>>>> upstream/main
     }
 }
 
@@ -666,11 +674,15 @@ CustomTagProcessor::Operation CustomTagProcessor::exeStringGroup(nw4r::ut::Rect*
     }
 #endif
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
     writeString(rect, tag.getParamString(), context);
 #else
     writeString(rect, *reinterpret_cast< const wchar_t** >(tag.getParamPtr(0)), context);
 #endif
+=======
+    writeString(rect, tag.getParamString(), context);
+>>>>>>> upstream/main
     return OPERATION_DEFAULT;
 }
 
@@ -737,7 +749,11 @@ CustomTagProcessor::Operation CustomTagProcessor::exeSystemGroupRuby(nw4r::ut::R
 
         rubyWriter.MoveCursorY(mRubyBaseLineOffset + -writer->GetFontAscent());
         CustomTagAlphaCtrl alpha = mAlphaCtrl;
+<<<<<<< HEAD
         s32 index = rubyLength * alpha.mCharIndex / baseLength;
+=======
+        s32 index = baseLength != 0 ? rubyLength * alpha.mCharIndex / baseLength : 0;
+>>>>>>> upstream/main
         f32 interval = (baseLength * alpha.mCharInterval) / rubyLength;
         mAlphaCtrl.mCharInterval = interval;
         mAlphaCtrl.mCharIndex = index;

@@ -7,6 +7,7 @@ project(NebulaSDL LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+<<<<<<< HEAD
 # The host's SIMD kernels (galaxy/simd128.h) use SSSE3 on x86-64: MSVC allows it without a flag and Android's x86_64
 # ABI includes it, but desktop Linux's default x86-64 target has only SSE2.
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$" AND NOT ANDROID)
@@ -15,6 +16,14 @@ endif()
 
 get_filename_component(nebula_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 set(NEBULA_DEPS "D:/NebulaWork/deps" CACHE PATH "Folder of the dependency checkouts")
+=======
+
+get_filename_component(nebula_root "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+set(NEBULA_DEPS "" CACHE PATH "Folder of the dependency checkouts")
+if(NOT IS_DIRECTORY "${NEBULA_DEPS}")
+    message(FATAL_ERROR "Set NEBULA_DEPS to the folder of the dependency checkouts (platform/android/build_apk.ps1 -Deps)")
+endif()
+>>>>>>> upstream/main
 set(NEBULA_VULKAN_HEADERS_DIR "${NEBULA_DEPS}/Vulkan-Headers-vulkan-sdk-1.4.350.1" CACHE PATH "Vulkan-Headers")
 set(NEBULA_VOLK_DIR "${NEBULA_DEPS}/volk-vulkan-sdk-1.4.350.1" CACHE PATH "volk")
 set(NEBULA_VMA_DIR "${NEBULA_DEPS}/VulkanMemoryAllocator-v3.4.0" CACHE PATH "VulkanMemoryAllocator")
@@ -49,13 +58,21 @@ target_link_libraries(nebula_vulkan_deps INTERFACE glslang SPIRV glslang-default
 set(galaxy_uber_embed_cpp "${CMAKE_CURRENT_BINARY_DIR}/generated/uber_shader_embed.cpp")
 set(galaxy_uber_embed_body "")
 foreach(stage vs ps)
+<<<<<<< HEAD
     set(hlsl "${nebula_root}/runtime/src/gx/uber_${stage}.hlsl")
+=======
+    set(hlsl "${nebula_root}/runtime/src/render/uber_${stage}.hlsl")
+>>>>>>> upstream/main
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${hlsl}")
     file(READ "${hlsl}" hex HEX)
     string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," hex "${hex}")
     string(APPEND galaxy_uber_embed_body "extern const char galaxy_uber_${stage}_hlsl[] = {${hex}0x00};\n")
 endforeach()
+<<<<<<< HEAD
 file(CONFIGURE OUTPUT "${galaxy_uber_embed_cpp}" CONTENT "namespace galaxy::gx {\n${galaxy_uber_embed_body}}\n" @ONLY)
+=======
+file(CONFIGURE OUTPUT "${galaxy_uber_embed_cpp}" CONTENT "namespace galaxy::render {\n${galaxy_uber_embed_body}}\n" @ONLY)
+>>>>>>> upstream/main
 
 # The post-processing passes' sources (post_process_vk.cpp compiles them on the device).
 include("${nebula_root}/cmake/post_shader_sources.cmake")
@@ -64,7 +81,11 @@ galaxy_embed_post_sources("${galaxy_post_embed_cpp}" "${nebula_root}")
 
 set(rt "${nebula_root}/runtime/src")
 add_library(galaxy_gx_vk STATIC
+<<<<<<< HEAD
     ${rt}/gx/gx_shim.cpp
+=======
+    ${rt}/gx/renderer_api.cpp
+>>>>>>> upstream/main
     ${rt}/gx/gx_state.cpp
     ${rt}/gx/frame_completion.cpp
     ${rt}/gx/render_config.cpp
@@ -76,6 +97,10 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/gx/movie_replacement.cpp
     ${rt}/gx/vertex_loader.cpp
     ${rt}/gx/curved_surfaces.cpp
+<<<<<<< HEAD
+=======
+    ${rt}/gx/native_shapes.cpp
+>>>>>>> upstream/main
     ${rt}/gx/shader_keys.cpp
     ${rt}/gx/efb_copy.cpp
     ${rt}/gx/line_point_raster.cpp
@@ -85,7 +110,11 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/gx/post_process_settings.cpp
     ${rt}/gx/transform_history.cpp
     ${rt}/gx/fifo_parser.cpp
+<<<<<<< HEAD
     ${rt}/gx/gx_backend.cpp
+=======
+    ${rt}/gx/render_core.cpp
+>>>>>>> upstream/main
     ${rt}/gx/game_lights.cpp
     ${rt}/gx/game_objects.cpp
     ${rt}/gx/rt_tev_eval.cpp
@@ -115,6 +144,7 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/runtime_settings.cpp
     ${rt}/achievements.cpp
     ${rt}/stats.cpp
+<<<<<<< HEAD
     ${rt}/controller_roster.cpp
     ${rt}/coop_menu.cpp
     ${rt}/coop_saves.cpp
@@ -126,6 +156,8 @@ add_library(galaxy_gx_vk STATIC
     ${rt}/net/udp.cpp
     ${rt}/net/link.cpp
     ${rt}/net/direct_transport.cpp
+=======
+>>>>>>> upstream/main
     ${rt}/input_bindings.cpp
     ${rt}/host_pointer_events.cpp
     ${rt}/native_input.cpp
@@ -170,7 +202,10 @@ set(host_sources
     "${nebula_root}/native/host/host_main.cpp"
     "${nebula_root}/runtime/src/native_thp_video.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/host_window_sdl.cpp"
+<<<<<<< HEAD
     "${CMAKE_CURRENT_SOURCE_DIR}/native_settings_sdl.cpp"
+=======
+>>>>>>> upstream/main
     "${CMAKE_CURRENT_SOURCE_DIR}/display_clock.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/thread_sampler.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/native_game_host_sdl.cpp")
@@ -187,5 +222,9 @@ target_include_directories(main PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(main PRIVATE galaxy_gx_vk SDL3::SDL3)
 
 # The vector kernels against their references on this platform's CPU (NEON on AArch64).
+<<<<<<< HEAD
 add_executable(nebula_simd_kernel_tests "${nebula_root}/runtime/src/gx/simd_kernel_tests.cpp")
+=======
+add_executable(nebula_simd_kernel_tests "${nebula_root}/runtime/src/render/simd_kernel_tests.cpp")
+>>>>>>> upstream/main
 target_link_libraries(nebula_simd_kernel_tests PRIVATE galaxy_gx_vk)

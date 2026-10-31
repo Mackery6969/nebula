@@ -1,4 +1,5 @@
 #include "Game/System/GameSystemException.hpp"
+<<<<<<< HEAD
 #include "Game/System/GameSystem.hpp"
 #include "Game/System/GameSystemObjHolder.hpp"
 #include "Game/Util/GamePadUtil.hpp"
@@ -32,10 +33,17 @@ namespace {
 void GameSystemException::init() {
     JUTDirectPrint* pDirectPrint = JUTDirectPrint::start();
 
+=======
+#include <JSystem/JUtility/JUTAssert.hpp>
+#include <JSystem/JUtility/JUTConsole.hpp>
+
+void GameSystemException::init() {
+>>>>>>> upstream/main
     JUTAssertion::create();
     JUTAssertion::changeDisplayTime(600);
     JUTAssertion::changeDevice(3);
     JUTConsoleManager::createManager(nullptr);
+<<<<<<< HEAD
     JUTException::create(pDirectPrint);
     JUTException::createConsole(new u8[0x24FC], 0x24FC);
     JUTException::setPreUserCallback(GameSystemException::handleException);
@@ -97,4 +105,6 @@ void GameSystemException::handleException(OSError error, OSContext* pContext, u3
             }
         }
     }
+=======
+>>>>>>> upstream/main
 }

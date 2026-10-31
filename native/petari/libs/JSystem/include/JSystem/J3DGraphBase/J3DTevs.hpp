@@ -2,7 +2,10 @@
 
 #include "Inline.hpp"
 
+<<<<<<< HEAD
 #include "JSystem/J3DGraphBase/J3DGD.hpp"
+=======
+>>>>>>> upstream/main
 #include "JSystem/J3DGraphBase/J3DStruct.hpp"
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
 #include <revolution/gx.h>
@@ -60,8 +63,11 @@ public:
         mInfo = j3dDefaultLightInfo;
     }
 
+<<<<<<< HEAD
     void load(u32) const;
 
+=======
+>>>>>>> upstream/main
     J3DLightInfo* getLightInfo() {
         return &mInfo;
     }
@@ -75,6 +81,12 @@ public:
     /* 0x34 */ GXLightObj mLightObj;
 };  // Size = 0x74
 
+<<<<<<< HEAD
+=======
+// One TEV stage as GX's functions take it: the colour and alpha inputs (GXTevColorArg, GXTevAlphaArg), operations
+// (GXTevOp, compare operations included), bias, scale, clamp and output register, and the swap tables the
+// rasterised colour and the texture read through.
+>>>>>>> upstream/main
 struct J3DTevStage {
     J3DTevStage() {
 #ifdef J3D_TEV_STAGE_MUTABLE_DEFAULTS
@@ -84,6 +96,7 @@ struct J3DTevStage {
         setTevStageInfo(j3dDefaultTevStageInfo);
         setTevSwapModeInfo(j3dDefaultTevSwapMode);
 #endif
+<<<<<<< HEAD
     }
 
     void setTevColorOp(u8 param_1, u8 param_2, u8 param_3, u8 param_4, u8 param_5) {
@@ -123,6 +136,43 @@ struct J3DTevStage {
 
     void setAlphaD(u8 d) {
         mTevSwapModeInfo = mTevSwapModeInfo & ~(0x07 << 4) | d << 4;
+=======
+        mStageNo = 0;
+    }
+
+    void setTevColorOp(u8 op, u8 bias, u8 scale, u8 clamp, u8 reg) {
+        mColorOp = op;
+        mColorBias = bias;
+        mColorScale = scale;
+        mColorClamp = clamp;
+        mColorReg = reg;
+    }
+
+    void setTevColorAB(u8 a, u8 b) {
+        mColorIn[0] = a;
+        mColorIn[1] = b;
+    }
+
+    void setTevColorCD(u8 c, u8 d) {
+        mColorIn[2] = c;
+        mColorIn[3] = d;
+    }
+
+    void setAlphaA(u8 a) {
+        mAlphaIn[0] = a;
+    }
+
+    void setAlphaB(u8 b) {
+        mAlphaIn[1] = b;
+    }
+
+    void setAlphaC(u8 c) {
+        mAlphaIn[2] = c;
+    }
+
+    void setAlphaD(u8 d) {
+        mAlphaIn[3] = d;
+>>>>>>> upstream/main
     }
 
 #ifdef J3D_TEV_STAGE_MUTABLE_DEFAULTS
@@ -136,6 +186,7 @@ struct J3DTevStage {
         setAlphaD(d);
     }
 
+<<<<<<< HEAD
     void setTevAlphaOp(u8 param_1, u8 param_2, u8 param_3, u8 param_4, u8 param_5) {
         mTevAlphaOp = mTevAlphaOp & ~(0x01 << 2) | param_1 << 2;
         if (param_1 <= 1) {
@@ -150,6 +201,17 @@ struct J3DTevStage {
         mTevAlphaOp = mTevAlphaOp & ~(0x03 << 6) | param_5 << 6;
     }
 
+=======
+    void setTevAlphaOp(u8 op, u8 bias, u8 scale, u8 clamp, u8 reg) {
+        mAlphaOp = op;
+        mAlphaBias = bias;
+        mAlphaScale = scale;
+        mAlphaClamp = clamp;
+        mAlphaReg = reg;
+    }
+
+    // The model file's stage (J3DTevStageInfo; its field names follow the console's register bytes, not their use).
+>>>>>>> upstream/main
     void setTevStageInfo(const J3DTevStageInfo& info) {
         setTevColorOp(info.mTevAlphaOp, info.mTevAlphaAB, info.mTevSwapModeInfo, info.field_0x8, info.field_0x9);
         setTevColorAB(info.mTevColorOp, info.mTevColorAB);
@@ -161,6 +223,10 @@ struct J3DTevStage {
     J3DTevStage(J3DTevStageInfo const& param_0) {
         setTevStageInfo(param_0);
         setTevSwapModeInfo(j3dDefaultTevSwapMode);
+<<<<<<< HEAD
+=======
+        mStageNo = 0;
+>>>>>>> upstream/main
     }
 
     void setTevSwapModeInfo(J3DTevSwapModeInfo const& param_0) {
@@ -169,6 +235,7 @@ struct J3DTevStage {
     }
 
     void setStageNo(u32 param_0) {
+<<<<<<< HEAD
         field_0x0 = 0xC0 + param_0 * 2;
         field_0x4 = 0xC1 + param_0 * 2;
     }
@@ -220,6 +287,55 @@ struct J3DTevStage {
     /* 0x5 */ u8 mTevAlphaOp;
     /* 0x6 */ u8 mTevAlphaAB;
     /* 0x7 */ u8 mTevSwapModeInfo;
+=======
+        mStageNo = static_cast< u8 >(param_0);
+    }
+
+    void setRasSel(u8 ras_sel) {
+        mRasSel = ras_sel;
+    }
+
+    void setTexSel(u8 tex_sel) {
+        mTexSel = tex_sel;
+    }
+
+    // Copies the stage's settings, not its number.
+    J3DTevStage& operator=(const J3DTevStage& other) {
+        for (int i = 0; i < 4; i++) {
+            mColorIn[i] = other.mColorIn[i];
+            mAlphaIn[i] = other.mAlphaIn[i];
+        }
+        mColorOp = other.mColorOp;
+        mColorBias = other.mColorBias;
+        mColorScale = other.mColorScale;
+        mColorClamp = other.mColorClamp;
+        mColorReg = other.mColorReg;
+        mAlphaOp = other.mAlphaOp;
+        mAlphaBias = other.mAlphaBias;
+        mAlphaScale = other.mAlphaScale;
+        mAlphaClamp = other.mAlphaClamp;
+        mAlphaReg = other.mAlphaReg;
+        mRasSel = other.mRasSel;
+        mTexSel = other.mTexSel;
+        return *this;
+    }
+
+    u8 mStageNo;
+    u8 mColorIn[4];
+    u8 mColorOp;
+    u8 mColorBias;
+    u8 mColorScale;
+    u8 mColorClamp;
+    u8 mColorReg;
+    u8 mAlphaIn[4];
+    u8 mAlphaOp;
+    u8 mAlphaBias;
+    u8 mAlphaScale;
+    u8 mAlphaClamp;
+    u8 mAlphaReg;
+    u8 mRasSel;
+    u8 mTexSel;
+>>>>>>> upstream/main
 };
 
 void makeTexCoordTable();
@@ -325,12 +441,22 @@ struct J3DTevSwapModeTable {
     /* 0x0 */ u8 mIdx;
 };  // Size: 0x1
 
+<<<<<<< HEAD
 struct J3DIndTevStage {
     J3DIndTevStage() : mInfo() {
         setIndTevStageInfo(J3DTevsDefault::j3dDefaultIndTevStageInfo);
     }
 
     J3DIndTevStage(J3DIndTevStageInfo const& info) : mInfo() {
+=======
+// One indirect TEV stage as GXSetTevIndirect takes it.
+struct J3DIndTevStage {
+    J3DIndTevStage() {
+        setIndTevStageInfo(J3DTevsDefault::j3dDefaultIndTevStageInfo);
+    }
+
+    J3DIndTevStage(J3DIndTevStageInfo const& info) {
+>>>>>>> upstream/main
         setIndTevStageInfo(info);
     }
 
@@ -347,6 +473,7 @@ struct J3DIndTevStage {
     }
 
     void setIndStage(u8 indStage) {
+<<<<<<< HEAD
         mInfo = (mInfo & ~3) | indStage;
     }
 
@@ -397,15 +524,64 @@ struct J3DIndTevStage {
     }
 
     /* 0x0 */ u32 mInfo;
+=======
+        mIndStage = indStage;
+    }
+
+    void setIndFormat(u8 indFormat) {
+        mIndFormat = indFormat;
+    }
+
+    void setBiasSel(u8 biasSel) {
+        mBiasSel = biasSel;
+    }
+
+    void setMtxSel(u8 mtxSel) {
+        mMtxSel = mtxSel;
+    }
+
+    void setWrapS(u8 wrapS) {
+        mWrapS = wrapS;
+    }
+
+    void setWrapT(u8 wrapT) {
+        mWrapT = wrapT;
+    }
+
+    void setPrev(u8 prev) {
+        mPrev = prev;
+    }
+
+    void setLod(u8 lod) {
+        mLod = lod;
+    }
+
+    void setAlphaSel(u8 alphaSel) {
+        mAlphaSel = alphaSel;
+    }
+
+    u8 mIndStage;
+    u8 mIndFormat;
+    u8 mBiasSel;
+    u8 mMtxSel;
+    u8 mWrapS;
+    u8 mWrapT;
+    u8 mPrev;
+    u8 mLod;
+    u8 mAlphaSel;
+>>>>>>> upstream/main
 };
 
 struct J3DNBTScale;
 struct J3DTexCoord;
 void loadNBTScale(J3DNBTScale& param_0);
 
+<<<<<<< HEAD
 void loadTexCoordGens(u32 param_0, J3DTexCoord* param_1);
 void loadTexNo(u32 param_0, u16 const& param_1);
 void patchTexNo_PtrToIdx(u32 texID, u16 const& idx);
+=======
+>>>>>>> upstream/main
 bool isTexNoReg(void* param_0);
 u16 getTexNoReg(void* param_0);
 
@@ -510,10 +686,13 @@ struct J3DBlend : public J3DBlendInfo {
         return (GXLogicOp)mOp;
     }
 
+<<<<<<< HEAD
     void load(u8 ditherEnable) const {
         J3DGDSetBlendMode((GXBlendMode)mType, (GXBlendFactor)mSrcFactor, (GXBlendFactor)mDstFactor, (GXLogicOp)mOp, ditherEnable);
     }
 
+=======
+>>>>>>> upstream/main
     void setBlendInfo(const J3DBlendInfo& i_blendInfo) {
         *static_cast< J3DBlendInfo* >(this) = i_blendInfo;
     }
@@ -538,11 +717,14 @@ struct J3DFog : public J3DFogInfo {
     void setFogInfo(const J3DFogInfo* info) {
         *(J3DFogInfo*)this = *info;
     }
+<<<<<<< HEAD
 
     void load() const {
         J3DGDSetFog(GXFogType(mType), mStartZ, mEndZ, mNearZ, mFarZ, mColor);
         J3DGDSetFogRangeAdj(mAdjEnable, mCenter, (GXFogAdjTable*)&mFogAdjTable);
     }
+=======
+>>>>>>> upstream/main
 };
 
 inline u16 calcAlphaCmpID(u8 comp0, u8 op, u8 comp1) {
@@ -607,10 +789,13 @@ struct J3DAlphaComp {
         return mRef1;
     }
 
+<<<<<<< HEAD
     void load() const {
         J3DGDSetAlphaCompare((GXCompare)getComp0(), mRef0, (GXAlphaOp)getOp(), (GXCompare)getComp1(), mRef1);
     }
 
+=======
+>>>>>>> upstream/main
     /* 0x00 */ u16 mID;
     /* 0x02 */ u8 mRef0;
     /* 0x03 */ u8 mRef1;
@@ -621,6 +806,10 @@ static inline u32 setChanCtrlMacro(u8 enable, GXColorSrc ambSrc, GXColorSrc matS
            (attnFn != GX_AF_NONE) << 9 | (attnFn != GX_AF_SPEC) << 10 | (lightMask >> 4 & 0x0F) << 11;
 }
 
+<<<<<<< HEAD
+=======
+// One colour channel as GXSetChanCtrl takes it (a specular channel has no diffuse function).
+>>>>>>> upstream/main
 class J3DColorChan {
 public:
     J3DColorChan() {
@@ -628,6 +817,7 @@ public:
     }
 
     J3DColorChan(J3DColorChanInfo const& info) {
+<<<<<<< HEAD
         u8 ambSrc;
         if (info.mAmbSrc == 0xFF) {
             ambSrc = 0;
@@ -636,6 +826,10 @@ public:
         }
 
         mColorChanID = calcColorChanID(info.mEnable, info.mMatSrc, info.mLightMask, info.mDiffuseFn, info.mAttnFn, ambSrc);
+=======
+        set(info.mEnable, info.mMatSrc, info.mLightMask, info.mDiffuseFn, info.mAttnFn,
+            info.mAmbSrc == 0xFF ? 0 : info.mAmbSrc);
+>>>>>>> upstream/main
     }
 
     inline void setColorChanInfo(J3DColorChanInfo const& info) {
@@ -645,6 +839,7 @@ public:
         // same logic but without the bug.
         // See J3DMaterialFactory::newColorChan - both the bugged and correct behavior are present there, as it calls
         // both constructors.
+<<<<<<< HEAD
         u8 ambSrc;
         if (info.mAmbSrc == 0xFFFF) {
             ambSrc = 0;
@@ -696,6 +891,65 @@ public:
     }
 
     /* 0x0 */ u16 mColorChanID;
+=======
+        set(info.mEnable, info.mMatSrc, info.mLightMask, info.mDiffuseFn, info.mAttnFn,
+            info.mAmbSrc == 0xFFFF ? 0 : info.mAmbSrc);
+    }
+
+    void set(u8 enable, u8 matSrc, u8 lightMask, u8 diffuseFn, u8 attnFn, u8 ambSrc) {
+        mEnable = enable & 1;
+        mMatSrc = matSrc & 1;
+        mAmbSrc = ambSrc & 1;
+        mLightMask = lightMask;
+        mDiffuseFn = attnFn == GX_AF_SPEC ? 0 : diffuseFn & 3;
+        mAttnFn = attnFn;
+    }
+
+    u8 getLightMask() const {
+        return mLightMask;
+    }
+
+    void setLightMask(u8 param_1) {
+        mLightMask = param_1;
+    }
+
+    u8 getEnable() const {
+        return mEnable;
+    }
+
+    u8 getAmbSrc() const {
+        return mAmbSrc;
+    }
+
+    u8 getMatSrc() const {
+        return mMatSrc;
+    }
+
+    u8 getDiffuseFn() const {
+        return mDiffuseFn;
+    }
+
+    inline u8 getAttnFn() const {
+        return mAttnFn;
+    }
+
+    J3DColorChan& operator=(const J3DColorChan& other) {
+        mEnable = other.mEnable;
+        mMatSrc = other.mMatSrc;
+        mAmbSrc = other.mAmbSrc;
+        mLightMask = other.mLightMask;
+        mDiffuseFn = other.mDiffuseFn;
+        mAttnFn = other.mAttnFn;
+        return *this;
+    }
+
+    u8 mEnable;
+    u8 mMatSrc;
+    u8 mAmbSrc;
+    u8 mLightMask;
+    u8 mDiffuseFn;
+    u8 mAttnFn;
+>>>>>>> upstream/main
 };
 
 inline u16 calcZModeID(u8 param_0, u8 param_1, u8 param_2) {
@@ -737,10 +991,13 @@ struct J3DZMode {
         mZModeID = calcZModeID(j3dZModeTable[mZModeID * 3], j3dZModeTable[mZModeID * 3 + 1], i_enable);
     }
 
+<<<<<<< HEAD
     void load() const {
         J3DGDSetZMode(getCompareEnable(), GXCompare(getFunc()), getUpdateEnable());
     }
 
+=======
+>>>>>>> upstream/main
     u8 getCompareEnable() const {
         return *(&j3dZModeTable[mZModeID * 3] + 0);
     }
@@ -756,6 +1013,9 @@ struct J3DZMode {
     /* 0x0 */ u16 mZModeID;
 };
 
+<<<<<<< HEAD
 inline void loadTexCoordScale(GXTexCoordID coord, const J3DTexCoordScaleInfo& info) {
     J3DGDSetTexCoordScale2(coord, info.field_0x00, info.field_0x04 == 1, 0, info.field_0x02, info.field_0x06 == 1, 0);
 }
+=======
+>>>>>>> upstream/main

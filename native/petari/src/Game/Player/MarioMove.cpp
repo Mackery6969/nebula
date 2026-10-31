@@ -393,7 +393,11 @@ void Mario::mainMove() {
         TVec3f stick;
         mActor->getStickValue(&stick.x, &stick.y);
         stick.z = 0.0f;
+<<<<<<< HEAD
         PSVECCrossProduct(&_250, &stick, &cross);
+=======
+        NebulaVecCrossProduct(&_250, &stick, &cross);
+>>>>>>> upstream/main
 
         a4 = true;
 
@@ -476,7 +480,11 @@ void Mario::mainMove() {
             if (_3D4 == 0) {
                 turnAngleSpeed *= 0.01f;
                 _244.zero();
+<<<<<<< HEAD
                 PSVECCrossProduct(&_214, &_22C, &_3D8);
+=======
+                NebulaVecCrossProduct(&_214, &_22C, &_3D8);
+>>>>>>> upstream/main
             }
 
             _238 = _22C;
@@ -507,8 +515,13 @@ void Mario::mainMove() {
                 }
 
                 Mtx mtx;
+<<<<<<< HEAD
                 PSMTXRotAxisRad(mtx, &mHeadVec, angle);
                 PSMTXMultVecSR(mtx, &_214, &vec2);
+=======
+                NebulaMtxRotAxisRad(mtx, &mHeadVec, angle);
+                NebulaMtxMultVecSR(mtx, &_214, &vec2);
+>>>>>>> upstream/main
             } else if (MR::diffAngleAbs(mFrontVec, _22C) < 0.1f) {
                 if (_524 == _528) {
                     vec2 = _22C;
@@ -670,7 +683,11 @@ void Mario::mainMove() {
     TVec3f cross4(_368.cross(newVelocity));
     MR::normalizeOrZero(&cross4);
 
+<<<<<<< HEAD
     PSVECCrossProduct(&cross4, &_368, &newVelocity);
+=======
+    NebulaVecCrossProduct(&cross4, &_368, &newVelocity);
+>>>>>>> upstream/main
     newVelocity.setLength(speed);
 
     mVelocity = newVelocity;

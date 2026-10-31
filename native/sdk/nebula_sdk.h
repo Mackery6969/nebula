@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 /* A physical range of the game's memory and where it lives in the host process (for the GPU's address
    resolution). */
 typedef struct NebulaMemoryRegion {
@@ -19,16 +20,22 @@ typedef struct NebulaMemoryRegion {
     uint8_t* host;
 } NebulaMemoryRegion;
 
+=======
+>>>>>>> upstream/main
 int nebula_memory_init(void);
 uint8_t* nebula_arena_base(void);
 /* The module's own image (its code and data), for diagnostics. */
 void nebula_image_range(uintptr_t* base, uintptr_t* size);
+<<<<<<< HEAD
 /* The output's shape, latched from the host after each retrace's vi_frame (vi/display_native.c). */
 void nebula_display_refresh(void);
 /* Integer division traps in the game module finish with the console CPU's result (os/divide_native.c). */
 void nebula_divide_init(void);
 
 void nebula_memory_regions(NebulaMemoryRegion* out, int* count);
+=======
+
+>>>>>>> upstream/main
 void nebula_memory_arenas(void** mem1Lo, void** mem1Hi, void** mem2Lo, void** mem2Hi);
 /* Game memory written for the GPU (the host's gpu_coherent service); ranges outside the arena and image are ignored. */
 void nebula_gpu_coherent(const void* addr, uint32_t size);
@@ -48,12 +55,20 @@ void nebula_fatal(const char* format, ...) __attribute__((noreturn, format(print
 /* The data tables the game keeps in main.dol, read from the user's disc (dol_data.c). */
 void nebula_load_dol_data(void);
 
+<<<<<<< HEAD
 /* The OS core (os/os_native.c). */
 /* A device interrupt by its SDK number (__OS_INTERRUPT_*), from any host thread: the handler registered with
    __OSSetInterruptHandler runs on the simulation thread at the next point interrupts are enabled. */
 void nebula_raise_interrupt(int interrupt);
 /* Wakes the simulation thread if it is idle (new host event). */
 void nebula_signal_simulation(void);
+=======
+/* The disc's release (region.c): 'E' North America, 'P' Europe, 'J' Japan; and its save folder on the NAND. */
+char nebula_disc_region(void);
+const char* nebula_home_dir(void);
+
+/* The platform layer (os/os_native.c). */
+>>>>>>> upstream/main
 /* The console's time base: OSGetTime ticks (60.75 MHz) since boot. */
 int64_t nebula_time_base(void);
 /* Runs the game: the OS core's boot, then the game's entry on its boot thread. Does not return. */

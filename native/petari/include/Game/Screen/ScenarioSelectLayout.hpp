@@ -6,9 +6,12 @@
 class BackButton;
 class CameraContext;
 class MultiSceneActor;
+<<<<<<< HEAD
 #ifdef TARGET_PC
 class NebulaSelectPlayers;
 #endif
+=======
+>>>>>>> upstream/main
 class ScenarioSelectStar;
 
 class ScenarioSelectLayout : public LayoutActor {
@@ -75,8 +78,11 @@ public:
     /* 0xA0 */ const char* mMarioPaneName;
     /* 0xA4 */ s32 _A4;
     /* 0xA8 */ s32 _A8;
+<<<<<<< HEAD
 #ifdef TARGET_PC
     // Online co-op: who plays each star, under it.
     NebulaSelectPlayers* mCoopPlayers;
 #endif
+=======
+>>>>>>> upstream/main
 };

@@ -1,4 +1,5 @@
 #include "JSystem/JUtility/JUTException.hpp"
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JUtility/JUTConsole.hpp"
 #include "JSystem/JUtility/JUTDirectPrint.hpp"
@@ -188,6 +189,20 @@ void JUTException::panic_f_va(const char* file, int line, const char* format, va
     OSSendMessage(&sMessageQueue, &exCallbackObject, OS_MESSAGE_BLOCK);
     OSSuspendThread(OSGetCurrentThread());
 #endif
+=======
+#include <nebula_game_api.h>
+#include <stdio.h>
+
+extern "C" const NebulaHostServices* nebula_host(void);
+
+void JUTException::panic_f_va(const char* file, int line, const char* format, va_list args) {
+    char message[256];
+    char text[320];
+    vsnprintf(message, sizeof(message), format, args);
+    snprintf(text, sizeof(text), "%s:%d: %s", file, line, message);
+    const NebulaHostServices* pHost = nebula_host();
+    pHost->fatal(pHost->user, text);
+>>>>>>> upstream/main
 }
 
 void JUTException::panic_f(const char* file, int line, const char* format, ...) {
@@ -196,6 +211,7 @@ void JUTException::panic_f(const char* file, int line, const char* format, ...) 
     panic_f_va(file, line, format, args);
     va_end(args);
 }
+<<<<<<< HEAD
 
 #define __signbit(x) ((*reinterpret_cast< unsigned char* >(&(x))) & 0x80)
 
@@ -758,3 +774,5 @@ JUTExternalFB::JUTExternalFB(_GXRenderModeObj* renderMode, GXGamma gamma, void* 
     mGamma = gamma;
     field_0x10 = false;
 }
+=======
+>>>>>>> upstream/main

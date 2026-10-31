@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Game/System/OSThreadWrapper.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Util/Array.hpp"
 #include "Game/Util/StringUtil.hpp"
 
@@ -27,8 +31,13 @@ public:
     /* 0x04 */ int mPriority;
     /* 0x08 */ const char* mName;
     /* 0x0C */ volatile bool mIsEnd;
+<<<<<<< HEAD
     /* 0x10 */ OSMessageQueue mQueue;
     /* 0x30 */ OSMessage mMessage;
+=======
+    /* 0x10 */ NebulaMessageQueue mQueue;
+    /* 0x30 */ void* mMessage;
+>>>>>>> upstream/main
 };
 
 class FunctionAsyncExecutorThread : public OSThreadWrapper {
@@ -43,14 +52,24 @@ public:
 
 class FunctionAsyncExecutorOnMainThread {
 public:
+<<<<<<< HEAD
     FunctionAsyncExecutorOnMainThread(OSThread*);
+=======
+    FunctionAsyncExecutorOnMainThread(NebulaThread*);
+>>>>>>> upstream/main
 
     void update();
 
     /* 0x000 */ bool _0;
+<<<<<<< HEAD
     /* 0x004 */ OSMessageQueue mQueue;
     /* 0x024 */ OSMessage mMsgArray[64];
     /* 0x124 */ OSThread* mThread;
+=======
+    /* 0x004 */ NebulaMessageQueue mQueue;
+    /* 0x024 */ void* mMsgArray[64];
+    /* 0x124 */ NebulaThread* mThread;
+>>>>>>> upstream/main
 };
 
 class FunctionAsyncExecutor {
@@ -62,7 +81,11 @@ public:
     bool startOnMainThread(const MR::FunctorBase&, const char*);
     void waitForEnd(const char*);
     bool isEnd(const char*) const;
+<<<<<<< HEAD
     OSThread* getOSThread(const char*);
+=======
+    NebulaThread* getOSThread(const char*);
+>>>>>>> upstream/main
     FunctionAsyncExecInfo* createAndAddExecInfo(const MR::FunctorBase&, int, const char*);
     FunctionAsyncExecutorThread* getSuspendThread();
 

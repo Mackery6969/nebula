@@ -32,7 +32,10 @@ u32 WPadReadDataInfo::getValidStatusCount() const {
 }
 
 WPadHolder::WPadHolder() : mReadDataInfoArray(), mMode(WPAD_SENSOR_BAR_POS_TOP) {
+<<<<<<< HEAD
     WPADRegisterAllocator(MR::allocFromWPadHeap, MR::freeFromWPadHeap);
+=======
+>>>>>>> upstream/main
     KPADInit();
 
     mReadDataInfoArray = new WPadReadDataInfo[WPAD_MAX_CONTROLLERS];
@@ -169,6 +172,7 @@ namespace MR {
         pWPadHolder->mMode = WPAD_SENSOR_BAR_POS_TOP;
     }
 
+<<<<<<< HEAD
     void getHBMKPadData(HBMKPadData* pPadData, s32 chan) {
         u32 type;
         s32 err = WPADProbe(chan, &type);
@@ -192,5 +196,11 @@ namespace MR {
         u8 minute = isLongAutoSleep ? 15 : 5;
 
         WPADSetAutoSleepTime(minute);
+=======
+
+    void setAutoSleepTimeWiiRemote(bool isLongAutoSleep) {
+        // Remotes sleep as the host decides.
+        (void)isLongAutoSleep;
+>>>>>>> upstream/main
     }
 };  // namespace MR

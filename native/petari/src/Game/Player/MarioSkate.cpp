@@ -54,11 +54,19 @@ bool MarioSkate::postureCtrl(MtxPtr pMtx) {
     getPlayer()->postureCtrl(pMtx);
     f32 rotation = _20;
     rotation *= 3.1415927f;
+<<<<<<< HEAD
     PSMTXConcat(pMtx, MR::tmpMtxRotYRad(rotation), pMtx);
     PSMTXConcat(pMtx, MR::tmpMtxRotZRad(_24), pMtx);
     Mtx direction;
     getPlayer()->createDirectionMtx(direction);
     PSMTXConcat(direction, pMtx, pMtx);
+=======
+    NebulaMtxConcat(pMtx, MR::tmpMtxRotYRad(rotation), pMtx);
+    NebulaMtxConcat(pMtx, MR::tmpMtxRotZRad(_24), pMtx);
+    Mtx direction;
+    getPlayer()->createDirectionMtx(direction);
+    NebulaMtxConcat(direction, pMtx, pMtx);
+>>>>>>> upstream/main
     return true;
 }
 

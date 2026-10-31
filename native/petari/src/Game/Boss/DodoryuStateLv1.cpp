@@ -14,6 +14,10 @@
 #include "Game/Util/ObjUtil.hpp"
 #include "Game/Util/PlayerUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     static const s32 sStopSceneFrame = 10;
@@ -347,7 +351,11 @@ bool DodoryuStateLv1::catchPlayerAttack(u32 msg, HitSensor* pSender, HitSensor* 
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     if (__NebulaCodePatch(NEBULA_PATCH_DODORYU_SHELL_ONLY, nullptr) ? MR::isMsgJetTurtleAttack(msg)
+=======
+    if (NebulaHost::codePatch(NEBULA_PATCH_DODORYU_SHELL_ONLY, nullptr) ? MR::isMsgJetTurtleAttack(msg)
+>>>>>>> upstream/main
                                                                       : MR::isMsgPlayerHitAll(msg)) {
 #else
     if (MR::isMsgPlayerHitAll(msg)) {

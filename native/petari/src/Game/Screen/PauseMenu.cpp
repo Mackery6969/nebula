@@ -17,8 +17,11 @@
 #ifdef TARGET_PC
 #include "Game/Screen/NebulaPauseSettingsButton.hpp"
 #include "Game/Screen/NebulaSettingsMenu.hpp"
+<<<<<<< HEAD
 #include <nebula_game_api.h>
 #include <revolution/os.h>
+=======
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -28,6 +31,7 @@ namespace {
         return !MR::isOnGameEventFlagUseAstroDome() || (MR::isStageAstroLocation() && !MR::isEqualStageName("HeavensDoorGalaxy"));
     }
 
+<<<<<<< HEAD
     // Quit Game writes the save first. A player who joined another's online co-op room plays the host's save (the
     // room's, which the host's game writes), so their Quit leaves without writing it.
     bool isEndGameSave() {
@@ -39,6 +43,8 @@ namespace {
         return true;
     }
 
+=======
+>>>>>>> upstream/main
     bool isStageHideScenarioTitle() {
         return MR::isStageBeginPrologueEvent() || MR::isStageAstroLocation();
     }
@@ -202,12 +208,15 @@ void PauseMenu::draw() const {
     }
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 bool PauseMenu::isSelecting() const {
     return isNerve(GET_NERVE(PauseMenu, PauseMenuNrvSelecting));
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 void PauseMenu::kill() {
     LayoutActor::kill();
 #ifdef TARGET_PC
@@ -361,7 +370,11 @@ void PauseMenu::exeDecided() {
         }
 
         if (_24->isDecidedWait()) {
+<<<<<<< HEAD
             if (::isInvalidBackAstroDome() && ::isEndGameSave()) {
+=======
+            if (::isInvalidBackAstroDome()) {
+>>>>>>> upstream/main
                 setNerve(GET_NERVE(PauseMenu, PauseMenuNrvGameDataSave));
             } else {
                 setNerve(GET_NERVE(PauseMenu, PauseMenuNrvConfirm));
@@ -439,7 +452,10 @@ void PauseMenu::exeConfirm() {
             MR::closeSystemWipeFadeWithCaptureScreen(::cBackSequenceFadeFrame);
 
             if (::isInvalidBackAstroDome()) {
+<<<<<<< HEAD
                 // Online co-op: back at the main menu, the player leaves the room (its host closes it for everyone).
+=======
+>>>>>>> upstream/main
                 MR::requestChangeSceneTitle();
             } else {
                 MR::requestChangeStageGoBackAstroDome();

@@ -3,7 +3,11 @@
 #include <JSystem/JGeometry/TVec.hpp>
 
 #include <JSystem/J3DGraphAnimator/J3DModel.hpp>
+<<<<<<< HEAD
 #include <revolution/gd/GDBase.h>
+=======
+#include <JSystem/J3DGraphBase/J3DStateList.hpp>
+>>>>>>> upstream/main
 
 class J3DShape;
 class J3DShapeX;
@@ -21,13 +25,21 @@ public:
     void viewCalcRefPos(u32, J3DModel*, const TVec3f&, const TVec3f&);
     bool simpleDrawSetup(J3DMaterial*);
     void simpleDrawShape(J3DMaterial*);
+<<<<<<< HEAD
     void storeDisplayList(_GDLObj*, u32);
+=======
+    void storeStateList(J3DStateList& rBuilder, u32 index);
+>>>>>>> upstream/main
     void shapePacketDrawFast(J3DShapePacketX*) const;
     void shapeDrawFast(J3DShapeX*) const;
     void copyExtraMtxBuffer(const J3DModelX*);
     void copyAnmMtxBuffer(const J3DModelX*);
     void swapDrawBuffer(u32);
+<<<<<<< HEAD
     void setDynamicDL(u8*, u32);
+=======
+    void setDynamicDL(const J3DStateList* pList);
+>>>>>>> upstream/main
     void setDrawViewBuffer(MtxPtr);
     void setDrawView(u32);
     void directDraw(J3DModel*);
@@ -136,6 +148,7 @@ public:
     /* 0x124 */ void (*mShapeCallback)(J3DShape*);
     /* 0x128 */ void* _128;
     /* 0x12C */ J3DModel* _12C;
+<<<<<<< HEAD
     /* 0x130 */ u8* mDisplayLists[16];
     /* 0x170 */ u32 mDisplayListSizes[16];
     /* 0x1B0 */ Flags mFlags;
@@ -146,6 +159,18 @@ public:
     /* 0x1C4 */ u8** _1C4;
     /* 0x1C8 */ u8** _1C8;
     /* 0x1CC */ u16* _1CC;
+=======
+    // The drawing state each flag of mFlags sets.
+    J3DStateList mStateLists[16];
+    /* 0x1B0 */ Flags mFlags;
+    // The dynamic state list (lighting, alpha) the next draws use; the one set for them.
+    const J3DStateList* _1B4;
+    const J3DStateList* _1B8;
+    /* 0x1C0 */ u16 _1C0;
+    // Per material: the state list it draws with (texture swaps); the one set for its next draws.
+    const J3DStateList** _1C4;
+    const J3DStateList** _1C8;
+>>>>>>> upstream/main
     /* 0x1D0 */ u8 _1D0;
     /* 0x1D4 */ f32 _1D4;
     /* 0x1D8 */ u32 _1D8;

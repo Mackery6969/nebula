@@ -115,7 +115,11 @@ void MoguStone::startThrowLevelSound() {
 void MoguStone::exeThrow() {
     startThrowLevelSound();
     doBehavior();
+<<<<<<< HEAD
     PSQUATMultiply(&_A0, &_90, &_90);
+=======
+    NebulaQuatMultiply(&_A0, &_90, &_90);
+>>>>>>> upstream/main
     _90.normalize();
 
     if (MR::isBinded(this)) {
@@ -131,7 +135,11 @@ void MoguStone::exeThrow() {
 }
 
 void MoguStone::exeFall() {
+<<<<<<< HEAD
     PSQUATMultiply(&_A0, &_90, &_90);
+=======
+    NebulaQuatMultiply(&_A0, &_90, &_90);
+>>>>>>> upstream/main
     _90.normalize();
     MR::applyVelocityDampAndGravity(this, 2.0f, 0.8f, 0.98f, 0.98f, 1.0f);
 

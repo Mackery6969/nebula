@@ -1,4 +1,10 @@
 #include "JSystem/JParticle/JPABaseShape.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Inline.hpp"
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JMath/JMATrigonometric.hpp"
@@ -8,6 +14,7 @@
 #include <revolution/mtx.h>
 
 void JPASetPointSize(JPAEmitterWorkData* work) {
+<<<<<<< HEAD
     GXSetPointSize((u8)(s32)((25.0f * work->mGlobalPtclScl.x)), GX_TO_ONE);
 }
 
@@ -21,6 +28,21 @@ void JPASetPointSize(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
 
 void JPASetLineWidth(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     GXSetLineWidth((u8)(s32)((ptcl->mParticleScaleX * (25.0f * work->mGlobalPtclScl.x))), GX_TO_ONE);
+=======
+    J3DNativeState::setPointSize((u8)(s32)((25.0f * work->mGlobalPtclScl.x)), GX_TO_ONE);
+}
+
+void JPASetLineWidth(JPAEmitterWorkData* work) {
+    J3DNativeState::setLineWidth((u8)(s32)((25.0f * work->mGlobalPtclScl.x)), GX_TO_ONE);
+}
+
+void JPASetPointSize(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
+    J3DNativeState::setPointSize((u8)(s32)((ptcl->mParticleScaleX * (25.0f * work->mGlobalPtclScl.x))), GX_TO_ONE);
+}
+
+void JPASetLineWidth(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
+    J3DNativeState::setLineWidth((u8)(s32)((ptcl->mParticleScaleX * (25.0f * work->mGlobalPtclScl.x))), GX_TO_ONE);
+>>>>>>> upstream/main
 }
 
 void JPARegistPrm(JPAEmitterWorkData* work) {
@@ -30,7 +52,11 @@ void JPARegistPrm(JPAEmitterWorkData* work) {
     prm.g = COLOR_MULTI(prm.g, emtr->mGlobalPrmClr.g);
     prm.b = COLOR_MULTI(prm.b, emtr->mGlobalPrmClr.b);
     prm.a = COLOR_MULTI(prm.a, emtr->mGlobalPrmClr.a);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+>>>>>>> upstream/main
 }
 
 void JPARegistEnv(JPAEmitterWorkData* work) {
@@ -39,7 +65,11 @@ void JPARegistEnv(JPAEmitterWorkData* work) {
     env.r = COLOR_MULTI(env.r, emtr->mGlobalEnvClr.r);
     env.g = COLOR_MULTI(env.g, emtr->mGlobalEnvClr.g);
     env.b = COLOR_MULTI(env.b, emtr->mGlobalEnvClr.b);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG1, env);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG1, env);
+>>>>>>> upstream/main
 }
 
 void JPARegistPrmEnv(JPAEmitterWorkData* work) {
@@ -53,8 +83,13 @@ void JPARegistPrmEnv(JPAEmitterWorkData* work) {
     env.r = COLOR_MULTI(env.r, emtr->mGlobalEnvClr.r);
     env.g = COLOR_MULTI(env.g, emtr->mGlobalEnvClr.g);
     env.b = COLOR_MULTI(env.b, emtr->mGlobalEnvClr.b);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
     GXSetTevColor(GX_TEVREG1, env);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+    J3DNativeState::setTevColor(GX_TEVREG1, env);
+>>>>>>> upstream/main
 }
 
 void JPARegistAlpha(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
@@ -65,7 +100,11 @@ void JPARegistAlpha(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     prm.b = COLOR_MULTI(prm.b, emtr->mGlobalPrmClr.b);
     prm.a = COLOR_MULTI(prm.a, emtr->mGlobalPrmClr.a);
     prm.a = COLOR_MULTI(prm.a, ptcl->mPrmColorAlphaAnm);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+>>>>>>> upstream/main
 }
 
 void JPARegistPrmAlpha(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
@@ -76,7 +115,11 @@ void JPARegistPrmAlpha(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     prm.b = COLOR_MULTI(prm.b, emtr->mGlobalPrmClr.b);
     prm.a = COLOR_MULTI(prm.a, emtr->mGlobalPrmClr.a);
     prm.a = COLOR_MULTI(prm.a, ptcl->mPrmColorAlphaAnm);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+>>>>>>> upstream/main
 }
 
 void JPARegistPrmAlphaEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
@@ -91,8 +134,13 @@ void JPARegistPrmAlphaEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     env.r = COLOR_MULTI(env.r, emtr->mGlobalEnvClr.r);
     env.g = COLOR_MULTI(env.g, emtr->mGlobalEnvClr.g);
     env.b = COLOR_MULTI(env.b, emtr->mGlobalEnvClr.b);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
     GXSetTevColor(GX_TEVREG1, env);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+    J3DNativeState::setTevColor(GX_TEVREG1, env);
+>>>>>>> upstream/main
 }
 
 void JPARegistAlphaEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
@@ -107,8 +155,13 @@ void JPARegistAlphaEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     env.r = COLOR_MULTI(env.r, emtr->mGlobalEnvClr.r);
     env.g = COLOR_MULTI(env.g, emtr->mGlobalEnvClr.g);
     env.b = COLOR_MULTI(env.b, emtr->mGlobalEnvClr.b);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG0, prm);
     GXSetTevColor(GX_TEVREG1, env);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG0, prm);
+    J3DNativeState::setTevColor(GX_TEVREG1, env);
+>>>>>>> upstream/main
 }
 
 void JPARegistEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
@@ -117,7 +170,11 @@ void JPARegistEnv(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     env.r = COLOR_MULTI(env.r, emtr->mGlobalEnvClr.r);
     env.g = COLOR_MULTI(env.g, emtr->mGlobalEnvClr.g);
     env.b = COLOR_MULTI(env.b, emtr->mGlobalEnvClr.b);
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG1, env);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG1, env);
+>>>>>>> upstream/main
 }
 
 void JPACalcClrIdxNormal(JPAEmitterWorkData* work) {
@@ -160,8 +217,13 @@ void JPACalcClrIdxReverse(JPAEmitterWorkData* work) {
     JPABaseShape* const shape = work->mpRes->getBsp();
     int maxFrm = shape->getClrAnmMaxFrm();
     u32 tick = work->mpEmtr->mTick;
+<<<<<<< HEAD
     u32 uVar1 = tick / maxFrm;
     tick = tick % maxFrm;
+=======
+    u32 uVar1 = maxFrm != 0 ? tick / maxFrm : 0;
+    tick = maxFrm != 0 ? tick % maxFrm : tick;
+>>>>>>> upstream/main
     uVar1 &= 1;
     work->mClrKeyFrame = tick + (uVar1) * (maxFrm - tick * 2);
 }
@@ -170,8 +232,14 @@ void JPACalcClrIdxReverse(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     JPABaseShape* const shape = work->mpRes->getBsp();
     s32 tick = param_1->mAge + shape->getClrLoopOfst(param_1->mAnmRandom);
     s32 maxFrm = shape->getClrAnmMaxFrm();
+<<<<<<< HEAD
     s32 rem = tick % maxFrm;
     work->mClrKeyFrame = rem + ((tick / maxFrm) & 1) * (maxFrm - rem * 2);
+=======
+    s32 rem = maxFrm != 0 ? tick % maxFrm : tick;
+    s32 div = maxFrm != 0 ? tick / maxFrm : tick < 0 ? -1 : 0;
+    work->mClrKeyFrame = rem + (div & 1) * (maxFrm - rem * 2);
+>>>>>>> upstream/main
 }
 
 void JPACalcClrIdxMerge(JPAEmitterWorkData* work) {
@@ -219,6 +287,7 @@ void JPACalcColorCopy(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
 }
 
 void JPAGenTexCrdMtxIdt(JPAEmitterWorkData* param_0) {
+<<<<<<< HEAD
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
 }
 
@@ -228,6 +297,17 @@ void JPAGenTexCrdMtxAnm(JPAEmitterWorkData* param_0) {
 
 void JPAGenTexCrdMtxPrj(JPAEmitterWorkData* param_0) {
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_POS, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+=======
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+}
+
+void JPAGenTexCrdMtxAnm(JPAEmitterWorkData* param_0) {
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+}
+
+void JPAGenTexCrdMtxPrj(JPAEmitterWorkData* param_0) {
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_POS, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+>>>>>>> upstream/main
 }
 
 #pragma push
@@ -257,8 +337,13 @@ void JPAGenCalcTexCrdMtxAnm(JPAEmitterWorkData* work) {
     local_108[2][1] = 0.0f;
     local_108[2][2] = 1.0f;
     local_108[2][3] = 0.0f;
+<<<<<<< HEAD
     GXLoadTexMtxImm(local_108, 0x1e, GX_MTX2x4);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1e, false, 0x7d);
+=======
+    J3DNativeShape::sendTexture(local_108, 0x1e, GX_MTX2x4);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1e, false, 0x7d);
+>>>>>>> upstream/main
 }
 #pragma pop
 
@@ -289,7 +374,11 @@ void JPALoadCalcTexCrdMtxAnm(JPAEmitterWorkData* work, JPABaseParticle* param_1)
     local_108[2][1] = 0.0f;
     local_108[2][2] = 1.0f;
     local_108[2][3] = 0.0f;
+<<<<<<< HEAD
     GXLoadTexMtxImm(local_108, 0x1e, GX_MTX2x4);
+=======
+    J3DNativeShape::sendTexture(local_108, 0x1e, GX_MTX2x4);
+>>>>>>> upstream/main
 }
 #pragma pop
 
@@ -319,12 +408,21 @@ void JPACalcTexIdxNormal(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
 
 void JPACalcTexIdxRepeat(JPAEmitterWorkData* work) {
     JPABaseShape* const shape = work->mpRes->getBsp();
+<<<<<<< HEAD
     work->mpEmtr->mTexAnmIdx = shape->getTexIdx(work->mpEmtr->mTick % shape->getTexAnmKeyNum());
+=======
+    work->mpEmtr->mTexAnmIdx = shape->getTexIdx(shape->getTexAnmKeyNum() != 0 ? work->mpEmtr->mTick % shape->getTexAnmKeyNum() : work->mpEmtr->mTick);
+>>>>>>> upstream/main
 }
 
 void JPACalcTexIdxRepeat(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     JPABaseShape* const shape = work->mpRes->getBsp();
+<<<<<<< HEAD
     u8 texIdx = ((int)shape->getTexLoopOfst(param_1->mAnmRandom) + param_1->mAge) % shape->getTexAnmKeyNum();
+=======
+    const int frame = (int)shape->getTexLoopOfst(param_1->mAnmRandom) + param_1->mAge;
+    u8 texIdx = shape->getTexAnmKeyNum() != 0 ? frame % shape->getTexAnmKeyNum() : frame;
+>>>>>>> upstream/main
     param_1->mTexAnmIdx = shape->getTexIdx(texIdx);
 }
 
@@ -332,8 +430,13 @@ void JPACalcTexIdxReverse(JPAEmitterWorkData* work) {
     JPABaseShape* const shape = work->mpRes->getBsp();
     int tick = work->mpEmtr->mTick;
     int keyNum = (int)shape->getTexAnmKeyNum() - 1;
+<<<<<<< HEAD
     int div = tick / keyNum;
     int rem = tick % keyNum;
+=======
+    int div = keyNum != 0 ? tick / keyNum : tick < 0 ? -1 : 0;
+    int rem = keyNum != 0 ? tick % keyNum : tick;
+>>>>>>> upstream/main
     work->mpEmtr->mTexAnmIdx = shape->getTexIdx(rem + (div & 1) * (keyNum - rem * 2));
 }
 
@@ -341,8 +444,13 @@ void JPACalcTexIdxReverse(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     JPABaseShape* const shape = work->mpRes->getBsp();
     s32 tick = shape->getTexLoopOfst(param_1->mAnmRandom) + param_1->mAge;
     int keyNum = (int)shape->getTexAnmKeyNum() - 1;
+<<<<<<< HEAD
     int div = tick / keyNum;
     int rem = tick % keyNum;
+=======
+    int div = keyNum != 0 ? tick / keyNum : tick < 0 ? -1 : 0;
+    int rem = keyNum != 0 ? tick % keyNum : tick;
+>>>>>>> upstream/main
     u8 texIdx = rem + (div & 1) * (keyNum - rem * 2);
     param_1->mTexAnmIdx = work->mpRes->getBsp()->getTexIdx(texIdx);
 }
@@ -355,7 +463,11 @@ void JPACalcTexIdxMerge(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     JPABaseShape* const shape = work->mpRes->getBsp();
     s32 maxFrm = shape->getTexAnmKeyNum();
     s32 tick = (s32)(maxFrm * param_1->mTime) + shape->getTexLoopOfst(param_1->mAnmRandom);
+<<<<<<< HEAD
     u8 texIdx = tick % maxFrm;
+=======
+    u8 texIdx = maxFrm != 0 ? tick % maxFrm : tick;
+>>>>>>> upstream/main
     param_1->mTexAnmIdx = work->mpRes->getBsp()->getTexIdx(texIdx);
 }
 
@@ -365,12 +477,21 @@ void JPACalcTexIdxRandom(JPAEmitterWorkData* work) {
 
 void JPACalcTexIdxRandom(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     JPABaseShape* const shape = work->mpRes->getBsp();
+<<<<<<< HEAD
     u8 texIdx = ((int)shape->getTexLoopOfst(param_1->mAnmRandom)) % shape->getTexAnmKeyNum();
+=======
+    const int frame = shape->getTexLoopOfst(param_1->mAnmRandom);
+    u8 texIdx = shape->getTexAnmKeyNum() != 0 ? frame % shape->getTexAnmKeyNum() : frame;
+>>>>>>> upstream/main
     param_1->mTexAnmIdx = shape->getTexIdx(texIdx);
 }
 
 void JPALoadPosMtxCam(JPAEmitterWorkData* work) {
+<<<<<<< HEAD
     GXLoadPosMtxImm(work->mPosCamMtx, GX_PNMTX0);
+=======
+    J3DNativeShape::sendPosition(work->mPosCamMtx, GX_PNMTX0);
+>>>>>>> upstream/main
 }
 
 static void noLoadPrj(JPAEmitterWorkData const* work, const Mtx srt) {
@@ -379,8 +500,13 @@ static void noLoadPrj(JPAEmitterWorkData const* work, const Mtx srt) {
 
 void loadPrj(JPAEmitterWorkData const* work, const Mtx srt) {
     Mtx mtx;
+<<<<<<< HEAD
     PSMTXConcat(work->mPrjMtx, srt, mtx);
     GXLoadTexMtxImm(mtx, GX_TEXMTX0, GX_MTX3x4);
+=======
+    NebulaMtxConcat(work->mPrjMtx, srt, mtx);
+    J3DNativeShape::sendTexture(mtx, GX_TEXMTX0, GX_MTX3x4);
+>>>>>>> upstream/main
 }
 
 #pragma push
@@ -410,6 +536,7 @@ static void loadPrjAnm(JPAEmitterWorkData const* work, const Mtx srt) {
     local_108[2][1] = 0.0f;
     local_108[2][2] = 1.0f;
     local_108[2][3] = 0.0f;
+<<<<<<< HEAD
     PSMTXConcat(local_108, work->mPrjMtx, local_108);
     PSMTXConcat(local_108, srt, local_108);
     GXLoadTexMtxImm(local_108, 0x1e, GX_MTX3x4);
@@ -430,6 +557,44 @@ static u8* p_dl[2] = {
     jpa_dl,
     jpa_dl_x,
 };
+=======
+    NebulaMtxConcat(local_108, work->mPrjMtx, local_108);
+    NebulaMtxConcat(local_108, srt, local_108);
+    J3DNativeShape::sendTexture(local_108, 0x1e, GX_MTX3x4);
+}
+#pragma pop
+
+namespace {
+    // The quad arrays JPAResource set for the particles being drawn: positions 3 signed bytes, texture coordinates 2.
+    const u8* sQuadPositions = nullptr;
+    const u8* sQuadTexCoords = nullptr;
+
+    void sendQuadVertex(u32 position, u32 texCoord) {
+        const s8* pPos = reinterpret_cast< const s8* >(sQuadPositions) + 3 * position;
+        const s8* pCrd = reinterpret_cast< const s8* >(sQuadTexCoords) + 2 * texCoord;
+        J3DNativeDraw::position(pPos[0], pPos[1], pPos[2]);
+        J3DNativeDraw::texCoord(pCrd[0], pCrd[1]);
+    }
+}  // namespace
+
+void JPASetQuadArrays(const u8* pPositions, const u8* pTexCoords) {
+    sQuadPositions = pPositions;
+    sQuadTexCoords = pTexCoords;
+}
+
+void JPADrawQuad(u32 type) {
+    // Positions 0-3 with texture coordinates 0-3; the crossed type adds positions 0x48-0x4B with the same coordinates.
+    J3DNativeDraw::begin(GX_QUADS, type != 0 ? 8 : 4, NEBULA_SHAPE_TEXCOORD0);
+    for (u32 i = 0; i < 4; i++) {
+        sendQuadVertex(i, i);
+    }
+    if (type != 0) {
+        for (u32 i = 0; i < 4; i++) {
+            sendQuadVertex(0x48 + i, i);
+        }
+    }
+}
+>>>>>>> upstream/main
 
 typedef void (*projectionFunc)(JPAEmitterWorkData const*, const Mtx);
 
@@ -442,7 +607,11 @@ static projectionFunc p_prj[3] = {
 void JPADrawBillboard(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     if (param_1->checkStatus(8) == 0) {
         JGeometry::TVec3< f32 > local_48;
+<<<<<<< HEAD
         PSMTXMultVec(work->mPosCamMtx, &param_1->mPosition, &local_48);
+=======
+        NebulaMtxMultVec(work->mPosCamMtx, &param_1->mPosition, &local_48);
+>>>>>>> upstream/main
         Mtx local_38;
         local_38[0][0] = work->mGlobalPtclScl.x * param_1->mParticleScaleX;
         local_38[0][3] = local_48.x;
@@ -456,16 +625,26 @@ void JPADrawBillboard(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
         local_38[1][0] = 0.0f;
         local_38[0][2] = 0.0f;
         local_38[0][1] = 0.0f;
+<<<<<<< HEAD
         GXLoadPosMtxImm(local_38, 0);
         p_prj[work->mPrjType](work, local_38);
         GXCallDisplayList(jpa_dl, sizeof(jpa_dl));
+=======
+        J3DNativeShape::sendPosition(local_38, 0);
+        p_prj[work->mPrjType](work, local_38);
+        JPADrawQuad(0);
+>>>>>>> upstream/main
     }
 }
 
 void JPADrawRotBillboard(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
     if (param_1->checkStatus(8) == 0) {
         JGeometry::TVec3< f32 > local_48;
+<<<<<<< HEAD
         PSMTXMultVec(work->mPosCamMtx, &param_1->mPosition, &local_48);
+=======
+        NebulaMtxMultVec(work->mPosCamMtx, &param_1->mPosition, &local_48);
+>>>>>>> upstream/main
         f32 sinRot = JMASSin(param_1->mRotateAngle);
         f32 cosRot = JMath::sSinCosTable.cosShort(param_1->mRotateAngle);
         f32 particleX = work->mGlobalPtclScl.x * param_1->mParticleScaleX;
@@ -484,9 +663,15 @@ void JPADrawRotBillboard(JPAEmitterWorkData* work, JPABaseParticle* param_1) {
         local_38[2][0] = 0.0f;
         local_38[1][2] = 0.0f;
         local_38[0][2] = 0.0f;
+<<<<<<< HEAD
         GXLoadPosMtxImm(local_38, 0);
         p_prj[work->mPrjType](work, local_38);
         GXCallDisplayList(jpa_dl, sizeof(jpa_dl));
+=======
+        J3DNativeShape::sendPosition(local_38, 0);
+        p_prj[work->mPrjType](work, local_38);
+        JPADrawQuad(0);
+>>>>>>> upstream/main
     }
 }
 
@@ -646,10 +831,17 @@ void JPADrawRotation(JPAEmitterWorkData* param_0, JPABaseParticle* param_1) {
         auStack_88[0][3] = param_1->mPosition.x;
         auStack_88[1][3] = param_1->mPosition.y;
         auStack_88[2][3] = param_1->mPosition.z;
+<<<<<<< HEAD
         PSMTXConcat(param_0->mPosCamMtx, auStack_88, auStack_88);
         GXLoadPosMtxImm(auStack_88, 0);
         p_prj[param_0->mPrjType](param_0, auStack_88);
         GXCallDisplayList(p_dl[param_0->mDLType], sizeof(jpa_dl));
+=======
+        NebulaMtxConcat(param_0->mPosCamMtx, auStack_88, auStack_88);
+        J3DNativeShape::sendPosition(auStack_88, 0);
+        p_prj[param_0->mPrjType](param_0, auStack_88);
+        JPADrawQuad(param_0->mDLType);
+>>>>>>> upstream/main
     }
 }
 
@@ -658,6 +850,7 @@ void JPADrawPoint(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
         return;
     }
 
+<<<<<<< HEAD
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GXBegin(GX_POINTS, GX_VTXFMT1, 1);
@@ -666,6 +859,11 @@ void JPADrawPoint(JPAEmitterWorkData* work, JPABaseParticle* ptcl) {
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+    J3DNativeDraw::begin(GX_POINTS, 1, NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(ptcl->mPosition.x, ptcl->mPosition.y, ptcl->mPosition.z);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+>>>>>>> upstream/main
 }
 
 #ifndef TARGET_PC
@@ -685,6 +883,7 @@ void JPADrawLine(JPAEmitterWorkData* param_0, JPABaseParticle* param_1) {
 
     local_28.setLength(param_0->mGlobalPtclScl.y * (25.0f * param_1->mParticleScaleY));
     local_28.sub(local_1c, local_28);
+<<<<<<< HEAD
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GXBegin(GX_LINES, GX_VTXFMT1, 2);
@@ -695,6 +894,13 @@ void JPADrawLine(JPAEmitterWorkData* param_0, JPABaseParticle* param_1) {
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+    J3DNativeDraw::begin(GX_LINES, 2, NEBULA_SHAPE_TEXCOORD0);
+    J3DNativeDraw::position(local_1c.x, local_1c.y, local_1c.z);
+    J3DNativeDraw::texCoord(0.0f, 0.0f);
+    J3DNativeDraw::position(local_28.x, local_28.y, local_28.z);
+    J3DNativeDraw::texCoord(0.0f, 1.0f);
+>>>>>>> upstream/main
 }
 #endif
 
@@ -740,11 +946,17 @@ void JPADrawStripe(JPAEmitterWorkData* param_0) {
         node_func = getNext;
     }
 
+<<<<<<< HEAD
     GXLoadPosMtxImm(param_0->mPosCamMtx, 0);
     p_prj[param_0->mPrjType](param_0, param_0->mPosCamMtx);
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, ptcl_num << 1);
+=======
+    J3DNativeShape::sendPosition(param_0->mPosCamMtx, 0);
+    p_prj[param_0->mPrjType](param_0, param_0->mPosCamMtx);
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, ptcl_num << 1, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* node = startNode; node != param_0->mpAlivePtcl->getEnd(); node = node_func(node), coord += step) {
         param_0->mpCurNode = node;
         JPABaseParticle* particle = node->getObject();
@@ -782,6 +994,7 @@ void JPADrawStripe(JPAEmitterWorkData* param_0) {
         local_c8[2][1] = local_f8.z;
         local_c8[2][2] = particle->mBaseAxis.z;
         local_c8[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(local_c8, local_e0, local_e0, 2);
         GXPosition3f32(local_e0[0].x + local_ec.x, local_e0[0].y + local_ec.y, local_e0[0].z + local_ec.z);
         GXTexCoord2f32(0.0f, coord);
@@ -791,6 +1004,14 @@ void JPADrawStripe(JPAEmitterWorkData* param_0) {
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+        NebulaMtxMultVecArraySR(local_c8, local_e0, local_e0, 2);
+        J3DNativeDraw::position(local_e0[0].x + local_ec.x, local_e0[0].y + local_ec.y, local_e0[0].z + local_ec.z);
+        J3DNativeDraw::texCoord(0.0f, coord);
+        J3DNativeDraw::position(local_e0[1].x + local_ec.x, local_e0[1].y + local_ec.y, local_e0[1].z + local_ec.z);
+        J3DNativeDraw::texCoord(1.0f, coord);
+    }
+>>>>>>> upstream/main
 }
 #endif
 
@@ -829,11 +1050,17 @@ void JPADrawStripeX(JPAEmitterWorkData* param_0) {
         node_func = getNext;
     }
 
+<<<<<<< HEAD
     GXLoadPosMtxImm(param_0->mPosCamMtx, 0);
     p_prj[param_0->mPrjType](param_0, param_0->mPosCamMtx);
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
     GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, ptcl_num << 1);
+=======
+    J3DNativeShape::sendPosition(param_0->mPosCamMtx, 0);
+    p_prj[param_0->mPrjType](param_0, param_0->mPosCamMtx);
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, ptcl_num << 1, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* node = startNode; node != param_0->mpAlivePtcl->getEnd(); node = node_func(node), coord += step) {
         param_0->mpCurNode = node;
         JPABaseParticle* particle = node->getObject();
@@ -871,6 +1098,7 @@ void JPADrawStripeX(JPAEmitterWorkData* param_0) {
         local_90[2][1] = local_c0.z;
         local_90[2][2] = particle->mBaseAxis.z;
         local_90[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(local_90, local_a8, local_a8, 2);
         GXPosition3f32(local_a8[0].x + local_b4.x, local_a8[0].y + local_b4.y, local_a8[0].z + local_b4.z);
         GXTexCoord2f32(0.0f, coord);
@@ -881,6 +1109,17 @@ void JPADrawStripeX(JPAEmitterWorkData* param_0) {
 
     coord = start_coord;
     GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT1, ptcl_num << 1);
+=======
+        NebulaMtxMultVecArraySR(local_90, local_a8, local_a8, 2);
+        J3DNativeDraw::position(local_a8[0].x + local_b4.x, local_a8[0].y + local_b4.y, local_a8[0].z + local_b4.z);
+        J3DNativeDraw::texCoord(0.0f, coord);
+        J3DNativeDraw::position(local_a8[1].x + local_b4.x, local_a8[1].y + local_b4.y, local_a8[1].z + local_b4.z);
+        J3DNativeDraw::texCoord(1.0f, coord);
+    }
+
+    coord = start_coord;
+    J3DNativeDraw::begin(GX_TRIANGLESTRIP, ptcl_num << 1, NEBULA_SHAPE_TEXCOORD0);
+>>>>>>> upstream/main
     for (JPANode< JPABaseParticle >* node = startNode; node != param_0->mpAlivePtcl->getEnd(); node = node_func(node), coord += step) {
         param_0->mpCurNode = node;
         JPABaseParticle* particle = node->getObject();
@@ -918,6 +1157,7 @@ void JPADrawStripeX(JPAEmitterWorkData* param_0) {
         local_90[2][1] = local_c0.z;
         local_90[2][2] = particle->mBaseAxis.z;
         local_90[2][3] = 0.0f;
+<<<<<<< HEAD
         PSMTXMultVecArraySR(local_90, local_a8, local_a8, 2);
         GXPosition3f32(local_a8[0].x + local_b4.x, local_a8[0].y + local_b4.y, local_a8[0].z + local_b4.z);
         GXTexCoord2f32(0.0f, coord);
@@ -927,6 +1167,14 @@ void JPADrawStripeX(JPAEmitterWorkData* param_0) {
     GXEnd();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX8);
+=======
+        NebulaMtxMultVecArraySR(local_90, local_a8, local_a8, 2);
+        J3DNativeDraw::position(local_a8[0].x + local_b4.x, local_a8[0].y + local_b4.y, local_a8[0].z + local_b4.z);
+        J3DNativeDraw::texCoord(0.0f, coord);
+        J3DNativeDraw::position(local_a8[1].x + local_b4.x, local_a8[1].y + local_b4.y, local_a8[1].z + local_b4.z);
+        J3DNativeDraw::texCoord(1.0f, coord);
+    }
+>>>>>>> upstream/main
 }
 #endif
 
@@ -1112,6 +1360,7 @@ GXTevAlphaArg JPABaseShape::st_aa[2][4] = {
 void JPABaseShape::setGX(JPAEmitterWorkData* work) const {
     const GXTevColorArg* const colorArg = getTevColorArg();
     const GXTevAlphaArg* alphaArg = getTevAlphaArg();
+<<<<<<< HEAD
     GXSetBlendMode(getBlendMode(), getBlendSrc(), getBlendDst(), getLogicOp());
     GXSetZMode(getZEnable(), getZCmp(), getZUpd());
     GXSetAlphaCompare(getAlphaCmp0(), getAlphaRef0(), getAlphaOp(), getAlphaCmp1(), getAlphaRef1());
@@ -1120,4 +1369,14 @@ void JPABaseShape::setGX(JPAEmitterWorkData* work) const {
     GXSetTevDirect(GX_TEVSTAGE0);
     GXSetTevDirect(GX_TEVSTAGE1);
     GXSetZCompLoc(getZCompLoc());
+=======
+    J3DNativeState::setBlendMode(getBlendMode(), getBlendSrc(), getBlendDst(), getLogicOp());
+    J3DNativeState::setZMode(getZEnable(), getZCmp(), getZUpd());
+    J3DNativeState::setAlphaCompare(getAlphaCmp0(), getAlphaRef0(), getAlphaOp(), getAlphaCmp1(), getAlphaRef1());
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, colorArg[0], colorArg[1], colorArg[2], colorArg[3]);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, alphaArg[0], alphaArg[1], alphaArg[2], alphaArg[3]);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+    J3DNativeState::setZCompLoc(getZCompLoc());
+>>>>>>> upstream/main
 }

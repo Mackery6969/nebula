@@ -1,4 +1,8 @@
 #include "Game/Util/MemoryUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/System/HeapMemoryWatcher.hpp"
 #include "Game/Util/MutexHolder.hpp"
 #include "Game/Util/SingletonHolder.hpp"
@@ -10,12 +14,17 @@
 namespace MR {
     CurrentHeapRestorer::CurrentHeapRestorer(JKRHeap* pHeap) {
         _0 = JKRHeap::sCurrentHeap;
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 1 >::sMutex);
+=======
+        (MR::MutexHolder< 1 >::sMutex).lock();
+>>>>>>> upstream/main
         MR::becomeCurrentHeap(pHeap);
     }
 
     CurrentHeapRestorer::~CurrentHeapRestorer() {
         MR::becomeCurrentHeap(_0);
+<<<<<<< HEAD
         OSUnlockMutex(&MR::MutexHolder< 1 >::sMutex);
     }
 
@@ -37,6 +46,9 @@ namespace MR {
         JKRHeapAllocator< 0 >::sHeap = SingletonHolder< HeapMemoryWatcher >::get()->mHomeButtonLayoutHeap;
 
         return &JKRHeapAllocator< 0 >::sAllocator;
+=======
+        (MR::MutexHolder< 1 >::sMutex).unlock();
+>>>>>>> upstream/main
     }
 
     JKRHeap* getCurrentHeap() {
@@ -158,7 +170,11 @@ namespace MR {
         u32 alignment = reinterpret_cast< uintptr_t >(pDst) & 3;
 
         if ((reinterpret_cast< uintptr_t >(pDst) & 0x1F) == 0 && (size & 0x1F) == 0) {
+<<<<<<< HEAD
             DCZeroRange(pDst, size);
+=======
+            memset(pDst, 0, size);
+>>>>>>> upstream/main
         } else if (alignment == 0 && (size & 0xF) == 0) {
             for (u32 count = size / 16; count != 0; count--) {
                 u32* pWords = reinterpret_cast< u32* >(pDstBytes);

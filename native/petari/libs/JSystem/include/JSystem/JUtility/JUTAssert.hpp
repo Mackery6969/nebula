@@ -1,11 +1,20 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace JUTAssertion {
     void create();
     u32 flush_subroutine();
+<<<<<<< HEAD
     void flushMessage();
+=======
+>>>>>>> upstream/main
     void flushMessage_dbPrint();
     void setVisible(bool);
     void setMessageCount(int);

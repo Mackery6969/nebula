@@ -43,7 +43,11 @@ void GameSceneScenarioOpeningCameraState::start() {
     MR::forceOpenWipeFade();
     MR::forceToFrameCinemaFrame();
     MR::startStageBGM("BGM_START_DEMO", false);
+<<<<<<< HEAD
     PSMTXCopy(MR::getPlayerBaseMtx(), mBaseMtx);
+=======
+    NebulaMtxCopy(MR::getPlayerBaseMtx(), mBaseMtx);
+>>>>>>> upstream/main
 
     TVec3f namePos;
 

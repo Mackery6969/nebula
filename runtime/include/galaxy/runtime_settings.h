@@ -1,11 +1,18 @@
+<<<<<<< HEAD
 // Player settings in runtime_settings.ini: input mode, audio gains, text speed, language, Discord status, online co-op.
+=======
+// Player settings in runtime_settings.ini: input mode, audio gains, text speed, language, Discord status.
+>>>>>>> upstream/main
 #pragma once
 
 #include <filesystem>
 #include <cstdint>
 #include <span>
 #include <string>
+<<<<<<< HEAD
 #include <string_view>
+=======
+>>>>>>> upstream/main
 
 namespace galaxy {
 
@@ -34,6 +41,7 @@ struct RuntimeAudioSettings {
 
 // The style of the game's button icons: the controller in use (a Wii Remote's for the keyboard and controllers it does
 // not know), or one style always.
+<<<<<<< HEAD
 enum class ButtonIcons : std::uint8_t { Auto, Wii, Xbox, Nintendo, PlayStation };
 
 // The three languages of the USA disc, as the Wii's SC language codes SCGetLanguage returns.
@@ -84,6 +92,27 @@ struct RuntimeCoopSettings {
 [[nodiscard]] const char* coop_pvp_mode_key(CoopPvpMode mode) noexcept;
 // "mario" or "luigi" (runtime_settings.ini's coop_character).
 [[nodiscard]] const char* coop_character_key(CoopCharacter character) noexcept;
+=======
+enum class ButtonIcons : std::uint8_t { Auto, Wii, Xbox, Nintendo, PlayStation, Keyboard };
+
+// The game's languages, as the Wii's SC language codes SCGetLanguage returns; the disc's release picks each one's
+// folder (UsEnglish on North America's disc, EuEnglish on Europe's, JpJapanese on Japan's). Auto: the system's language
+// where the disc has it, else English, else the disc's first (game_language_resolved).
+enum class GameLanguage : std::uint8_t {
+    Japanese = 0,
+    English = 1,
+    German = 2,
+    French = 3,
+    Spanish = 4,
+    Italian = 5,
+    Dutch = 6,
+    Auto = 0xFF,
+};
+// Every language a release's disc holds, in the order the settings step through them.
+inline constexpr GameLanguage kGameLanguages[] = {GameLanguage::English, GameLanguage::German,  GameLanguage::French,
+                                                  GameLanguage::Spanish, GameLanguage::Italian, GameLanguage::Dutch,
+                                                  GameLanguage::Japanese};
+>>>>>>> upstream/main
 
 struct RuntimeSettings {
     RuntimeInputMode input_mode = RuntimeInputMode::Auto;
@@ -91,26 +120,46 @@ struct RuntimeSettings {
     // Steps of dialogue text revealed per frame: 1 the game's pace, 2 or 3; 4 each page at once (instant).
     unsigned text_speed = 1u;
     // Takes effect at the next start.
+<<<<<<< HEAD
     GameLanguage language = GameLanguage::English;
     // Discord shows what the player is doing (galaxy, star, Power Stars) while Discord runs.
     bool discord_status = true;
     ButtonIcons button_icons = ButtonIcons::Auto;
     RuntimeCoopSettings coop{};
+=======
+    GameLanguage language = GameLanguage::Auto;
+    // Discord shows what the player is doing (galaxy, star, Power Stars) while Discord runs.
+    bool discord_status = true;
+    ButtonIcons button_icons = ButtonIcons::Auto;
+>>>>>>> upstream/main
 
     friend bool operator==(const RuntimeSettings&, const RuntimeSettings&) = default;
 };
 
 // The languages on the game's disc as it is read (its language folders, the mods' among them): the language setting
+<<<<<<< HEAD
 // offers only these, and a language whose folder is missing starts in English. Every language until it is set.
 void set_disc_languages(std::span<const std::string> folders) noexcept;
 [[nodiscard]] bool game_language_on_disc(GameLanguage language) noexcept;
+=======
+// offers only these, and a language whose folder is missing starts as Auto does. Every language until it is set.
+void set_disc_languages(std::span<const std::string> folders) noexcept;
+[[nodiscard]] bool game_language_on_disc(GameLanguage language) noexcept;
+// The language `setting` plays in on this disc: itself where the disc has it; else (and for Auto) the system's
+// language where the disc has it, else English, else the first of kGameLanguages the disc has.
+[[nodiscard]] GameLanguage game_language_resolved(GameLanguage setting) noexcept;
+>>>>>>> upstream/main
 
 // The language the game runs in this session: the setting when the game first asks (at boot), then
 // fixed, so a change made while playing never mixes two languages.
 [[nodiscard]] GameLanguage game_language_for_boot() noexcept;
 // Whether the game has asked yet, and if so, its language.
 [[nodiscard]] bool running_game_language(GameLanguage& language) noexcept;
+<<<<<<< HEAD
 // "english", "french" or "spanish" (runtime_settings.ini).
+=======
+// "auto", "japanese", "english", "german", "french", "spanish", "italian" or "dutch" (runtime_settings.ini).
+>>>>>>> upstream/main
 [[nodiscard]] const char* game_language_key(GameLanguage language) noexcept;
 // "auto", "wii", "xbox", "nintendo" or "playstation" (runtime_settings.ini).
 [[nodiscard]] const char* button_icons_key(ButtonIcons icons) noexcept;

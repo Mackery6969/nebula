@@ -1,4 +1,8 @@
 #include "Game/System/FileLoaderThread.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/System/FileRipper.hpp"
 #include "Game/Util/FileUtil.hpp"
 
@@ -19,11 +23,18 @@ FileLoaderThread::FileLoaderThread(int priority, int msgCount, JKRHeap* pHeap) :
 }
 
 void* FileLoaderThread::run() {
+<<<<<<< HEAD
     OSInitFastCast();
 
     while (true) {
         OSMessage msg;
         OSReceiveMessage(&mQueue, &msg, OS_MESSAGE_BLOCK);
+=======
+
+    while (true) {
+        void* msg;
+        mQueue.receive(&msg, true);
+>>>>>>> upstream/main
         RequestFileInfo* info = (RequestFileInfo*)msg;
 
         switch (info->_0) {

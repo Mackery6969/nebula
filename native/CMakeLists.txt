@@ -21,6 +21,7 @@ file(GLOB_RECURSE game_sources CONFIGURE_DEPENDS
     "${petari}/src/JSystem/*.cpp" "${petari}/src/JSystem/*.c"
     "${petari}/src/nw4r/*.cpp" "${petari}/src/nw4r/*.c"
     "${petari}/src/RVLFaceLib/*.c" "${petari}/src/RVLFaceLib/*.cpp")
+<<<<<<< HEAD
 # The SDK code the native layer reuses (docs/NATIVE_PORT.md, "Platform boundary"): GX but its FIFO (sdk/gx/gx_fifo.c),
 # display-list building, the MEM heaps, KPAD's processing, the disc's file system (dvdfs.c), U8 archives (arc.c), the
 # Wii Remote speaker's encoder (wenc.c), and the OS's scheduler, alarms, synchronisation and arenas on the native OS
@@ -37,6 +38,13 @@ list(REMOVE_ITEM sdk_sources "${petari}/src/RVL_SDK/gx/GXFifo.c")
 foreach(unit OSThread OSMutex OSMessage OSAlarm OSTime OSArena OSAlloc)
     list(APPEND sdk_sources "${petari}/src/RVL_SDK/os/${unit}.c")
 endforeach()
+=======
+# The SDK code the native layer reuses (docs/NATIVE_PORT.md, "Platform boundary"): KPAD's processing and the Wii
+# Remote speaker's encoder (wenc.c).
+file(GLOB sdk_sources CONFIGURE_DEPENDS
+    "${petari}/src/RVL_SDK/kpad/*.c"
+    "${petari}/src/RVL_SDK/wenc/wenc.c")
+>>>>>>> upstream/main
 file(GLOB_RECURSE layer_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/sdk/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/sdk/*.c")
 list(FILTER layer_sources EXCLUDE REGEX "/tests/")
 
@@ -44,10 +52,19 @@ add_library(smg_game SHARED
     ${game_sources}
     ${sdk_sources}
     ${layer_sources}
+<<<<<<< HEAD
     msl/src/msl_runtime.c)
 
 target_include_directories(smg_game BEFORE PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/msl/include"
+=======
+    msl/src/msl_runtime.c
+    math/src/nebula_math.c)
+
+target_include_directories(smg_game BEFORE PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/msl/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/math/include"
+>>>>>>> upstream/main
     "${petari}/include"
     "${petari}/libs/JSystem/include"
     "${petari}/libs/MSL_C++/include"
@@ -160,6 +177,7 @@ endif()
 # The native game's host (host/host_main.cpp): loads the module and serves it. Built with the host's own C++ library.
 # The mods' virtual disc (galaxy::mods) serves this host's disc reads as the windowed host's.
 add_executable(nebula_native_host host/host_main.cpp
+<<<<<<< HEAD
     ../runtime/src/mods.cpp ../runtime/src/mod_xml.cpp ../runtime/src/virtual_disc.cpp ../runtime/src/atomic_file.cpp
     ../runtime/src/crash_report.cpp ../runtime/src/discord_presence.cpp ../runtime/src/coop_menu.cpp
     ../runtime/src/coop_saves.cpp ../runtime/src/coop_mods.cpp ../runtime/src/coop_session.cpp
@@ -172,6 +190,11 @@ else()
     target_compile_options(nebula_native_host PRIVATE
         "SHELL:-include ${CMAKE_CURRENT_SOURCE_DIR}/../runtime/include/galaxy/posix_compat.h")
 endif()
+=======
+    ../runtime/src/mods.cpp ../runtime/src/mod_xml.cpp ../runtime/src/virtual_disc.cpp ../runtime/src/atomic_file.cpp ../runtime/src/save_files.cpp ../runtime/src/disc_files.cpp
+    ../runtime/src/crash_report.cpp ../runtime/src/discord_presence.cpp ../runtime/src/mii_import.cpp
+    ../runtime/src/mii_formats.cpp ../runtime/src/wii_device_data.cpp)
+>>>>>>> upstream/main
 target_include_directories(nebula_native_host PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/include")
 target_compile_features(nebula_native_host PRIVATE cxx_std_20)

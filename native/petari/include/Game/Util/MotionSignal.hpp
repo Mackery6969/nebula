@@ -2,7 +2,11 @@
 
 #ifdef TARGET_PC
 #include <JSystem/JGeometry/TVec.hpp>
+<<<<<<< HEAD
 #include <nebula_gx_fifo.h>
+=======
+#include "Game/Util/RenderSignals.hpp"
+>>>>>>> upstream/main
 #include <revolution/types.h>
 
 class J3DMatPacket;
@@ -28,7 +32,11 @@ namespace nw4r {
 // What the renderer needs to draw between two game frames (frame interpolation, motion vectors, temporal upscaling)
 // and to know the scene (ray tracing): the object each draw belongs to, the draw phase it is in, when an object starts
 // a new life or jumps, and when the camera cuts. The game writes them as host markers into the GX stream
+<<<<<<< HEAD
 // (galaxy/motion_signals.h), only while the renderer asks for them (__NebulaGXMarkers).
+=======
+// (galaxy/motion_signals.h), only while the renderer asks for them (NebulaRender::sDrawIdentities).
+>>>>>>> upstream/main
 namespace MotionSignal {
     // SceneFunction's draw phases in GameScene::draw3D (galaxy::motion::ScenePhase).
     enum ScenePhase {
@@ -57,7 +65,11 @@ namespace MotionSignal {
 
     // A J3D model's shape packet draws next (J3DShapePacket::prepareDraw).
     inline void drawShapePacket(const J3DShapePacket* pPacket) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             drawShapePacketImpl(pPacket);
         }
     }
@@ -67,28 +79,44 @@ namespace MotionSignal {
     // resource name and the material's name, lower case), names the surface for the renderer's material table (the
     // ray tracer's light sources and materials, finer than their textures).
     inline void drawMaterial(const J3DShapePacket* pPacket) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             drawMaterialImpl(pPacket);
         }
     }
 
     // A NameObj's own draw method runs next (the draw lists' delegator).
     inline void drawNameObj(const NameObj* pObj) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             drawNameObjImpl(pObj);
         }
     }
 
     // An emitter's particles draw next (JPAResource::drawP, drawC for its children).
     inline void drawEmitter(const JPAResource* pResource, const JPABaseEmitter* pEmitter, bool child) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             drawEmitterImpl(pResource, pEmitter, child);
         }
     }
 
     // One particle draws next (its own GXBegin).
     inline void drawParticle(const JPABaseParticle* pParticle, bool child) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             drawParticleImpl(pParticle, child);
         }
     }
@@ -99,25 +127,41 @@ namespace MotionSignal {
 
     // CategoryList::execute(MR::DrawType), drawOpa and drawXlu(MR::DrawBufferType).
     inline void drawType(u32 type) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             categoryImpl(1, type);
         }
     }
 
     inline void drawBufferOpa(u32 type) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             categoryImpl(2, type);
         }
     }
 
     inline void drawBufferXlu(u32 type) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             categoryImpl(3, type);
         }
     }
 
     inline void phase(ScenePhase phase) {
+<<<<<<< HEAD
         if (__NebulaGXMarkers != 0) {
+=======
+        if (NebulaRender::sDrawIdentities != 0) {
+>>>>>>> upstream/main
             categoryImpl(4, phase);
         }
     }

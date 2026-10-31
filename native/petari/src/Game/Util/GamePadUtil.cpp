@@ -347,6 +347,7 @@ namespace MR {
 
         return pWPad->mButton->testButtonB();
     }
+<<<<<<< HEAD
 
 #ifdef TARGET_PC
     void holdWPadsForMenu() {
@@ -358,6 +359,8 @@ namespace MR {
         }
     }
 #endif
+=======
+>>>>>>> upstream/main
 };  // namespace MR
 
 namespace WPadFunction {

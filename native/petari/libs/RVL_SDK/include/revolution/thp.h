@@ -1,13 +1,22 @@
 #ifndef THP_H
 #define THP_H
 
+<<<<<<< HEAD
 #include "revolution.h"
+=======
+#include "revolution/gx.h"
+#include "revolution/mtx.h"
+#include "revolution/os.h"
+>>>>>>> upstream/main
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 typedef u8 THPSample;
+=======
+>>>>>>> upstream/main
 typedef s16 THPCoeff;
 typedef float THPQuantTab[64];
 
@@ -141,6 +150,7 @@ void __THPHuffDecodeDCTCompY(THPFileInfo *, THPCoeff *);
 void __THPHuffDecodeDCTCompU(THPFileInfo *, THPCoeff *);
 void __THPHuffDecodeDCTCompV(THPFileInfo *, THPCoeff *);
 
+<<<<<<< HEAD
 s32 THPVideoDecode(void *file, void *tileY, void *tileU, void *tileV, void *work);
 #ifdef TARGET_PC
 // The video component with its size: THP's entropy data is not byte-stuffed, so only the size bounds a frame.
@@ -150,6 +160,10 @@ u32 THPAudioDecode(s16 *, u8 *, s32);
 
 BOOL THPInit(void);
 
+=======
+u32 THPAudioDecode(s16 *, u8 *, s32);
+
+>>>>>>> upstream/main
 void THPGXYuv2RgbSetup(GXRenderModeObj *);
 void THPGXYuv2RgbDraw(u8 *, u8 *, u8 *, s16, s16, s16, s16, s16, s16); 
 void THPGXRestore(void);

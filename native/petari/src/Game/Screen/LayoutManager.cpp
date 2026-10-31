@@ -300,12 +300,20 @@ void LayoutManager::addGroupCtrl(LayoutGroupCtrl* pGroupCtrl) {
 
 bool LayoutManager::isPointing(const nw4r::lyt::Pane* pPane, const TVec2f& rPos) const {
     Mtx inverse;
+<<<<<<< HEAD
     PSMTXInverse(pPane->mGlbMtx, inverse);
+=======
+    NebulaMtxInverse(pPane->mGlbMtx, inverse);
+>>>>>>> upstream/main
     s32 horizontalPosition = static_cast< u8 >(pPane->mBasePosition % 3);
     s32 verticalPosition = static_cast< u8 >(pPane->mBasePosition / 3);
     TVec3f pos(0.0f, 0.0f, 0.0f);
     MR::convertScreenPosToLayoutPos(reinterpret_cast< TVec2f* >(&pos), rPos);
+<<<<<<< HEAD
     PSMTXMultVec(inverse, &pos, &pos);
+=======
+    NebulaMtxMultVec(inverse, &pos, &pos);
+>>>>>>> upstream/main
 
     switch (horizontalPosition) {
     case 0:
@@ -487,7 +495,11 @@ void LayoutManager::calcAnimWithoutLocationAdjust(const nw4r::lyt::DrawInfo& rDr
         if (mPaneInfoList[i].mMtxRef != nullptr) {
             nw4r::lyt::Pane* pPane =
                 mPaneInfoList[i].mPaneCtrl != nullptr ? mPaneInfoList[i].mPaneCtrl->mPane : findPaneByName(mPaneInfoList[i].mName);
+<<<<<<< HEAD
             PSMTXCopy(pPane->mGlbMtx, mPaneInfoList[i].mMtxRef);
+=======
+            NebulaMtxCopy(pPane->mGlbMtx, mPaneInfoList[i].mMtxRef);
+>>>>>>> upstream/main
             if (MR::isScreen16Per9()) {
                 mPaneInfoList[i].mMtxRef[0][3] *= MR::getScreenWidth() / 608.0f;
             }
@@ -535,7 +547,11 @@ void LayoutManager::initArc(const char* pArchiveName, const char* pLayoutName) {
 
 void LayoutManager::initDrawInfo() {
     nw4r::math::MTX34 mtx;
+<<<<<<< HEAD
     PSMTXIdentity(mtx);
+=======
+    NebulaMtxIdentity(mtx);
+>>>>>>> upstream/main
 
     mDrawInfo.mViewMtx = mtx;
     mDrawInfo.SetMultipleViewMtxOnDraw(true);

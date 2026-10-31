@@ -5,6 +5,7 @@ WPadButton::WPadButton(const WPad* pPad) : mPad(pPad), mHold(), mTrigger(), mRel
     KPADSetBtnRepeat(mPad->mChannel, mDelaySec, mPulseSec);
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 void WPadButton::holdForMenu() {
     mHold = 0;
@@ -14,6 +15,8 @@ void WPadButton::holdForMenu() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 void WPadButton::update() {
     KPADStatus* pStatus = mPad->getKPadStatus(0);
 

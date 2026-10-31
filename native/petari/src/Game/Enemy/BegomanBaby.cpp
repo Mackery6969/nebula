@@ -17,6 +17,10 @@
 #include "Game/Util/PlayerUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include <JSystem/JMath/JMATrigonometric.hpp>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NrvBegomanBaby {
     NEW_NERVE_ONEND(HostTypeNrvNoCalcWait, BegomanBaby, NoCalcWait, NoCalcWait);
@@ -177,7 +181,11 @@ void BegomanBaby::control() {
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     if (!__NebulaCodePatch(NEBULA_PATCH_BEGOMAN_FIRE_PROOF, nullptr) && MR::isBindedGroundDamageFire(this)) {
+=======
+    if (!NebulaHost::codePatch(NEBULA_PATCH_BEGOMAN_FIRE_PROOF, nullptr) && MR::isBindedGroundDamageFire(this)) {
+>>>>>>> upstream/main
 #else
     if (MR::isBindedGroundDamageFire(this)) {
 #endif

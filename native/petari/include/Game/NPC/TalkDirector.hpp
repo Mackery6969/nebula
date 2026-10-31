@@ -2,7 +2,10 @@
 
 #include "Game/NPC/TalkMessageInfo.hpp"
 #include "Game/Screen/LayoutActor.hpp"
+<<<<<<< HEAD
 #include "Game/System/DrawSyncManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/Util/Array.hpp"
 
 class ActorCameraInfo;
@@ -12,6 +15,7 @@ class TalkBalloonHolder;
 class TalkStateHolder;
 class TalkState;
 
+<<<<<<< HEAD
 class TalkPeekZ : DrawSyncCallback {
 public:
     TalkPeekZ();
@@ -22,6 +26,17 @@ public:
 
     /* 0x04 */ u16 mDrawSync;
     /* 0x06 */ u16 _6;
+=======
+class TalkPeekZ {
+public:
+    TalkPeekZ();
+
+    // The depth at the balloon's point, from the picture where the drawing has reached (its readback channel).
+    void setDrawSyncToken();
+
+    static const u32 cReadbackChannel = 2;
+
+>>>>>>> upstream/main
     /* 0x08 */ u32 _8;
     /* 0x0C */ TVec2f mScreenPos;
     /* 0x14 */ TVec3f _14;

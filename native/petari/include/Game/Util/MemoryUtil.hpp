@@ -1,7 +1,10 @@
 #pragma once
 
 #include <JSystem/JKernel/JKRHeap.hpp>
+<<<<<<< HEAD
 #include <revolution/mem.h>
+=======
+>>>>>>> upstream/main
 
 class JKRExpHeap;
 class JKRSolidHeap;
@@ -17,6 +20,7 @@ namespace MR {
         /* 0x00 */ JKRHeap* _0;
     };
 
+<<<<<<< HEAD
     class NewDeleteAllocator {
     public:
         static void* alloc(MEMAllocator* pAllocator, u32 size);
@@ -27,6 +31,8 @@ namespace MR {
     };
 
     MEMAllocator* getHomeButtonLayoutAllocator();
+=======
+>>>>>>> upstream/main
     JKRHeap* getCurrentHeap();
     f32 getHeapFreeRatio(JKRHeap* pHeap);
     JKRHeap* getAproposHeapForSceneArchive(f32 maxFreeSizeRate);
@@ -66,6 +72,7 @@ namespace MR {
     void* allocFromWPadHeap(u32 size);
     u8 freeFromWPadHeap(void* pPtr);
 
+<<<<<<< HEAD
     template < int N >
     class JKRHeapAllocator {
     public:
@@ -98,4 +105,6 @@ namespace MR {
 
     template < int N >
     JKRHeap* JKRHeapAllocator< N >::sHeap;
+=======
+>>>>>>> upstream/main
 };  // namespace MR

@@ -2,7 +2,10 @@
 
 #include "Game/Screen/LayoutActor.hpp"
 
+<<<<<<< HEAD
 class TriggerChecker;
+=======
+>>>>>>> upstream/main
 class ValueControl;
 
 class GameSystemResetAndPowerProcess : public LayoutActor {
@@ -11,8 +14,11 @@ public:
         ResetOperation_ApplicationReset,
         ResetOperation_Restart,
         ResetOperation_ReturnToMenu,
+<<<<<<< HEAD
         ResetOperation_ShutdownSystem,
         ResetOperation_RebootSystem,
+=======
+>>>>>>> upstream/main
     };
 
     /// @brief Creates a new `GameSystemResetAndPowerProcess`.
@@ -38,6 +44,7 @@ public:
     void exeFadein();
     void exitApplication();
     bool tryPermitReset() NO_INLINE;
+<<<<<<< HEAD
     bool tryAcceptPowerOff();
     bool isResetAcceptAudio() const;
     static void handleOSPowerCallback();
@@ -49,5 +56,12 @@ public:
     /* 0x58 */ volatile s32 mResetOperation;
     /* 0x5C */ bool _5C;
     /* 0x5D */ volatile bool mIsValidPowerOff;
+=======
+    bool isResetAcceptAudio() const;
+
+    /* 0x24 */ ValueControl* mFadeinoutControl;
+    /* 0x58 */ volatile s32 mResetOperation;
+    /* 0x5C */ bool _5C;
+>>>>>>> upstream/main
     /* 0x5E */ bool _5E;
 };

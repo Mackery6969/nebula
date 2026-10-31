@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define NWC24i_IO_BUFFER_SIZE 512
 #define NWC24i_STRING_WORK_SIZE 1024
 #define NWC24i_PATH_WORK_SIZE 256
@@ -18,6 +19,8 @@ typedef struct NWC24Work {
     u8 data[NWC24_WORK_PUBLIC_SIZE];
 } NWC24Work;
 
+=======
+>>>>>>> upstream/main
 NWC24Err NWC24OpenLib(void* pWork);
 NWC24Err NWC24CloseLib(void);
 s32 NWC24GetErrorCode(void);

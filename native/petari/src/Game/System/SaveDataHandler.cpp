@@ -1,7 +1,10 @@
 #include "Game/System/SaveDataHandler.hpp"
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/System/NANDManager.hpp"
+<<<<<<< HEAD
 #include "Game/System/SaveDataBannerCreator.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/SaveDataFileAccessor.hpp"
 #include "Game/System/SysConfigFile.hpp"
 #include "Game/System/UserFile.hpp"
@@ -9,6 +12,10 @@
 #include "Game/Util/NerveUtil.hpp"
 #include <JSystem/JKernel/JKRExpHeap.hpp>
 #include <cstdio>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+>>>>>>> upstream/main
 
 namespace {
     struct SaveFileSpec {
@@ -17,7 +24,10 @@ namespace {
     };
 
     const char cSaveFileName[] = "GameData.bin";
+<<<<<<< HEAD
     const char cBannerFileName[] = "banner.bin";
+=======
+>>>>>>> upstream/main
     const SaveFileSpec cSaveFileSpecTable[] = {{"mario", 0xF80}, {"luigi", 0xF80}, {"config", 0x60}};
     const SaveFileSpec cSaveFileSpecSystem = {"sysconf", 0x80};
 };  // namespace
@@ -26,27 +36,40 @@ namespace {
     NEW_NERVE(SaveDataHandlerWait, SaveDataHandler, Wait);
     NEW_NERVE(SaveDataHandlerProcessing, SaveDataHandler, Processing);
     NEW_NERVE(SaveDataHandlerSaveProcessingGameData, SaveDataHandler, SaveProcessingGameData);
+<<<<<<< HEAD
     NEW_NERVE(SaveDataHandlerSaveProcessingBanner, SaveDataHandler, SaveProcessingBanner);
     NEW_NERVE(SaveDataHandlerRemoveProcessingBanner, SaveDataHandler, RemoveProcessingBanner);
+=======
+>>>>>>> upstream/main
     NEW_NERVE(SaveDataHandlerRemoveProcessingGameData, SaveDataHandler, RemoveProcessingGameData);
 };  // namespace
 
 SaveDataHandler::SaveDataHandler(const SysConfigFile* pSysConfigFile, const UserFile* pUserFile)
+<<<<<<< HEAD
     : NerveExecutor("SaveDataHandler"), mNANDRequestInfo(), _C(), _10(), _14(), _18(), mBannerCreator() {
+=======
+    : NerveExecutor("SaveDataHandler"), mNANDRequestInfo(), _C(), _10(), _14(), _18() {
+>>>>>>> upstream/main
     mNANDRequestInfo = new NANDRequestInfo();
 
     createCommunicationBuffer();
     resetSaveData(_18);
     initializeAllFileInSaveData(_18, pSysConfigFile, pUserFile);
 
+<<<<<<< HEAD
     mBannerCreator = new SaveDataBannerCreator();
+=======
+>>>>>>> upstream/main
 
     initNerve(GET_NERVE_ANON(SaveDataHandlerWait));
 }
 
 void SaveDataHandler::update() {
     updateNerve();
+<<<<<<< HEAD
     mBannerCreator->updateNerve();
+=======
+>>>>>>> upstream/main
 }
 
 void SaveDataHandler::requestCheckEnableToCreate() {
@@ -70,7 +93,11 @@ bool SaveDataHandler::requestVerifyAfterLoadGameDataFile() {
 
     SaveDataFileHeader* pFileHeader = reinterpret_cast< SaveDataFileHeader* >(_14);
 
+<<<<<<< HEAD
     if (_C != OSRoundUp32B(pFileHeader->mFileSize)) {
+=======
+    if (_C != NebulaAlignUp32(pFileHeader->mFileSize)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -156,18 +183,30 @@ void SaveDataHandler::requestSaveSaveData() {
 
     MR::copyMemory(_14, _18, fileAccessorA.getHeader()->mFileSize);
     MR::fillMemory(_14 + fileAccessorA.getHeader()->mFileSize, 0,
+<<<<<<< HEAD
                    OSRoundUp32B(fileAccessorA.getHeader()->mFileSize) - fileAccessorA.getHeader()->mFileSize);
     fileAccessorB.getHeader()->mCheckSum = MR::calcCheckSum(_14 + sizeof(u32), reinterpret_cast< SaveDataFileHeader* >(_14)->mFileSize - sizeof(u32));
 
     SaveDataFileHeader* pHeader = fileAccessorB.getHeader();
     mNANDRequestInfo->setWriteSeq(::cSaveFileName, _14, OSRoundUp32B(pHeader->mFileSize), 60, 0);
+=======
+                   NebulaAlignUp32(fileAccessorA.getHeader()->mFileSize) - fileAccessorA.getHeader()->mFileSize);
+    fileAccessorB.getHeader()->mCheckSum = MR::calcCheckSum(_14 + sizeof(u32), reinterpret_cast< SaveDataFileHeader* >(_14)->mFileSize - sizeof(u32));
+
+    SaveDataFileHeader* pHeader = fileAccessorB.getHeader();
+    mNANDRequestInfo->setWriteSeq(::cSaveFileName, _14, NebulaAlignUp32(pHeader->mFileSize), 60, 0);
+>>>>>>> upstream/main
     MR::addRequestToNANDManager(mNANDRequestInfo);
 
     setNerve(GET_NERVE_ANON(SaveDataHandlerSaveProcessingGameData));
 }
 
 void SaveDataHandler::requestRemoveSaveData() {
+<<<<<<< HEAD
     setNerve(GET_NERVE_ANON(SaveDataHandlerRemoveProcessingBanner));
+=======
+    setNerve(GET_NERVE_ANON(SaveDataHandlerRemoveProcessingGameData));
+>>>>>>> upstream/main
 }
 
 u32 SaveDataHandler::getEnoughtTempBufferSize() {
@@ -181,7 +220,11 @@ bool SaveDataHandler::isDone() const {
 }
 
 NANDResultCode SaveDataHandler::getLastResultCode() const {
+<<<<<<< HEAD
     return NANDResultCode(mNANDRequestInfo->mResult);
+=======
+    return NANDResultCode(mNANDRequestInfo->getResult());
+>>>>>>> upstream/main
 }
 
 void SaveDataHandler::exeWait() {
@@ -202,6 +245,7 @@ void SaveDataHandler::exeSaveProcessingGameData() {
         return;
     }
 
+<<<<<<< HEAD
     if (!isErr) {
         setNerve(GET_NERVE_ANON(SaveDataHandlerSaveProcessingBanner));
     } else {
@@ -223,6 +267,10 @@ void SaveDataHandler::exeSaveProcessingBanner() {
             setNerve(GET_NERVE_ANON(SaveDataHandlerWait));
         }
     }
+=======
+    // Saved or not, the sequence ends (the console wrote the System Menu's banner next; a PC has no System Menu).
+    setNerve(GET_NERVE_ANON(SaveDataHandlerWait));
+>>>>>>> upstream/main
 }
 
 void SaveDataHandler::exeRemoveProcessingGameData() {
@@ -235,6 +283,7 @@ void SaveDataHandler::exeRemoveProcessingGameData() {
     setNerve(GET_NERVE_ANON(SaveDataHandlerWait));
 }
 
+<<<<<<< HEAD
 void SaveDataHandler::exeRemoveProcessingBanner() {
     bool isRemoved = false;
 
@@ -249,6 +298,8 @@ void SaveDataHandler::exeRemoveProcessingBanner() {
     }
 }
 
+=======
+>>>>>>> upstream/main
 void SaveDataHandler::resetSaveData(u8* pBuffer) {
     SaveDataFile* pFile = reinterpret_cast< SaveDataFile* >(pBuffer);
     u32 offset = 0x140;
@@ -290,7 +341,11 @@ void SaveDataHandler::resetSaveData(u8* pBuffer) {
 
     pFile->mHeader.mFileSize = offset + ::cSaveFileSpecSystem.mBufferSize;
 
+<<<<<<< HEAD
     u32 padding = OSRoundUp32B(offset + ::cSaveFileSpecSystem.mBufferSize) - pFile->mHeader.mFileSize;
+=======
+    u32 padding = NebulaAlignUp32(offset + ::cSaveFileSpecSystem.mBufferSize) - pFile->mHeader.mFileSize;
+>>>>>>> upstream/main
     u8* pPadding = pBuffer + pFile->mHeader.mFileSize;
     for (u32 i = 0; i < padding; i++) {
         pPadding[i] = 0;
@@ -365,7 +420,11 @@ bool SaveDataHandler::tryRemoveFile(const char* pFileName, bool* pIsRemoved) {
     if (MR::isFirstStep(this)) {
         MR::addRequestToNANDManager(mNANDRequestInfo->setDelete(pFileName));
     } else if (mNANDRequestInfo->isDone()) {
+<<<<<<< HEAD
         NANDResultCode resultCode = NANDResultCode(mNANDRequestInfo->mResult);
+=======
+        NANDResultCode resultCode = NANDResultCode(mNANDRequestInfo->getResult());
+>>>>>>> upstream/main
 
         if (resultCode.isSuccess() || resultCode.isNoExistFile()) {
             *pIsRemoved = true;
@@ -384,7 +443,11 @@ bool SaveDataHandler::trySave(bool* pIsErr, bool isDone) {
         return false;
     }
 
+<<<<<<< HEAD
     NANDResultCode resultCode = NANDResultCode(mNANDRequestInfo->mResult);
+=======
+    NANDResultCode resultCode = NANDResultCode(mNANDRequestInfo->getResult());
+>>>>>>> upstream/main
 
     if (resultCode.isSuccess()) {
         *pIsErr = false;

@@ -1,5 +1,11 @@
 #include "Game/System/NANDErrorSequence.hpp"
+<<<<<<< HEAD
 #include <revolution/os.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <revolution/os.h>
+#include <revolution/nand.h>
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Screen/SysInfoWindow.hpp"
 #include "Game/System/GameSystemFunction.hpp"
@@ -181,7 +187,11 @@ void NANDErrorSequence::exeErrorToFreeze() {
 
     for (;;) {
 #ifdef TARGET_PC
+<<<<<<< HEAD
         __NebulaPoll();
+=======
+        NebulaKernel::poll();
+>>>>>>> upstream/main
 #endif
     }
 }

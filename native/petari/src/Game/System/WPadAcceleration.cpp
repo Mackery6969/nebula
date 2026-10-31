@@ -7,7 +7,11 @@ namespace {
     bool sSelectDominantRotation;
 
     inline f32 squareDistance(const TVec3f& rA, const TVec3f& rB) {
+<<<<<<< HEAD
         return JMathInlineVEC::PSVECSquareDistance(&rA, &rB);
+=======
+        return NebulaVecSquareDistance(&rA, &rB);
+>>>>>>> upstream/main
     }
 }
 

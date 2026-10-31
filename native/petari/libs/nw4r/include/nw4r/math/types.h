@@ -1,7 +1,13 @@
 #pragma once
 
 #include <cstring>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace nw4r {
     namespace math {
@@ -83,17 +89,29 @@ namespace nw4r {
         };
 
         inline MTX34* MTX34Copy(MTX34* pOut, const MTX34* pIn) {
+<<<<<<< HEAD
             PSMTXCopy(*pIn, *pOut);
+=======
+            NebulaMtxCopy(*pIn, *pOut);
+>>>>>>> upstream/main
             return pOut;
         }
 
         inline MTX34* MTX34Identity(MTX34* pOut) {
+<<<<<<< HEAD
             PSMTXIdentity(*pOut);
+=======
+            NebulaMtxIdentity(*pOut);
+>>>>>>> upstream/main
             return pOut;
         }
 
         inline MTX34* MTX34Mult(MTX34* pOut, const MTX34* pA, const MTX34* pB) {
+<<<<<<< HEAD
             PSMTXConcat(*pA, *pB, *pOut);
+=======
+            NebulaMtxConcat(*pA, *pB, *pOut);
+>>>>>>> upstream/main
             return pOut;
         }
 

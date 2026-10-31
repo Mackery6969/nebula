@@ -1,11 +1,22 @@
 #include "Game/Screen/NebulaSettingsMenu.hpp"
+<<<<<<< HEAD
 
 #ifdef TARGET_PC
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+
+#ifdef TARGET_PC
+#include "Game/AudioLib/AudSystem.hpp"
+#include "Game/AudioLib/AudWrap.hpp"
+>>>>>>> upstream/main
 #include "Game/Screen/LayoutActor.hpp"
 #include "Game/Screen/LayoutCoreUtil.hpp"
 #include "Game/Screen/LayoutManager.hpp"
 #include "Game/Screen/NebulaIcons.hpp"
+<<<<<<< HEAD
 #include "Game/Screen/NebulaMenuFocus.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/Screen/NebulaPaneKit.hpp"
 #include "Game/Screen/NebulaUi.hpp"
 #include "Game/System/NebulaCutsceneSkip.hpp"
@@ -15,6 +26,11 @@
 #include "Game/Util/SceneUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/Util/StringUtil.hpp"
+#include "Game/Screen/NebulaHomeMenu.hpp"
+>>>>>>> upstream/main
 #include <cstdio>
 #include <cstring>
 #include <nebula_game_api.h>
@@ -22,6 +38,10 @@
 #include <revolution/os.h>
 #include <revolution/wpad.h>
 #include <wstring.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 using namespace NebulaUi;
 
@@ -119,9 +139,14 @@ namespace {
     enum { ChoiceNum = 3 };
 
     // What the hints and buttons name a key or button for. KeyPress: a row's button (IMPORT, OPEN) is pressed with
+<<<<<<< HEAD
     // Space or the bottom button. KeyReset: the main menu's Tab, a controller's Back (View, Minus, Create).
     // KeyErase: a main menu text's delete, Backspace or that same Back button.
     enum { KeyApply, KeyUndo, KeyBack, KeyPage, KeyChange, KeyBind, KeyPress, KeyReset, KeyErase, KeyNum };
+=======
+    // Space or the bottom button.
+    enum { KeyApply, KeyUndo, KeyBack, KeyPage, KeyChange, KeyBind, KeyPress, KeyNum };
+>>>>>>> upstream/main
 
     // The questions the host asks over the page (NEBULA_SETTINGS_STATUS_*), with their answers: each one's word, what it
     // sends and the key or button that gives it.
@@ -155,6 +180,17 @@ namespace {
          {"SettingsChoiceRestart", "SettingsChoiceLater", nullptr},
          {NEBULA_SETTINGS_APPLY, NEBULA_SETTINGS_CLOSE, 0},
          {KeyApply, KeyBack, 0}},
+<<<<<<< HEAD
+=======
+        {NEBULA_SETTINGS_STATUS_RT_RESTART_ASK, "SettingsRtRestartAsk", "SettingsRtRestartAsk", 2,
+         {"SettingsChoiceRestart", "SettingsChoiceLater", nullptr},
+         {NEBULA_SETTINGS_APPLY, NEBULA_SETTINGS_CLOSE, 0},
+         {KeyApply, KeyBack, 0}},
+        {NEBULA_SETTINGS_STATUS_DIAGNOSTICS_ASK, "SettingsDiagnosticsAsk", "SettingsDiagnosticsAsk", 2,
+         {"SettingsChoiceRestart", "SettingsChoiceNotNow", nullptr},
+         {NEBULA_SETTINGS_APPLY, NEBULA_SETTINGS_CLOSE, 0},
+         {KeyApply, KeyBack, 0}},
+>>>>>>> upstream/main
         // Its text follows the halves (fillTexts).
         {NEBULA_SETTINGS_STATUS_JOYCON, "SettingsJoyConPress", "SettingsJoyConPress", 1,
          {"SettingsBack", nullptr, nullptr},
@@ -232,6 +268,10 @@ namespace {
         f32 mInkY[2];
         nw4r::math::VEC2 mLabelScales[2];
         bool mGlyph;  // mWord is the D-pad
+<<<<<<< HEAD
+=======
+        bool mKeyIcon;  // mWord is the keyboard's keys (NebulaIcons::keyCode)
+>>>>>>> upstream/main
         f32 mSize;    // the size of the text it stands with
         f32 mWidth;
     };
@@ -253,8 +293,11 @@ namespace {
         {{L"\u00D7", 0xFFFFFFFF, cText}, {L"\u25CB", 0xFFFFFFFF, cText}, {L"\u25A1", 0xFFFFFFFF, cText}, {L"\u25B3", 0xFFFFFFFF, cText}},
     };
     const wchar_t* const cPadShoulders[3][2] = {{L"LB", L"RB"}, {L"L", L"R"}, {L"L1", L"R1"}};
+<<<<<<< HEAD
     // The controllers' Back button, which resets the main menu's settings: a pill as the shoulders are.
     const wchar_t* const cPadBack[3] = {L"View", L"\u2212", L"Create"};
+=======
+>>>>>>> upstream/main
     const PadButton cShoulders[3] = {{nullptr, 0x45474EFF, 0xFFFFFFFF}, {nullptr, 0xFFFFFFFF, cText}, {nullptr, 0xFFFFFFFF, cText}};
     const u32 cBadgeRing = 0xB4C2DEFF;  // round a white badge, as the window's rules
 
@@ -485,8 +528,12 @@ namespace {
             append(pDst, pDst + capacity, L"\u2190\u2192");
             return;
         }
+<<<<<<< HEAD
         static const char* const cKeys[KeyNum] = {"KeyEnter", "KeyBackspace", "KeyEscape", "KeyTab", nullptr, "KeyEnter", "KeySpace",
                                                    "KeyTab", "KeyBackspace"};
+=======
+        static const char* const cKeys[KeyNum] = {"KeyEnter", "KeyBackspace", "KeyEscape", "KeyTab", nullptr, "KeyEnter", "KeySpace"};
+>>>>>>> upstream/main
         NebulaText::get(pDst, capacity, key == KeyApply && controls ? "KeySpace" : cKeys[key]);
     }
 
@@ -532,15 +579,51 @@ namespace {
         return true;
     }
 
+<<<<<<< HEAD
     // `key` (KeyApply...; -1 none) as `input` (NEBULA_SETTINGS_INPUT_*) shows it.
+=======
+    // The keyboard's key for `key` (NEBULA_KEY_*); `controls`: the bindings page's own (Space applies). Changing: the
+    // left arrow (the right one beside it).
+    s32 keyboardKey(s32 key, bool controls) {
+        static const s32 cKeys[KeyNum] = {NEBULA_KEY_ENTER, NEBULA_KEY_BACKSPACE, NEBULA_KEY_ESCAPE, NEBULA_KEY_TAB,
+                                          NEBULA_KEY_LEFT,  NEBULA_KEY_ENTER,     NEBULA_KEY_SPACE};
+        return key == KeyApply && controls ? NEBULA_KEY_SPACE : cKeys[key];
+    }
+
+    // `key` (KeyApply...; -1 none) as `input` (NEBULA_SETTINGS_INPUT_*) shows it: the keyboard's as its keys' icons
+    // (as the game's icons draw them; its name in words while the icons cannot be drawn), a controller's as its buttons.
+>>>>>>> upstream/main
     void fillKeyCap(KeyCap& rCap, s32 key, u32 input, bool controls) {
         f32 height = 0.0f;
         const bool pad = input >= NEBULA_SETTINGS_INPUT_XBOX && input <= NEBULA_SETTINGS_INPUT_PLAYSTATION;
         rCap.mBadgeCount = 0;
         rCap.mWidth = 0.0f;
         rCap.mGlyph = false;
+<<<<<<< HEAD
         rCap.mWord->SetVisible(key >= 0 && (!pad || key == KeyChange));
         if (key >= 0 && !pad) {
+=======
+        rCap.mKeyIcon = false;
+        rCap.mWord->SetVisible(key >= 0 && (!pad || key == KeyChange));
+        const u16 keyIcon = key >= 0 && !pad ? NebulaIcons::keyCode(keyboardKey(key, controls)) : 0;
+        if (keyIcon != 0) {
+            const f32 glyphSize = rCap.mSize * 1.3f;
+            setGlyph(rCap.mWord, keyIcon, glyphSize);
+            s32 glyphs = 1;
+            if (key == KeyChange) {
+                // Left and right, side by side.
+                wchar_t text[16] = {0};
+                MR::addPictureFontTag(MR::addPictureFontTag(text, keyIcon), NebulaIcons::keyCode(NEBULA_KEY_RIGHT));
+                setText(rCap.mWord, text);
+                glyphs = 2;
+            }
+            setTextColor(rCap.mWord, 0xFFFFFFFF, 0xFFFFFFFF);
+            rCap.mGlyph = true;
+            rCap.mKeyIcon = true;
+            rCap.mWidth = glyphFontSize(rCap.mWord, glyphSize).width * glyphs;
+            rCap.mWord->mSize = nw4r::lyt::Size(rCap.mWidth + glyphSize, glyphSize * 2.0f);
+        } else if (key >= 0 && !pad) {
+>>>>>>> upstream/main
             wchar_t text[64] = {0};
             getKeyName(text, 64, key, controls);
             setTextStyle(rCap.mWord, rCap.mSize, cAccent, cAccent, 4);
@@ -554,6 +637,7 @@ namespace {
         } else if (key >= 0) {
             const s32 layout = static_cast< s32 >(input) - 1;
             const f32 diameter = rCap.mSize * cBadgeScale;
+<<<<<<< HEAD
             static const s32 cFace[KeyNum] = {3, 2, 1, -1, 0, 0, 0, -1, -1};
             rCap.mBadgeCount = key == KeyPage ? 2 : 1;
             for (s32 i = 0; i < rCap.mBadgeCount; i++) {
@@ -561,6 +645,14 @@ namespace {
                 const bool face = key != KeyPage && !back;
                 const PadButton& rLook = face ? cPadFaces[layout][cFace[key]] : cShoulders[layout];
                 setText(rCap.mLabels[i], face ? rLook.mLabel : back ? cPadBack[layout] : cPadShoulders[layout][i]);
+=======
+            static const s32 cFace[KeyNum] = {3, 2, 1, -1, 0, 0, 0};
+            rCap.mBadgeCount = key == KeyPage ? 2 : 1;
+            for (s32 i = 0; i < rCap.mBadgeCount; i++) {
+                const PadButton& rLook = key == KeyPage ? cShoulders[layout] : cPadFaces[layout][cFace[key]];
+                const bool face = key != KeyPage;
+                setText(rCap.mLabels[i], face ? rLook.mLabel : cPadShoulders[layout][i]);
+>>>>>>> upstream/main
                 setTextColor(rCap.mLabels[i], rLook.mInk, rLook.mInk);
                 paint(rCap.mBadges[i], rLook.mFill, rLook.mFill == 0xFFFFFFFF ? cBadgeRing : darker(rLook.mFill));
                 f32 labelWidth = 0.0f;
@@ -592,7 +684,14 @@ namespace {
     void placeKeyCap(KeyCap& rCap, f32 left, f32 y) {
         if (rCap.mBadgeCount == 0) {
             rCap.mWord->mTranslate = nw4r::math::VEC3(left + rCap.mWidth * 0.5f,
+<<<<<<< HEAD
                                                       rCap.mGlyph ? glyphCentre(y, rCap.mSize * 1.3f) : textCentre(y, rCap.mSize), 0.0f);
+=======
+                                                      rCap.mKeyIcon ? y - cKeyGlyphDrop * rCap.mSize * 1.3f
+                                                      : rCap.mGlyph ? glyphCentre(y, rCap.mSize * 1.3f)
+                                                                    : textCentre(y, rCap.mSize),
+                                                      0.0f);
+>>>>>>> upstream/main
             return;
         }
         const f32 diameter = rCap.mSize * cBadgeScale;
@@ -625,12 +724,15 @@ namespace {
                rRow.slider_steps > 0;
     }
 
+<<<<<<< HEAD
     // A loading bar (the main menu's joining screen): a slider that doesn't change, without a knob.
     bool hasProgress(const NebulaSettingsRow& rRow) {
         return (rRow.flags & (NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_SLIDER)) == NEBULA_SETTINGS_ROW_SLIDER &&
                rRow.slider_steps > 0;
     }
 
+=======
+>>>>>>> upstream/main
     // A setting with a list of values: its arrows step through them (a binding waits for an input instead).
     bool hasArrows(const NebulaSettingsRow& rRow) {
         return (rRow.flags & (NEBULA_SETTINGS_ROW_HEADING | NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_BUTTONS |
@@ -662,7 +764,11 @@ namespace {
         if (pRow == nullptr) {
             return HintChange;
         }
+<<<<<<< HEAD
         if (hasButtons(pRow) || (pRow->flags & NEBULA_SETTINGS_ROW_TEXT) != 0) {
+=======
+        if (hasButtons(pRow)) {
+>>>>>>> upstream/main
             return HintPress;
         }
         if (modList(*pRow) >= 0) {
@@ -698,11 +804,14 @@ public:
     bool isShown() const { return mOpen > 0.0f; }
     bool isOpenFully() const { return mOpen >= 1.0f && !mClosing; }
     bool isHome() const { return mHome; }
+<<<<<<< HEAD
     bool isMainMenu() const { return mShown.kind == NEBULA_SETTINGS_KIND_MAIN_MENU; }
     // The pointer is on something A presses (a tab, a footer button, a row): the screen takes that A itself.
     bool isPointerOnItem() const { return mHoverButton != nullptr || mHoverTab >= 0 || mHoverRow >= 0; }
     // The D-pad or stick moved the selection: the pointer waits until it moves.
     void takeFromPointer() { mPointerMode = false; }
+=======
+>>>>>>> upstream/main
 
 private:
     bool build();
@@ -854,6 +963,7 @@ private:
 namespace {
     NebulaSettingsScreen* sScreen = nullptr;
     NebulaSettingsView sView;
+<<<<<<< HEAD
     bool sHoldingInput = false;  // the game plays on without the player's input: the menu open, dropping in or rising away
     bool sMainMenuActive = false;  // the file select shows the online co-op main menu (FileSelector)
     bool sMainMenuReading = false;  // the main menu took the pad last frame
@@ -897,6 +1007,10 @@ namespace {
             __NebulaSettingsInput(NEBULA_SETTINGS_CLOSE, 0);
         }
     }
+=======
+    bool sFreezing = false;     // the scene waits: the menu open, dropping in or rising away
+    bool sMusicPaused = false;  // the music stopped once faded, as under the pause menu
+>>>>>>> upstream/main
 };  // namespace
 
 NebulaSettingsScreen::NebulaSettingsScreen()
@@ -959,7 +1073,11 @@ void NebulaSettingsScreen::init(const JMapInfoIter& rIter) {
     memcpy(pManager->mLayoutName, cLayoutName, sizeof(cLayoutName));
     mBuilt = build();
     if (!mBuilt) {
+<<<<<<< HEAD
         OSReport("NebulaSettingsMenu: a layout or pane is missing\n");
+=======
+        JUTNativeLog("NebulaSettingsMenu: a layout or pane is missing\n");
+>>>>>>> upstream/main
     }
     kill();
 }
@@ -1221,6 +1339,7 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
     f32 width = 0.0f;
     f32 height = 0.0f;
     if (pShown == nullptr) {
+<<<<<<< HEAD
         NebulaText::get(text, 256, rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU ? "CoopMenuTitle" : "SettingsTitle");
         setText(mTitle, text);
         measure(mTitle, 4000.0f, &width, &height);
@@ -1230,6 +1349,15 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
             Chip& rTab = mTabs[i];
             rTab.mRoot->SetVisible(i < tabs);
             if (i >= tabs) {
+=======
+        NebulaText::get(text, 256, "SettingsTitle");
+        setText(mTitle, text);
+        measure(mTitle, 4000.0f, &width, &height);
+        for (u32 i = 0; i < NEBULA_SETTINGS_PAGES; i++) {
+            Chip& rTab = mTabs[i];
+            rTab.mRoot->SetVisible(i < rView.page_count);
+            if (i >= rView.page_count) {
+>>>>>>> upstream/main
                 continue;
             }
             translateLine(text, 64, rView.pages[i], false);
@@ -1298,7 +1426,14 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
         if (heading) {
             continue;
         }
+<<<<<<< HEAD
         const u32 valueColor = (rData.flags & (NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_TEXT)) != 0 ? cText : cDisabled;
+=======
+        // A binding whose input another control shares is red: both act together.
+        const u32 valueColor = (rData.flags & NEBULA_SETTINGS_ROW_SHARED) != 0    ? cWarning
+                               : (rData.flags & NEBULA_SETTINGS_ROW_CHANGES) != 0 ? cText
+                                                                                  : cDisabled;
+>>>>>>> upstream/main
         translateLine(text, 192, rData.value, (rData.flags & NEBULA_SETTINGS_ROW_NAME) != 0);
         if ((rData.flags & NEBULA_SETTINGS_ROW_ACTIVE) != 0) {
             wchar_t inUse[48] = L"  ";
@@ -1371,10 +1506,15 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
     setTextColor(mStatus, statusColor, statusColor);
     mStatusRoom = -1.0f;  // fitted again where it is placed
 
+<<<<<<< HEAD
     // The hints: changing (pressing, on a row of buttons; moving a mod), the page's own key, the pages. The main menu
     // has one page and nothing to undo: on a page under the main one, Back and Reset instead.
     const bool mainMenu = rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
     const bool controls = !mainMenu && rView.page == rView.controls_page;
+=======
+    // The hints: changing (pressing, on a row of buttons; moving a mod), the page's own key, the pages.
+    const bool controls = rView.page == rView.controls_page;
+>>>>>>> upstream/main
     static const s32 cPageKeys[cHintsMax] = {KeyChange, KeyUndo, KeyPage};
     static const char* const cPageWords[cHintsMax] = {"SettingsHintChange", "SettingsHintUndo", "SettingsHintPage"};
     static const s32 cControlsKeys[cHintsMax] = {KeyBind, KeyUndo, KeyPage};
@@ -1388,6 +1528,7 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
             key = KeyPress;
             pWord = cFirstWords[hint];
         }
+<<<<<<< HEAD
         if (mainMenu && i > 0) {
             const bool under = rView.back != 0;
             key = !under ? -1 : i == 1 ? KeyBack : KeyReset;
@@ -1401,6 +1542,8 @@ void NebulaSettingsScreen::fillTexts(const NebulaSettingsView& rView, const Nebu
             key = i == 2 && !mainMenu ? KeyUndo : cEditKeys[i];
             pWord = cEditWords[i];
         }
+=======
+>>>>>>> upstream/main
         fillKeyCap(rHint.mKey, key, rView.input, controls);
         text[0] = 0;
         if (pWord != nullptr) {
@@ -1563,6 +1706,7 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
     MR::convertScreenPosToLayoutPos(&layout, screen);
     const f32 x = layout.x / mScaleX;
     const f32 y = layout.y - mMenu->mTranslate.y;
+<<<<<<< HEAD
     // The main menu, played with a pad as often as a pointer, gives the pointer its highlight back only once it really
     // moves (a gyro's or a resting stick's drift does not), as NebulaMenuFocus does; until then nothing is under it.
     const bool mainMenu = rView.kind == NEBULA_SETTINGS_KIND_MAIN_MENU;
@@ -1577,6 +1721,13 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
     if (mainMenu && !mPointerMode && !mHome) {
         return;
     }
+=======
+    if (__builtin_fabsf(x - mPointerX) > 0.5f || __builtin_fabsf(y - mPointerY) > 0.5f) {
+        mPointerMode = true;
+    }
+    mPointerX = x;
+    mPointerY = y;
+>>>>>>> upstream/main
     if (mHome) {
         readHomePointer(x, y);
         return;
@@ -1595,7 +1746,11 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
                 mHoverTab = static_cast< s32 >(i);
             }
         }
+<<<<<<< HEAD
         for (s32 i = 0; i < FooterNum && rView.kind != NEBULA_SETTINGS_KIND_MAIN_MENU; i++) {
+=======
+        for (s32 i = 0; i < FooterNum; i++) {
+>>>>>>> upstream/main
             if (isOnButton(x, y, mFooter[i].mChip.mX, mFooterY, mFooter[i].mChip.mWidth, cButtonHeight, cButtonGap)) {
                 mHoverButton = &mFooter[i];
             }
@@ -1638,7 +1793,11 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
             mHeldFrames++;
             if (mHoverArrow == mHeldArrow && mHoverRow == static_cast< s32 >(rView.selected) && mHeldFrames >= cRepeatDelay &&
                 (mHeldFrames - cRepeatDelay) % cRepeatEvery == 0) {
+<<<<<<< HEAD
                 __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, mHeldArrow);
+=======
+                NebulaHost::settingsInput(NEBULA_SETTINGS_CHANGE, mHeldArrow);
+>>>>>>> upstream/main
             }
             return;
         }
@@ -1646,7 +1805,11 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
     }
     if (mPointerMode && mHoverRow >= 0 && mHoverRow != static_cast< s32 >(rView.selected)) {
         mPointerRow = mHoverRow;
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, mHoverRow);
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, mHoverRow);
+>>>>>>> upstream/main
     }
     // The list held down: moved, it is dragged (as the Wii's lists, by pointing and holding A); let go where it was
     // pressed, the row there is clicked.
@@ -1673,16 +1836,28 @@ void NebulaSettingsScreen::readPointer(const NebulaSettingsView& rView) {
         return;
     }
     if (mHoverButton != nullptr) {
+<<<<<<< HEAD
         __NebulaSettingsInput(mHoverButton->mAction, 0);
     } else if (mHoverTab >= 0) {
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_PAGE, mHoverTab);
+=======
+        NebulaHost::settingsInput(mHoverButton->mAction, 0);
+    } else if (mHoverTab >= 0) {
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_PAGE, mHoverTab);
+>>>>>>> upstream/main
     } else if (mHoverRow >= 0 && (mHoverArrow != 0 || mHoverSlider)) {
         // An arrow steps the setting at once, going round at its ends; a slider takes the step under the pointer.
         mPointerMode = true;
         mPointerRow = mHoverRow;
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, mHoverRow);
         if (mHoverArrow != 0) {
             __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, mHoverArrow * 2);
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, mHoverRow);
+        if (mHoverArrow != 0) {
+            NebulaHost::settingsInput(NEBULA_SETTINGS_CHANGE, mHoverArrow * 2);
+>>>>>>> upstream/main
             mHeldArrow = mHoverArrow;
             mHeldFrames = 0;
         } else {
@@ -1707,6 +1882,7 @@ void NebulaSettingsScreen::clickRow(const NebulaSettingsView& rView, s32 row) {
     const Row& rRow = mRows[row - static_cast< s32 >(rView.first_row)];
     mPointerMode = true;
     mPointerRow = row;
+<<<<<<< HEAD
     if ((hasButtons(pData) && (mHoverRowButton >= 0 || rRow.mButtonCount == 1)) || (pData->flags & NEBULA_SETTINGS_ROW_TEXT) != 0) {
         // A text row is edited (or kept, clicked while edited) as A does.
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, row);
@@ -1714,6 +1890,14 @@ void NebulaSettingsScreen::clickRow(const NebulaSettingsView& rView, s32 row) {
     } else if ((pData->flags & NEBULA_SETTINGS_ROW_CHANGES) != 0 && !hasSlider(*pData)) {
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, row);
         __NebulaSettingsInput(NEBULA_SETTINGS_CHANGE, hasArrows(*pData) ? 2 : 1);
+=======
+    if (hasButtons(pData) && (mHoverRowButton >= 0 || rRow.mButtonCount == 1)) {
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, row);
+        NebulaHost::settingsInput(NEBULA_SETTINGS_PRESS, mHoverRowButton >= 0 ? mHoverRowButton : 0);
+    } else if ((pData->flags & NEBULA_SETTINGS_ROW_CHANGES) != 0 && !hasSlider(*pData)) {
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, row);
+        NebulaHost::settingsInput(NEBULA_SETTINGS_CHANGE, hasArrows(*pData) ? 2 : 1);
+>>>>>>> upstream/main
     }
 }
 
@@ -1732,10 +1916,17 @@ void NebulaSettingsScreen::dragSlider(const NebulaSettingsView& rView, f32 x) {
     const s32 step = static_cast< s32 >(clamp((x - rRow.mSliderLeft) / length, 0.0f, 1.0f) * pData->slider_steps + 0.5f);
     const bool selected = mSliderRow == static_cast< s32 >(rView.selected);
     if (!selected) {
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, mSliderRow);
     }
     if (!selected || step != static_cast< s32 >(pData->slider_at)) {
         __NebulaSettingsInput(NEBULA_SETTINGS_SET_VALUE, step);
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, mSliderRow);
+    }
+    if (!selected || step != static_cast< s32 >(pData->slider_at)) {
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SET_VALUE, step);
+>>>>>>> upstream/main
     }
 }
 
@@ -1787,8 +1978,13 @@ void NebulaSettingsScreen::readModsPointer(const NebulaSettingsView& rView, f32 
                     place--;
                 }
                 if (mDropList != mItemList[index] || place != mItemPlace[index]) {
+<<<<<<< HEAD
                     __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, mDragRow);
                     __NebulaSettingsInput(NEBULA_SETTINGS_MOVE_MOD, (mDropList + 1) << 16 | place);
+=======
+                    NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, mDragRow);
+                    NebulaHost::settingsInput(NEBULA_SETTINGS_MOVE_MOD, (mDropList + 1) << 16 | place);
+>>>>>>> upstream/main
                     MR::startSystemSE("SE_SY_SELECT_PAUSE_ITEM");
                 }
             }
@@ -1802,13 +1998,22 @@ void NebulaSettingsScreen::readModsPointer(const NebulaSettingsView& rView, f32 
         return;
     }
     if (mHoverModButton >= 0 && mModButtonsRow >= 0) {
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, mModButtonsRow);
         __NebulaSettingsInput(NEBULA_SETTINGS_PRESS, mHoverModButton);
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, mModButtonsRow);
+        NebulaHost::settingsInput(NEBULA_SETTINGS_PRESS, mHoverModButton);
+>>>>>>> upstream/main
     } else if (hovered >= 0) {
         // Held down: dragged once it moves.
         mPointerMode = true;
         mPointerRow = hovered;
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_SELECT_ROW, hovered);
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_SELECT_ROW, hovered);
+>>>>>>> upstream/main
         mDragRow = hovered;
         mDragFromX = x;
         mDragFromY = y;
@@ -1830,10 +2035,17 @@ void NebulaSettingsScreen::readHomePointer(f32 x, f32 y) {
         return;
     }
     if (mPointerMode && hovered != (mHomeView & 0xFF)) {
+<<<<<<< HEAD
         __NebulaHomeMenu(NEBULA_HBM_POINT, hovered);
     }
     if (MR::testCorePadTriggerA(WPAD_CHAN0)) {
         __NebulaHomeMenu(NEBULA_HBM_CHOOSE, hovered);
+=======
+        NebulaHomeMenu::point(hovered);
+    }
+    if (MR::testCorePadTriggerA(WPAD_CHAN0)) {
+        NebulaHomeMenu::choose(hovered);
+>>>>>>> upstream/main
     }
 }
 
@@ -2232,7 +2444,11 @@ void NebulaSettingsScreen::placeRows(const NebulaSettingsView& rView) {
         // The row as a button: the selected one (the keys' or under the pointer) white and ringed in the game's blue; a
         // row that only shows something fainter.
         const bool selected = row == static_cast< s32 >(rView.selected) && !asking;
+<<<<<<< HEAD
         const bool fixed = (rData.flags & (NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_BUTTONS | NEBULA_SETTINGS_ROW_TEXT)) == 0;
+=======
+        const bool fixed = (rData.flags & (NEBULA_SETTINGS_ROW_CHANGES | NEBULA_SETTINGS_ROW_BUTTONS)) == 0;
+>>>>>>> upstream/main
         // The others' ring in their fill: their whole box shows (the ring's colour is near the window's).
         const u32 fill = selected ? cHighlightFill : fixed ? cFrameFixed : cFrameFill;
         paint(rRow.mFrame, fill, selected ? cHighlightRing : fill);
@@ -2269,6 +2485,7 @@ void NebulaSettingsScreen::placeRows(const NebulaSettingsView& rView) {
             rRow.mValue->mScale = nw4r::math::VEC2(squeeze, 1.0f);
             rRow.mValue->mTranslate = nw4r::math::VEC3(mValueRight, textCentre(cEdgeDrop * 0.5f, cTextSize), 0.0f);
             labelRoom = start - labelX - 12.0f;
+<<<<<<< HEAD
         } else if (hasProgress(rData)) {
             // From after its label (at most where a slider starts) to its value, filled as far as it is.
             const f32 sliderLeft = start + cKnobSize * 0.5f - cSliderHeight * 0.5f;
@@ -2285,6 +2502,8 @@ void NebulaSettingsScreen::placeRows(const NebulaSettingsView& rView) {
             rRow.mValue->mScale = nw4r::math::VEC2(squeeze, 1.0f);
             rRow.mValue->mTranslate = nw4r::math::VEC3(mValueRight, textCentre(0.0f, cTextSize), 0.0f);
             labelRoom = left - labelX - 12.0f;
+=======
+>>>>>>> upstream/main
         } else {
             // A value too long for the room its label leaves is narrowed to fit.
             const f32 room = mValueRight - labelX - rRow.mLabelWidth - 24.0f;
@@ -2358,12 +2577,18 @@ void NebulaSettingsScreen::place(const NebulaSettingsView& rView) {
 
     // The footer: Apply and Back for the pointer on the right; the line under the page and the hints in the room left,
     // narrowed when a language runs long.
+<<<<<<< HEAD
     // The main menu has nothing to apply and nowhere to go back to: no footer buttons, the line under the page takes
     // the whole width.
     const bool footer = rView.kind != NEBULA_SETTINGS_KIND_MAIN_MENU;
     f32 buttonWidths[FooterNum];
     f32 buttonsWidth = 0.0f;
     for (s32 i = 0; i < FooterNum && footer; i++) {
+=======
+    f32 buttonWidths[FooterNum];
+    f32 buttonsWidth = 0.0f;
+    for (s32 i = 0; i < FooterNum; i++) {
+>>>>>>> upstream/main
         const Button& rButton = mFooter[i];
         buttonWidths[i] = rButton.mKey.mWidth + cKeyGap + rButton.mWordWidth + 44.0f;
         buttonWidths[i] = buttonWidths[i] < 110.0f ? 110.0f : buttonWidths[i];
@@ -2371,10 +2596,13 @@ void NebulaSettingsScreen::place(const NebulaSettingsView& rView) {
     }
     f32 x = mRight;
     for (s32 i = FooterNum - 1; i >= 0; i--) {
+<<<<<<< HEAD
         mFooter[i].mChip.mRoot->SetVisible(footer);
         if (!footer) {
             continue;
         }
+=======
+>>>>>>> upstream/main
         placeButton(mFooter[i], x - buttonWidths[i] * 0.5f, mFooterY, buttonWidths[i]);
         x -= buttonWidths[i] + cButtonGap;
     }
@@ -2511,7 +2739,11 @@ void NebulaSettingsScreen::placeJoyCon(f32 top) {
 // The Pair Joy-Con pictures at the 2D layer's density, painted for about `budgetMicros` this frame; that density in
 // pixels per menu unit.
 void NebulaSettingsScreen::paintJoyCon(u32 budgetMicros, f32* pPixelsX, f32* pPixelsY) const {
+<<<<<<< HEAD
     const u32 scale = __NebulaLayer2DScale();
+=======
+    const u32 scale = NebulaHost::layer2DScale();
+>>>>>>> upstream/main
     const f32 layer = scale != 0u ? static_cast< f32 >(scale) : 3.0f;
     *pPixelsX = 640.0f * layer / mWidth;
     *pPixelsY = 456.0f * layer / mHeight;
@@ -2549,10 +2781,15 @@ void NebulaSettingsScreen::step(const NebulaSettingsView& rView, s32 homeView) {
     }
     const bool wanted = rView.open || homeView >= 0;
     const bool home = !rView.open;
+<<<<<<< HEAD
     // The main menu and the settings menu share the screen: one opened over the other (Options) fills it anew.
     const bool otherKind = rView.open && rView.kind != mShown.kind;
     if (wanted && (!isShown() || mClosing || home != mHome || otherKind)) {
         if (!isShown() || home != mHome || otherKind) {
+=======
+    if (wanted && (!isShown() || mClosing || home != mHome)) {
+        if (!isShown() || home != mHome) {
+>>>>>>> upstream/main
             appear();
             mHome = home;
             mHomeView = -1;
@@ -2705,6 +2942,7 @@ namespace NebulaSettingsMenu {
         if (sScreen == nullptr || !sScreen->isBuilt()) {
             return;
         }
+<<<<<<< HEAD
         __NebulaSettingsView(&sView);
         // Not before a file is chosen (the logos, the title, the file select): asked for there, it closes at once. The
         // main menu shows there, and so do the settings its Options opens.
@@ -2733,6 +2971,40 @@ namespace NebulaSettingsMenu {
             if (!sHoldingInput || NebulaCutsceneSkip::isFreezingScene()) {
                 MR::updateStarPointerModeWhileSceneHeld();
             }
+=======
+        NebulaHost::settingsView(&sView);
+        // Not before a file is chosen (the logos, the title, the file select): asked for there, it closes at once.
+        if (sView.open && !sScreen->isShown() &&
+            (MR::isEqualSceneName("Logo") || MR::isEqualSceneName("Title") || MR::isStageFileSelect())) {
+            NebulaHost::settingsInput(NEBULA_SETTINGS_CLOSE, 0);
+            sView.open = 0;
+        }
+        sScreen->step(sView, NebulaHomeMenu::view());
+        // The whole game waits from the first frame of the drop to the last of the rise. Its sound fades and the music
+        // stops as under the pause menu, and both come back as they were. The HOME Menu holds the game itself
+        // (HomeButtonLayout).
+        const bool freezing = sView.open || (sScreen->isShown() && !sScreen->isHome());
+        AudSystem* pAudio = AudWrap::getSystem();
+        if (freezing != sFreezing) {
+            sFreezing = freezing;
+            if (pAudio != nullptr) {
+                pAudio->holdForSettingsMenu(freezing, NebulaCutsceneSkip::isFreezingScene() || NebulaCutsceneSkip::isSkipping());
+                if (!freezing && sMusicPaused) {
+                    pAudio->unpause();
+                }
+            }
+            sMusicPaused = false;
+        }
+        if (freezing && !sMusicPaused && sScreen->isOpenFully() && pAudio != nullptr && !pAudio->mIsPaused &&
+            !pAudio->isPauseMenuActive() && !pAudio->isHomeButtonMenuActive()) {
+            pAudio->pause();
+            sMusicPaused = true;
+        }
+        setSharp(SharpSettings, sScreen->isShown());
+        if (sScreen->isShown()) {
+            MR::requestStarPointerModePauseMenu(sScreen);
+            MR::updateStarPointerModeWhileSceneHeld();
+>>>>>>> upstream/main
             sScreen->calcAnim();
         }
     }
@@ -2743,8 +3015,13 @@ namespace NebulaSettingsMenu {
         }
     }
 
+<<<<<<< HEAD
     bool isHoldingInput() {
         return sHoldingInput;
+=======
+    bool isFreezingScene() {
+        return sFreezing;
+>>>>>>> upstream/main
     }
 
     bool isShown() {
@@ -2752,11 +3029,15 @@ namespace NebulaSettingsMenu {
     }
 
     void requestOpen() {
+<<<<<<< HEAD
         __NebulaSettingsInput(NEBULA_SETTINGS_OPEN, 0);
     }
 
     void setMainMenuActive(bool active) {
         sMainMenuActive = active;
+=======
+        NebulaHost::settingsInput(NEBULA_SETTINGS_OPEN, 0);
+>>>>>>> upstream/main
     }
 };  // namespace NebulaSettingsMenu
 #endif

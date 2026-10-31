@@ -1,7 +1,13 @@
 #pragma once
 
 #include <JSystem/JMath/random.hpp>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace JMath {
     struct TRandom_fast_;
@@ -48,9 +54,12 @@ public:
     /* 0x00 */ NameObjHolder* mObjHolder;
     /* 0x04 */ ParticleResourceHolder* mParticleResHolder;
     /* 0x08 */ GXRenderModeObj* mRenderModeObj;
+<<<<<<< HEAD
     /* 0x0C */ void* _C;
     /* 0x10 */ void* _10;
     /* 0x14 */ void* _14;
+=======
+>>>>>>> upstream/main
     /* 0x18 */ CaptureScreenDirector* mCaptureScreenDirector;
     /* 0x1C */ ScreenPreserver* mScreenPreserver;
     /* 0x20 */ AudSystemWrapper* mAudioSystem;

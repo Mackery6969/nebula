@@ -21,6 +21,10 @@
 #include "Game/Util/ObjUtil.hpp"
 #include "Game/Util/PlayerUtil.hpp"
 #include "Game/Util/SoundUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NrvBegomanSpike {
     NEW_NERVE_ONEND(HostTypeNrvNoCalcWait, BegomanSpike, NoCalcWait, NoCalcWait);
@@ -209,7 +213,11 @@ void BegomanSpike::control() {
     }
 
 #ifdef TARGET_PC
+<<<<<<< HEAD
     if (!__NebulaCodePatch(NEBULA_PATCH_BEGOMAN_FIRE_PROOF, nullptr) && MR::isBindedGroundDamageFire(this)) {
+=======
+    if (!NebulaHost::codePatch(NEBULA_PATCH_BEGOMAN_FIRE_PROOF, nullptr) && MR::isBindedGroundDamageFire(this)) {
+>>>>>>> upstream/main
 #else
     if (MR::isBindedGroundDamageFire(this)) {
 #endif

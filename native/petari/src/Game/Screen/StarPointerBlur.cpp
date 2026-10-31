@@ -1,11 +1,21 @@
 #include "Game/Screen/StarPointerBlur.hpp"
+<<<<<<< HEAD
+=======
+#include <revolution/wpad.h>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Screen/StarPointerDirector.hpp"
 #include "Game/Util/MathUtil.hpp"
 #include "Game/Util/StarPointerUtil.hpp"
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <revolution/gx/GXStruct.h>
 #include <revolution/gx/GXTransform.h>
+<<<<<<< HEAD
 #include <revolution/gx/GXVert.h>
+=======
+>>>>>>> upstream/main
 
 namespace {
     static const f32 sBeginThick = 10.0f;
@@ -168,6 +178,7 @@ void StarPointerBlur::draw2() const {
             continue;
         }
 
+<<<<<<< HEAD
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, range * 2);
         for (s32 point = start; point < end; point++) {
             const TVec2f& pos = mBlurPoints[point].mPos;
@@ -178,6 +189,17 @@ void StarPointerBlur::draw2() const {
             GXTexCoord2f32(1.0f, mBlurTexCoords[point]);
         }
         GXEnd();
+=======
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, range * 2, NEBULA_SHAPE_TEXCOORD0);
+        for (s32 point = start; point < end; point++) {
+            const TVec2f& pos = mBlurPoints[point].mPos;
+            const TVec2f& offset = dir * mBlurThicks[point];
+            J3DNativeDraw::position(pos.x - offset.x, pos.y - offset.y, 0.0f);
+            J3DNativeDraw::texCoord(0.0f, mBlurTexCoords[point]);
+            J3DNativeDraw::position(pos.x + offset.x, pos.y + offset.y, 0.0f);
+            J3DNativeDraw::texCoord(1.0f, mBlurTexCoords[point]);
+        }
+>>>>>>> upstream/main
 
         start = end;
     }
@@ -192,6 +214,7 @@ void StarPointerBlur::draw2() const {
             continue;
         }
 
+<<<<<<< HEAD
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, range * 2);
         for (s32 point = start; point < end; point++) {
             const TVec2f& pos = mBlurPoints[point].mPos;
@@ -202,12 +225,24 @@ void StarPointerBlur::draw2() const {
             GXTexCoord2f32(1.0f, mBlurTexCoords[point]);
         }
         GXEnd();
+=======
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, range * 2, NEBULA_SHAPE_TEXCOORD0);
+        for (s32 point = start; point < end; point++) {
+            const TVec2f& pos = mBlurPoints[point].mPos;
+            const TVec2f& offset = dir * mBlurThicks[point];
+            J3DNativeDraw::position(pos.x - offset.x, pos.y - offset.y, 0.0f);
+            J3DNativeDraw::texCoord(0.0f, mBlurTexCoords[point]);
+            J3DNativeDraw::position(pos.x + offset.x, pos.y + offset.y, 0.0f);
+            J3DNativeDraw::texCoord(1.0f, mBlurTexCoords[point]);
+        }
+>>>>>>> upstream/main
 
         start = end;
     }
 }
 
 void StarPointerBlur::initDraw() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
 
@@ -217,10 +252,15 @@ void StarPointerBlur::initDraw() const {
 
     GXSetNumTexGens(1);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, 60, GX_FALSE, 125);
+=======
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, 60, GX_FALSE, 125);
+>>>>>>> upstream/main
     mTexture->load(GX_TEXMAP0);
 
     TPos3f mtx;
     mtx.identity();
+<<<<<<< HEAD
     GXLoadPosMtxImm(mtx, 0);
     GXSetCurrentMtx(0);
 
@@ -246,4 +286,31 @@ void StarPointerBlur::initDraw() const {
     GXSetAlphaCompare(GX_LEQUAL, 255, GX_AOP_OR, GX_LESS, 255);
 
     GXSetTevColor(GX_TEVREG0, *mMainColor);
+=======
+    J3DNativeShape::sendPosition(mtx, 0);
+    J3DNativeState::setCurrentMtx(0);
+
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_DISABLE, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_DISABLE, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+
+    J3DNativeState::setNumIndStages(0);
+
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    J3DNativeState::setZCompLoc(GX_FALSE);
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+
+    J3DNativeState::setAlphaCompare(GX_LEQUAL, 255, GX_AOP_OR, GX_LESS, 255);
+
+    J3DNativeState::setTevColor(GX_TEVREG0, *mMainColor);
+>>>>>>> upstream/main
 }

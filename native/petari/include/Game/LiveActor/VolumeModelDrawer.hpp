@@ -3,7 +3,13 @@
 #include "Game/NameObj/NameObj.hpp"
 #include "Game/Util/Color.hpp"
 #include <JSystem/J3DGraphAnimator/J3DModelData.hpp>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class VolumeModelDrawer : public NameObj {
 public:

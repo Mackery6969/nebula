@@ -88,10 +88,20 @@ target_include_directories(galaxy_runtime_abi INTERFACE "${CMAKE_CURRENT_SOURCE_
 add_library(galaxy_atomic_file STATIC runtime/src/atomic_file.cpp)
 target_link_libraries(galaxy_atomic_file PUBLIC galaxy_runtime_abi)
 
+<<<<<<< HEAD
+=======
+add_library(galaxy_disc_files STATIC runtime/src/disc_files.cpp)
+target_link_libraries(galaxy_disc_files PUBLIC galaxy_runtime_abi)
+
+add_library(galaxy_save_files STATIC runtime/src/save_files.cpp)
+target_link_libraries(galaxy_save_files PUBLIC galaxy_runtime_abi galaxy_atomic_file)
+
+>>>>>>> upstream/main
 add_library(galaxy_runtime_settings STATIC
     runtime/src/runtime_settings.cpp
     runtime/src/input_bindings.cpp
     runtime/src/achievements.cpp
+<<<<<<< HEAD
     runtime/src/stats.cpp
     runtime/src/coop_menu.cpp
     runtime/src/coop_saves.cpp)
@@ -112,6 +122,12 @@ add_library(galaxy_net STATIC
 target_link_libraries(galaxy_net PUBLIC galaxy_runtime_abi galaxy_atomic_file ws2_32)
 galaxy_host_options(galaxy_net)
 
+=======
+    runtime/src/stats.cpp)
+target_link_libraries(galaxy_runtime_settings PUBLIC galaxy_runtime_abi galaxy_atomic_file)
+galaxy_host_options(galaxy_runtime_settings)
+
+>>>>>>> upstream/main
 add_library(galaxy_frame_cadence_diagnostics STATIC runtime/src/frame_cadence_diagnostics.cpp)
 target_link_libraries(galaxy_frame_cadence_diagnostics PUBLIC galaxy_runtime_abi)
 galaxy_host_options(galaxy_frame_cadence_diagnostics)
@@ -137,7 +153,12 @@ galaxy_host_options(galaxy_native_input)
 
 # The game's audio commands mixed on the host (jaudio_host_mixer.h).
 add_library(galaxy_jaudio_mixer STATIC runtime/src/jaudio_host_mixer.cpp)
+<<<<<<< HEAD
 target_include_directories(galaxy_jaudio_mixer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/runtime/include")
+=======
+target_include_directories(galaxy_jaudio_mixer PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/runtime/include"
+                           "${CMAKE_CURRENT_SOURCE_DIR}/native/include")
+>>>>>>> upstream/main
 galaxy_host_options(galaxy_jaudio_mixer)
 
 add_library(galaxy_native_host STATIC
@@ -157,7 +178,10 @@ target_link_libraries(galaxy_native_host
     PUBLIC
         galaxy_runtime_abi
         galaxy_runtime_settings
+<<<<<<< HEAD
         galaxy_net
+=======
+>>>>>>> upstream/main
         galaxy_native_input
         galaxy_jaudio_mixer
         galaxy_frame_cadence_diagnostics
@@ -174,12 +198,20 @@ target_link_libraries(galaxy_native_host
 )
 galaxy_host_options(galaxy_native_host)
 
+<<<<<<< HEAD
 # Uber shader sources (runtime/src/gx/uber_*.hlsl) become NUL-terminated char
+=======
+# Uber shader sources (runtime/src/render/uber_*.hlsl) become NUL-terminated char
+>>>>>>> upstream/main
 # arrays in a generated translation unit. Editing a source re-runs configure.
 set(galaxy_uber_embed_cpp "${CMAKE_CURRENT_BINARY_DIR}/generated/uber_shader_embed.cpp")
 set(galaxy_uber_embed_body "")
 foreach(galaxy_uber_stage vs ps)
+<<<<<<< HEAD
     set(galaxy_uber_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/uber_${galaxy_uber_stage}.hlsl")
+=======
+    set(galaxy_uber_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/uber_${galaxy_uber_stage}.hlsl")
+>>>>>>> upstream/main
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${galaxy_uber_hlsl}")
     file(READ "${galaxy_uber_hlsl}" galaxy_uber_hex HEX)
     string(REGEX REPLACE "([0-9a-f][0-9a-f])" "0x\\1," galaxy_uber_hex "${galaxy_uber_hex}")
@@ -187,7 +219,11 @@ foreach(galaxy_uber_stage vs ps)
         "extern const char galaxy_uber_${galaxy_uber_stage}_hlsl[] = {${galaxy_uber_hex}0x00};\n")
 endforeach()
 file(CONFIGURE OUTPUT "${galaxy_uber_embed_cpp}"
+<<<<<<< HEAD
     CONTENT "namespace galaxy::gx {\n${galaxy_uber_embed_body}}\n"
+=======
+    CONTENT "namespace galaxy::render {\n${galaxy_uber_embed_body}}\n"
+>>>>>>> upstream/main
     @ONLY)
 
 # The same passes for the Vulkan renderer, compiled on the device (cmake/post_shader_sources.cmake).
@@ -195,7 +231,11 @@ include(cmake/post_shader_sources.cmake)
 set(galaxy_post_embed_cpp "${CMAKE_CURRENT_BINARY_DIR}/generated/post_shader_embed.cpp")
 galaxy_embed_post_sources("${galaxy_post_embed_cpp}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
+<<<<<<< HEAD
 # Presentation post-processing passes (runtime/src/gx/post_process.hlsl with
+=======
+# Presentation post-processing passes (runtime/src/render/post_process.hlsl with
+>>>>>>> upstream/main
 # the vendored SMAA and FidelityFX FSR 1 sources) are compiled by fxc at build
 # time into bytecode headers, so the runtime never compiles them at startup.
 find_program(GALAXY_FXC fxc
@@ -203,7 +243,11 @@ find_program(GALAXY_FXC fxc
     REQUIRED)
 set(galaxy_post_dir "${CMAKE_CURRENT_BINARY_DIR}/generated/post_shaders")
 file(MAKE_DIRECTORY "${galaxy_post_dir}")
+<<<<<<< HEAD
 set(galaxy_post_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/post_process.hlsl")
+=======
+set(galaxy_post_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/post_process.hlsl")
+>>>>>>> upstream/main
 set(galaxy_smaa_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/third_party/smaa/SMAA.hlsl")
 set(galaxy_ffx_a_h "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fidelityfx-fsr1/ffx_a.h")
 set(galaxy_ffx_fsr1_h "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fidelityfx-fsr1/ffx_fsr1.h")
@@ -245,13 +289,33 @@ endfunction()
 galaxy_post_shader(post_fullscreen_vs PASS_RESAMPLE - none vs_5_0 VSMain)
 galaxy_post_shader(post_resample_ps PASS_RESAMPLE - none ps_5_0 PSMain)
 galaxy_post_shader(post_deband_ps PASS_DEBAND - none ps_5_0 PSMain)
+<<<<<<< HEAD
+=======
+galaxy_post_shader(post_deband_reduce_ps PASS_DEBAND_REDUCE - none ps_5_0 PSMain)
+galaxy_post_shader(post_deband_smooth_ps PASS_DEBAND_SMOOTH - none ps_5_0 PSMain)
+galaxy_post_shader(post_deband_apply_ps PASS_DEBAND_APPLY - none ps_5_0 PSMain)
+>>>>>>> upstream/main
 galaxy_post_shader(post_fxaa_ps PASS_FXAA - none ps_5_0 PSMain)
 galaxy_post_shader(post_fsr_easu_ps PASS_FSR_EASU - fsr ps_5_0 PSMain)
 galaxy_post_shader(post_fsr_rcas_ps PASS_FSR_RCAS - fsr ps_5_0 PSMain)
 galaxy_post_shader(post_fsr_rcas_scaled_ps PASS_FSR_RCAS_SCALED - fsr ps_5_0 PSMain)
+<<<<<<< HEAD
 galaxy_post_shader(post_smaa_edges_vs PASS_SMAA_EDGES SMAA_PRESET_HIGH smaa vs_5_0 VSMain)
 galaxy_post_shader(post_smaa_blend_vs PASS_SMAA_BLEND SMAA_PRESET_HIGH smaa vs_5_0 VSMain)
 galaxy_post_shader(post_smaa_blend_ps PASS_SMAA_BLEND SMAA_PRESET_HIGH smaa ps_5_0 PSMain)
+=======
+# The same passes reading a picture held in a taller texture (post_process.hlsl SOURCE_BOX).
+galaxy_post_shader(post_resample_box_ps PASS_RESAMPLE SOURCE_BOX none ps_5_0 PSMain)
+galaxy_post_shader(post_deband_box_ps PASS_DEBAND SOURCE_BOX none ps_5_0 PSMain)
+galaxy_post_shader(post_deband_reduce_box_ps PASS_DEBAND_REDUCE SOURCE_BOX none ps_5_0 PSMain)
+galaxy_post_shader(post_deband_apply_box_ps PASS_DEBAND_APPLY SOURCE_BOX none ps_5_0 PSMain)
+galaxy_post_shader(post_fsr_easu_box_ps PASS_FSR_EASU SOURCE_BOX fsr ps_5_0 PSMain)
+galaxy_post_shader(post_fsr_rcas_scaled_box_ps PASS_FSR_RCAS_SCALED SOURCE_BOX fsr ps_5_0 PSMain)
+galaxy_post_shader(post_smaa_edges_vs PASS_SMAA_EDGES SMAA_PRESET_HIGH smaa vs_5_0 VSMain)
+galaxy_post_shader(post_smaa_blend_vs PASS_SMAA_BLEND SMAA_PRESET_HIGH smaa vs_5_0 VSMain)
+galaxy_post_shader(post_smaa_blend_ps PASS_SMAA_BLEND SMAA_PRESET_HIGH smaa ps_5_0 PSMain)
+galaxy_post_shader(post_smaa_blend_keep_ps PASS_SMAA_BLEND_KEEP SMAA_PRESET_HIGH smaa ps_5_0 PSMain)
+>>>>>>> upstream/main
 foreach(galaxy_smaa_preset LOW MEDIUM HIGH ULTRA)
     string(TOLOWER "${galaxy_smaa_preset}" galaxy_smaa_suffix)
     galaxy_post_shader(post_smaa_edges_ps_${galaxy_smaa_suffix}
@@ -262,8 +326,13 @@ foreach(galaxy_smaa_preset LOW MEDIUM HIGH ULTRA)
         PASS_SMAA_WEIGHTS SMAA_PRESET_${galaxy_smaa_preset} smaa ps_5_0 PSMain)
 endforeach()
 
+<<<<<<< HEAD
 # Ambient occlusion (runtime/src/gx/ambient_occlusion.hlsl), compiled by fxc like the post passes.
 set(galaxy_ao_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/ambient_occlusion.hlsl")
+=======
+# Ambient occlusion (runtime/src/render/ambient_occlusion.hlsl), compiled by fxc like the post passes.
+set(galaxy_ao_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/ambient_occlusion.hlsl")
+>>>>>>> upstream/main
 set(galaxy_ao_headers "")
 foreach(galaxy_ao_pass distance_cs:DepthCS:cs_5_0 occlusion_cs:AoCS:cs_5_0 denoise_cs:DenoiseCS:cs_5_0
         apply_vs:ApplyVS:vs_5_0 apply_ps:ApplyPS:ps_5_0)
@@ -284,8 +353,13 @@ foreach(galaxy_ao_pass distance_cs:DepthCS:cs_5_0 occlusion_cs:AoCS:cs_5_0 denoi
     list(APPEND galaxy_ao_headers "${galaxy_ao_header}")
 endforeach()
 
+<<<<<<< HEAD
 # The game's bloom (runtime/src/gx/game_bloom.hlsl), compiled by fxc like the post passes.
 set(galaxy_bloom_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/game_bloom.hlsl")
+=======
+# The game's bloom (runtime/src/render/game_bloom.hlsl), compiled by fxc like the post passes.
+set(galaxy_bloom_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/game_bloom.hlsl")
+>>>>>>> upstream/main
 set(galaxy_bloom_headers "")
 foreach(galaxy_bloom_pass down_cs:DownCS:cs_5_0 box_cs:BoxCS:cs_5_0 blur_cs:BlurCS:cs_5_0
         composite_vs:CompositeVS:vs_5_0 composite_ps:CompositePS:ps_5_0)
@@ -302,7 +376,11 @@ foreach(galaxy_bloom_pass down_cs:DownCS:cs_5_0 box_cs:BoxCS:cs_5_0 blur_cs:Blur
     list(APPEND galaxy_bloom_headers "${galaxy_bloom_header}")
 endforeach()
 
+<<<<<<< HEAD
 # Ray-tracing compute shaders (runtime/src/gx/ray_tracing.hlsl: DXR 1.1 inline ray queries,
+=======
+# Ray-tracing compute shaders (runtime/src/render/ray_tracing.hlsl: DXR 1.1 inline ray queries,
+>>>>>>> upstream/main
 # shader model 6.5) are compiled by the Windows SDK's DXC at build time into signed DXIL headers.
 find_program(GALAXY_DXC dxc
     HINTS "$ENV{WindowsSdkVerBinPath}x64" "$ENV{WindowsSdkBinPath}x64"
@@ -312,23 +390,38 @@ if(NOT GALAXY_DXC)
 endif()
 set(galaxy_rt_dir "${CMAKE_CURRENT_BINARY_DIR}/generated/rt_shaders")
 file(MAKE_DIRECTORY "${galaxy_rt_dir}")
+<<<<<<< HEAD
 set(galaxy_rt_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/ray_tracing.hlsl")
+=======
+set(galaxy_rt_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/ray_tracing.hlsl")
+>>>>>>> upstream/main
 set(galaxy_rt_headers "")
 foreach(galaxy_rt_pass geometry:GeometryCS validate:ValidateCS)
     string(REPLACE ":" ";" galaxy_rt_pair "${galaxy_rt_pass}")
     list(GET galaxy_rt_pair 0 galaxy_rt_name)
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}_cs.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T cs_6_5 -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug -Qstrip_reflect
             -Vn g_rt_${galaxy_rt_name}_cs -Fh "${galaxy_rt_header}" "${galaxy_rt_hlsl}"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T cs_6_5 -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug -Qstrip_reflect
+            -Vn g_rt_${galaxy_rt_name}_cs -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_hlsl}"
+>>>>>>> upstream/main
         DEPENDS "${galaxy_rt_hlsl}"
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
 # Ray-traced lighting passes, the picture capture and the EFB composite
+<<<<<<< HEAD
 # (runtime/src/gx/rt_lighting.hlsl).
 set(galaxy_rt_light_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_lighting.hlsl")
+=======
+# (runtime/src/render/rt_lighting.hlsl).
+set(galaxy_rt_light_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_lighting.hlsl")
+>>>>>>> upstream/main
 foreach(galaxy_rt_pass capture_cs:CaptureCS:cs_6_5 sky_state_cs:SkyStateCS:cs_6_5 glow_base_cs:GlowBaseCS:cs_6_5
         sky_light_map_cs:SkyLightMapCS:cs_6_5 sky_light_sh_cs:SkyLightShCS:cs_6_5
         surface_emit_cs:SurfaceEmitCS:cs_6_5
@@ -342,6 +435,7 @@ foreach(galaxy_rt_pass capture_cs:CaptureCS:cs_6_5 sky_state_cs:SkyStateCS:cs_6_
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     list(GET galaxy_rt_pair 2 galaxy_rt_profile)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_light_hlsl}"
@@ -351,6 +445,17 @@ foreach(galaxy_rt_pass capture_cs:CaptureCS:cs_6_5 sky_state_cs:SkyStateCS:cs_6_
 endforeach()
 # The camera of the ray-traced picture: bloom and the tone curve from the HDR scene EFB (runtime/src/gx/rt_camera.hlsl).
 set(galaxy_rt_camera_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_camera.hlsl")
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_light_hlsl}"
+        DEPENDS "${galaxy_rt_light_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_tev.hlsli"
+        VERBATIM)
+    list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
+endforeach()
+# The camera of the ray-traced picture: bloom and the tone curve from the HDR scene EFB (runtime/src/render/rt_camera.hlsl).
+set(galaxy_rt_camera_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_camera.hlsl")
+>>>>>>> upstream/main
 foreach(galaxy_rt_pass camera_down_cs:CameraDownCS:cs_6_5 camera_up_cs:CameraUpCS:cs_6_5 camera_vs:CameraVS:vs_6_0
         camera_ps:CameraPS:ps_6_0 camera_widen_ps:CameraWidenPS:ps_6_0 camera_shafts_cs:CameraShaftsCS:cs_6_0)
     string(REPLACE ":" ";" galaxy_rt_pair "${galaxy_rt_pass}")
@@ -358,15 +463,26 @@ foreach(galaxy_rt_pass camera_down_cs:CameraDownCS:cs_6_5 camera_up_cs:CameraUpC
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     list(GET galaxy_rt_pair 2 galaxy_rt_profile)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_camera_hlsl}"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_camera_hlsl}"
+>>>>>>> upstream/main
         DEPENDS "${galaxy_rt_camera_hlsl}"
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
+<<<<<<< HEAD
 # Ray-traced reflections and their EFB composite (runtime/src/gx/rt_reflections.hlsl).
 set(galaxy_rt_reflect_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_reflections.hlsl")
+=======
+# Ray-traced reflections and their EFB composite (runtime/src/render/rt_reflections.hlsl).
+set(galaxy_rt_reflect_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_reflections.hlsl")
+>>>>>>> upstream/main
 foreach(galaxy_rt_pass reflect_memory_cs:ReflectMemoryCS:cs_6_5 reflect_trace_cs:ReflectTraceCS:cs_6_5
         reflect_sky_cs:SkyCaptureCS:cs_6_5 reflect_draw_clear_cs:DrawLightClearCS:cs_6_5
         reflect_draw_cs:DrawLightCS:cs_6_5
@@ -380,10 +496,17 @@ foreach(galaxy_rt_pass reflect_memory_cs:ReflectMemoryCS:cs_6_5 reflect_trace_cs
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     list(GET galaxy_rt_pair 2 galaxy_rt_profile)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_reflect_hlsl}"
         DEPENDS "${galaxy_rt_reflect_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_tev.hlsli"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T ${galaxy_rt_profile} -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_reflect_hlsl}"
+        DEPENDS "${galaxy_rt_reflect_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_tev.hlsli"
+>>>>>>> upstream/main
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
@@ -393,10 +516,17 @@ foreach(galaxy_rt_pass reflect_trace_tex_cs:ReflectTraceCS water_trace_tex_cs:Wa
     list(GET galaxy_rt_pair 0 galaxy_rt_name)
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_reflect_hlsl}"
         DEPENDS "${galaxy_rt_reflect_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_tev.hlsli"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_reflect_hlsl}"
+        DEPENDS "${galaxy_rt_reflect_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_tev.hlsli"
+>>>>>>> upstream/main
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
@@ -409,17 +539,31 @@ foreach(galaxy_rt_pass sky_probe_tex_cs:SkyProbeCS emit_triangle_cs:EmitTriangle
     list(GET galaxy_rt_pair 0 galaxy_rt_name)
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_light_hlsl}"
         DEPENDS "${galaxy_rt_light_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_tev.hlsli"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_light_hlsl}"
+        DEPENDS "${galaxy_rt_light_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_tev.hlsli"
+>>>>>>> upstream/main
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
 
+<<<<<<< HEAD
 # The ray tracing engine (runtime/src/gx/rt_engine.hlsl, including rt_lighting.hlsl; shader model 6.6).
 set(galaxy_rt_engine_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_engine.hlsl")
 foreach(galaxy_rt_pass engine_gbuffer_cs:EngineGBufferCS engine_direct_cs:EngineDirectCS
+=======
+# The ray tracing engine (runtime/src/render/rt_engine.hlsl, including rt_lighting.hlsl; shader model 6.6).
+set(galaxy_rt_engine_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_engine.hlsl")
+foreach(galaxy_rt_pass engine_paint_clear_cs:EnginePaintClearCS engine_paint_cs:EnginePaintCS
+        engine_gbuffer_cs:EngineGBufferCS engine_direct_cs:EngineDirectCS
+>>>>>>> upstream/main
         engine_light_grid_cs:EngineLightGridCS engine_cache_cs:EngineCacheCS
         engine_direct_spatial_cs:EngineDirectSpatialCS
         engine_shadow_blur_cs:EngineShadowBlurCS
@@ -432,28 +576,47 @@ foreach(galaxy_rt_pass engine_gbuffer_cs:EngineGBufferCS engine_direct_cs:Engine
     list(GET galaxy_rt_pair 0 galaxy_rt_name)
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_engine_hlsl}"
         DEPENDS "${galaxy_rt_engine_hlsl}" "${galaxy_rt_light_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_tev.hlsli"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -D RT_TEXTURED=1 -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_engine_hlsl}"
+        DEPENDS "${galaxy_rt_engine_hlsl}" "${galaxy_rt_light_hlsl}" "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_tev.hlsli"
+>>>>>>> upstream/main
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
 
+<<<<<<< HEAD
 # Texture de-lighting for the physical lighting (runtime/src/gx/rt_delight.hlsl; textures from the descriptor heap).
 set(galaxy_rt_delight_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/gx/rt_delight.hlsl")
+=======
+# Texture de-lighting for the physical lighting (runtime/src/render/rt_delight.hlsl; textures from the descriptor heap).
+set(galaxy_rt_delight_hlsl "${CMAKE_CURRENT_SOURCE_DIR}/runtime/src/render/rt_delight.hlsl")
+>>>>>>> upstream/main
 foreach(galaxy_rt_pass delight_cs:DelightCS delight_mip_cs:DelightMipCS)
     string(REPLACE ":" ";" galaxy_rt_pair "${galaxy_rt_pass}")
     list(GET galaxy_rt_pair 0 galaxy_rt_name)
     list(GET galaxy_rt_pair 1 galaxy_rt_entry)
     set(galaxy_rt_header "${galaxy_rt_dir}/rt_${galaxy_rt_name}.h")
+<<<<<<< HEAD
     add_custom_command(OUTPUT "${galaxy_rt_header}"
         COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
             -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" "${galaxy_rt_delight_hlsl}"
+=======
+    add_custom_command(OUTPUT "${galaxy_rt_header}" "${galaxy_rt_header}.dxil"
+        COMMAND "${GALAXY_DXC}" -nologo -T cs_6_6 -E ${galaxy_rt_entry} -O3 -WX -Qstrip_debug
+            -Qstrip_reflect -Vn g_rt_${galaxy_rt_name} -Fh "${galaxy_rt_header}" -Fo "${galaxy_rt_header}.dxil" "${galaxy_rt_delight_hlsl}"
+>>>>>>> upstream/main
         DEPENDS "${galaxy_rt_delight_hlsl}"
         VERBATIM)
     list(APPEND galaxy_rt_headers "${galaxy_rt_header}")
 endforeach()
+<<<<<<< HEAD
 
 add_library(galaxy_gx STATIC
     runtime/src/gx/gx_shim.cpp
@@ -513,6 +676,81 @@ add_library(galaxy_gx STATIC
     runtime/src/frame_telemetry.cpp
     runtime/src/perf_hint.cpp
     runtime/src/gx/game_asset_extract.cpp
+=======
+# The shaders' manifest (tools/rt_shader_manifest.cmake: each one's size and DXIL digest, the set's fingerprint) for the
+# start's shader preparation (runtime/src/render/rt_prepare.cpp), from the binaries dxc writes beside the headers.
+set(galaxy_rt_manifest "${galaxy_rt_dir}/rt_shader_manifest.h")
+set(galaxy_rt_binaries "")
+foreach(galaxy_rt_header IN LISTS galaxy_rt_headers)
+    list(APPEND galaxy_rt_binaries "${galaxy_rt_header}.dxil")
+endforeach()
+string(REPLACE ";" "|" galaxy_rt_binary_arg "${galaxy_rt_binaries}")
+add_custom_command(OUTPUT "${galaxy_rt_manifest}"
+    COMMAND "${CMAKE_COMMAND}" "-DOUT=${galaxy_rt_manifest}" "-DBINARIES=${galaxy_rt_binary_arg}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tools/rt_shader_manifest.cmake"
+    DEPENDS ${galaxy_rt_binaries} "${CMAKE_CURRENT_SOURCE_DIR}/tools/rt_shader_manifest.cmake"
+    VERBATIM)
+list(APPEND galaxy_rt_headers "${galaxy_rt_manifest}")
+
+add_library(galaxy_gx STATIC
+    runtime/src/render/renderer_api.cpp
+    runtime/src/render/render_config.cpp
+    runtime/src/render/host_window_win32.cpp
+    runtime/src/render/vblank_clock_win32.cpp
+    runtime/src/render/renderer_d3d12.cpp
+    runtime/src/render/renderer_common.cpp
+    runtime/src/render/upload_ring.cpp
+    runtime/src/render/galaxy_select.cpp
+    runtime/src/render/window_owner.cpp
+    runtime/src/render/texture_cache.cpp
+    runtime/src/render/texture_pack.cpp
+    runtime/src/render/texture_pack_codecs.cpp
+    runtime/src/render/movie_replacement.cpp
+    runtime/src/render/texture_backend_d3d12.cpp
+    runtime/src/render/placed_texture_allocator.cpp
+    runtime/src/render/curved_surfaces.cpp
+    runtime/src/render/native_shapes.cpp
+    runtime/src/render/native_material.cpp
+    runtime/src/render/draw_state.cpp
+    runtime/src/render/matrix_memory.cpp
+    runtime/src/render/shader_keys.cpp
+    runtime/src/render/efb_copy.cpp
+    runtime/src/render/line_point_raster.cpp
+    runtime/src/render/pipeline_cache.cpp
+    runtime/src/render/shader_gen.cpp
+    runtime/src/render/uber_shaders.cpp
+    ${galaxy_uber_embed_cpp}
+    runtime/src/render/post_process.cpp
+    runtime/src/render/post_process_settings.cpp
+    ${galaxy_post_headers}
+    runtime/src/render/ambient_occlusion.cpp
+    ${galaxy_ao_headers}
+    runtime/src/render/game_bloom.cpp
+    ${galaxy_bloom_headers}
+    runtime/src/render/temporal_upscaler.cpp
+    runtime/src/render/ray_tracing.cpp
+    runtime/src/render/game_lights.cpp
+    runtime/src/render/game_objects.cpp
+    runtime/src/render/rt_tev_eval.cpp
+    runtime/src/render/ray_tracing_camera.cpp
+    runtime/src/render/ray_tracing_engine.cpp
+    runtime/src/render/ray_tracing_reflections.cpp
+    runtime/src/render/ray_tracing_water.cpp
+    runtime/src/render/rt_prepare.cpp
+    runtime/src/render/rt_surfaces.cpp
+    runtime/src/render/rt_materials.cpp
+    runtime/src/render/enhanced_lighting.cpp
+    ${galaxy_rt_headers}
+    runtime/src/render/streamline_bridge.cpp
+    runtime/src/render/transform_history.cpp
+    runtime/src/render/frame_interpolation.cpp
+    runtime/src/render/interp_gpu.cpp
+    runtime/src/render/display_modes.cpp
+    runtime/src/render/render_core.cpp
+    runtime/src/frame_telemetry.cpp
+    runtime/src/perf_hint.cpp
+    runtime/src/render/game_asset_extract.cpp
+>>>>>>> upstream/main
 )
 # AMD FSR 3 (cmake/fidelityfx.cmake).
 include(cmake/fidelityfx.cmake)
@@ -557,9 +795,15 @@ endif()
 # (smg_game.dll, beside the executable or --module) on Nebula's renderer.
 add_executable(NebulaNative native/host/host_main.cpp runtime/src/native_thp_video.cpp)
 target_include_directories(NebulaNative PRIVATE native/include runtime/include)
+<<<<<<< HEAD
 target_compile_definitions(NebulaNative PRIVATE NEBULA_HOST_RENDERER=1 _CRT_SECURE_NO_WARNINGS)
 target_compile_features(NebulaNative PRIVATE cxx_std_20)
 target_link_libraries(NebulaNative PRIVATE galaxy_gx)
+=======
+target_compile_definitions(NebulaNative PRIVATE NEBULA_HOST_RENDERER=1 NEBULA_HOST_D3D12=1 _CRT_SECURE_NO_WARNINGS)
+target_compile_features(NebulaNative PRIVATE cxx_std_20)
+target_link_libraries(NebulaNative PRIVATE galaxy_gx galaxy_save_files galaxy_disc_files)
+>>>>>>> upstream/main
 if(MSVC)
     # Symbols for crash dumps and the thread profiler; code generation is unchanged.
     target_compile_options(NebulaNative PRIVATE /Zi)
@@ -573,7 +817,11 @@ if(NEBULA_HOST_IPO)
     check_ipo_supported(RESULT nebula_host_ipo_supported OUTPUT nebula_host_ipo_error LANGUAGES CXX)
     if(nebula_host_ipo_supported)
         foreach(target galaxy_native_host galaxy_gx galaxy_native_input galaxy_host_pointer_events
+<<<<<<< HEAD
                 galaxy_frame_cadence_diagnostics galaxy_runtime_settings galaxy_net galaxy_atomic_file galaxy_jaudio_mixer)
+=======
+                galaxy_frame_cadence_diagnostics galaxy_runtime_settings galaxy_atomic_file galaxy_jaudio_mixer)
+>>>>>>> upstream/main
             set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
         endforeach()
         set(nebula_host_ipo_effective ON)
@@ -603,12 +851,25 @@ endfunction()
 
 set(rt runtime/src)
 galaxy_test(galaxy_atomic_file_tests SOURCES ${rt}/atomic_file_tests.cpp LIBS galaxy_atomic_file)
+<<<<<<< HEAD
 galaxy_test(galaxy_runtime_settings_tests SOURCES ${rt}/runtime_settings_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_coop_menu_tests SOURCES ${rt}/coop_menu_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_net_tests SOURCES ${rt}/net/net_tests.cpp LIBS galaxy_net)
 galaxy_test(galaxy_coop_chat_tests SOURCES ${rt}/coop_chat_tests.cpp LIBS galaxy_net)
 galaxy_test(galaxy_coop_snapshot_tests SOURCES ${rt}/coop_snapshot_tests.cpp LIBS galaxy_net)
 galaxy_test(galaxy_coop_world_tests SOURCES ${rt}/coop_world_tests.cpp LIBS galaxy_net)
+=======
+galaxy_test(galaxy_save_files_tests SOURCES ${rt}/save_files_tests.cpp LIBS galaxy_save_files)
+galaxy_test(galaxy_disc_files_tests SOURCES ${rt}/disc_files_tests.cpp LIBS galaxy_disc_files)
+# The game's calendar (native/petari), compiled against a host the test provides.
+galaxy_test(galaxy_native_calendar_tests SOURCES ${rt}/native_calendar_tests.cpp
+    native/petari/src/Game/System/NebulaCalendar.cpp)
+target_include_directories(galaxy_native_calendar_tests PRIVATE native/include native/petari/include
+    native/petari/libs/RVL_SDK/include)
+# The game's types.h defines nullptr as 0 unless it is a macro already: here it names the keyword itself.
+target_compile_definitions(galaxy_native_calendar_tests PRIVATE _ALLOW_KEYWORD_MACROS nullptr=nullptr)
+galaxy_test(galaxy_runtime_settings_tests SOURCES ${rt}/runtime_settings_tests.cpp LIBS galaxy_runtime_settings)
+>>>>>>> upstream/main
 galaxy_test(galaxy_achievements_tests SOURCES ${rt}/achievements_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_stats_tests SOURCES ${rt}/stats_tests.cpp LIBS galaxy_runtime_settings)
 galaxy_test(galaxy_controls_tests SOURCES ${rt}/controls_tests.cpp LIBS galaxy_runtime_settings galaxy_native_input)
@@ -630,7 +891,11 @@ galaxy_test(galaxy_mods_tests SOURCES ${rt}/mods_tests.cpp ${rt}/mod_xml.cpp ${r
 galaxy_test(galaxy_crash_report_tests SOURCES ${rt}/crash_report_tests.cpp ${rt}/crash_report.cpp)
 galaxy_test(galaxy_discord_presence_tests SOURCES ${rt}/discord_presence_tests.cpp ${rt}/discord_presence.cpp)
 
+<<<<<<< HEAD
 set(gxs runtime/src/gx)
+=======
+set(gxs runtime/src/render)
+>>>>>>> upstream/main
 galaxy_test(galaxy_game_asset_extract_tests SOURCES ${gxs}/game_asset_extract_tests.cpp ${gxs}/game_asset_extract.cpp)
 galaxy_test(galaxy_transform_history_tests SOURCES ${gxs}/transform_history_tests.cpp ${gxs}/transform_history.cpp)
 galaxy_test(galaxy_frame_interpolation_tests SOURCES ${gxs}/frame_interpolation_tests.cpp
@@ -640,15 +905,26 @@ galaxy_test(galaxy_interp_gpu_tests SOURCES ${gxs}/interp_gpu_tests.cpp ${gxs}/i
 galaxy_test(galaxy_window_owner_tests SOURCES ${gxs}/window_owner_tests.cpp ${gxs}/window_owner.cpp)
 set_tests_properties(galaxy_window_owner_tests PROPERTIES TIMEOUT 20)
 # Tests of the renderer library.
+<<<<<<< HEAD
 foreach(name shader_gen fifo_parser vertex_loader curved_surfaces simd_kernel vs_constants rt_tev_eval render_config
         frame_completion memory_snapshot sampler_key rt_surfaces rt_materials texture_pack movie_replacement
         xfb_present_selection line_point_raster xf_lighting sorted_dirty_ranges native_settings_overlay post_process
         efb_conversion)
+=======
+foreach(name shader_gen curved_surfaces native_shapes simd_kernel vs_constants rt_tev_eval render_config
+        sampler_key rt_surfaces rt_materials rt_prepare texture_pack movie_replacement
+        efb_copy line_point_raster xf_lighting native_settings_overlay post_process
+        efb_conversion native_material)
+>>>>>>> upstream/main
     galaxy_test(galaxy_${name}_tests SOURCES ${gxs}/${name}_tests.cpp LIBS galaxy_gx)
 endforeach()
 # The game's text table: every text the settings menu shows has its entry.
 target_compile_definitions(galaxy_native_settings_overlay_tests PRIVATE
     NEBULA_TEXT_TABLE="${CMAKE_CURRENT_SOURCE_DIR}/localization/NebulaText.tsv")
+<<<<<<< HEAD
+=======
+add_test(NAME galaxy_post_process_tests_held_no_deband COMMAND galaxy_post_process_tests --held-no-deband)
+>>>>>>> upstream/main
 foreach(mode content-key-hash oversized-content-cache decoded-allocation-budget)
     add_test(NAME galaxy_efb_conversion_tests_${mode} COMMAND galaxy_efb_conversion_tests --${mode})
 endforeach()
@@ -672,6 +948,7 @@ if(NEBULA_VULKAN)
     include(cmake/vulkan_deps.cmake)
 
     add_executable(galaxy_vk_shader_tests
+<<<<<<< HEAD
         runtime/src/gx/vk/shader_compile_vk_tests.cpp
         runtime/src/gx/vk/shader_compile_vk.cpp
         runtime/src/gx/vk/vk_context.cpp
@@ -687,6 +964,23 @@ if(NEBULA_VULKAN)
         runtime/src/gx/renderer_common.cpp
         runtime/src/gx/efb_copy.cpp
         runtime/src/gx/render_config.cpp)
+=======
+        runtime/src/render/vk/shader_compile_vk_tests.cpp
+        runtime/src/render/vk/shader_compile_vk.cpp
+        runtime/src/render/vk/vk_context.cpp
+        runtime/src/render/vk/device_quirks_vk.cpp
+        runtime/src/render/vk/vk_libraries.cpp
+        runtime/src/render/shader_gen.cpp
+        runtime/src/render/enhanced_lighting.cpp
+        runtime/src/render/rt_materials.cpp
+        runtime/src/render/rt_surfaces.cpp
+        runtime/src/render/uber_shaders.cpp
+        ${galaxy_uber_embed_cpp}
+        ${galaxy_post_embed_cpp}
+        runtime/src/render/renderer_common.cpp
+        runtime/src/render/efb_copy.cpp
+        runtime/src/render/render_config.cpp)
+>>>>>>> upstream/main
     target_include_directories(galaxy_vk_shader_tests PRIVATE runtime/include)
     target_compile_features(galaxy_vk_shader_tests PRIVATE cxx_std_20)
     target_link_libraries(galaxy_vk_shader_tests PRIVATE nebula_vulkan_deps galaxy_runtime_abi galaxy_runtime_settings)
@@ -694,6 +988,7 @@ if(NEBULA_VULKAN)
 
     # galaxy_gx on Vulkan: the API-neutral GX sources with the Vulkan renderer, pipeline cache and texture backend.
     add_library(galaxy_gx_vk STATIC
+<<<<<<< HEAD
         runtime/src/gx/gx_shim.cpp
         runtime/src/gx/gx_state.cpp
         runtime/src/gx/frame_completion.cpp
@@ -747,6 +1042,61 @@ if(NEBULA_VULKAN)
         runtime/src/gx/vk/game_bloom_vk.cpp
         ${galaxy_post_embed_cpp}
         runtime/src/gx/vk/surface_win32.cpp)
+=======
+        runtime/src/render/renderer_api.cpp
+            runtime/src/render/render_config.cpp
+        runtime/src/render/host_window_win32.cpp
+        runtime/src/render/vblank_clock_win32.cpp
+        runtime/src/render/renderer_common.cpp
+        runtime/src/render/upload_ring.cpp
+        runtime/src/render/window_owner.cpp
+        runtime/src/render/texture_cache.cpp
+        runtime/src/render/texture_pack.cpp
+        runtime/src/render/texture_pack_codecs.cpp
+        runtime/src/render/movie_replacement.cpp
+        runtime/src/render/curved_surfaces.cpp
+        runtime/src/render/native_shapes.cpp
+        runtime/src/render/native_material.cpp
+        runtime/src/render/draw_state.cpp
+        runtime/src/render/matrix_memory.cpp
+        runtime/src/render/shader_keys.cpp
+        runtime/src/render/efb_copy.cpp
+        runtime/src/render/line_point_raster.cpp
+        runtime/src/render/shader_gen.cpp
+        runtime/src/render/uber_shaders.cpp
+        ${galaxy_uber_embed_cpp}
+        runtime/src/render/post_process_settings.cpp
+        runtime/src/render/transform_history.cpp
+        runtime/src/render/display_modes.cpp
+            runtime/src/render/render_core.cpp
+        runtime/src/render/game_lights.cpp
+        runtime/src/render/game_objects.cpp
+    runtime/src/render/rt_tev_eval.cpp
+        runtime/src/render/galaxy_select.cpp
+        runtime/src/render/frame_interpolation.cpp
+        runtime/src/render/interp_gpu.cpp
+        runtime/src/render/rt_surfaces.cpp
+        runtime/src/render/rt_materials.cpp
+        runtime/src/render/enhanced_lighting.cpp
+        runtime/src/render/streamline_bridge.cpp
+        runtime/src/frame_telemetry.cpp
+        runtime/src/perf_hint.cpp
+        runtime/src/render/game_asset_extract.cpp
+        runtime/src/render/vk/vk_context.cpp
+        runtime/src/render/vk/device_quirks_vk.cpp
+        runtime/src/render/vk/vk_libraries.cpp
+        runtime/src/render/vk/shader_compile_vk.cpp
+        runtime/src/render/vk/texture_backend_vk.cpp
+        runtime/src/render/vk/pipeline_cache_vk.cpp
+        runtime/src/render/vk/compile_journal.cpp
+        runtime/src/render/vk/renderer_vk.cpp
+        runtime/src/render/vk/renderer_vk_efb.cpp
+        runtime/src/render/vk/renderer_vk_replay.cpp
+        runtime/src/render/vk/post_process_vk.cpp
+        runtime/src/render/vk/game_bloom_vk.cpp
+        ${galaxy_post_embed_cpp}
+        runtime/src/render/vk/surface_win32.cpp)
+>>>>>>> upstream/main
     target_include_directories(galaxy_gx_vk PUBLIC runtime/include)
     target_include_directories(galaxy_gx_vk PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/smaa")
     target_compile_features(galaxy_gx_vk PUBLIC cxx_std_20)
@@ -768,7 +1118,11 @@ if(NEBULA_VULKAN)
     add_executable(NebulaNativeVk native/host/host_main.cpp runtime/src/native_thp_video.cpp)
     target_include_directories(NebulaNativeVk PRIVATE native/include runtime/include)
     target_compile_definitions(NebulaNativeVk PRIVATE NEBULA_HOST_RENDERER=1 _CRT_SECURE_NO_WARNINGS)
+<<<<<<< HEAD
     target_link_libraries(NebulaNativeVk PRIVATE galaxy_gx_vk)
+=======
+    target_link_libraries(NebulaNativeVk PRIVATE galaxy_gx_vk galaxy_save_files galaxy_disc_files)
+>>>>>>> upstream/main
     if(MSVC)
         target_compile_options(NebulaNativeVk PRIVATE /Zi)
         target_link_options(NebulaNativeVk PRIVATE /DEBUG /OPT:REF /OPT:ICF /PDBALTPATH:NebulaNativeVk.pdb)

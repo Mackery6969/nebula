@@ -1,4 +1,10 @@
 #include "Game/Map/OceanBowl.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/Map/OceanBowlBloomDrawer.hpp"
 #include "Game/Map/OceanBowlPoint.hpp"
 #include "Game/Map/WaterAreaHolder.hpp"
@@ -365,12 +371,20 @@ void OceanBowl::draw() const {
     u16 even = 0;
     u16 odd = 1;
     for (s32 x = 0; x < 24; x++) {
+<<<<<<< HEAD
         GXBegin(GX_TRIANGLESTRIP, GX_VTXFMT0, 50);
+=======
+        // Texture coordinates 0-3 are entries of the bowl's arrays (two floats each), the vertex's index in all four.
+        J3DNativeDraw::begin(GX_TRIANGLESTRIP, 50,
+                             NEBULA_SHAPE_COLOR0 | NEBULA_SHAPE_TEXCOORD0 | NEBULA_SHAPE_TEXCOORD0 << 1 |
+                                 NEBULA_SHAPE_TEXCOORD0 << 2 | NEBULA_SHAPE_TEXCOORD0 << 3);
+>>>>>>> upstream/main
 
         for (s32 y = 0; y < 25; y++) {
             OceanBowlPoint* pPoint = getPoint(x + 1, y);
             OceanBowlPoint* pPoint2 = getPoint(x, y);
 
+<<<<<<< HEAD
             GXPosition3f32(pPoint->mVertexPosition.x, pPoint->mVertexPosition.y, pPoint->mVertexPosition.z);
             GXColor4u8(255, 255, 255, getPoint(x + 1, y)->mAlpha);
             GXTexCoord2s16(even, even);
@@ -380,16 +394,35 @@ void OceanBowl::draw() const {
             GXColor4u8(255, 255, 255, getPoint(x, y)->mAlpha);
             GXTexCoord2s16(odd, odd);
             GXTexCoord2s16(odd, odd);
+=======
+            J3DNativeDraw::position(pPoint->mVertexPosition.x, pPoint->mVertexPosition.y, pPoint->mVertexPosition.z);
+            J3DNativeDraw::color(255, 255, 255, getPoint(x + 1, y)->mAlpha);
+            J3DNativeDraw::texCoord(mVtxTex0Array[2 * even], mVtxTex0Array[2 * even + 1]);
+            J3DNativeDraw::texCoord(mVtxTex1Array[2 * even], mVtxTex1Array[2 * even + 1]);
+            J3DNativeDraw::texCoord(mVtxTex2Array[2 * even], mVtxTex2Array[2 * even + 1]);
+            J3DNativeDraw::texCoord(mVtxTex3Array[2 * even], mVtxTex3Array[2 * even + 1]);
+
+            J3DNativeDraw::position(pPoint2->mVertexPosition.x, pPoint2->mVertexPosition.y, pPoint2->mVertexPosition.z);
+            J3DNativeDraw::color(255, 255, 255, getPoint(x, y)->mAlpha);
+            J3DNativeDraw::texCoord(mVtxTex0Array[2 * odd], mVtxTex0Array[2 * odd + 1]);
+            J3DNativeDraw::texCoord(mVtxTex1Array[2 * odd], mVtxTex1Array[2 * odd + 1]);
+            J3DNativeDraw::texCoord(mVtxTex2Array[2 * odd], mVtxTex2Array[2 * odd + 1]);
+            J3DNativeDraw::texCoord(mVtxTex3Array[2 * odd], mVtxTex3Array[2 * odd + 1]);
+>>>>>>> upstream/main
 
             even += 2;
             odd += 2;
         }
+<<<<<<< HEAD
 
         GXEnd();
+=======
+>>>>>>> upstream/main
     }
 }
 
 void OceanBowl::loadMaterial() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
@@ -418,11 +451,25 @@ void OceanBowl::loadMaterial() const {
     GXSetTexCoordGen2(GX_TEXCOORD3, GX_TG_MTX3x4, GX_TG_POS, GX_TEXMTX3, GX_FALSE, GX_PTIDENTITY);
     GXSetTexCoordGen2(GX_TEXCOORD4, GX_TG_MTX3x4, GX_TG_TEX3, GX_TEXMTX4, GX_FALSE, GX_PTIDENTITY);
     GXSetTexCoordGen2(GX_TEXCOORD4, GX_TG_MTX2x4, GX_TG_TEX3, GX_TEXMTX4, GX_TRUE, GX_PTIDENTITY);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setNumTexGens(5);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, GX_TEXMTX1, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD2, GX_TG_MTX2x4, GX_TG_TEX2, GX_TEXMTX2, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD3, GX_TG_MTX3x4, GX_TG_POS, GX_TEXMTX3, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD4, GX_TG_MTX3x4, GX_TG_TEX3, GX_TEXMTX4, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD4, GX_TG_MTX2x4, GX_TG_TEX3, GX_TEXMTX4, GX_TRUE, GX_PTIDENTITY);
+>>>>>>> upstream/main
 
     TMtx34f mat;
     mat.identity();
     mat[0][2] = mTexU0;
     mat[1][2] = mTexV0;
+<<<<<<< HEAD
     GXLoadTexMtxImm(mat, GX_TEXMTX0, GX_MTX2x4);
     mat[0][2] = mTexU1;
     mat[1][2] = mTexV1;
@@ -430,19 +477,33 @@ void OceanBowl::loadMaterial() const {
     mat[0][2] = mTexU2;
     mat[1][2] = mTexV2;
     GXLoadTexMtxImm(mat, GX_TEXMTX2, GX_MTX2x4);
+=======
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX0, GX_MTX2x4);
+    mat[0][2] = mTexU1;
+    mat[1][2] = mTexV1;
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX1, GX_MTX2x4);
+    mat[0][2] = mTexU2;
+    mat[1][2] = mTexV2;
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX2, GX_MTX2x4);
+>>>>>>> upstream/main
     f32 a = (getPoint(0, 0)->mVertexPosition.x - MR::getPlayerPos()->x) + 2400.0f;
     f32 b = (getPoint(0, 0)->mVertexPosition.z - MR::getPlayerPos()->z) + 2400.0f;
     f32 c = a / 4800.0f;
     f32 d = b / 4800.0f;
     mat[0][2] = d;
     mat[1][2] = c;
+<<<<<<< HEAD
     GXLoadTexMtxImm(mat, GX_TEXMTX4, GX_MTX2x4);
+=======
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX4, GX_MTX2x4);
+>>>>>>> upstream/main
     MR::loadTexProjectionMtx(39);
     mWaterTex->load(GX_TEXMAP0);
     JUTTexture screentex(MR::getScreenResTIMG(), 0);
     screentex.load(GX_TEXMAP1);
     mWaterIndirectTex->load(GX_TEXMAP2);
     mMaskTex->load(GX_TEXMAP3);
+<<<<<<< HEAD
     MR::resetTextureCacheSize();
     if (MR::isCameraInWater()) {
         GXSetNumIndStages(0);
@@ -450,6 +511,14 @@ void OceanBowl::loadMaterial() const {
         GXSetNumIndStages(1);
         GXSetIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD2, GX_TEXMAP2);
         GXSetTevIndWarp(GX_TEVSTAGE3, GX_INDTEXSTAGE0, 1, 0, GX_ITM_0);
+=======
+    if (MR::isCameraInWater()) {
+        J3DNativeState::setNumIndStages(0);
+    } else {
+        J3DNativeState::setNumIndStages(1);
+        J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD2, GX_TEXMAP2);
+        J3DNativeState::setTevIndWarp(GX_TEVSTAGE3, GX_INDTEXSTAGE0, 1, 0, GX_ITM_0);
+>>>>>>> upstream/main
         f32 indmtx[2][3];
         indmtx[0][0] = ::sIndirectScale;
         indmtx[0][1] = 0.0f;
@@ -458,6 +527,7 @@ void OceanBowl::loadMaterial() const {
         indmtx[1][1] = ::sIndirectScale;
         indmtx[1][2] = 0.0f;
 
+<<<<<<< HEAD
         GXSetIndTexMtx(GX_ITM_0, indmtx, 0);
     }
 
@@ -528,11 +598,73 @@ void OceanBowl::loadMaterialBloom() const {
     GXSetNumTexGens(2);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
     GXSetTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, GX_TEXMTX1, GX_FALSE, GX_PTIDENTITY);
+=======
+        J3DNativeState::setIndTexMtx(GX_ITM_0, indmtx, 0);
+    }
+
+    if (MR::isCameraInWater()) {
+        J3DNativeState::setNumTevStages(3);
+    } else {
+        J3DNativeState::setNumTevStages(4);
+    }
+
+    J3DNativeState::setTevColor(GX_TEVREG0, ::sOceanBowlTevReg0);
+    J3DNativeState::setTevColor(GX_TEVREG1, ::sOceanBowlTevReg1);
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_TEXC, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_TEXA, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP0, GX_COLOR_NULL);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_TEXC, GX_CC_CPREV, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_DIVIDE_2, GX_FALSE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_TEXA, GX_CA_APREV, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, GX_FALSE, GX_TEVPREV);
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE2, GX_TEXCOORD4, GX_TEXMAP3, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_CPREV, GX_CC_A0, GX_CC_C0, GX_CC_CPREV);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_COMP_R8_EQ, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_RASA, GX_CA_TEXA, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+
+    if (!MR::isCameraInWater()) {
+        J3DNativeState::setTevOrder(GX_TEVSTAGE3, GX_TEXCOORD3, GX_TEXMAP1, GX_COLOR_NULL);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE3, GX_CC_ZERO, GX_CC_TEXC, GX_CC_C1, GX_CC_CPREV);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE3, GX_CA_APREV, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
+    }
+
+    if (MR::isCameraInWater()) {
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+    } else {
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    }
+
+    J3DNativeState::setAlphaCompare(GX_GREATER, 0, GX_AOP_OR, GX_GREATER, 0);
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    J3DNativeState::setZCompLoc(GX_TRUE);
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+}
+
+void OceanBowl::loadMaterialBloom() const {
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), 0);
+    J3DNativeState::setCurrentMtx(0);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+    J3DNativeState::setNumTexGens(2);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX1, GX_TEXMTX1, GX_FALSE, GX_PTIDENTITY);
+>>>>>>> upstream/main
 
     TMtx34f mat;
     mat.identity();
     mat[0][2] = mTexU0;
     mat[1][2] = mTexV0;
+<<<<<<< HEAD
     GXLoadTexMtxImm(mat, GX_TEXMTX0, GX_MTX2x4);
     mat[0][2] = mTexU1;
     mat[1][2] = mTexV1;
@@ -563,4 +695,36 @@ void OceanBowl::loadMaterialBloom() const {
     GXSetZCompLoc(GX_TRUE);
     GXSetCullMode(GX_CULL_NONE);
     GXSetClipMode(GX_CLIP_ENABLE);
+=======
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX0, GX_MTX2x4);
+    mat[0][2] = mTexU1;
+    mat[1][2] = mTexV1;
+    J3DNativeShape::sendTexture(mat, GX_TEXMTX1, GX_MTX2x4);
+    mWaterTex->load(GX_TEXMAP0);
+    J3DNativeState::setNumIndStages(0);
+    J3DNativeState::setNumTevStages(2);
+    Color8 c0 = Color8(::sOceanBowlBloomTevReg0V, ::sOceanBowlBloomTevReg0V, ::sOceanBowlBloomTevReg0V, 255);
+    Color8 c1 = Color8(::sOceanBowlBloomTevReg1V, ::sOceanBowlBloomTevReg1V, ::sOceanBowlBloomTevReg1V, 255);
+    J3DNativeState::setTevColor(GX_TEVREG0, c0);
+    J3DNativeState::setTevColor(GX_TEVREG1, c1);
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_C0, GX_CC_C1);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_TEXC, GX_CC_C0, GX_CC_CPREV);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_APREV);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+    J3DNativeState::setAlphaCompare(GX_GREATER, 0, GX_AOP_OR, GX_GREATER, 0);
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    J3DNativeState::setZCompLoc(GX_TRUE);
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+>>>>>>> upstream/main
 }

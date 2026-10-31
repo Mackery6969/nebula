@@ -36,8 +36,11 @@ public:
     void setWindowFollows(bool follows) {
         mWindowFollows = follows;
     }
+<<<<<<< HEAD
     // startPreLoad from a new console's save data: a missing file leaves none of the last one read.
     void startReload();
+=======
+>>>>>>> upstream/main
 #endif
     void startSaveTotalMailSize();
     void startLoad(int, bool);
@@ -104,8 +107,11 @@ public:
     /* 0x44 */ SaveIcon* mSaveIcon;
 #ifdef TARGET_PC
     bool mWindowFollows;
+<<<<<<< HEAD
     // A new console's files, never changed: what startReload starts from.
     SysConfigFile* mNewSysConfigFile;
     UserFile* mNewUserFile;
+=======
+>>>>>>> upstream/main
 #endif
 };

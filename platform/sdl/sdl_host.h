@@ -8,7 +8,10 @@
 #include "galaxy/input_bindings.h"
 
 #include <array>
+<<<<<<< HEAD
 #include <functional>
+=======
+>>>>>>> upstream/main
 #include <cstdint>
 
 namespace galaxy::sdl {
@@ -102,7 +105,10 @@ void home_menu_show() noexcept;
 void home_menu_hide() noexcept;
 [[nodiscard]] int home_menu_choice() noexcept;
 
+<<<<<<< HEAD
 // `task` on SDL's thread after its next pump (the file dialogs and the shell need it there). Any thread.
 void run_on_sdl_thread(std::function<void()> task) noexcept;
 
+=======
+>>>>>>> upstream/main
 }  // namespace galaxy::sdl

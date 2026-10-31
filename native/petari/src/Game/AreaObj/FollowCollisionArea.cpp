@@ -73,7 +73,11 @@ void FollowCollisionArea::movement() {
 bool FollowCollisionArea::hitCheck(const TVec3f& rPos, f32 radius, TVec3f* pPoint, TVec3f* pNormal) {
     s32 surface = -1;
     TPos3f matrix;
+<<<<<<< HEAD
     PSMTXCopy(_34, matrix);
+=======
+    NebulaMtxCopy(_34, matrix);
+>>>>>>> upstream/main
     MR::extractMtxTrans(_34, &_14);
     TVec3f localPoint;
     TVec3f axisX;

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Game/Util/Array.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include <JSystem/JKernel/JKRMemArchive.hpp>
 #include <revolution/types.h>
 
@@ -50,5 +54,9 @@ public:
     ArchiveHolderArchiveEntry* findEntry(const char*) const;
 
     /* 0x0 */ MR::Vector< MR::AssignableArray< ArchiveHolderArchiveEntry* > > mEntries;
+<<<<<<< HEAD
     /* 0xC */ OSMutex mMutex;
+=======
+    /* 0xC */ NebulaMutex mMutex;
+>>>>>>> upstream/main
 };

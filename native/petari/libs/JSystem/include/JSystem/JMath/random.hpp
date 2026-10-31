@@ -1,6 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 namespace JMath {
     class TRandom_fast_ {
@@ -26,7 +32,12 @@ namespace JMath {
         }
 
         inline u32 getRand(u32 range) {
+<<<<<<< HEAD
             return (rand() >> 9) % range;
+=======
+            const u32 value = rand() >> 9;
+        return range != 0 ? value % range : value;
+>>>>>>> upstream/main
         }
 
         u32 mSeed;

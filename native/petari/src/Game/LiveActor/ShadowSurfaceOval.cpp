@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ShadowSurfaceOval.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/LiveActor/ShadowController.hpp"
 #include "Game/LiveActor/ShadowSurfaceDrawer.hpp"
@@ -10,7 +14,10 @@
 #include <JSystem/JGeometry/TMatrix.hpp>
 #include <JSystem/JGeometry/TVec.hpp>
 #include <revolution/gx/GXEnum.h>
+<<<<<<< HEAD
 #include <revolution/gx/GXLighting.h>
+=======
+>>>>>>> upstream/main
 
 ShadowSurfaceOval::~ShadowSurfaceOval() {
 }
@@ -48,7 +55,11 @@ void ShadowSurfaceOval::draw() const {
     TVec3f pos, normal;
     controller->getProjectionPos(&pos);
     controller->getProjectionNormal(&normal);
+<<<<<<< HEAD
     GXSetChanMatColor(GX_COLOR0A0, mColor);
+=======
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, mColor);
+>>>>>>> upstream/main
     TPos3f mtx;
     mtx.setInline(baseMtx);
     MR::preScaleMtx(mtx, size);
@@ -62,5 +73,9 @@ void ShadowSurfaceOval::draw() const {
     MR::preScaleMtx(mtx.toMtxPtr(), 0.9f);
     TDDraw::setModelMtx(mtx.toMtxPtr());
     MR::drawSimpleModel(mModelData);
+<<<<<<< HEAD
     GXSetChanMatColor(GX_COLOR0A0, Color8(128));
+=======
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, Color8(128));
+>>>>>>> upstream/main
 }

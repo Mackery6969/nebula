@@ -15,6 +15,10 @@
 #include "Game/Util/ScreenUtil.hpp"
 #include "Game/Util/SingletonHolder.hpp"
 #include "Game/Util/SystemUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace MR {
     void requestChangeScene(const char* pName) {
@@ -48,7 +52,11 @@ namespace MR {
 
         GameSequenceFunction::requestGalaxyMove(argument);
 #ifdef TARGET_PC
+<<<<<<< HEAD
         if (u32 pieces = 0; __NebulaCodePatch(NEBULA_PATCH_MISS_STAR_PIECES, &pieces)) {
+=======
+        if (u32 pieces = 0; NebulaHost::codePatch(NEBULA_PATCH_MISS_STAR_PIECES, &pieces)) {
+>>>>>>> upstream/main
             GameDataFunction::addStarPiece(static_cast< s32 >(pieces));
         }
 #endif

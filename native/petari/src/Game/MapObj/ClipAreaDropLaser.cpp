@@ -1,4 +1,8 @@
 #include "Game/MapObj/ClipAreaDropLaser.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/MapObj/ClipAreaDropHolder.hpp"
 #include "Game/Scene/SceneFunction.hpp"
@@ -13,7 +17,10 @@
 #include "Game/Util/SoundUtil.hpp"
 #include <revolution/gx/GXEnum.h>
 #include <revolution/gx/GXGeometry.h>
+<<<<<<< HEAD
 #include <revolution/gx/GXPixel.h>
+=======
+>>>>>>> upstream/main
 
 namespace NrvClipAreaDropLaser {
     NEW_NERVE(ClipAreaDropLaserNrvWait, ClipAreaDropLaser, Wait);
@@ -50,8 +57,13 @@ void ClipAreaDropLaser::control() {
 void ClipAreaDropLaser::draw() const {
     TDDraw::cameraInit3D();
     TDDraw::setup(0, 2, 0);
+<<<<<<< HEAD
     GXSetLineWidth(0x14, GX_TO_ZERO);
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+=======
+    J3DNativeState::setLineWidth(0x14, GX_TO_ZERO);
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+>>>>>>> upstream/main
 
     for (int r29 = 1; r29 < mNumPointsToDraw; r29++) {
         int u1 = mDrawCount - (r29 - 1);

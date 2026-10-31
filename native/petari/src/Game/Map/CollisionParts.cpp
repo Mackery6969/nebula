@@ -33,7 +33,11 @@ CollisionParts::CollisionParts()
     mPrevBaseMatrix.identity();
     mBaseMatrix.identity();
     mMatrix.identity();
+<<<<<<< HEAD
     PSMTXInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+=======
+    NebulaMtxInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+>>>>>>> upstream/main
 }
 
 void CollisionParts::init(const TPos3f& rMatrix, HitSensor* pHitSensor, const void* pKclData, const void* pMapInfo, s32 keeperIndex,
@@ -125,7 +129,11 @@ void CollisionParts::resetAllMtxPrivate(const TPos3f& rMatrix) {
     mPrevBaseMatrix.setInline(rMatrix);
     mBaseMatrix.setInline(rMatrix);
     mMatrix.setInline(rMatrix);
+<<<<<<< HEAD
     PSMTXInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+=======
+    NebulaMtxInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+>>>>>>> upstream/main
 }
 
 void CollisionParts::setMtx(const TPos3f& rMatrix) {
@@ -173,7 +181,11 @@ void CollisionParts::updateMtx() {
         if (_D4 < 2) {
             mPrevBaseMatrix.setInline(mBaseMatrix);
             mBaseMatrix.setInline(mMatrix);
+<<<<<<< HEAD
             PSMTXInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+=======
+            NebulaMtxInverse(mBaseMatrix.toMtxPtr(), mInvBaseMatrix.toMtxPtr());
+>>>>>>> upstream/main
         }
     }
 }
@@ -308,7 +320,11 @@ u32 CollisionParts::checkStrikeBall(HitInfo* pHitInfo, u32 maxHits, const TVec3f
     TVec3f movement(0, 0, 0);
 
     if (checkMovement && _D4 == 0) {
+<<<<<<< HEAD
         PSMTXInverse(mPrevBaseMatrix.toMtxPtr(), inversePrev.toMtxPtr());
+=======
+        NebulaMtxInverse(mPrevBaseMatrix.toMtxPtr(), inversePrev.toMtxPtr());
+>>>>>>> upstream/main
         TVec3f prevPos;
         inversePrev.mult(rPos, prevPos);
         TVec3f localMovement(localPos - prevPos);
@@ -510,7 +526,11 @@ u32 CollisionParts::checkStrikeLine(HitInfo* pHitInfo, u32 maxHits, const TVec3f
 u32 CollisionParts::createAreaPolygonList(Triangle* pTriangles, u32 maxTriangles, const TVec3f& rMin, const TVec3f& rMax) {
     KC_PrismData* prisms[512];
     TPos3f rotation;
+<<<<<<< HEAD
     PSMTXCopy(mInvBaseMatrix.toMtxPtr(), rotation.toMtxPtr());
+=======
+    NebulaMtxCopy(mInvBaseMatrix.toMtxPtr(), rotation.toMtxPtr());
+>>>>>>> upstream/main
     rotation.zeroTrans();
     TVec3f min;
     TVec3f max;
@@ -532,7 +552,11 @@ u32 CollisionParts::createAreaPolygonListArray(Triangle* pTriangles, u32 maxTria
     KC_PrismData* prisms[512];
     TVec3f localPoints[32];
     TPos3f rotation;
+<<<<<<< HEAD
     PSMTXCopy(mInvBaseMatrix.toMtxPtr(), rotation.toMtxPtr());
+=======
+    NebulaMtxCopy(mInvBaseMatrix.toMtxPtr(), rotation.toMtxPtr());
+>>>>>>> upstream/main
     rotation.zeroTrans();
 
     for (u32 i = 0; i < numPoints; i++) {
@@ -557,7 +581,11 @@ u32 CollisionParts::createAreaPolygonListArray(Triangle* pTriangles, u32 maxTria
 void CollisionParts::calcForceMovePower(TVec3f* pMovement, const TVec3f& rPos) const {
     TVec3f position(rPos);
     TMtx34f inversePrev;
+<<<<<<< HEAD
     PSMTXInverse(mPrevBaseMatrix, inversePrev);
+=======
+    NebulaMtxInverse(mPrevBaseMatrix, inversePrev);
+>>>>>>> upstream/main
 
     inversePrev.mult(position, position);
     mBaseMatrix.mult(position, position);

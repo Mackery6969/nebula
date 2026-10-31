@@ -3,7 +3,13 @@
 #include "JSystem/JGeometry.hpp"
 #include "JSystem/JGeometry/TBox.hpp"
 #include "JSystem/JUtility/TColor.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 enum J2DGrafType {
     J2DGraf_Base = 0,

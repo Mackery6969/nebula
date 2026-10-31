@@ -8,6 +8,11 @@ namespace MR {
     void ddChangeTev();
     void ddSendVtxData(const TVec3f&, const TVec3f&, const TVec2f&);
     void ddSendVtxData(const TVec3f&, const TVec2f&);
+<<<<<<< HEAD
+=======
+    // The values ddSendVtxData sends per vertex for the format ddSetVtxFormat set (NEBULA_SHAPE_* bits).
+    u32 ddVtxAttributes();
+>>>>>>> upstream/main
     void ddLightingOn(u16);
     void ddLightingOff();
 };  // namespace MR

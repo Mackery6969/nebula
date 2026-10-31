@@ -2,6 +2,7 @@
 
 #include "revolution/types.h"
 
+<<<<<<< HEAD
 typedef s32 IOSError;
 typedef s32 IOSCid;
 typedef s32 IOSFd;
@@ -41,3 +42,7 @@ typedef struct {
         IOSCSigDummy dummy;
         IOSCName issuer;
 } IOSCSigRsa2048;
+=======
+typedef s32 IOSFd;
+
+>>>>>>> upstream/main

@@ -10,8 +10,11 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #define NWC24_FRIEND_LIST_CAPACITY 100
 
+=======
+>>>>>>> upstream/main
 typedef enum {
     NWC24_MSGTYPE_RVL_MENU_SHARED = 0,
     NWC24_MSGTYPE_WII_MENU_SHARED = 0,
@@ -120,6 +123,7 @@ typedef enum {
 
 typedef enum { NWC24_ENC_7BIT, NWC24_ENC_8BIT, NWC24_ENC_BASE64, NWC24_ENC_QUOTED_PRINTABLE, NWC24_MAX_ENCODINGS } NWC24Encoding;
 
+<<<<<<< HEAD
 typedef enum NWC24MsgBoxId { NWC24_MSGBOX_SEND, NWC24_MSGBOX_RECV, NWC24_MSGBOX_MAX } NWC24MsgBoxId;
 
 typedef struct NWC24File {
@@ -161,6 +165,8 @@ typedef struct NWC24Calendar {
     u32 UNK_0x20;
 } NWC24Calendar;
 
+=======
+>>>>>>> upstream/main
 typedef u64 NWC24UserId;
 
 typedef struct NWC24MsgObj {

@@ -2,7 +2,10 @@
 #define NAND_H
 
 #include "revolution/fs.h"
+<<<<<<< HEAD
 #include "revolution/nand/nandlogging.h"
+=======
+>>>>>>> upstream/main
 #include "revolution/types.h"
 
 #ifdef __cplusplus
@@ -15,6 +18,7 @@ extern "C" {
 #define NAND_RESULT_BUSY (-3)
 #define NAND_RESULT_CORRUPT (-4)
 #define NAND_RESULT_ECC_CRIT (-5)
+<<<<<<< HEAD
 #define NAND_RESULT_EXISTS (-6)
 #define NAND_RESULT_INVALID (-8)
 #define NAND_RESULT_MAXBLOCKS (-9)
@@ -27,6 +31,13 @@ extern "C" {
 #define NAND_RESULT_MAXDEPTH (-16)
 #define NAND_RESULT_UNKNOWN (-64)
 #define NAND_RESULT_FATAL_ERROR (-128)
+=======
+#define NAND_RESULT_MAXBLOCKS (-9)
+#define NAND_RESULT_MAXFILES (-11)
+#define NAND_RESULT_NOEXISTS (-12)
+#define NAND_RESULT_AUTHENTICATION (-15)
+#define NAND_RESULT_UNKNOWN (-64)
+>>>>>>> upstream/main
 
 #define NAND_MAX_PATH 64
 
@@ -107,7 +118,10 @@ typedef struct NANDStatus {
 } NANDStatus;
 
 typedef void (*NANDCallback)(s32, NANDCommandBlock*);
+<<<<<<< HEAD
 typedef void (*NANDAsyncCallback)(s32 result, struct NANDCommandBlock* block);
+=======
+>>>>>>> upstream/main
 
 s32 NANDInit(void);
 
@@ -177,6 +191,7 @@ s32 NANDPrivateCreateAsync(const char*, u8, u8, NANDCallback, NANDCommandBlock*)
 #define NAND_BANNER_ICON_SIZE (48 * 48 * 2)
 #define NAND_BANNER_COMMENT_SIZE 32
 
+<<<<<<< HEAD
 #define NAND_BANNER_ICON_ANIM_SPEED_END 0
 #define NAND_BANNER_ICON_ANIM_SPEED_FAST 1
 #define NAND_BANNER_ICON_ANIM_SPEED_NORMAL 2
@@ -197,6 +212,8 @@ s32 NANDPrivateCreateAsync(const char*, u8, u8, NANDCallback, NANDCommandBlock*)
 
 #define NAND_BANNER_SIZE(i) (32 + NAND_BANNER_COMMENT_SIZE * sizeof(u16) * 2 + NAND_BANNER_TEXTURE_SIZE + NAND_BANNER_ICON_SIZE * (i))
 
+=======
+>>>>>>> upstream/main
 #if defined(TARGET_PC) && defined(__cplusplus)
 // The save banner is file data in the console's byte order (NANDInitBanner writes the rest).
 typedef NEBULA_BE(u16) NANDBannerIconSpeed;

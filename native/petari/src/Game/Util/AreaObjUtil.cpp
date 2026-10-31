@@ -94,7 +94,11 @@ namespace MR {
             pInfo->_4 = MR::abs(MR::vecKillElement(fromBottom, up, &fromBottom));
             pInfo->mSurfacePos.set(top + fromTop);
             pArea->getForm< AreaFormCube >()->calcWorldMtx(&worldMtx);
+<<<<<<< HEAD
             PSMTXMultVec(worldMtx, &pInfo->mSurfacePos, &pInfo->mSurfacePos);
+=======
+            NebulaMtxMultVec(worldMtx, &pInfo->mSurfacePos, &pInfo->mSurfacePos);
+>>>>>>> upstream/main
             TVec3f rotation;
             pArea->getForm< AreaFormCube >()->calcWorldRotate(&rotation);
             MR::makeMtxRotate(rotationMtx, rotation.x, rotation.y, rotation.z);

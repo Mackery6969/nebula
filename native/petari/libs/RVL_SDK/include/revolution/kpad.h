@@ -15,6 +15,7 @@ extern "C" {
 #define KPAD_BTN_RPT_TIME_MAX 20000
 #define KPAD_BTN_NO_RPT_DELAY 40000
 
+<<<<<<< HEAD
 #define KPAD_CMOS_RESO_WX 128
 #define KPAD_CMOS_RESO_WY 96
 #define KPAD_CMOS_RESO_CX (KPAD_CMOS_RESO_WX / 2)
@@ -24,6 +25,10 @@ extern "C" {
 #define KPAD_DPD_RESO_WY WPAD_DPD_IMG_RESO_WY
 #define KPAD_DPD_RESO_CX (KPAD_DPD_RESO_WX / 2)
 #define KPAD_DPD_RESO_CY (KPAD_DPD_RESO_WY / 2)
+=======
+#define KPAD_DPD_RESO_WX WPAD_DPD_IMG_RESO_WX
+#define KPAD_DPD_RESO_WY WPAD_DPD_IMG_RESO_WY
+>>>>>>> upstream/main
 
 #define KPAD_USE_OBJECTS 2
 
@@ -102,8 +107,11 @@ typedef union {
 } KPADTmpStatus;
 
 typedef void (*KPADControlDpdCallback)(s32 chan, s32 reason);
+<<<<<<< HEAD
 typedef WPADCallback KPADCallback;
 typedef WPADChannel KPADChannel;
+=======
+>>>>>>> upstream/main
 
 typedef struct {
     KPADStatus status;

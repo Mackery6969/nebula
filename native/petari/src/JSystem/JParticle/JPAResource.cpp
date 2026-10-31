@@ -1,6 +1,10 @@
 #define JPA_LIST_DEFER_INLINE
 #define JPA_FIELD_BLOCK_DEFER_INLINE
 #include "JSystem/JParticle/JPAResource.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
 #endif
@@ -835,7 +839,10 @@ void JPAResource::drawP(JPAEmitterWorkData* work) {
         }
     }
 
+<<<<<<< HEAD
     GXSetMisc(GX_MT_XF_FLUSH, 0);
+=======
+>>>>>>> upstream/main
 
     if (work->mpEmtr->mpEmtrCallBack != NULL) {
         work->mpEmtr->mpEmtrCallBack->drawAfter(work->mpEmtr);
@@ -906,7 +913,10 @@ void JPAResource::drawC(JPAEmitterWorkData* work) {
         }
     }
 
+<<<<<<< HEAD
     GXSetMisc(GX_MT_XF_FLUSH, 0);
+=======
+>>>>>>> upstream/main
 
     if (work->mpEmtr->mpEmtrCallBack != NULL) {
         work->mpEmtr->mpEmtrCallBack->drawAfter(work->mpEmtr);
@@ -928,6 +938,7 @@ void JPAResource::setPTev() {
     }
     int pos_offset = center_offset + base_plane_type * 0x6C;
     int crd_offset = (mpBaseShape->getTilingS() + 2 * mpBaseShape->getTilingT()) * 8;
+<<<<<<< HEAD
     GXSetArray(GX_VA_POS, jpa_pos + pos_offset, 3);
     GXSetArray(GX_VA_TEX0, jpa_crd + crd_offset, 2);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
@@ -944,21 +955,47 @@ void JPAResource::setPTev() {
             GXSetIndTexMtx(GX_ITM_0, (f32(*)[3])mpExTexShape->getIndTexMtx(), mpExTexShape->getExpScale());
 #endif
             GXSetTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, 0, 0, GX_ITBA_OFF);
+=======
+    JPASetQuadArrays(jpa_pos + pos_offset, jpa_crd + crd_offset);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
+
+    if (mpExTexShape != NULL) {
+        if (mpExTexShape->isUseIndirect()) {
+            J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD1, GX_TEXMAP2);
+            J3DNativeState::setIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
+#ifdef TARGET_PC
+            f32 indTexMtx[2][3];
+            mpExTexShape->getIndTexMtx(indTexMtx);
+            J3DNativeState::setIndTexMtx(GX_ITM_0, indTexMtx, mpExTexShape->getExpScale());
+#else
+            J3DNativeState::setIndTexMtx(GX_ITM_0, (f32(*)[3])mpExTexShape->getIndTexMtx(), mpExTexShape->getExpScale());
+#endif
+            J3DNativeState::setTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, 0, 0, GX_ITBA_OFF);
+>>>>>>> upstream/main
             ind_stages++;
             tex_gens++;
             tex_coord = GX_TEXCOORD2;
         }
         if (mpExTexShape->isUseSecTex()) {
+<<<<<<< HEAD
             GXSetTevOrder(GX_TEVSTAGE1, tex_coord, GX_TEXMAP3, GX_COLOR_NULL);
             GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_TEXC, GX_CC_CPREV, GX_CC_ZERO);
             GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_TEXA, GX_CA_APREV, GX_CA_ZERO);
             GXSetTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
             GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+=======
+            J3DNativeState::setTevOrder(GX_TEVSTAGE1, tex_coord, GX_TEXMAP3, GX_COLOR_NULL);
+            J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_TEXC, GX_CC_CPREV, GX_CC_ZERO);
+            J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_TEXA, GX_CA_APREV, GX_CA_ZERO);
+            J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+            J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+>>>>>>> upstream/main
             tev_stages++;
             tex_gens++;
         }
     }
 
+<<<<<<< HEAD
     GXSetNumTevStages(tev_stages);
     GXSetNumIndStages(ind_stages);
     if (mpBaseShape->isClipOn()) {
@@ -968,11 +1005,22 @@ void JPAResource::setPTev() {
         GXSetClipMode(GX_CLIP_DISABLE);
     }
     GXSetNumTexGens(tex_gens);
+=======
+    J3DNativeState::setNumTevStages(tev_stages);
+    J3DNativeState::setNumIndStages(ind_stages);
+    if (mpBaseShape->isClipOn()) {
+        J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    } else {
+        J3DNativeState::setClipMode(GX_CLIP_DISABLE);
+    }
+    J3DNativeState::setNumTexGens(tex_gens);
+>>>>>>> upstream/main
 }
 
 void JPAResource::setCTev(JPAEmitterWorkData* work) {
     int base_plane_type = (mpChildShape->getType() == 3 || mpChildShape->getType() == 7) ? mpChildShape->getBasePlaneType() : 0;
     int pos_offset = 0x30 + base_plane_type * 0x6C;
+<<<<<<< HEAD
     GXSetArray(GX_VA_POS, jpa_pos + pos_offset, 3);
     GXSetArray(GX_VA_TEX0, jpa_crd, 2);
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR_NULL);
@@ -987,6 +1035,20 @@ void JPAResource::setCTev(JPAEmitterWorkData* work) {
         GXSetClipMode(GX_CLIP_DISABLE);
     }
     GXSetNumTexGens(1);
+=======
+    JPASetQuadArrays(jpa_pos + pos_offset, jpa_crd);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP1, GX_COLOR_NULL);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x3C, GX_FALSE, 0x7D);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setNumIndStages(0);
+    if (mpChildShape->isClipOn()) {
+        J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    } else {
+        J3DNativeState::setClipMode(GX_CLIP_DISABLE);
+    }
+    J3DNativeState::setNumTexGens(1);
+>>>>>>> upstream/main
     work->mpResMgr->CALL_INLINE_FUNC(load, work->mpRes->getTexIdx(mpChildShape->getTexIdx()), GX_TEXMAP1);
 }
 
@@ -1056,6 +1118,7 @@ void JPAResource::calcWorkData_c(JPAEmitterWorkData* work) {
     work->mVolumeAngleMax = 1;
     work->mDivNumber = mpDynamicsBlock->getDivNumber() * 2 + 1;
     Mtx local_scl_mtx, local_rot_mtx, global_mtx;
+<<<<<<< HEAD
     PSMTXScale(local_scl_mtx, work->mpEmtr->mLocalScl.x, work->mpEmtr->mLocalScl.y, work->mpEmtr->mLocalScl.z);
     JPAGetXYZRotateMtx(work->mpEmtr->mLocalRot.x * 182, work->mpEmtr->mLocalRot.y * 182, work->mpEmtr->mLocalRot.z * 182, local_rot_mtx);
     PSMTXScale(global_mtx, work->mpEmtr->mGlobalScl.x, work->mpEmtr->mGlobalScl.y, work->mpEmtr->mGlobalScl.z);
@@ -1066,18 +1129,39 @@ void JPAResource::calcWorkData_c(JPAEmitterWorkData* work) {
     PSMTXCopy(work->mpEmtr->mGlobalRot, work->mRotationMtx);
     PSMTXConcat(work->mRotationMtx, local_rot_mtx, work->mGlobalRot);
     PSMTXConcat(work->mGlobalRot, local_scl_mtx, work->mGlobalSR);
+=======
+    NebulaMtxScale(local_scl_mtx, work->mpEmtr->mLocalScl.x, work->mpEmtr->mLocalScl.y, work->mpEmtr->mLocalScl.z);
+    JPAGetXYZRotateMtx(work->mpEmtr->mLocalRot.x * 182, work->mpEmtr->mLocalRot.y * 182, work->mpEmtr->mLocalRot.z * 182, local_rot_mtx);
+    NebulaMtxScale(global_mtx, work->mpEmtr->mGlobalScl.x, work->mpEmtr->mGlobalScl.y, work->mpEmtr->mGlobalScl.z);
+    NebulaMtxConcat(work->mpEmtr->mGlobalRot, global_mtx, global_mtx);
+    global_mtx[0][3] = work->mpEmtr->mGlobalTrs.x;
+    global_mtx[1][3] = work->mpEmtr->mGlobalTrs.y;
+    global_mtx[2][3] = work->mpEmtr->mGlobalTrs.z;
+    NebulaMtxCopy(work->mpEmtr->mGlobalRot, work->mRotationMtx);
+    NebulaMtxConcat(work->mRotationMtx, local_rot_mtx, work->mGlobalRot);
+    NebulaMtxConcat(work->mGlobalRot, local_scl_mtx, work->mGlobalSR);
+>>>>>>> upstream/main
     work->mEmitterPos.set(work->mpEmtr->mLocalTrs);
     work->mGlobalScl.mul(work->mpEmtr->mGlobalScl, work->mpEmtr->mLocalScl);
     JPAGetDirMtx(work->mpEmtr->mLocalDir, work->mDirectionMtx);
     work->mPublicScale.set(work->mpEmtr->mGlobalScl);
+<<<<<<< HEAD
     PSMTXMultVec(global_mtx, &work->mpEmtr->mLocalTrs, &work->mGlobalPos);
+=======
+    NebulaMtxMultVec(global_mtx, &work->mpEmtr->mLocalTrs, &work->mGlobalPos);
+>>>>>>> upstream/main
 }
 
 void JPAResource::calcWorkData_d(JPAEmitterWorkData* work) {
     Mtx mtx;
     JPAGetXYZRotateMtx(work->mpEmtr->mLocalRot.x * 0xB6, work->mpEmtr->mLocalRot.y * 0xB6, work->mpEmtr->mLocalRot.z * 0xB6, mtx);
+<<<<<<< HEAD
     PSMTXConcat(work->mpEmtr->mGlobalRot, mtx, work->mGlobalRot);
     PSMTXMultVecSR(work->mGlobalRot, &work->mpEmtr->mLocalDir, &work->mGlobalEmtrDir);
+=======
+    NebulaMtxConcat(work->mpEmtr->mGlobalRot, mtx, work->mGlobalRot);
+    NebulaMtxMultVecSR(work->mGlobalRot, &work->mpEmtr->mLocalDir, &work->mGlobalEmtrDir);
+>>>>>>> upstream/main
 }
 
 #include "JSystem/JParticle/JPAFieldBlockInline.hpp"

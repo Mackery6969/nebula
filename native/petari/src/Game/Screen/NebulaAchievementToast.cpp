@@ -1,4 +1,8 @@
 #include "Game/Screen/NebulaAchievementToast.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/Screen/LayoutManager.hpp"
@@ -21,7 +25,10 @@
 #include <nw4r/lyt/window.h>
 #include <nw4r/ut/Font.h>
 #include <revolution/os.h>
+<<<<<<< HEAD
 #include <revolution/tpl.h>
+=======
+>>>>>>> upstream/main
 
 namespace {
     enum {
@@ -211,13 +218,21 @@ void NebulaAchievementToast::loadTextures() {
             void* pTpl = pHolder != nullptr ? pHolder->GetResource('timg', pIcon->mTexture, nullptr) : nullptr;
             if (pTpl != nullptr) {
                 mTextures[i] = new nw4r::lyt::TexMap();
+<<<<<<< HEAD
                 mTextures[i]->ReplaceImage(static_cast< TPLPalette* >(pTpl), 0);
+=======
+                mTextures[i]->ReplaceImage(pTpl, 0);
+>>>>>>> upstream/main
             }
         } else if (MR::isExistResourceInArc(pIcon->mArchive, pIcon->mTexture)) {
             mTextures[i] = MR::createLytTexMap(pIcon->mArchive, pIcon->mTexture);
         }
         if (mTextures[i] == nullptr) {
+<<<<<<< HEAD
             OSReport("NebulaAchievementToast: no %s in %s\n", pIcon->mTexture, pIcon->mArchive);
+=======
+            JUTNativeLog("NebulaAchievementToast: no %s in %s\n", pIcon->mTexture, pIcon->mArchive);
+>>>>>>> upstream/main
         }
     }
     if (mTextures[0] != nullptr) {

@@ -1,4 +1,8 @@
 #include "Game/Util/SystemUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include <revolution/os.h>
 #include "Game/NameObj/NameObjHolder.hpp"
 #ifdef TARGET_PC
@@ -76,7 +80,11 @@ namespace MR {
     void waitEndChangeArchivePlayer() {
         while (!GameSystemFunction::isEndChangeArchivePlayer()) {
 #ifdef TARGET_PC
+<<<<<<< HEAD
             __NebulaPoll();
+=======
+            NebulaKernel::poll();
+>>>>>>> upstream/main
 #endif
         }
     }
@@ -134,6 +142,7 @@ namespace MR {
     }
 
     void suspendAsyncExecuteThread(const char* pThreadName) {
+<<<<<<< HEAD
         OSSuspendThread(::getFunctionAsyncExecutor()->getOSThread(pThreadName));
     }
 
@@ -145,12 +154,29 @@ namespace MR {
 
     bool isSuspendedAsyncExecuteThread(const char* pThreadName) {
         OSThread* pThread = ::getFunctionAsyncExecutor()->getOSThread(pThreadName);
+=======
+        NebulaKernel::suspend(::getFunctionAsyncExecutor()->getOSThread(pThreadName));
+    }
+
+    void resumeAsyncExecuteThread(const char* pThreadName) {
+        NebulaThread* pThread = ::getFunctionAsyncExecutor()->getOSThread(pThreadName);
+
+        NebulaKernel::resume(::getFunctionAsyncExecutor()->getOSThread(pThreadName));
+    }
+
+    bool isSuspendedAsyncExecuteThread(const char* pThreadName) {
+        NebulaThread* pThread = ::getFunctionAsyncExecutor()->getOSThread(pThreadName);
+>>>>>>> upstream/main
 
         if (pThread == nullptr) {
             return false;
         }
 
+<<<<<<< HEAD
         return OSIsThreadSuspended(pThread);
+=======
+        return NebulaKernel::isSuspended(pThread);
+>>>>>>> upstream/main
     }
 
     bool isScreen16Per9() {
@@ -175,12 +201,18 @@ namespace MR {
         getGameSystemObjHolder()->mAudioSystem->stopAllSound(param1);
     }
 
+<<<<<<< HEAD
     void setLayoutDefaultAllocator() {
         nw4r::lyt::Layout::mspAllocator = &MR::NewDeleteAllocator::sAllocator;
     }
 
     bool isDisplayEncouragePal60Window() {
         return VIGetTvFormat() == VI_PAL;
+=======
+    // The output is 60 Hz: no PAL television to suggest PAL60 for.
+    bool isDisplayEncouragePal60Window() {
+        return false;
+>>>>>>> upstream/main
     }
 
     JMapIdInfo* getPlayerRestartIdInfo() {

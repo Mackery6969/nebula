@@ -745,6 +745,7 @@ std::filesystem::path mods_folder() {
     return s.folder;
 }
 
+<<<<<<< HEAD
 namespace {
 
 // The online room's mods for the next apply_mods (set_room_mods).
@@ -771,6 +772,8 @@ std::vector<ModInfo> scan_folders(const std::vector<std::pair<std::string, fs::p
 
 }  // namespace
 
+=======
+>>>>>>> upstream/main
 std::vector<ModInfo> scan_mods(const std::string& requested_game_id) {
     fs::path folder;
     fs::path file;
@@ -782,6 +785,7 @@ std::vector<ModInfo> scan_mods(const std::string& requested_game_id) {
         file = s.file;
         if (game_id.empty()) game_id = s.game_id;
     }
+<<<<<<< HEAD
     const std::vector<std::pair<std::string, fs::path>> dirs = mod_folders(folder);
     if (dirs.empty()) return {};
     return scan_folders(dirs, read_saved(file), game_id);
@@ -838,13 +842,31 @@ std::vector<ModInfo> scan_room_mods(const std::vector<RoomModChoice>& room, cons
 std::vector<ModInfo> scan_folders(const std::vector<std::pair<std::string, fs::path>>& dirs,
                                   const std::map<std::string, SavedMod>& saved, const std::string& game_id) {
     std::vector<ModInfo> mods;
+=======
+    std::vector<ModInfo> mods;
+    std::error_code error;
+    if (folder.empty() || !fs::is_directory(folder, error)) return mods;
+    const std::map<std::string, SavedMod> saved = read_saved(file);
+    std::vector<fs::path> dirs;
+    for (const auto& entry : fs::directory_iterator(folder, error)) {
+        // Hidden folders: imports in progress (mod_import.cpp) and the system's own.
+        if (entry.is_directory(error) && !utf8_name(entry.path()).starts_with('.')) dirs.push_back(entry.path());
+    }
+    std::sort(dirs.begin(), dirs.end());
+>>>>>>> upstream/main
     const std::string region_id = game_id.empty() ? std::string("RMGE01") : game_id;
     // What each mod changes, by its id: disc paths ("name:x.arc" for a file name alone) and texture names.
     std::map<std::string, std::set<std::string>> changed_paths;
     std::map<std::string, std::set<std::string>> changed_textures;
+<<<<<<< HEAD
     for (const auto& [id, dir] : dirs) {
         ModInfo mod;
         mod.id = id;
+=======
+    for (const fs::path& dir : dirs) {
+        ModInfo mod;
+        mod.id = utf8_name(dir);
+>>>>>>> upstream/main
         mod.path = dir;
         const ModLayout layout = layout_of(dir);
         mod.riivolution = !layout.xmls.empty();
@@ -993,8 +1015,11 @@ std::vector<ModInfo> scan_folders(const std::vector<std::pair<std::string, fs::p
     return mods;
 }
 
+<<<<<<< HEAD
 }  // namespace
 
+=======
+>>>>>>> upstream/main
 void set_mod_enabled(std::vector<ModInfo>& mods, std::size_t index, bool enabled) {
     if (index >= mods.size() || mods[index].enabled == enabled) return;
     ModInfo mod = std::move(mods[index]);
@@ -1227,6 +1252,7 @@ SessionMods session_mods() {
 bool mods_differ_from_session(std::span<const ModInfo> mods) {
     Session& s = session();
     const std::lock_guard<std::mutex> lock(s.mutex);
+<<<<<<< HEAD
     if (mods_signature(mods) != mods_signature(s.mods.started_with)) return true;
     if (!s.mods.room) return false;
     // A room's mod of the same name may be another copy (a download): the player's own is played only after a restart.
@@ -1235,6 +1261,9 @@ bool mods_differ_from_session(std::span<const ModInfo> mods) {
                std::none_of(mods.begin(), mods.end(),
                             [&started](const ModInfo& own) { return own.path == started.path; });
     });
+=======
+    return mods_signature(mods) != mods_signature(s.mods.started_with);
+>>>>>>> upstream/main
 }
 
 std::unique_ptr<ActiveMods> apply_mods(std::span<const std::uint8_t> partition_fst,
@@ -1242,6 +1271,7 @@ std::unique_ptr<ActiveMods> apply_mods(std::span<const std::uint8_t> partition_f
                                        const std::uint8_t* partition, std::uint64_t partition_size,
                                        const std::string& game_id, int revision, int disc_number,
                                        const std::string& language_folder) {
+<<<<<<< HEAD
     std::optional<std::vector<RoomModChoice>> room;
     {
         const std::lock_guard<std::mutex> lock(s_room_mutex);
@@ -1252,6 +1282,13 @@ std::unique_ptr<ActiveMods> apply_mods(std::span<const std::uint8_t> partition_f
         Session& s = session();
         const std::lock_guard<std::mutex> lock(s.mutex);
         s.mods = SessionMods{mods, {}, 0, 0, room.has_value()};
+=======
+    std::vector<ModInfo> mods = scan_mods(game_id);
+    {
+        Session& s = session();
+        const std::lock_guard<std::mutex> lock(s.mutex);
+        s.mods = SessionMods{mods, {}, 0, 0};
+>>>>>>> upstream/main
     }
     if (std::none_of(mods.begin(), mods.end(), [](const ModInfo& m) { return m.enabled; })) return nullptr;
     auto active = std::make_unique<ActiveMods>();

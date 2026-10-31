@@ -1,4 +1,8 @@
 #include "JSystem/JAudio2/JASAramStream.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASAiCtrl.hpp"
 #include "JSystem/JAudio2/JASChannel.hpp"
 #include "JSystem/JAudio2/JASCriticalSection.hpp"
@@ -9,7 +13,10 @@
 #include "JSystem/JKernel/JKRDvdRipper.hpp"
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
 #include "JSystem/JSupport/JSupport.hpp"
+<<<<<<< HEAD
 #include <revolution/os/OSCache.h>
+=======
+>>>>>>> upstream/main
 
 JASTaskThread* JASAramStream::sLoadThread;
 
@@ -19,6 +26,7 @@ u32 JASAramStream::sBlockSize;
 
 u32 JASAramStream::sChannelMax;
 
+<<<<<<< HEAD
 bool UNK_BOOL_A;
 bool UNK_BOOL_B;
 
@@ -34,6 +42,21 @@ void JASAramStream::initSystem(u32 block_size, u32 channel_max) {
         UNK_BOOL_A = false;
         UNK_BOOL_B = false;
     }
+=======
+bool UNK_BOOL_B;
+
+void JASAramStream::initSystem(u32 block_size, u32 channel_max) {
+    // The console also registered a check of the drive here, which paused streams on a disc error; a PC's game
+    // files have none.
+    if (sLoadThread == nullptr) {
+        sLoadThread = JASDvd::getThreadPointer();
+    }
+
+    sReadBuffer = new (JASDram, 0x20) u8[(block_size + 0x20) * channel_max];
+    sBlockSize = block_size;
+    sChannelMax = channel_max;
+    UNK_BOOL_B = false;
+>>>>>>> upstream/main
 }
 
 JASAramStream::JASAramStream() : _0B8(), _0C4(), _0C8(), _114() {
@@ -100,12 +123,21 @@ void JASAramStream::init(u32 param_0, u32 param_1, StreamCallback i_callback, vo
     _1DC[0] = 0xffff;
     mCallback = i_callback;
     mCallbackData = i_callbackData;
+<<<<<<< HEAD
     OSInitMessageQueue(&_000, _040, 0x10);
     OSInitMessageQueue(&_020, _080, 4);
 }
 
 bool JASAramStream::prepare(s32 param_0, int param_1) {
     if (!DVDFastOpen(param_0, &mDvdFileInfo)) {
+=======
+    _000.init(_040, 0x10);
+    _020.init(_080, 4);
+}
+
+bool JASAramStream::prepare(s32 param_0, int param_1) {
+    if (!NebulaDisc::open(param_0, &mDvdFile)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -126,7 +158,11 @@ bool JASAramStream::prepare(s32 param_0, int param_1) {
 }
 
 bool JASAramStream::start() {
+<<<<<<< HEAD
     if (!OSSendMessage(&_000, (OSMessage)0, OS_MESSAGE_NOBLOCK)) {
+=======
+    if (!_000.send((void*)0, false)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -134,7 +170,11 @@ bool JASAramStream::start() {
 }
 
 bool JASAramStream::stop(u16 param_0) {
+<<<<<<< HEAD
     if (!OSSendMessage(&_000, (OSMessage)(uintptr_t)(param_0 << 0x10 | 1), OS_MESSAGE_NOBLOCK)) {
+=======
+    if (!_000.send((void*)(uintptr_t)(param_0 << 0x10 | 1), false)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -142,8 +182,13 @@ bool JASAramStream::stop(u16 param_0) {
 }
 
 bool JASAramStream::pause(bool param_0) {
+<<<<<<< HEAD
     OSMessage msg = param_0 ? (OSMessage)2 : (OSMessage)3;
     if (!OSSendMessage(&_000, msg, OS_MESSAGE_NOBLOCK)) {
+=======
+    void* msg = param_0 ? (void*)2 : (void*)3;
+    if (!_000.send(msg, false)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -212,7 +257,11 @@ void JASAramStream::finishTask(void* i_this) {
 
 void JASAramStream::prepareFinishTask(void* i_this) {
     JASAramStream* _this = (JASAramStream*)i_this;
+<<<<<<< HEAD
     OSSendMessage(&_this->_020, (OSMessage)4, OS_MESSAGE_BLOCK);
+=======
+    _this->_020.send((void*)4, true);
+>>>>>>> upstream/main
     if (_this->mCallback != nullptr) {
         _this->mCallback(CB_STOP, _this, _this->mCallbackData);
     }
@@ -227,12 +276,19 @@ bool JASAramStream::headerLoad(u32 param_0, int param_1) {
         return false;
     }
 
+<<<<<<< HEAD
     if (DVDReadPrio(&mDvdFileInfo, sReadBuffer, sizeof(Header), 0, 1) < 0) {
+=======
+    if (NebulaDisc::read(&mDvdFile, sReadBuffer, sizeof(Header), 0) < 0) {
+>>>>>>> upstream/main
         UNK_BOOL_B = true;
         return false;
     }
 
+<<<<<<< HEAD
     DCInvalidateRange(sReadBuffer, sizeof(Header));
+=======
+>>>>>>> upstream/main
     Header* header = (Header*)sReadBuffer;
     _158 = header->format;
     mChannelNum = header->channels;
@@ -297,15 +353,25 @@ bool JASAramStream::load() {
     u32 size = sBlockSize * mChannelNum + sizeof(BlockHeader);
     u32 offset = mBlock * size + sizeof(Header);
     if (mBlock == loop_end_block) {
+<<<<<<< HEAD
         size = mDvdFileInfo.length - offset;
     }
 
     if (DVDReadPrio(&mDvdFileInfo, sReadBuffer, size, offset, 1) < 0) {
+=======
+        size = mDvdFile.mLength - offset;
+    }
+
+    if (NebulaDisc::read(&mDvdFile, sReadBuffer, size, offset) < 0) {
+>>>>>>> upstream/main
         UNK_BOOL_B = true;
         return false;
     }
 
+<<<<<<< HEAD
     DCInvalidateRange(sReadBuffer, size);
+=======
+>>>>>>> upstream/main
     BlockHeader* bhead = (BlockHeader*)sReadBuffer;
     if (_114 != 0) {
         return false;
@@ -333,7 +399,11 @@ bool JASAramStream::load() {
 
         if (r28 == loop_end_block || r28 + 2 == loop_end_block) {
             _108 = _160;
+<<<<<<< HEAD
             OSSendMessage(&_020, (OSMessage)5, OS_MESSAGE_BLOCK);
+=======
+            _020.send((void*)5, true);
+>>>>>>> upstream/main
         } else {
             _108 = _160 - 1;
         }
@@ -359,6 +429,7 @@ s32 JASAramStream::channelProcCallback(void* i_this) {
     return stream->channelProc();
 }
 
+<<<<<<< HEAD
 s32 JASAramStream::dvdErrorCheck(void* param_0) {
     s32 status = DVDGetDriveStatus();
     switch (status) {
@@ -384,6 +455,8 @@ s32 JASAramStream::dvdErrorCheck(void* param_0) {
     return 0;
 }
 
+=======
+>>>>>>> upstream/main
 void JASAramStream::channelCallback(u32 i_callbackType, JASChannel* i_channel, JASDsp::TChannel* i_dspChannel, void* i_this) {
     JASAramStream* stream = (JASAramStream*)i_this;
     stream->updateChannel(i_callbackType, i_channel, i_dspChannel);
@@ -520,7 +593,11 @@ void JASAramStream::updateChannel(u32 i_callbackType, JASChannel* i_channel, JAS
                         }
                     }
                 } else {
+<<<<<<< HEAD
                     if (_118 == 0 && !UNK_BOOL_A) {
+=======
+                    if (_118 == 0) {
+>>>>>>> upstream/main
                         _0AE &= ~2;
                         _0AE &= ~4;
                     }
@@ -585,8 +662,13 @@ void JASAramStream::updateChannel(u32 i_callbackType, JASChannel* i_channel, JAS
 }
 
 s32 JASAramStream::channelProc() {
+<<<<<<< HEAD
     OSMessage msg;
     while (OSReceiveMessage(&_020, &msg, OS_MESSAGE_NOBLOCK)) {
+=======
+    void* msg;
+    while (_020.receive(&msg, false)) {
+>>>>>>> upstream/main
         switch ((u32)(uintptr_t)msg) {
         case 4:
             _0AC = true;
@@ -601,7 +683,11 @@ s32 JASAramStream::channelProc() {
         return 0;
     }
 
+<<<<<<< HEAD
     while (OSReceiveMessage(&_000, &msg, OS_MESSAGE_NOBLOCK)) {
+=======
+    while (_000.receive(&msg, false)) {
+>>>>>>> upstream/main
         switch ((u32)(uintptr_t)msg & 0xff) {
         case 0:
             channelStart();
@@ -622,10 +708,13 @@ s32 JASAramStream::channelProc() {
         _0AE |= 8;
     }
 
+<<<<<<< HEAD
     if (UNK_BOOL_A) {
         _0AE |= 2;
     }
 
+=======
+>>>>>>> upstream/main
     for (int i = 0; i < mChannelNum; i++) {
         JASChannel* channel = mChannels[i];
         if (channel != nullptr) {

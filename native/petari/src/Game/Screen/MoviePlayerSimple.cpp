@@ -17,6 +17,11 @@
 #include <JSystem/JKernel/JKRDisposer.hpp>
 #include <JSystem/JKernel/JKRExpHeap.hpp>
 #include <JSystem/JUtility/JUTVideo.hpp>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+#include "JSystem/JUtility/JUTException.hpp"
+>>>>>>> upstream/main
 
 namespace {
     static const s16 sCinemaFrameHeightTop = 44;
@@ -94,7 +99,11 @@ void MoviePlayerSimple::draw() const {
 
 void MoviePlayerSimple::startMovie(const char* pMovieName, bool a2) {
     if (!MR::isFileExist(pMovieName, false)) {
+<<<<<<< HEAD
         OSPanic(__FILE__, 0xDB, "Moive File NOT found.");
+=======
+        JUTException::panic_f(__FILE__, 0xDB, "Moive File NOT found.");
+>>>>>>> upstream/main
     }
 
     mMovie->mMovieName = pMovieName;
@@ -253,6 +262,7 @@ u32 MoviePlayerSimple::calcNeedMemoryForMovieWorks() {
     needMemory += 0x140000;
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+<<<<<<< HEAD
     needMemory += OSRoundUp32B(MR::getFrameBufferWidth() * MR::getFrameBufferHeight());
     needMemory += OSRoundUp32B(MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4);
     needMemory += OSRoundUp32B(MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4);
@@ -262,6 +272,17 @@ u32 MoviePlayerSimple::calcNeedMemoryForMovieWorks() {
     needMemory += OSRoundUp32B(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight()));
     needMemory += OSRoundUp32B(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4));
     needMemory += OSRoundUp32B(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4));
+=======
+    needMemory += NebulaAlignUp32(MR::getFrameBufferWidth() * MR::getFrameBufferHeight());
+    needMemory += NebulaAlignUp32(MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4);
+    needMemory += NebulaAlignUp32(MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4);
+#else
+    s32 texCount = mPlayerWrapper->getUseTextureCount();
+
+    needMemory += NebulaAlignUp32(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight()));
+    needMemory += NebulaAlignUp32(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4));
+    needMemory += NebulaAlignUp32(texCount * (MR::getFrameBufferWidth() * MR::getFrameBufferHeight() / 4));
+>>>>>>> upstream/main
 #endif
 
     return needMemory + 0x1188;

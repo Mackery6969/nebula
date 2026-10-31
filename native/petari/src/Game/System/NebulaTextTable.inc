@@ -67,8 +67,11 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Green Stars", nullptr, L"\u00C9toiles Vertes", L"\u00C9toiles vertes", L"Estrellas Verdes", L"Estrellas verdes", L"Gr\u00FCnsterne", L"Superstelle Verdi", L"Groene sterren", L"Estrelas verdes", L"\u30B0\u30EA\u30FC\u30F3\u30B9\u30BF\u30FC", L"\uCD08\uB85D\uD30C\uC6CC\uC2A4\uD0C0", L"\u7EFF\u8272\u661F\u661F", L"\u7DA0\u661F\u661F"}},
     {"StatLumas",
      {L"Hungry Lumas Fed", nullptr, L"Goinfres Chiko nourris", L"Goinfres Luma nourris", L"Destellos glotones alimentados", L"Destellos glotones alimentados", L"Gef\u00FCtterte Gourmet-Lumas", L"Sfavillotti Ghiotti nutriti", L"Gevoerde Snoep-Luma's", L"Lumas fominhas alimentados", L"\u6E80\u8179\u306B\u3057\u305F\u30CF\u30E9\u30DA\u30B3\u30C1\u30B3", L"\uBC30\uBD80\uB974\uAC8C \uD55C \uAF2C\uB974\uB975\uCE58\uCF54", L"\u5582\u9971\u7684\u8D2A\u5403\u742A\u742A", L"\u9935\u98FD\u7684\u8CAA\u5403\u5947\u53EF"}},
+<<<<<<< HEAD
     {"StatPowerStarsCollected",
      {L"Power Stars Collected", nullptr, L"Super \u00C9toiles r\u00E9colt\u00E9es", L"Super \u00C9toiles r\u00E9colt\u00E9es", L"Superestrellas recogidas", L"Superestrellas recogidas", L"Gesammelte Power-Sterne", L"Superstelle raccolte", L"Verzamelde krachtsterren", L"Estrelas do Poder coletadas", L"\u96C6\u3081\u305F\u30D1\u30EF\u30FC\u30B9\u30BF\u30FC", L"\uBAA8\uC740 \uD30C\uC6CC\uC2A4\uD0C0", L"\u6536\u96C6\u7684\u529B\u91CF\u4E4B\u661F", L"\u6536\u96C6\u7684\u529B\u91CF\u4E4B\u661F"}},
+=======
+>>>>>>> upstream/main
     {"StatJumps",
      {L"Jumps", nullptr, L"Sauts", L"Sauts", L"Saltos", L"Saltos", L"Spr\u00FCnge", L"Salti", L"Sprongen", L"Pulos", L"\u30B8\u30E3\u30F3\u30D7\u3057\u305F\u56DE\u6570", L"\uC810\uD504 \uD69F\uC218", L"\u8DF3\u8DC3\u6B21\u6570", L"\u8DF3\u8E8D\u6B21\u6578"}},
     {"StatSpins",
@@ -255,8 +258,15 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Mods", nullptr, L"Mods", L"Mods", L"Mods", L"Mods", L"Mods", L"Mod", L"Mods", L"Mods", L"MOD", L"\uBAA8\uB4DC", L"\u6A21\u7EC4", L"\u6A21\u7D44"}},
     {"S.SYSTEM",
      {L"System", nullptr, L"Syst\u00E8me", L"Syst\u00E8me", L"Sistema", L"Sistema", L"System", L"Sistema", L"Systeem", L"Sistema", L"\u30B7\u30B9\u30C6\u30E0", L"\uC2DC\uC2A4\uD15C", L"\u7CFB\u7EDF", L"\u7CFB\u7D71"}},
+<<<<<<< HEAD
     {"S.ONLINE",
      {L"Online", nullptr, L"En ligne", L"En ligne", L"En l\u00EDnea", L"En l\u00EDnea", L"Online", L"Online", L"Online", L"Online", L"\u30AA\u30F3\u30E9\u30A4\u30F3", L"\uC628\uB77C\uC778", L"\u5728\u7EBF", L"\u7DDA\u4E0A"}},
+=======
+    {"S.DIAGNOSTICS",
+     {L"Diagnostics", nullptr, L"Diagnostic", L"Diagnostic", L"Diagn\u00F3stico", L"Diagn\u00F3stico", L"Diagnose", L"Diagnostica", L"Diagnose", L"Diagn\u00F3stico", L"\u8A3A\u65AD", L"\uC9C4\uB2E8", L"\u8BCA\u65AD", L"\u8A3A\u65B7"}},
+    {"S.RECORD",
+     {L"Record", nullptr, L"Enregistrer", L"Enregistrer", L"Grabar", L"Grabar", L"Aufzeichnen", L"Registra", L"Opnemen", L"Gravar", L"\u8A18\u9332", L"\uAE30\uB85D", L"\u8BB0\u5F55", L"\u8A18\u9304"}},
+>>>>>>> upstream/main
     {"S.ADVANCED",
      {L"Advanced", nullptr, L"Avanc\u00E9", L"Avanc\u00E9", L"Avanzado", L"Avanzado", L"Erweitert", L"Avanzate", L"Geavanceerd", L"Avan\u00E7ado", L"\u8A73\u7D30\u8A2D\u5B9A", L"\uACE0\uAE09", L"\u9AD8\u7EA7", L"\u9032\u968E"}},
     {"S.ON",
@@ -607,6 +617,19 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"pointer", nullptr, L"pointeur", L"pointeur", L"puntero", L"puntero", L"Pointer", L"puntatore", L"aanwijzer", L"ponteiro", L"\u30DD\u30A4\u30F3\u30BF\u30FC", L"\uD3EC\uC778\uD130", L"\u6307\u9488", L"\u6307\u6A19"}},
     {"S.GYRO_SENSITIVITY",
      {L"Gyro sensitivity", nullptr, L"Sensibilit\u00E9 du gyroscope", L"Sensibilit\u00E9 du gyroscope", L"Sensibilidad del giroscopio", L"Sensibilidad del giroscopio", L"Gyro-Empfindlichkeit", L"Sensibilit\u00E0 giroscopio", L"Gyrogevoeligheid", L"Sensibilidade do girosc\u00F3pio", L"\u30B8\u30E3\u30A4\u30ED\u306E\u611F\u5EA6", L"\uC790\uC774\uB85C \uAC10\uB3C4", L"\u9640\u87BA\u4EEA\u7075\u654F\u5EA6", L"\u9640\u87BA\u5100\u9748\u654F\u5EA6"}},
+<<<<<<< HEAD
+=======
+    {"S.STICK",
+     {L"stick", nullptr, L"stick", L"stick", L"palanca", L"palanca", L"Stick", L"levetta", L"stick", L"anal\u00F3gico", L"\u30B9\u30C6\u30A3\u30C3\u30AF", L"\uC2A4\uD2F1", L"\u6447\u6746", L"\u6416\u687F"}},
+    {"S.MOTION",
+     {L"motion", nullptr, L"mouvement", L"mouvement", L"movimiento", L"movimiento", L"Bewegung", L"movimento", L"beweging", L"movimento", L"\u30E2\u30FC\u30B7\u30E7\u30F3", L"\uBAA8\uC158", L"\u4F53\u611F", L"\u9AD4\u611F"}},
+    {"S.TOUCHPAD",
+     {L"touchpad", nullptr, L"pav\u00E9 tactile", L"pav\u00E9 tactile", L"panel t\u00E1ctil", L"panel t\u00E1ctil", L"Touchpad", L"touchpad", L"touchpad", L"touchpad", L"\u30BF\u30C3\u30C1\u30D1\u30C3\u30C9", L"\uD130\uCE58\uD328\uB4DC", L"\u89E6\u6478\u677F", L"\u89F8\u63A7\u677F"}},
+    {"S.MOTION_+_TOUCHPAD",
+     {L"motion + touchpad", nullptr, L"mouvement + pav\u00E9 tactile", L"mouvement + pav\u00E9 tactile", L"movimiento + panel t\u00E1ctil", L"movimiento + panel t\u00E1ctil", L"Bewegung + Touchpad", L"movimento + touchpad", L"beweging + touchpad", L"movimento + touchpad", L"\u30E2\u30FC\u30B7\u30E7\u30F3 + \u30BF\u30C3\u30C1\u30D1\u30C3\u30C9", L"\uBAA8\uC158 + \uD130\uCE58\uD328\uB4DC", L"\u4F53\u611F + \u89E6\u6478\u677F", L"\u9AD4\u611F + \u89F8\u63A7\u677F"}},
+    {"S.TOUCHPAD_SENSITIVITY",
+     {L"Touchpad sensitivity", nullptr, L"Sensibilit\u00E9 du pav\u00E9 tactile", L"Sensibilit\u00E9 du pav\u00E9 tactile", L"Sensibilidad del panel t\u00E1ctil", L"Sensibilidad del panel t\u00E1ctil", L"Touchpad-Empfindlichkeit", L"Sensibilit\u00E0 del touchpad", L"Touchpadgevoeligheid", L"Sensibilidade do touchpad", L"\u30BF\u30C3\u30C1\u30D1\u30C3\u30C9\u306E\u611F\u5EA6", L"\uD130\uCE58\uD328\uB4DC \uAC10\uB3C4", L"\u89E6\u6478\u677F\u7075\u654F\u5EA6", L"\u89F8\u63A7\u677F\u9748\u654F\u5EA6"}},
+>>>>>>> upstream/main
     {"S.RESET_KEYBOARD_TO_DEFAULTS",
      {L"Reset keyboard to defaults", nullptr, L"R\u00E9tablir le clavier par d\u00E9faut", L"R\u00E9tablir le clavier par d\u00E9faut", L"Restablecer el teclado", L"Restablecer el teclado", L"Tastatur zur\u00FCcksetzen", L"Ripristina la tastiera", L"Toetsenbord herstellen", L"Restaurar o teclado", L"\u30AD\u30FC\u30DC\u30FC\u30C9\u3092\u521D\u671F\u8A2D\u5B9A\u306B\u623B\u3059", L"\uD0A4\uBCF4\uB4DC \uAE30\uBCF8\uAC12 \uBCF5\uC6D0", L"\u6062\u590D\u952E\u76D8\u9ED8\u8BA4\u8BBE\u7F6E", L"\u9084\u539F\u9375\u76E4\u9810\u8A2D\u503C"}},
     {"S.RESET_XBOX_TO_DEFAULTS",
@@ -629,6 +652,11 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"That input can't be used here.", nullptr, L"Cette entr\u00E9e ne peut pas servir ici.", L"Cette entr\u00E9e ne peut pas servir ici.", L"Esa entrada no sirve aqu\u00ED.", L"Esa entrada no sirve aqu\u00ED.", L"Diese Eingabe passt hier nicht.", L"Quell'input non si pu\u00F2 usare qui.", L"Die invoer kan hier niet worden gebruikt.", L"Essa entrada n\u00E3o pode ser usada aqui.", L"\u305D\u306E\u5165\u529B\u306F\u3053\u3053\u3067\u306F\u4F7F\u3048\u307E\u305B\u3093\u3002", L"\uADF8 \uC785\uB825\uC740 \uC5EC\uAE30\uC5D0 \uC4F8 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.", L"\u8BE5\u8F93\u5165\u4E0D\u80FD\u7528\u4E8E\u6B64\u5904\u3002", L"\u8A72\u8F38\u5165\u4E0D\u80FD\u7528\u65BC\u6B64\u8655\u3002"}},
     {"S.NO_CONTROLLER_CONNECTED",
      {L"No controller is connected.", nullptr, L"Aucune manette n'est connect\u00E9e.", L"Aucune manette n'est connect\u00E9e.", L"No hay ning\u00FAn control conectado.", L"No hay ning\u00FAn mando conectado.", L"Kein Controller verbunden.", L"Nessun controller collegato.", L"Er is geen controller verbonden.", L"Nenhum controle conectado.", L"\u30B3\u30F3\u30C8\u30ED\u30FC\u30E9\u30FC\u304C\u63A5\u7D9A\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002", L"\uC5F0\uACB0\uB41C \uCEE8\uD2B8\uB864\uB7EC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.", L"\u672A\u8FDE\u63A5\u624B\u67C4\u3002", L"\u672A\u9023\u63A5\u63A7\u5236\u5668\u3002"}},
+<<<<<<< HEAD
+=======
+    {"S.NO_WII_REMOTE_CONNECTED",
+     {L"No Wii Remote is connected.", nullptr, L"Aucune Wiimote n'est connect\u00E9e.", L"Aucune Wiimote n'est connect\u00E9e.", L"No hay ning\u00FAn control remoto Wii conectado.", L"No hay ning\u00FAn control remoto Wii conectado.", L"Keine Wii-Fernbedienung verbunden.", L"Nessun telecomando Wii collegato.", L"Er is geen Wii-afstandsbediening verbonden.", L"Nenhum Controle Remoto Wii conectado.", L"Wii\u30EA\u30E2\u30B3\u30F3\u304C\u63A5\u7D9A\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002", L"\uC5F0\uACB0\uB41C Wii \uB9AC\uBAA8\uCEE8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.", L"\u672A\u8FDE\u63A5 Wii \u9065\u63A7\u5668\u3002", L"\u672A\u9023\u63A5 Wii \u9059\u63A7\u5668\u3002"}},
+>>>>>>> upstream/main
     {"S.Space",
      {L"Space", nullptr, L"Espace", L"Espace", L"Espacio", L"Espacio", L"Leertaste", L"Spazio", L"Spatie", L"Espa\u00E7o", L"\u30B9\u30DA\u30FC\u30B9", L"\uC2A4\uD398\uC774\uC2A4", L"\u7A7A\u683C", L"\u7A7A\u767D\u9375"}},
     {"S.Enter",
@@ -991,6 +1019,7 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"FXAA failed", nullptr, L"FXAA en \u00E9chec", L"FXAA en \u00E9chec", L"FXAA fall\u00F3", L"FXAA fall\u00F3", L"FXAA fehlgeschlagen", L"FXAA non riuscito", L"FXAA mislukt", L"FXAA falhou", L"FXAA \u5931\u6557", L"FXAA \uC2E4\uD328", L"FXAA \u5931\u8D25", L"FXAA \u5931\u6557"}},
     {"S.ANTI-ALIASING,_FSR_#_AND_SHARPENING",
      {L"Anti-aliasing, FSR {0} and sharpening.", nullptr, L"Anticr\u00E9nelage, FSR {0} et nettet\u00E9.", L"Anticr\u00E9nelage, FSR {0} et nettet\u00E9.", L"Antialiasing, FSR {0} y nitidez.", L"Antialiasing, FSR {0} y nitidez.", L"Kantengl\u00E4ttung, FSR {0} und Sch\u00E4rfe.", L"Anti-aliasing, FSR {0} e nitidezza.", L"Anti-aliasing, FSR {0} en verscherping.", L"Antisserrilhado, FSR {0} e nitidez.", L"\u30A2\u30F3\u30C1\u30A8\u30A4\u30EA\u30A2\u30B9\u3001FSR {0}\u3001\u30B7\u30E3\u30FC\u30D7\u30CD\u30B9\u3067\u3059\u3002", L"\uC548\uD2F0 \uC568\uB9AC\uC5B4\uC2F1, FSR {0}, \uC120\uBA85\uB3C4\uC785\uB2C8\uB2E4.", L"\u6297\u952F\u9F7F\u3001FSR {0} \u4E0E\u9510\u5316\u3002", L"\u53CD\u92F8\u9F52\u3001FSR {0} \u8207\u92B3\u5229\u5316\u3002"}},
+<<<<<<< HEAD
     {"CoopMenuTitle",
      {L"Main Menu", nullptr, L"Menu principal", L"Menu principal", L"Men\u00FA principal", L"Men\u00FA principal", L"Hauptmen\u00FC", L"Menu principale", L"Hoofdmenu", L"Menu principal", L"\u30E1\u30A4\u30F3\u30E1\u30CB\u30E5\u30FC", L"\uBA54\uC778 \uBA54\uB274", L"\u4E3B\u83DC\u5355", L"\u4E3B\u9078\u55AE"}},
     {"CoopHintDone",
@@ -1005,6 +1034,8 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Host", nullptr, L"H\u00F4te", L"H\u00F4te", L"Anfitri\u00F3n", L"Anfitri\u00F3n", L"Host", L"Host", L"Host", L"Anfitri\u00E3o", L"\u30DB\u30B9\u30C8", L"\uD638\uC2A4\uD2B8", L"\u623F\u4E3B", L"\u623F\u4E3B"}},
     {"PlayerListArriving",
      {L"On the way...", nullptr, L"En route...", L"En route...", L"En camino...", L"En camino...", L"Unterwegs...", L"In arrivo...", L"Onderweg...", L"A caminho...", L"\u79FB\u52D5\u4E2D\u2026", L"\uC774\uB3D9 \uC911...", L"\u6B63\u5728\u524D\u5F80\u2026", L"\u6B63\u5728\u524D\u5F80\u2026"}},
+=======
+>>>>>>> upstream/main
     {"SettingsTitle",
      {L"Settings", nullptr, L"Param\u00E8tres", L"Param\u00E8tres", L"Configuraci\u00F3n", L"Configuraci\u00F3n", L"Einstellungen", L"Impostazioni", L"Instellingen", L"Configura\u00E7\u00F5es", L"\u8A2D\u5B9A", L"\uC124\uC815", L"\u8BBE\u7F6E", L"\u8A2D\u5B9A"}},
     {"SettingsApply",
@@ -1021,8 +1052,11 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Change", nullptr, L"Modifier", L"Modifier", L"Cambiar", L"Cambiar", L"\u00C4ndern", L"Cambia", L"Wijzigen", L"Mudar", L"\u5909\u66F4", L"\uBCC0\uACBD", L"\u66F4\u6539", L"\u8B8A\u66F4"}},
     {"SettingsHintUndo",
      {L"Undo", nullptr, L"Annuler", L"Annuler", L"Deshacer", L"Deshacer", L"R\u00FCckg\u00E4ngig", L"Annulla", L"Ongedaan maken", L"Desfazer", L"\u5143\u306B\u623B\u3059", L"\uB418\uB3CC\uB9AC\uAE30", L"\u64A4\u9500", L"\u5FA9\u539F"}},
+<<<<<<< HEAD
     {"SettingsHintReset",
      {L"Reset", nullptr, L"R\u00E9initialiser", L"R\u00E9initialiser", L"Restablecer", L"Restablecer", L"Zur\u00FCcksetzen", L"Ripristina", L"Herstellen", L"Redefinir", L"\u30EA\u30BB\u30C3\u30C8", L"\uCD08\uAE30\uD654", L"\u91CD\u7F6E", L"\u91CD\u8A2D"}},
+=======
+>>>>>>> upstream/main
     {"SettingsHintPage",
      {L"Page", nullptr, L"Page", L"Page", L"P\u00E1gina", L"P\u00E1gina", L"Seite", L"Pagina", L"Pagina", L"P\u00E1gina", L"\u30DA\u30FC\u30B8", L"\uD398\uC774\uC9C0", L"\u9875\u9762", L"\u9801\u9762"}},
     {"SettingsHintBind",
@@ -1145,6 +1179,13 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Reset", nullptr, L"R\u00E9initialiser", L"R\u00E9initialiser", L"Restablecer", L"Restablecer", L"Zur\u00FCcksetzen", L"Ripristina", L"Herstellen", L"Redefinir", L"\u30EA\u30BB\u30C3\u30C8", L"\uCD08\uAE30\uD654", L"\u91CD\u7F6E", L"\u91CD\u8A2D"}},
     {"SettingsModsRestartAsk",
      {L"Restart to apply the mod changes?", nullptr, L"Red\u00E9marrer pour appliquer les changements de mods?", L"Red\u00E9marrer pour appliquer les changements de mods ?", L"\u00BFReiniciar para aplicar los cambios de mods?", L"\u00BFReiniciar para aplicar los cambios de mods?", L"Neu starten, um die Mod-\u00C4nderungen anzuwenden?", L"Riavviare per applicare le modifiche alle mod?", L"Opnieuw starten om de modwijzigingen toe te passen?", L"Reiniciar para aplicar as mudan\u00E7as de mods?", L"\u518D\u8D77\u52D5\u3057\u3066 MOD \u306E\u5909\u66F4\u3092\u53CD\u6620\u3057\u307E\u3059\u304B\uFF1F", L"\uB2E4\uC2DC \uC2DC\uC791\uD574\uC11C \uBAA8\uB4DC \uBCC0\uACBD\uC744 \uC801\uC6A9\uD560\uAE4C\uC694?", L"\u91CD\u65B0\u542F\u52A8\u4EE5\u5E94\u7528\u6A21\u7EC4\u66F4\u6539\u5417\uFF1F", L"\u91CD\u65B0\u555F\u52D5\u4EE5\u5957\u7528\u6A21\u7D44\u8B8A\u66F4\u55CE\uFF1F"}},
+<<<<<<< HEAD
+=======
+    {"SettingsRtRestartAsk",
+     {L"Restart to turn on ray tracing?", nullptr, L"Red\u00E9marrer pour activer le ray tracing?", L"Red\u00E9marrer pour activer le ray tracing ?", L"\u00BFReiniciar para activar el trazado de rayos?", L"\u00BFReiniciar para activar el trazado de rayos?", L"Neu starten, um Raytracing einzuschalten?", L"Riavviare per attivare il ray tracing?", L"Opnieuw starten om raytracing in te schakelen?", L"Reiniciar para ativar o ray tracing?", L"\u518D\u8D77\u52D5\u3057\u3066\u30EC\u30A4\u30C8\u30EC\u30FC\u30B7\u30F3\u30B0\u3092\u30AA\u30F3\u306B\u3057\u307E\u3059\u304B\uFF1F", L"\uB2E4\uC2DC \uC2DC\uC791\uD574\uC11C \uB808\uC774 \uD2B8\uB808\uC774\uC2F1\uC744 \uCF24\uAE4C\uC694?", L"\u91CD\u65B0\u542F\u52A8\u4EE5\u5F00\u542F\u5149\u7EBF\u8FFD\u8E2A\u5417\uFF1F", L"\u91CD\u65B0\u555F\u52D5\u4EE5\u958B\u555F\u5149\u7DDA\u8FFD\u8E64\u55CE\uFF1F"}},
+    {"SettingsDiagnosticsAsk",
+     {L"Restart and record a diagnostics run?", nullptr, L"Red\u00E9marrer et enregistrer une session de diagnostic?", L"Red\u00E9marrer et enregistrer une session de diagnostic ?", L"\u00BFReiniciar y grabar una sesi\u00F3n de diagn\u00F3stico?", L"\u00BFReiniciar y grabar una sesi\u00F3n de diagn\u00F3stico?", L"Neu starten und eine Diagnosesitzung aufzeichnen?", L"Riavviare e registrare una sessione di diagnostica?", L"Opnieuw starten en een diagnosesessie opnemen?", L"Reiniciar e gravar uma sess\u00E3o de diagn\u00F3stico?", L"\u518D\u8D77\u52D5\u3057\u3066\u8A3A\u65AD\u30BB\u30C3\u30B7\u30E7\u30F3\u3092\u8A18\u9332\u3057\u307E\u3059\u304B\uFF1F", L"\uB2E4\uC2DC \uC2DC\uC791\uD574\uC11C \uC9C4\uB2E8 \uC138\uC158\uC744 \uAE30\uB85D\uD560\uAE4C\uC694?", L"\u91CD\u65B0\u542F\u52A8\u5E76\u8BB0\u5F55\u4E00\u6B21\u8BCA\u65AD\u4F1A\u8BDD\u5417\uFF1F", L"\u91CD\u65B0\u555F\u52D5\u4E26\u8A18\u9304\u4E00\u6B21\u8A3A\u65B7\u5DE5\u4F5C\u968E\u6BB5\u55CE\uFF1F"}},
+>>>>>>> upstream/main
     {"SettingsModsNone",
      {L"No mods yet", nullptr, L"Aucun mod pour le moment", L"Aucun mod pour le moment", L"A\u00FAn no hay mods", L"A\u00FAn no hay mods", L"Noch keine Mods", L"Ancora nessuna mod", L"Nog geen mods", L"Nenhum mod ainda", L"MOD \u306F\u307E\u3060\u3042\u308A\u307E\u305B\u3093", L"\uC544\uC9C1 \uBAA8\uB4DC\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4", L"\u8FD8\u6CA1\u6709\u6A21\u7EC4", L"\u9084\u6C92\u6709\u6A21\u7D44"}},
     {"SettingsHintPickUp",
@@ -1159,12 +1200,15 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Options", nullptr, L"Options", L"Options", L"Opciones", L"Opciones", L"Optionen", L"Opzioni", L"Opties", L"Op\u00E7\u00F5es", L"\u30AA\u30D7\u30B7\u30E7\u30F3", L"\uC635\uC158", L"\u9009\u9879", L"\u9078\u9805"}},
     {"S.OPEN_FOLDER",
      {L"Open folder", nullptr, L"Ouvrir le dossier", L"Ouvrir le dossier", L"Abrir carpeta", L"Abrir carpeta", L"Ordner \u00F6ffnen", L"Apri cartella", L"Map openen", L"Abrir pasta", L"\u30D5\u30A9\u30EB\u30C0\u30FC\u3092\u958B\u304F", L"\uD3F4\uB354 \uC5F4\uAE30", L"\u6253\u5F00\u6587\u4EF6\u5939", L"\u958B\u555F\u8CC7\u6599\u593E"}},
+<<<<<<< HEAD
     {"S.MODS_(THE_HOST_PAGE_PICKS_THE_ROOM'S)",
      {L"Mods (the Host page picks the room's)", nullptr, L"Mods (la page H\u00E9berger choisit ceux de la partie)", L"Mods (la page H\u00E9berger choisit ceux de la partie)", L"Mods (la p\u00E1gina Alojar elige los de la sala)", L"Mods (la p\u00E1gina Alojar elige los de la sala)", L"Mods (die Seite Hosten w\u00E4hlt die des Raums)", L"Mod (la pagina Ospita sceglie quelle della stanza)", L"Mods (de pagina Hosten kiest die van de kamer)", L"Mods (a p\u00E1gina Hospedar escolhe os da sala)", L"MOD\uFF08\u30EB\u30FC\u30E0\u306E\u3082\u306E\u306F\u30DB\u30B9\u30C8\u30DA\u30FC\u30B8\u3067\u9078\u3076\uFF09", L"\uBAA8\uB4DC (\uBC29\uC758 \uBAA8\uB4DC\uB294 \uD638\uC2A4\uD2B8 \uD398\uC774\uC9C0\uC5D0\uC11C \uACE0\uB984)", L"\u6A21\u7EC4\uFF08\u623F\u95F4\u7684\u6A21\u7EC4\u5728\u4E3B\u6301\u9875\u9762\u9009\u62E9\uFF09", L"\u6A21\u7D44\uFF08\u623F\u9593\u7684\u6A21\u7D44\u5728\u4E3B\u6301\u9801\u9762\u9078\u64C7\uFF09"}},
     {"S.REMOVE",
      {L"Remove", nullptr, L"Retirer", L"Retirer", L"Quitar", L"Quitar", L"Entfernen", L"Rimuovi", L"Verwijderen", L"Remover", L"\u53D6\u308A\u9664\u304F", L"\uC81C\uAC70", L"\u79FB\u9664", L"\u79FB\u9664"}},
     {"S.PRESS_AGAIN_TO_REMOVE",
      {L"Press again to remove", nullptr, L"Appuyez encore pour retirer", L"Appuyez encore pour retirer", L"Pulsa otra vez para quitar", L"Pulsa otra vez para quitar", L"Zum Entfernen erneut dr\u00FCcken", L"Premi di nuovo per rimuovere", L"Druk nogmaals om te verwijderen", L"Pressione de novo para remover", L"\u3082\u3046\u4E00\u5EA6\u62BC\u3059\u3068\u53D6\u308A\u9664\u304F", L"\uD55C \uBC88 \uB354 \uB204\uB974\uBA74 \uC81C\uAC70", L"\u518D\u6309\u4E00\u6B21\u4EE5\u79FB\u9664", L"\u518D\u6309\u4E00\u6B21\u4EE5\u79FB\u9664"}},
+=======
+>>>>>>> upstream/main
     {"S.COULD_NOT_RESTART",
      {L"Could not restart", nullptr, L"Red\u00E9marrage impossible", L"Red\u00E9marrage impossible", L"No se pudo reiniciar", L"No se pudo reiniciar", L"Neustart nicht m\u00F6glich", L"Impossibile riavviare", L"Opnieuw starten lukt niet", L"N\u00E3o foi poss\u00EDvel reiniciar", L"\u518D\u8D77\u52D5\u3067\u304D\u307E\u305B\u3093\u3067\u3057\u305F", L"\uB2E4\uC2DC \uC2DC\uC791\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4", L"\u65E0\u6CD5\u91CD\u65B0\u542F\u52A8", L"\u7121\u6CD5\u91CD\u65B0\u555F\u52D5"}},
     {"S.BUTTON_ICONS",
@@ -1177,6 +1221,7 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Nintendo Switch", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}},
     {"S.PLAYSTATION",
      {L"PlayStation", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}},
+<<<<<<< HEAD
     {"S.THE_BUTTONS_THE_GAME'S_ICONS_SHOW._AUTO:_THE_CONTROLLER_IN_USE",
      {L"The buttons the game's icons show. Auto: the controller in use.", nullptr, L"Les boutons que montrent les ic\u00F4nes du jeu. Auto : la manette utilis\u00E9e.", L"Les boutons que montrent les ic\u00F4nes du jeu. Auto : la manette utilis\u00E9e.", L"Los botones que muestran los \u00EDconos del juego. Autom\u00E1tico: el control en uso.", L"Los botones que muestran los iconos del juego. Autom\u00E1tico: el mando en uso.", L"Die Tasten, die die Symbole des Spiels zeigen. Automatisch: der verwendete Controller.", L"I pulsanti mostrati dalle icone del gioco. Automatico: il controller in uso.", L"De knoppen die de pictogrammen van het spel tonen. Automatisch: de gebruikte controller.", L"Os bot\u00F5es que os \u00EDcones do jogo mostram. Autom\u00E1tico: o controle em uso.", L"\u30B2\u30FC\u30E0\u306E\u30A2\u30A4\u30B3\u30F3\u304C\u793A\u3059\u30DC\u30BF\u30F3\u3002\u81EA\u52D5\uFF1A\u4F7F\u7528\u4E2D\u306E\u30B3\u30F3\u30C8\u30ED\u30FC\u30E9\u30FC", L"\uAC8C\uC784 \uC544\uC774\uCF58\uC774 \uBCF4\uC5EC \uC8FC\uB294 \uBC84\uD2BC. \uC790\uB3D9: \uC0AC\uC6A9 \uC911\uC778 \uCEE8\uD2B8\uB864\uB7EC", L"\u6E38\u620F\u56FE\u6807\u663E\u793A\u7684\u6309\u952E\u3002\u81EA\u52A8\uFF1A\u6B63\u5728\u4F7F\u7528\u7684\u63A7\u5236\u5668", L"\u904A\u6232\u5716\u793A\u986F\u793A\u7684\u6309\u9375\u3002\u81EA\u52D5\uFF1A\u6B63\u5728\u4F7F\u7528\u7684\u63A7\u5236\u5668"}},
     {"CoopChatJoined",
@@ -1199,5 +1244,15 @@ const NebulaTextRow cNebulaTextRows[] = {
      {L"Who you play as, in any save. Other players see you as him.", nullptr, L"Le personnage que vous incarnez, dans toutes les sauvegardes. Les autres joueurs vous voient ainsi.", L"Le personnage que vous incarnez, dans toutes les sauvegardes. Les autres joueurs vous voient ainsi.", L"Con qui\u00E9n juegas, en cualquier partida guardada. Los dem\u00E1s jugadores te ven as\u00ED.", L"Con qui\u00E9n juegas, en cualquier partida guardada. Los dem\u00E1s jugadores te ven as\u00ED.", L"Mit wem du spielst, in jedem Spielstand. Die anderen Spieler sehen dich so.", L"Il personaggio con cui giochi, in ogni salvataggio. Gli altri giocatori ti vedono cos\u00EC.", L"Met wie je speelt, in elke opslag. Andere spelers zien je zo.", L"Com quem voc\u00EA joga, em qualquer jogo salvo. Os outros jogadores veem voc\u00EA assim.", L"\u3069\u306E\u30BB\u30FC\u30D6\u30C7\u30FC\u30BF\u3067\u3082\u4F7F\u3046\u30AD\u30E3\u30E9\u30AF\u30BF\u30FC\u3002\u307B\u304B\u306E\u30D7\u30EC\u30A4\u30E4\u30FC\u306B\u3082\u3053\u306E\u59FF\u3067\u898B\u3048\u307E\u3059\u3002", L"\uBAA8\uB4E0 \uC800\uC7A5 \uB370\uC774\uD130\uC5D0\uC11C \uD50C\uB808\uC774\uD560 \uCE90\uB9AD\uD130. \uB2E4\uB978 \uD50C\uB808\uC774\uC5B4\uC5D0\uAC8C\uB3C4 \uC774 \uBAA8\uC2B5\uC73C\uB85C \uBCF4\uC785\uB2C8\uB2E4.", L"\u5728\u4EFB\u4F55\u5B58\u6863\u4E2D\u4F7F\u7528\u7684\u89D2\u8272\u3002\u5176\u4ED6\u73A9\u5BB6\u770B\u5230\u7684\u4E5F\u662F\u4ED6\u3002", L"\u5728\u4EFB\u4F55\u5B58\u6A94\u4E2D\u4F7F\u7528\u7684\u89D2\u8272\u3002\u5176\u4ED6\u73A9\u5BB6\u770B\u5230\u7684\u4E5F\u662F\u4ED6\u3002"}},
     {"S.TYPE_YOUR_NAME,_OR_PICK_EACH_LETTER_WITH_UP_AND_DOWN._A_OR_ENTER_KEEPS_IT,_B_OR_ESCAPE_DROPS_IT",
      {L"Type your name, or pick each letter with up and down. A or Enter keeps it, B or Escape drops it.", nullptr, L"Tapez votre nom, ou choisissez chaque lettre avec haut et bas. A ou Entr\u00E9e le garde, B ou \u00C9chap l'annule.", L"Tapez votre nom, ou choisissez chaque lettre avec haut et bas. A ou Entr\u00E9e le garde, B ou \u00C9chap l'annule.", L"Escribe tu nombre o elige cada letra con arriba y abajo. A o Intro lo guarda, B o Esc lo descarta.", L"Escribe tu nombre o elige cada letra con arriba y abajo. A o Intro lo guarda, B o Esc lo descarta.", L"Gib deinen Namen ein oder w\u00E4hle jeden Buchstaben mit Hoch und Runter. A oder Enter \u00FCbernimmt ihn, B oder Esc verwirft ihn.", L"Scrivi il tuo nome o scegli ogni lettera con su e gi\u00F9. A o Invio lo conferma, B o Esc lo annulla.", L"Typ je naam of kies elke letter met omhoog en omlaag. A of Enter bewaart hem, B of Esc verwerpt hem.", L"Digite seu nome ou escolha cada letra com cima e baixo. A ou Enter confirma, B ou Esc descarta.", L"\u540D\u524D\u3092\u5165\u529B\u3059\u308B\u304B\u3001\u4E0A\u4E0B\u3067\u6587\u5B57\u3092\u9078\u3073\u307E\u3059\u3002A \u304B Enter \u3067\u6C7A\u5B9A\u3001B \u304B Esc \u3067\u53D6\u308A\u6D88\u3057\u3002", L"\uC774\uB984\uC744 \uC785\uB825\uD558\uAC70\uB098 \uC704\uC544\uB798\uB85C \uAE00\uC790\uB97C \uACE0\uB985\uB2C8\uB2E4. A \uB610\uB294 Enter\uB85C \uD655\uC815, B \uB610\uB294 Esc\uB85C \uCDE8\uC18C.", L"\u8F93\u5165\u540D\u5B57\uFF0C\u6216\u7528\u4E0A\u4E0B\u9009\u62E9\u6BCF\u4E2A\u5B57\u6BCD\u3002A \u6216 Enter \u786E\u5B9A\uFF0CB \u6216 Esc \u53D6\u6D88\u3002", L"\u8F38\u5165\u540D\u5B57\uFF0C\u6216\u7528\u4E0A\u4E0B\u9078\u64C7\u6BCF\u500B\u5B57\u6BCD\u3002A \u6216 Enter \u78BA\u5B9A\uFF0CB \u6216 Esc \u53D6\u6D88\u3002"}},
+=======
+    {"S.KEYBOARD_AND_MOUSE",
+     {L"Keyboard and mouse", nullptr, L"Clavier et souris", L"Clavier et souris", L"Teclado y mouse", L"Teclado y rat\u00F3n", L"Tastatur und Maus", L"Tastiera e mouse", L"Toetsenbord en muis", L"Teclado e mouse", L"\u30AD\u30FC\u30DC\u30FC\u30C9\u3068\u30DE\u30A6\u30B9", L"\uD0A4\uBCF4\uB4DC\uC640 \uB9C8\uC6B0\uC2A4", L"\u952E\u76D8\u548C\u9F20\u6807", L"\u9375\u76E4\u548C\u6ED1\u9F20"}},
+    {"S.THE_BUTTONS_THE_GAME'S_ICONS_SHOW._AUTO:_THE_CONTROLLER_IN_USE",
+     {L"The buttons the game's icons show. Auto: the controller in use.", nullptr, L"Les boutons que montrent les ic\u00F4nes du jeu. Auto : la manette utilis\u00E9e.", L"Les boutons que montrent les ic\u00F4nes du jeu. Auto : la manette utilis\u00E9e.", L"Los botones que muestran los \u00EDconos del juego. Autom\u00E1tico: el control en uso.", L"Los botones que muestran los iconos del juego. Autom\u00E1tico: el mando en uso.", L"Die Tasten, die die Symbole des Spiels zeigen. Automatisch: der verwendete Controller.", L"I pulsanti mostrati dalle icone del gioco. Automatico: il controller in uso.", L"De knoppen die de pictogrammen van het spel tonen. Automatisch: de gebruikte controller.", L"Os bot\u00F5es que os \u00EDcones do jogo mostram. Autom\u00E1tico: o controle em uso.", L"\u30B2\u30FC\u30E0\u306E\u30A2\u30A4\u30B3\u30F3\u304C\u793A\u3059\u30DC\u30BF\u30F3\u3002\u81EA\u52D5\uFF1A\u4F7F\u7528\u4E2D\u306E\u30B3\u30F3\u30C8\u30ED\u30FC\u30E9\u30FC", L"\uAC8C\uC784 \uC544\uC774\uCF58\uC774 \uBCF4\uC5EC \uC8FC\uB294 \uBC84\uD2BC. \uC790\uB3D9: \uC0AC\uC6A9 \uC911\uC778 \uCEE8\uD2B8\uB864\uB7EC", L"\u6E38\u620F\u56FE\u6807\u663E\u793A\u7684\u6309\u952E\u3002\u81EA\u52A8\uFF1A\u6B63\u5728\u4F7F\u7528\u7684\u63A7\u5236\u5668", L"\u904A\u6232\u5716\u793A\u986F\u793A\u7684\u6309\u9375\u3002\u81EA\u52D5\uFF1A\u6B63\u5728\u4F7F\u7528\u7684\u63A7\u5236\u5668"}},
+    {"RtPrepareTitle",
+     {L"Preparing ray tracing", nullptr, L"Pr\u00E9paration du ray tracing", L"Pr\u00E9paration du ray tracing", L"Preparando el trazado de rayos", L"Preparando el trazado de rayos", L"Raytracing wird vorbereitet", L"Preparazione del ray tracing", L"Raytracing voorbereiden", L"Preparando o ray tracing", L"\u30EC\u30A4\u30C8\u30EC\u30FC\u30B7\u30F3\u30B0\u3092\u6E96\u5099\u3057\u3066\u3044\u307E\u3059", L"\uB808\uC774 \uD2B8\uB808\uC774\uC2F1 \uC900\uBE44 \uC911", L"\u6B63\u5728\u51C6\u5907\u5149\u7EBF\u8FFD\u8E2A", L"\u6B63\u5728\u6E96\u5099\u5149\u7DDA\u8FFD\u8E64"}},
+    {"RtPreparePercent",
+     {L"{n}%", nullptr, L"{n}\u00A0%", L"{n}\u00A0%", L"{n}\u00A0%", L"{n}\u00A0%", L"{n}\u00A0%", L"{n}%", L"{n}%", L"{n}%", L"{n}%", L"{n}%", L"{n}%", L"{n}%"}},
+>>>>>>> upstream/main
 };
 // clang-format on

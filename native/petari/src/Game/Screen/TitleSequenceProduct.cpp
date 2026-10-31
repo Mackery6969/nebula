@@ -1,4 +1,10 @@
 #include "Game/Screen/TitleSequenceProduct.hpp"
+<<<<<<< HEAD
+=======
+#ifdef TARGET_PC
+#include "Game/System/NebulaRegion.hpp"
+#endif
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Screen/EncouragePal60Window.hpp"
 #include "Game/System/GameDataFunction.hpp"
@@ -9,6 +15,10 @@
 #include "Game/Util/SoundUtil.hpp"
 #include "Game/Util/SystemUtil.hpp"
 #include "Game/Util/TriggerChecker.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaCalendar.hpp"
+>>>>>>> upstream/main
 
 namespace {
     static const s32 sPressABAppearFrame = 25;
@@ -57,21 +67,43 @@ TitleSequenceProduct::TitleSequenceProduct()
 void TitleSequenceProduct::exeDisplayEncouragePal60Window() {
     if (MR::isFirstStep(this)) {
         OSTime timeAnnounced = GameDataFunction::getSysConfigFileTimeAnnounced();
+<<<<<<< HEAD
         OSTime ticks = OSGetTime();
         s32 day = OSTicksToSeconds(ticks) / (60 * 60 * 24);
         s32 dayAnnounced = OSTicksToSeconds(timeAnnounced) / (60 * 60 * 24);
+=======
+        OSTime ticks = NebulaCalendar::now();
+        s32 day = NebulaCalendar::toSeconds(ticks) / (60 * 60 * 24);
+        s32 dayAnnounced = NebulaCalendar::toSeconds(timeAnnounced) / (60 * 60 * 24);
+>>>>>>> upstream/main
         dayAnnounced += 100;
 
         if (timeAnnounced == 0 || ticks < timeAnnounced || dayAnnounced < day) {
             mEncouragePal60Window->appear();
+<<<<<<< HEAD
 #if (VERSION == RMGP01 || VERSION == RMGK01)
+=======
+#ifdef TARGET_PC
+            if (NebulaRegion::isPal()) {
+                GameDataFunction::updateSysConfigFileTimeAnnounced();
+            }
+#elif (VERSION == RMGP01 || VERSION == RMGK01)
+>>>>>>> upstream/main
             GameDataFunction::updateSysConfigFileTimeAnnounced();
 #endif
         }
     }
 
     if (MR::isDead(mEncouragePal60Window)) {
+<<<<<<< HEAD
 #if (VERSION == RMGJ01 || VERSION == RMGE01)
+=======
+#ifdef TARGET_PC
+        if (!NebulaRegion::isPal()) {
+            GameDataFunction::updateSysConfigFileTimeAnnounced();
+        }
+#elif (VERSION == RMGJ01 || VERSION == RMGE01)
+>>>>>>> upstream/main
         GameDataFunction::updateSysConfigFileTimeAnnounced();
 #endif
         setNerve(GET_NERVE_ANON(TitleSequenceProductBgmPrepare));

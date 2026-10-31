@@ -3,7 +3,11 @@
 void Mario::initMember() {
     _40.zero();
     _4C.zero();
+<<<<<<< HEAD
     PSMTXIdentity(_F4.toMtxPtr());
+=======
+    NebulaMtxIdentity(_F4.toMtxPtr());
+>>>>>>> upstream/main
     mPosition.zero();
     _16C.zero();
     mVelocityAfter.zero();
@@ -58,9 +62,15 @@ void Mario::initMember() {
     _790.zero();
     _7C4.zero();
     _7D4.zero();
+<<<<<<< HEAD
     PSMTXIdentity(_7E4.toMtxPtr());
     _814.zero();
     PSMTXIdentity(_824.toMtxPtr());
+=======
+    NebulaMtxIdentity(_7E4.toMtxPtr());
+    _814.zero();
+    NebulaMtxIdentity(_824.toMtxPtr());
+>>>>>>> upstream/main
 
     _8B0.zero();
     _8BC.zero();

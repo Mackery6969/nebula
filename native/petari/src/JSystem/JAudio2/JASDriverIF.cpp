@@ -1,4 +1,8 @@
 #include "JSystem/JAudio2/JASDriverIF.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include <revolution/os.h>
 #include "JSystem/JAudio2/JASAiCtrl.hpp"
 #include "JSystem/JAudio2/JASDspInterface.hpp"
@@ -30,9 +34,15 @@ u32 JASDriver::getOutputMode() {
 void JASDriver::waitSubFrame() {
     u32 r31 = getSubFrameCounter();
     do {
+<<<<<<< HEAD
         OSYieldThread();
 #ifdef TARGET_PC
         __NebulaPoll();
+=======
+        NebulaKernel::yield();
+#ifdef TARGET_PC
+        NebulaKernel::poll();
+>>>>>>> upstream/main
 #endif
     } while (r31 == getSubFrameCounter());
 }

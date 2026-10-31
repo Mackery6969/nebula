@@ -117,6 +117,7 @@ void set_game_dol(std::span<const std::uint8_t> dol);
 // The mods found and their saved choices (Riivolution defaults where none is saved): the enabled ones in load order
 // (the first wins), then the disabled ones by name; for the game set_mods_folder named when `game_id` is empty.
 [[nodiscard]] std::vector<ModInfo> scan_mods(const std::string& game_id = {});
+<<<<<<< HEAD
 
 // A mod an online room plays (coop_mods.h): its id, its folder (the player's own copy or a downloaded one) and its
 // choices.
@@ -129,6 +130,8 @@ struct RoomModChoice {
 // The next apply_mods plays exactly these mods that change the game, in this order (the first wins), in place of
 // mods.ini's; the player's own texture packs and movies stay as mods.ini has them. Once: apply_mods forgets them.
 void set_room_mods(std::vector<RoomModChoice> mods);
+=======
+>>>>>>> upstream/main
 // Saves the mods' order, on/off state and choices (for the next start); false when the file could not be written.
 bool save_mod_settings(std::span<const ModInfo> mods);
 // A mod of a scan_mods list turned on (to the top of the enabled ones) or off (among the disabled ones by name); the
@@ -157,11 +160,17 @@ struct SessionMods {
     std::vector<std::string> active;
     unsigned files_changed = 0;
     unsigned unsupported = 0;
+<<<<<<< HEAD
     bool room = false;  // started with an online room's mods (set_room_mods), not mods.ini's
 };
 [[nodiscard]] SessionMods session_mods();
 // Whether `mods` (the settings' current choices) differ from what this session started with (a restart applies them):
 // after a room's mods, also whenever one of those wasn't the player's own.
+=======
+};
+[[nodiscard]] SessionMods session_mods();
+// Whether `mods` (the settings' current choices) differ from what this session started with (a restart applies them).
+>>>>>>> upstream/main
 [[nodiscard]] bool mods_differ_from_session(std::span<const ModInfo> mods);
 
 // Memory patches against main.dol's image (the native game reads only its data tables from it): the bytes at a

@@ -1,4 +1,10 @@
 #include "Game/Util/FurDrawer.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/MaterialCtrl.hpp"
 #include "Game/Util/DirectDraw.hpp"
 #include "Game/Util/FurParam.hpp"
@@ -20,7 +26,11 @@ FurDrawer::FurDrawer(u32 numLayers, ResTIMG* pBody, ResTIMG* pIndirect)
         mUseIndirect = 0;
     }
 
+<<<<<<< HEAD
     u32 size = GXGetTexBufferSize(32, 32, GX_TF_IA8, GX_FALSE, 1);
+=======
+    u32 size = J3DNativeTexture::imageSize(GX_TF_IA8, 32, 32, 1);
+>>>>>>> upstream/main
     ResTIMG* pImage = reinterpret_cast< ResTIMG* >(new (32) u8[size + sizeof(ResTIMG)]);
     pImage->mFormat = GX_TF_IA8;
     pImage->mWidth = 32;
@@ -44,8 +54,13 @@ FurDrawer::FurDrawer(u32 numLayers, ResTIMG* pBody, ResTIMG* pIndirect)
     pImage->mImageDataOffset = sizeof(ResTIMG);
     mFurTexture = new JUTTexture(pImage, 0);
     mUseDensityMap = 0;
+<<<<<<< HEAD
     PSMTXIdentity(mFurTexMtx);
     PSMTXIdentity(mIndirectTexMtx);
+=======
+    NebulaMtxIdentity(mFurTexMtx);
+    NebulaMtxIdentity(mIndirectTexMtx);
+>>>>>>> upstream/main
     mMixFog = 0;
     mFogPosition.x = mFogPosition.y = mFogPosition.z = 0.0f;
     mFogWidth = 0.0f;
@@ -70,7 +85,11 @@ FurDrawer::FurDrawer(u32 numLayers, ResTIMG* pBody, ResTIMG* pIndirect)
 }
 
 void FurDrawer::update() {
+<<<<<<< HEAD
     PSMTXScale(mFurTexMtx, mFurUVScale, mFurUVScale, 1.0f);
+=======
+    NebulaMtxScale(mFurTexMtx, mFurUVScale, mFurUVScale, 1.0f);
+>>>>>>> upstream/main
 }
 
 f32 FurDrawer::CLayerParam::calcValue(s32 layer, s32 numLayers) const {
@@ -86,6 +105,7 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
         useSpecular = true;
     }
 
+<<<<<<< HEAD
     GXSetCoPlanar(GX_FALSE);
     GXSetCullMode(static_cast< GXCullMode >(mCullMode));
 
@@ -130,22 +150,78 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
     } else {
         GXSetNumIndStages(0);
         GXSetTevDirect(GX_TEVSTAGE1);
+=======
+    J3DNativeState::setCoPlanar(GX_FALSE);
+    J3DNativeState::setCullMode(static_cast< GXCullMode >(mCullMode));
+
+    if (mAdditive) {
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_CLEAR);
+    } else {
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_CLEAR);
+    }
+
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, mZWrite);
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setAlphaUpdate(GX_FALSE);
+    J3DNativeState::setAlphaCompare(GX_GREATER, mAlphaRef, GX_AOP_OR, GX_GREATER, mAlphaRef);
+    J3DNativeState::setZCompLoc(mZCompLoc);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setNumTevStages(2);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevKColorSel(GX_TEVSTAGE0, GX_TEV_KCSEL_K3_R);
+    J3DNativeState::setTevKAlphaSel(GX_TEVSTAGE0, GX_TEV_KASEL_K3_G);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_KONST);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevKColorSel(GX_TEVSTAGE1, GX_TEV_KCSEL_K3);
+    J3DNativeState::setTevKAlphaSel(GX_TEVSTAGE1, GX_TEV_KASEL_K3_B);
+
+    if (useSpecular) {
+        J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR1A1);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_C2, GX_CC_CPREV, GX_CC_TEXC, GX_CC_RASC);
+    } else {
+        J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR_NULL);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_C2, GX_CC_CPREV, GX_CC_TEXC, GX_CC_ZERO);
+    }
+
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, GX_TRUE, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_TEXA, GX_CA_APREV, GX_CA_KONST);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    if (mUseIndirect) {
+        J3DNativeState::setNumIndStages(1);
+        J3DNativeState::setTevIndirect(GX_TEVSTAGE1, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, GX_FALSE, GX_FALSE, GX_ITBA_OFF);
+    } else {
+        J3DNativeState::setNumIndStages(0);
+        J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+>>>>>>> upstream/main
     }
 
     if (pParam->mFogCtrl) {
         const J3DFogInfo& fog = pParam->mFogCtrl->mFogInfo;
+<<<<<<< HEAD
         GXSetFog(static_cast< GXFogType >(fog.mType), fog.mStartZ, fog.mEndZ, fog.mNearZ, fog.mFarZ, fog.mColor);
+=======
+        J3DNativeState::setFog(static_cast< GXFogType >(fog.mType), fog.mStartZ, fog.mEndZ, fog.mNearZ, fog.mFarZ, fog.mColor);
+>>>>>>> upstream/main
     } else if (mMixFog) {
         TDDraw::mixFogColor(mFogPosition, mFogWidth, 0xFF000080);
     } else {
         GXColor color = {0, 0, 0, 0};
+<<<<<<< HEAD
         GXSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, color);
         GXSetFogRangeAdj(GX_FALSE, 0, nullptr);
+=======
+        J3DNativeState::setFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, color);
+        J3DNativeState::setFogRangeAdj(GX_FALSE, 0, nullptr);
+>>>>>>> upstream/main
     }
 
     Mtx bodyMtx;
     Mtx furMtx;
     Mtx indirectMtx;
+<<<<<<< HEAD
     PSMTXCopy(mFurTexMtx, furMtx);
 
     if (mUseIndirect) {
@@ -185,6 +261,47 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
             numChans = 2;
         } else {
             GXSetChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+=======
+    NebulaMtxCopy(mFurTexMtx, furMtx);
+
+    if (mUseIndirect) {
+        NebulaMtxCopy(mIndirectTexMtx, indirectMtx);
+    } else {
+        NebulaMtxIdentity(indirectMtx);
+    }
+
+    NebulaMtxScale(bodyMtx, mBodyUVScale, mBodyUVScale, 1.0f);
+    J3DNativeShape::sendTexture(bodyMtx, GX_TEXMTX0, GX_MTX2x4);
+    J3DNativeShape::sendTexture(furMtx, GX_TEXMTX1, GX_MTX2x4);
+
+    if (mUseIndirect) {
+        J3DNativeShape::sendTexture(indirectMtx, GX_TEXMTX2, GX_MTX2x4);
+        J3DNativeState::setNumTexGens(3);
+        J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD2, GX_TEXMAP2);
+        J3DNativeState::setIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD2, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX2, GX_FALSE, GX_PTIDENTITY);
+    } else {
+        J3DNativeState::setNumTexGens(2);
+    }
+
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX1, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setClipMode(GX_CLIP_DISABLE);
+
+    if (pLight) {
+        u8 numChans = 1;
+        J3DNativeState::setChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        J3DNativeState::setChanCtrl(GX_COLOR0, GX_TRUE, static_cast< GXColorSrc >(pLight->mColorSource & 1),
+                      static_cast< GXColorSrc >((pLight->mColorSource >> 1) & 1), pLight->mLightMask, GX_DF_CLAMP, GX_AF_NONE);
+
+        if (useSpecular) {
+            J3DNativeState::setChanCtrl(GX_COLOR1, GX_TRUE, static_cast< GXColorSrc >((pLight->mColorSource >> 2) & 1),
+                          static_cast< GXColorSrc >((pLight->mColorSource >> 3) & 1), pLight->mSpecularLightMask, GX_DF_NONE, GX_AF_SPEC);
+            J3DNativeState::setChanCtrl(GX_ALPHA1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+            numChans = 2;
+        } else {
+            J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+>>>>>>> upstream/main
         }
 
         GXColor matColor = {0, 0, 0, 255};
@@ -195,8 +312,13 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
         ambColor.r = pLight->mAmbIntensity;
         ambColor.g = pLight->mAmbIntensity;
         ambColor.b = pLight->mAmbIntensity;
+<<<<<<< HEAD
         GXSetChanMatColor(GX_COLOR0A0, matColor);
         GXSetChanAmbColor(GX_COLOR0A0, ambColor);
+=======
+        J3DNativeState::setChanMatColor(GX_COLOR0A0, matColor);
+        J3DNativeState::setChanAmbColor(GX_COLOR0A0, ambColor);
+>>>>>>> upstream/main
         GXColor specularMatColor = {0, 0, 0, 255};
         specularMatColor.r = pLight->mSpecularMatIntensity;
         specularMatColor.g = pLight->mSpecularMatIntensity;
@@ -205,6 +327,7 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
         specularAmbColor.r = pLight->mSpecularAmbIntensity;
         specularAmbColor.g = pLight->mSpecularAmbIntensity;
         specularAmbColor.b = pLight->mSpecularAmbIntensity;
+<<<<<<< HEAD
         GXSetChanMatColor(GX_COLOR1A1, specularMatColor);
         GXSetChanAmbColor(GX_COLOR1A1, specularAmbColor);
         GXSetNumChans(numChans);
@@ -212,6 +335,15 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
         GXSetChanCtrl(GX_COLOR0, GX_TRUE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
         GXSetChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
         GXSetChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+=======
+        J3DNativeState::setChanMatColor(GX_COLOR1A1, specularMatColor);
+        J3DNativeState::setChanAmbColor(GX_COLOR1A1, specularAmbColor);
+        J3DNativeState::setNumChans(numChans);
+    } else {
+        J3DNativeState::setChanCtrl(GX_COLOR0, GX_TRUE, GX_SRC_VTX, GX_SRC_VTX, GX_LIGHT_NULL, GX_DF_CLAMP, GX_AF_NONE);
+        J3DNativeState::setChanCtrl(GX_ALPHA0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+        J3DNativeState::setChanCtrl(GX_COLOR1A1, GX_FALSE, GX_SRC_REG, GX_SRC_REG, GX_LIGHT_NULL, GX_DF_NONE, GX_AF_NONE);
+>>>>>>> upstream/main
         GXColor matColor = {0, 0, 0, 255};
         matColor.r = mMatIntensity;
         matColor.g = mMatIntensity;
@@ -220,9 +352,15 @@ void FurDrawer::setupMaterial(DynamicFurParam* pParam) const {
         ambColor.r = mAmbIntensity;
         ambColor.g = mAmbIntensity;
         ambColor.b = mAmbIntensity;
+<<<<<<< HEAD
         GXSetChanMatColor(GX_COLOR0A0, matColor);
         GXSetChanAmbColor(GX_COLOR0A0, ambColor);
         GXSetNumChans(1);
+=======
+        J3DNativeState::setChanMatColor(GX_COLOR0A0, matColor);
+        J3DNativeState::setChanAmbColor(GX_COLOR0A0, ambColor);
+        J3DNativeState::setNumChans(1);
+>>>>>>> upstream/main
     }
 
     mBodyTexture->load(GX_TEXMAP0);
@@ -242,13 +380,21 @@ void FurDrawer::setupLayerMaterial(s32 layer) const {
     kColor.g = (s32)(brightness);
     kColor.b = (s32)(blend);
     kColor.a = 255;
+<<<<<<< HEAD
     GXSetTevKColor(GX_KCOLOR3, kColor);
+=======
+    J3DNativeState::setTevKColor(GX_KCOLOR3, kColor);
+>>>>>>> upstream/main
     GXColor color;
     color.r = mColor.r;
     color.g = mColor.g;
     color.b = mColor.b;
     color.a = 255;
+<<<<<<< HEAD
     GXSetTevColor(GX_TEVREG2, color);
+=======
+    J3DNativeState::setTevColor(GX_TEVREG2, color);
+>>>>>>> upstream/main
 
     if (mUseIndirect) {
         f32 scale = mIndirect.calcValue(layer, mNumLayers);
@@ -259,7 +405,11 @@ void FurDrawer::setupLayerMaterial(s32 layer) const {
         mtx[1][0] = 0.0f;
         mtx[1][1] = scale;
         mtx[1][2] = 0.0f;
+<<<<<<< HEAD
         GXSetIndTexMtx(GX_ITM_0, mtx, 0);
+=======
+        J3DNativeState::setIndTexMtx(GX_ITM_0, mtx, 0);
+>>>>>>> upstream/main
     }
 }
 
@@ -295,5 +445,9 @@ void FurDrawer::createFurMap() {
         }
     }
 
+<<<<<<< HEAD
     DCStoreRange(pPixels, count * sizeof(u16));
+=======
+    J3DNativeTexture::registerImage(pPixels, GX_TF_IA8, width, height, 1);
+>>>>>>> upstream/main
 }

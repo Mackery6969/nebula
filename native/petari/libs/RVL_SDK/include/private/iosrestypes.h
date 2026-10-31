@@ -4,6 +4,7 @@
 
 typedef u32 IOSUid;
 typedef u16 IOSGid;
+<<<<<<< HEAD
 typedef u32 IOSResourceHandle;
 
 #define IOS_ERROR_OK                     0
@@ -87,3 +88,6 @@ typedef struct {
         IOSResourceIoctlv ioctlv;
     } args;
 } IOSResourceRequest;
+=======
+
+>>>>>>> upstream/main

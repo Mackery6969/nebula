@@ -756,12 +756,21 @@ void Dodoryu::turnUpVecTo(const TVec3f& rVec) {
     Vec* pZ;
     Vec* pY = &yDir;
     pZ = &zDir;
+<<<<<<< HEAD
     PSVECCrossProduct(pZ, &xDir, pY);
     PSVECCrossProduct(&xDir, pY, pZ);
     PSVECMag(pY);
     PSVECNormalize(pY, pY);
     PSVECMag(pZ);
     PSVECNormalize(pZ, pZ);
+=======
+    NebulaVecCrossProduct(pZ, &xDir, pY);
+    NebulaVecCrossProduct(&xDir, pY, pZ);
+    NebulaVecMag(pY);
+    NebulaVecNormalize(pY, pY);
+    NebulaVecMag(pZ);
+    NebulaVecNormalize(pZ, pZ);
+>>>>>>> upstream/main
     mBaseMtx.setXDir(xDir);
     mBaseMtx.setYDir(yDir);
     mBaseMtx.setZDir(zDir);

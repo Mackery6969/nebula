@@ -8,7 +8,11 @@ lack is the GX renderer, which is D3D12, and the host's window, audio and input,
 | Part | Lines | D3D12/Win32 | Notes |
 |---|---|---|---|
 | fifo_parser, gx_state, shader_gen, vertex_loader, shader_keys | ~7,800 | none | API-neutral: parse the FIFO, track GX state, generate HLSL |
+<<<<<<< HEAD
 | gx_backend | 12,700 | 53 sites | records draws itself (PSO, descriptor tables, vertex/index views), rings, threads, events |
+=======
+| render_core | 12,700 | 53 sites | records draws itself (PSO, descriptor tables, vertex/index views), rings, threads, events |
+>>>>>>> upstream/main
 | renderer_d3d12 | 11,000 | throughout | EFB targets, copies, peeks, present, telemetry, capture/replay, temporal, RT hooks |
 | pipeline_cache | 3,300 | 170 | FXC, PSO library, uber/specialised hybrid |
 | texture_cache, efb_copy, post_process, placed_texture_allocator | ~4,500 | ~290 | |
@@ -37,7 +41,11 @@ The renderer interface GxBackend uses has 75 methods; about half are diagnostics
 - **macOS** runs the Vulkan backend on MoltenVK (Apache-2.0), with the same limits as Android for geometry shaders and
   logic ops.
 - **arm64** (Android, Apple silicon) needs its own context switch (`context_switch.c` is x86-64 assembly) and its own
+<<<<<<< HEAD
   division semantics check (arm64 does not trap; `__nebula_divw` already gives PowerPC's results).
+=======
+  division semantics check (arm64 does not trap; every division states its zero-divisor result in source).
+>>>>>>> upstream/main
 
 ## Driver compatibility
 
@@ -50,7 +58,12 @@ Every Vulkan 1.1 GPU and driver (Android's in particular), with no per-device wo
   Qualcomm before 512.762.12 draws its clears; Mali and Adreno read back from coherent memory; Qualcomm reads back
   through a linear image (its optimal image-to-buffer copies make a temporary image each); PowerVR clears render
   passes by command (its load-op clears do nothing); one PSO thread on Android (parallel precompiles crash Android
+<<<<<<< HEAD
   drivers). On every device:
+=======
+  drivers); no curved surfaces on NVIDIA's driver (610.88's compiler crashes in `vkCreateGraphicsPipelines` on their
+  pipelines, which validate). On every device:
+>>>>>>> upstream/main
   SPIR-V 1.3 (Qualcomm and ARM drivers mishandle 1.4), no maximal-reconvergence mode (Dusklight issue 2563), TEV byte
   masks per component (Mali's vector AND), D24S8 depth where present (Adreno's D32F clears), no reversed depth ranges.
 - **Capabilities.** Only what the device reports is enabled; without it: single-source blending, plain writes for
@@ -75,10 +88,18 @@ Every Vulkan 1.1 GPU and driver (Android's in particular), with no per-device wo
   version built elsewhere makes other SPIR-V: the Adreno 840 refused the PC build's vertex shaders that it accepts from
   the phone's own (test 3), so `vk_shader_seed` SPIR-V is used only on a matching compiler.
 - **Driver crashes** inside a compile (the class Dusklight hit on Adreno 740): `compile_journal.h` maps the compiles
+<<<<<<< HEAD
   in progress into a file; the next launch never builds that pipeline again.
 - **Reports.** The first refusal logs the VkResult, the pipeline's state, this process's driver log (Android's
   logcat) and the shaders' HLSL. `GALAXY_VK_SHADER_DUMP=<dir>` writes every module.
 - **Checks** (D:/NebulaWork/port/tools): `vk_compat_runs.sh` runs a simulated driver
+=======
+  in progress into a file; the next launch on the same driver build never builds that pipeline again (another GPU's
+  crash, as on a laptop with two, is not this one's).
+- **Reports.** The first refusal logs the VkResult, the pipeline's state, this process's driver log (Android's
+  logcat) and the shaders' HLSL. `GALAXY_VK_SHADER_DUMP=<dir>` writes every module.
+- **Checks** (development scripts, outside the repository): `vk_compat_runs.sh` runs a simulated driver
+>>>>>>> upstream/main
   (`GALAXY_VK_SIMULATE_DRIVER=qualcomm:512.700.0`), forced refusals (`GALAXY_VK_TEST_REFUSE=dual-source,...`) and a
   forced crash (`GALAXY_VK_TEST_CRASH_AT=<n>`); `vk_profile_matrix.sh` runs the game under the validation layer with
   each Android GPU's gpuinfo.org profile (`fetch_device_profiles.py`: Adreno 610-840, Turnip, Mali-G52-G715,

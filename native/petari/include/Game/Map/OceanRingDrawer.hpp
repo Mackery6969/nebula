@@ -1,8 +1,17 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <JSystem/JGeometry.hpp>
 #include <JSystem/JUtility/JUTTexture.hpp>
 #include <revolution.h>
+=======
+#include "Game/Util/NativeMesh.hpp"
+#include <JSystem/JGeometry.hpp>
+#include <JSystem/JUtility/JUTTexture.hpp>
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class OceanRing;
 
@@ -12,7 +21,11 @@ public:
 
     void initDisplayList(f32*, f32*, f32*);
     void draw() const;
+<<<<<<< HEAD
     void drawGD(f32*, f32*, f32*) const;
+=======
+    void drawGD(f32*, f32*, f32*);
+>>>>>>> upstream/main
     void drawDynamic() const;
     void drawDynamicBloom() const;
 
@@ -27,8 +40,13 @@ public:
     /* 0x1C */ f32 _1C;
     /* 0x20 */ f32 _20;
     /* 0x24 */ f32 _24;
+<<<<<<< HEAD
     /* 0x28 */ u32 mDispListLength;
     /* 0x2C */ u8* mDispList;
+=======
+    // The ring's surface as the renderer draws it from far away.
+    NativeMesh mMesh;
+>>>>>>> upstream/main
 };
 
 class OceanRingDrawer {
@@ -40,7 +58,11 @@ public:
     void drawBloom() const;
     void initParts();
     void initDisplayList();
+<<<<<<< HEAD
     void drawGD() const;
+=======
+    void drawGD();
+>>>>>>> upstream/main
     void loadMaterial() const;
     void loadMaterialBloom() const;
 
@@ -63,6 +85,11 @@ public:
     /* 0x20 */ f32 _20;
     /* 0x24 */ JUTTexture* mWaterTex;
     /* 0x28 */ JUTTexture* mWaterIndTex;
+<<<<<<< HEAD
     /* 0x2C */ u32 mDispListLength;
     /* 0x30 */ u8* mDispList;
+=======
+    // The ring's surface as the renderer draws it from far away.
+    NativeMesh mMesh;
+>>>>>>> upstream/main
 };

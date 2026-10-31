@@ -3,7 +3,13 @@
 #ifdef TARGET_PC
 #include "Game/Util/Color.hpp"
 #include <JSystem/JGeometry/TVec.hpp>
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class LiveActor;
 struct ActorLightInfo;

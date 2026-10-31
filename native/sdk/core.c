@@ -27,6 +27,7 @@ NEBULA_GAME_API void nebula_game_run(void) {
     nebula_os_boot(nebula_game_main);
 }
 
+<<<<<<< HEAD
 void __NebulaGameContext(u32 what, s32 value) {
     sHost->game_context(sHost->user, what, value);
 }
@@ -232,3 +233,10 @@ NEBULA_GAME_API int nebula_game_memory_regions(NebulaGameMemoryRegion* out, int 
 void nebula_sdk_missing(const char* name) {
     nebula_fatal("the game called %s, which the native SDK layer does not implement yet", name);
 }
+=======
+void __NebulaMovieFrame(const char* name, s32 frame, f32 frame_rate, const void* y, const void* u, const void* v,
+                        u32 width, u32 height) {
+    sHost->movie_frame(sHost->user, name, frame, frame_rate, y, u, v, width, height);
+}
+
+>>>>>>> upstream/main

@@ -1,6 +1,10 @@
 #include "Game/System/SysConfigFile.hpp"
 #include "Game/System/BinaryDataContentAccessor.hpp"
 #include "Game/Util/MemoryUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaCalendar.hpp"
+>>>>>>> upstream/main
 
 SysConfigChunk::SysConfigChunk() : mHeaderSerializer(nullptr) {
     initHeaderSerializer();
@@ -72,7 +76,11 @@ OSTime SysConfigFile::getTimeAnnounced() {
 void SysConfigFile::updateTimeAnnounced() {
     SysConfigChunk* pChunk = mChunk;
 
+<<<<<<< HEAD
     pChunk->mTimeAnnounced = OSGetTime();
+=======
+    pChunk->mTimeAnnounced = NebulaCalendar::now();
+>>>>>>> upstream/main
 }
 
 OSTime SysConfigFile::getTimeSent() {

@@ -61,7 +61,11 @@ void J3DCalcYBBoardMtx(Mtx mtx) {
     }
 
     Vec vec = {0.0f, -mtx[2][1], mtx[1][1]};
+<<<<<<< HEAD
     PSVECNormalize(&vec, &vec);
+=======
+    NebulaVecNormalize(&vec, &vec);
+>>>>>>> upstream/main
 
     mtx[0][0] = x;
     mtx[0][2] = 0.0f;

@@ -1,4 +1,12 @@
 #include "Game/MapObj/NormalMapBase.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeTexture.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/Animation/BtkPlayer.hpp"
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Scene/SceneFunction.hpp"
@@ -33,7 +41,11 @@ NormalMapBase::NormalMapBase(const char* pName) : LiveActor(pName) {
     mBtkPlayer = nullptr;
     _150 = 0;
     for (u32 i = 0; i < ARRAY_SIZE(_184); i++) {
+<<<<<<< HEAD
         PSMTXIdentity(_184[i]);
+=======
+        NebulaMtxIdentity(_184[i]);
+>>>>>>> upstream/main
     }
 
     _13A = 0;
@@ -137,9 +149,15 @@ void NormalMapBase::control() {
 void NormalMapBase::calcAnim() {
     LiveActor::calcAnim();
     updateBtkMtx();
+<<<<<<< HEAD
     OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
     MR::getJ3DModel(this)->viewCalc();
     OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+    (MR::MutexHolder< 0 >::sMutex).lock();
+    MR::getJ3DModel(this)->viewCalc();
+    (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::updateBtkMtx() {
@@ -160,7 +178,11 @@ void NormalMapBase::updateBtkMtx() {
 void NormalMapBase::loadTexMtxBtk(J3DMaterial* pMaterial) const {
     if (mBtkPlayer != nullptr) {
         if (_150) {
+<<<<<<< HEAD
             GXLoadTexMtxImm(_184[pMaterial->mIndex], 0x1E, GX_MTX2x4);
+=======
+            J3DNativeShape::sendTexture(_184[pMaterial->mIndex], 0x1E, GX_MTX2x4);
+>>>>>>> upstream/main
         }
     }
 }
@@ -175,6 +197,7 @@ void NormalMapBase::draw() const {
 
         MR::loadViewMtx();
         MR::loadProjectionMtx();
+<<<<<<< HEAD
         GXSetColorUpdate(GX_TRUE);
         GXSetAlphaUpdate(GX_FALSE);
         GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
@@ -193,6 +216,19 @@ void NormalMapBase::draw() const {
         MR::makeMtxTRS(mtx, this);
         MR::multMtx(mtx, mtx, rCameraViewMtx);
         PSMTXCopy((const MtxPtr)mtx, (MtxPtr)_F4);
+=======
+        J3DNativeState::setColorUpdate(GX_TRUE);
+        J3DNativeState::setAlphaUpdate(GX_FALSE);
+        J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+        J3DNativeState::setDither(GX_FALSE);
+        const TPos3f& rCameraViewMtx = MR::getCameraViewMtx();
+        TPos3f lightMtx;
+        Mtx mtx;
+        NebulaMtxIdentity(mtx);
+        MR::makeMtxTRS(mtx, this);
+        MR::multMtx(mtx, mtx, rCameraViewMtx);
+        NebulaMtxCopy((const MtxPtr)mtx, (MtxPtr)_F4);
+>>>>>>> upstream/main
 
         MR::makeMtxTR(lightMtx, this);
         MR::normalize(&lightMtx);
@@ -211,7 +247,11 @@ void NormalMapBase::draw() const {
 
         shapeAnalyzeDraw(MR::getJ3DModel(this));
         standardDraw(MR::getJ3DModel(this));
+<<<<<<< HEAD
         GXSetDither(GX_TRUE);
+=======
+        J3DNativeState::setDither(GX_TRUE);
+>>>>>>> upstream/main
     }
 }
 
@@ -250,10 +290,17 @@ void NormalMapBase::updateLightMtx(MtxPtr pMtx) const {
     MR::normalizeOrZero(&lightB);
     localA = lightA;
     localB = lightB;
+<<<<<<< HEAD
     PSMTXInverse(getBaseMtx(), inverse);
     MR::normalize(&inverse);
     PSMTXMultVecSR(inverse, &localA, &localA);
     PSMTXMultVecSR(inverse, &localB, &localB);
+=======
+    NebulaMtxInverse(getBaseMtx(), inverse);
+    MR::normalize(&inverse);
+    NebulaMtxMultVecSR(inverse, &localA, &localA);
+    NebulaMtxMultVecSR(inverse, &localB, &localB);
+>>>>>>> upstream/main
     if (pMtx) {
         TVec3f light(localA * 0.5f);
         light *= 1.0077f;
@@ -274,7 +321,11 @@ void NormalMapBase::updateLightMtx(MtxPtr pMtx) const {
         indMtx[1][2] = 0.5f * -localB.z;
     }
 
+<<<<<<< HEAD
     GXSetIndTexMtx(GX_ITM_0, indMtx, 0);
+=======
+    J3DNativeState::setIndTexMtx(GX_ITM_0, indMtx, 0);
+>>>>>>> upstream/main
 }
 
 bool NormalMapBase::isNormalMapMaterial(const char* pName) const {
@@ -321,6 +372,7 @@ void NormalMapBase::shapeAnalyzeDraw(J3DModel* pModel) const {
                     f32 rotationX = rTransform.mRotation.x * (180.0f / 32768.0f);
                     MR::makeMtxTRS(localMtx, rTransform.mTranslate.x, rTransform.mTranslate.y, rTransform.mTranslate.z, rotationX, rotationY,
                                    rotationZ, rTransform.mScale.x, rTransform.mScale.y, rTransform.mScale.z);
+<<<<<<< HEAD
                     PSMTXConcat(_F4, localMtx, viewMtx);
                     if (pJoint->getMtxType() == 1) {
                         J3DCalcBBoardMtx(viewMtx);
@@ -336,6 +388,23 @@ void NormalMapBase::shapeAnalyzeDraw(J3DModel* pModel) const {
 
                     GXLoadPosMtxImm(viewMtx, GX_PNMTX0);
                     GXLoadNrmMtxImm(viewMtx, GX_PNMTX0);
+=======
+                    NebulaMtxConcat(_F4, localMtx, viewMtx);
+                    if (pJoint->getMtxType() == 1) {
+                        J3DCalcBBoardMtx(viewMtx);
+                        TPos3f inverse;
+                        NebulaMtxInverse(_F4, inverse);
+                        NebulaMtxConcat(inverse, viewMtx, localMtx);
+                    } else if (pJoint->getMtxType() == 2) {
+                        J3DCalcYBBoardMtx(viewMtx);
+                        TPos3f inverse;
+                        NebulaMtxInverse(_F4, inverse);
+                        NebulaMtxConcat(inverse, viewMtx, localMtx);
+                    }
+
+                    J3DNativeShape::loadPosition(viewMtx, GX_PNMTX0);
+                    J3DNativeShape::loadNormal(viewMtx, GX_PNMTX0);
+>>>>>>> upstream/main
                     MR::normalize(&localMtx);
                     updateLightMtx(localMtx);
                     drawMaterialSetting(pMaterial);
@@ -359,7 +428,11 @@ void NormalMapBase::shapeAnalyzeDraw(J3DModel* pModel) const {
 }
 
 void NormalMapBase::drawShape(J3DModel* pModel, J3DShape* pShape) const {
+<<<<<<< HEAD
     GXCallDisplayList(pShape->getVcdVatCmd(), J3DShape::kVcdVatDLSize);
+=======
+    pShape->prepareGeometry();
+>>>>>>> upstream/main
     u16 groupCount = pShape->getMtxGroupNum();
     for (u16 i = 0; i < groupCount; i++) {
         if (pShape->getShapeDraw(i)) {
@@ -369,8 +442,13 @@ void NormalMapBase::drawShape(J3DModel* pModel, J3DShape* pShape) const {
                 u16 index = pShapeMtx->getUseMtxIndex(j);
                 if (index != 0xFFFF) {
                     MtxPtr pMtx = pModel->getDrawMtx(index);
+<<<<<<< HEAD
                     GXLoadPosMtxImm(pMtx, static_cast< u16 >(j * 3));
                     GXLoadNrmMtxImm(pMtx, static_cast< u16 >(j * 3));
+=======
+                    J3DNativeShape::loadPosition(pMtx, static_cast< u16 >(j * 3));
+                    J3DNativeShape::loadNormal(pMtx, static_cast< u16 >(j * 3));
+>>>>>>> upstream/main
                 }
             }
 
@@ -381,6 +459,7 @@ void NormalMapBase::drawShape(J3DModel* pModel, J3DShape* pShape) const {
 
 void NormalMapBase::loadDiffuseGradTex(GXTexMapID mapID) const {
     GXTexObj obj;
+<<<<<<< HEAD
     GXInitTexObj(&obj, mImagePtr, width, height, GX_TF_IA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
 
     if (_13A & 1) {
@@ -390,10 +469,22 @@ void NormalMapBase::loadDiffuseGradTex(GXTexMapID mapID) const {
     }
 
     GXLoadTexObj(&obj, mapID);
+=======
+    J3DNativeTexture::init(&obj, mImagePtr, width, height, GX_TF_IA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
+
+    if (_13A & 1) {
+        J3DNativeTexture::initLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    } else {
+        J3DNativeTexture::initLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    }
+
+    J3DNativeTexture::load(&obj, mapID);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::loadNormalTex(const JUTTexture* pTex, GXTexMapID id) const {
     GXTexObj obj;
+<<<<<<< HEAD
     GXInitTexObj(&obj, pTex->mImage, pTex->mTIMG->mWidth, pTex->mTIMG->mHeight, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
     if ((_13A & 2) != 0 && (_13A & 0x4) != 0) {
         GXInitTexObjLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
@@ -406,6 +497,20 @@ void NormalMapBase::loadNormalTex(const JUTTexture* pTex, GXTexMapID id) const {
     }
 
     GXLoadTexObj(&obj, id);
+=======
+    J3DNativeTexture::init(&obj, pTex->mImage, pTex->mTIMG->mWidth, pTex->mTIMG->mHeight, GX_TF_RGBA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    if ((_13A & 2) != 0 && (_13A & 0x4) != 0) {
+        J3DNativeTexture::initLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    } else if ((_13A & 0x2) != 0) {
+        J3DNativeTexture::initLOD(&obj, GX_NEAR, GX_LINEAR, 0.0, 0.0, 0.0, 0, 0, GX_ANISO_1);
+    } else if ((_13A & 0x4) != 0) {
+        J3DNativeTexture::initLOD(&obj, GX_LINEAR, GX_NEAR, 0.0, 0.0, 0.0, 0, 0, GX_ANISO_1);
+    } else {
+        J3DNativeTexture::initLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0, 0.0, 0.0, 0, 0, GX_ANISO_1);
+    }
+
+    J3DNativeTexture::load(&obj, id);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::loadTexture1(J3DMaterial* pMaterial) const {
@@ -440,7 +545,11 @@ void NormalMapBase::loadTexture1(J3DMaterial* pMaterial) const {
 void NormalMapBase::drawMaterialSetting(J3DMaterial* pMaterial) const {
     loadTexture1(pMaterial);
     loadTexMtxBtk(pMaterial);
+<<<<<<< HEAD
     GXLoadTexMtxImm(pMaterial->getTexMtx(0)->getMtx(), GX_TEXMTX2, GX_MTX2x4);
+=======
+    J3DNativeShape::sendTexture(pMaterial->getTexMtx(0)->getMtx(), GX_TEXMTX2, GX_MTX2x4);
+>>>>>>> upstream/main
     Color8 ambient;
     Color8 material;
     ambient.set(mAmbColor, mAmbColor, mAmbColor, mAmbAlpha);
@@ -467,6 +576,7 @@ void NormalMapBase::drawMaterialSetting(J3DMaterial* pMaterial) const {
         material.a = pMaterial->getColorBlock()->getMatColor(0)->a;
     }
 
+<<<<<<< HEAD
     GXSetChanAmbColor(GX_COLOR0A0, ambient);
     GXSetChanMatColor(GX_COLOR0A0, material);
     if (mUseModelTevReg) {
@@ -477,12 +587,25 @@ void NormalMapBase::drawMaterialSetting(J3DMaterial* pMaterial) const {
     } else {
         GXSetTevColorS10(GX_TEVREG0, mTevColor0);
         GXSetTevColorS10(GX_TEVREG1, mTevColor1);
+=======
+    J3DNativeState::setChanAmbColor(GX_COLOR0A0, ambient);
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, material);
+    if (mUseModelTevReg) {
+        GXColorS10* pColor0 = pMaterial->getTevBlock()->getTevColor(0);
+        GXColorS10* pColor1 = pMaterial->getTevBlock()->getTevColor(1);
+        J3DNativeState::setTevColorS10(GX_TEVREG0, *pColor0);
+        J3DNativeState::setTevColorS10(GX_TEVREG1, *pColor1);
+    } else {
+        J3DNativeState::setTevColorS10(GX_TEVREG0, mTevColor0);
+        J3DNativeState::setTevColorS10(GX_TEVREG1, mTevColor1);
+>>>>>>> upstream/main
     }
 }
 
 void NormalMapBase::drawSetting(MtxPtr pMtx) const {
     updateLightMtx(pMtx);
     Mtx scale_mtx;
+<<<<<<< HEAD
     PSMTXScale(scale_mtx, 0.0f, 0.0f, 0.0f);
     MR::setMtxTrans(scale_mtx, 0.5f, 0.5f, 0.0f);
     GXLoadTexMtxImm(scale_mtx, 0x21, GX_MTX2x4);
@@ -503,10 +626,33 @@ void NormalMapBase::drawSetting(MtxPtr pMtx) const {
     setTevForObject();
     loadDiffuseGradTex(GX_TEXMAP1);
     GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+=======
+    NebulaMtxScale(scale_mtx, 0.0f, 0.0f, 0.0f);
+    MR::setMtxTrans(scale_mtx, 0.5f, 0.5f, 0.0f);
+    J3DNativeShape::sendTexture(scale_mtx, 0x21, GX_MTX2x4);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    J3DNativeState::setNumChans(1);
+
+    if (mHardLightColorMask) {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 1, GX_SRC_REG, GX_SRC_VTX, mHardLightColorMask, GX_DF_CLAMP, GX_AF_NONE);
+    } else if (mUseModelLightReg) {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 1, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_CLAMP, GX_AF_NONE);
+    } else {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 1, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_CLAMP, GX_AF_NONE);
+    }
+
+    J3DNativeState::setChanCtrl(GX_ALPHA0, 1, GX_SRC_REG, GX_SRC_REG, mHardLightAlphaMask, GX_DF_SIGN, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    setTevForObject();
+    loadDiffuseGradTex(GX_TEXMAP1);
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::setTevForObject_Material() const {
     if (mBtkPlayer && _150) {
+<<<<<<< HEAD
         GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1E, 0, 0x7D);
     } else {
         GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x3C, 0, 0x7D);
@@ -530,6 +676,28 @@ void NormalMapBase::setTevForObject() const {
     GXSetIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD0, GX_TEXMAP0);
     GXSetIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
     GXSetTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, GX_FALSE, GX_FALSE, GX_ITBA_OFF);
+=======
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1E, 0, 0x7D);
+    } else {
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x3C, 0, 0x7D);
+    }
+
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, 0x21, 0, 0x7D);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD2, GX_TG_MTX2x4, GX_TG_TEX0, 0x24, 0, 0x7D);
+}
+
+void NormalMapBase::setTevForObject() const {
+    J3DNativeState::setNumTexGens(3);
+    J3DNativeState::setNumIndStages(1);
+    J3DNativeState::setNumTevStages(4);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE2);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE3);
+    setTevForObject_Material();
+    J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD0, GX_TEXMAP0);
+    J3DNativeState::setIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
+    J3DNativeState::setTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, GX_FALSE, GX_FALSE, GX_ITBA_OFF);
+>>>>>>> upstream/main
 
     GXTevColorArg lightAColor, lightBColor, lightARaster, lightBRaster;
     lightAColor = GX_CC_ONE;
@@ -568,6 +736,7 @@ void NormalMapBase::setTevForObject() const {
         lightBRaster = GX_CC_ONE;
     }
 
+<<<<<<< HEAD
     GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
     GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, lightAColor, lightARaster, GX_CC_ZERO);
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
@@ -628,11 +797,74 @@ void NormalMapBase::setTevForObject() const {
         GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
         GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
         GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+=======
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, lightAColor, lightARaster, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP_NULL, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, lightBColor, lightBRaster, GX_CC_CPREV);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVREG2);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_KONST, GX_CA_ZERO, lightBAlpha, GX_CA_A0);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE2, GX_TEXCOORD2, GX_TEXMAP2, GX_COLOR_NULL);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_C1, GX_CC_C2, GX_CC_TEXC, GX_CC_C0);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    Color8 color(255, 255, 255, 0);
+    J3DNativeState::setTevKColor(GX_KCOLOR0, color);
+    J3DNativeState::setTevKColorSel(GX_TEVSTAGE3, GX_TEV_KCSEL_K0);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE3, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR_NULL);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+
+    switch (mBackLightMode) {
+    case 0:
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE3, GX_CC_ZERO, GX_CC_ONE, GX_CC_CPREV, GX_CC_APREV);
+        break;
+    case 1:
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE3, GX_CC_ZERO, GX_CC_APREV, GX_CC_CPREV, GX_CC_ZERO);
+        break;
+    case 2:
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_C1, GX_CC_C2, GX_CC_TEXC, GX_CC_APREV);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE3, GX_CC_ZERO, GX_CC_C2, GX_CC_CPREV, GX_CC_C0);
+        break;
+    case 3:
+        J3DNativeState::setNumTevStages(3);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_C1, GX_CC_C2, GX_CC_TEXC, GX_CC_APREV);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        break;
+    case 4:
+    case 7:
+        J3DNativeState::setNumTevStages(3);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_ZERO, GX_CC_C2, GX_CC_ONE, GX_CC_ZERO);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        break;
+    case 5:
+        J3DNativeState::setNumTevStages(3);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_ZERO, GX_CC_ONE, GX_CC_TEXC, GX_CC_ZERO);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        break;
+    case 6:
+        J3DNativeState::setNumTevStages(1);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ONE, GX_CC_RASC, GX_CC_ZERO);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+>>>>>>> upstream/main
         break;
     default:
         break;
     }
 
+<<<<<<< HEAD
     GXSetTevColorOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, 1, GX_TEVPREV);
     GXSetTevAlphaIn(GX_TEVSTAGE3, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
     GXSetTevAlphaOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
@@ -655,11 +887,35 @@ void NormalMapBase::setTevForDebug() const {
     GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
     GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+=======
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE3, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_KONST);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE3, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+}
+
+void NormalMapBase::setTevForDebug() const {
+    J3DNativeState::setNumTexGens(1);
+    J3DNativeState::setNumIndStages(0);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 0x1E, 0, 0x7D);
+    Mtx mtx;
+    NebulaMtxScale(mtx, 0.0f, 0.0f, 0.0f);
+    MR::setMtxTrans(mtx, 0.5f, 0.5f, 0.0f);
+    J3DNativeShape::sendTexture(mtx, 0x1E, GX_MTX2x4);
+    loadDiffuseGradTex(GX_TEXMAP0);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::drawSettingForDebug(MtxPtr pMtx) const {
     updateLightMtx(pMtx);
     Mtx texMtx;
+<<<<<<< HEAD
     PSMTXScale(texMtx, 0.0f, 0.0f, 0.0f);
     MR::setMtxTrans(texMtx, 0.0f, 0.0f, 0.0f);
     GXLoadTexMtxImm(texMtx, GX_TEXMTX0, GX_MTX2x4);
@@ -725,6 +981,73 @@ void NormalMapBase::drawSettingForDebug(MtxPtr pMtx) const {
     }
 
     GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+=======
+    NebulaMtxScale(texMtx, 0.0f, 0.0f, 0.0f);
+    MR::setMtxTrans(texMtx, 0.0f, 0.0f, 0.0f);
+    J3DNativeShape::sendTexture(texMtx, GX_TEXMTX0, GX_MTX2x4);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    J3DNativeState::setNumChans(1);
+    GXColor ambient = {128, 128, 128, 128};
+    J3DNativeState::setChanAmbColor(GX_COLOR0A0, ambient);
+    GXColor material = {255, 255, 255, 255};
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, material);
+    if (_138 & 8) {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 1, GX_SRC_REG, GX_SRC_VTX, 1, GX_DF_CLAMP, GX_AF_NONE);
+    } else {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 0, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_CLAMP, GX_AF_NONE);
+    }
+
+    J3DNativeState::setChanCtrl(GX_ALPHA0, 1, GX_SRC_REG, GX_SRC_REG, 2, GX_DF_CLAMP, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    loadDiffuseGradTex(GX_TEXMAP2);
+    J3DNativeState::setNumTexGens(3);
+    J3DNativeState::setNumIndStages(1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE2);
+    if (_138 & 4) {
+        J3DNativeState::setNumTevStages(3);
+    } else {
+        J3DNativeState::setNumTevStages(2);
+    }
+
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    if (mBtkPlayer && _150) {
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD2, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX1, GX_FALSE, GX_PTIDENTITY);
+    } else {
+        J3DNativeState::setTexCoordGen2(GX_TEXCOORD2, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    }
+
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorS10(GX_TEVREG0, mTevColor0);
+    J3DNativeState::setTevColorS10(GX_TEVREG1, mTevColor1);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_TEXC, GX_CC_RASC, GX_CC_C1);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+    if (_138 & 1) {
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    } else if (_138 & 2) {
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_TEXC, GX_CC_TEXA, GX_CC_CPREV, GX_CC_ZERO);
+    } else {
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, GX_CC_TEXA, GX_CC_ZERO);
+    }
+
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    if (_138 & 4) {
+        J3DNativeState::setTevOrder(GX_TEVSTAGE2, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_ALPHA0);
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE2, GX_CC_ONE, GX_CC_ZERO, GX_CC_RASA, GX_CC_CPREV);
+        J3DNativeState::setTevColorOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+        J3DNativeState::setTevAlphaIn(GX_TEVSTAGE2, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+        J3DNativeState::setTevAlphaOp(GX_TEVSTAGE2, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    }
+
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::createGradTexture() {
@@ -791,7 +1114,11 @@ void NormalMapBase::createGradTexture() {
     }
 
     TDDraw::tileConversion16(static_cast< u16* >(mImagePtr), width, height);
+<<<<<<< HEAD
     DCStoreRange(mImagePtr, width * height * 2);
+=======
+    J3DNativeTexture::registerImage(mImagePtr, GX_TF_IA8, width, height, 1);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::swapColorGB(JUTTexture* pTexture) {
@@ -808,7 +1135,11 @@ void NormalMapBase::swapColorGB(JUTTexture* pTexture) {
         }
     }
 
+<<<<<<< HEAD
     DCStoreRange(pTexture->mImage, pTexture->getWidth() * pTexture->getHeight() * 4);
+=======
+    J3DNativeTexture::registerImage(pTexture->mImage, GX_TF_RGBA8, pTexture->getWidth(), pTexture->getHeight(), 1);
+>>>>>>> upstream/main
 }
 
 namespace {
@@ -820,6 +1151,7 @@ namespace {
 
 void NormalMapBase::indirectCapture() const {
     TDDraw::setup(1, 0, 2);
+<<<<<<< HEAD
     GXSetZMode(0, GX_ALWAYS, 0);
     GXSetDither(0);
     GXSetColorUpdate(1);
@@ -852,6 +1184,40 @@ void NormalMapBase::indirectCapture() const {
     GXSetIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
     GXSetTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, GX_FALSE, GX_FALSE, GX_ITBA_OFF);
     GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+=======
+    J3DNativeState::setZMode(0, GX_ALWAYS, 0);
+    J3DNativeState::setDither(0);
+    J3DNativeState::setColorUpdate(1);
+    J3DNativeState::setAlphaUpdate(1);
+    Mtx texMtx;
+    NebulaMtxIdentity(texMtx);
+    updateLightMtx(texMtx);
+    NebulaMtxScale(texMtx, 0.0f, 0.0f, 0.0f);
+    f32 exponent = sgrad_tex_thresh - 1;
+    f32 threshold = pow(2.0, exponent);
+    MR::setMtxTrans(texMtx, 0.5f, 1.0f - threshold, 0.0f);
+    J3DNativeShape::sendTexture(texMtx, GX_TEXMTX0, GX_MTX2x4);
+    J3DNativeState::setNumChans(1);
+    J3DNativeState::setChanCtrl(GX_COLOR0A0, 1, GX_SRC_REG, GX_SRC_REG, 2, GX_DF_CLAMP, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    loadDiffuseGradTex(GX_TEXMAP0);
+    J3DNativeState::setNumTexGens(2);
+    J3DNativeState::setNumIndStages(1);
+    J3DNativeState::setNumTevStages(1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE2);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_TEXMTX0, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setIndTexOrder(GX_INDTEXSTAGE0, GX_TEXCOORD1, GX_TEXMAP1);
+    J3DNativeState::setIndTexCoordScale(GX_INDTEXSTAGE0, GX_ITS_1, GX_ITS_1);
+    J3DNativeState::setTevIndirect(GX_TEVSTAGE0, GX_INDTEXSTAGE0, GX_ITF_8, GX_ITB_STU, GX_ITM_0, GX_ITW_OFF, GX_ITW_OFF, GX_FALSE, GX_FALSE, GX_ITBA_OFF);
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+>>>>>>> upstream/main
     u16 captured[32];
     for (u32 i = 0; i < 32; i++) {
         captured[i] = 0;
@@ -891,6 +1257,7 @@ void NormalMapBase::indirectCapture() const {
                 s32 screenHeight = MR::getScreenHeight();
                 f32 scaleY = static_cast< f32 >(MR::getScreenHeight()) / screenHeight;
                 TVec3f position(0.0f, 0.0f, 0.0f);
+<<<<<<< HEAD
                 GXBegin(GX_QUADS, GX_VTXFMT0, 4);
                 GXPosition3f32(position.x, position.y, 0.0f);
                 GXTexCoord2f32(0.0f, 0.0f);
@@ -901,6 +1268,17 @@ void NormalMapBase::indirectCapture() const {
                 GXPosition3f32(position.x, position.y + scaleY * pTexture->getHeight(), 0.0f);
                 GXTexCoord2f32(0.0f, 1.0f);
                 GXEnd();
+=======
+                J3DNativeDraw::begin(GX_QUADS, 4, NEBULA_SHAPE_TEXCOORD0);
+                J3DNativeDraw::position(position.x, position.y, 0.0f);
+                J3DNativeDraw::texCoord(0.0f, 0.0f);
+                J3DNativeDraw::position(position.x + scaleX * pTexture->getWidth(), position.y, 0.0f);
+                J3DNativeDraw::texCoord(1.0f, 0.0f);
+                J3DNativeDraw::position(position.x + scaleX * pTexture->getWidth(), position.y + scaleY * pTexture->getHeight(), 0.0f);
+                J3DNativeDraw::texCoord(1.0f, 1.0f);
+                J3DNativeDraw::position(position.x, position.y + scaleY * pTexture->getHeight(), 0.0f);
+                J3DNativeDraw::texCoord(0.0f, 1.0f);
+>>>>>>> upstream/main
                 _4B8->capture(0, 0, GX_CTF_RA8, false, 0);
                 break;
             }
@@ -910,6 +1288,7 @@ void NormalMapBase::indirectCapture() const {
 
 void NormalMapBase::loadDirectLightTex(GXTexMapID id) const {
     GXTexObj obj;
+<<<<<<< HEAD
     GXInitTexObj(&obj, _4B8->mImage, _4B8->mTIMG->mWidth, _4B8->mTIMG->mHeight, GX_TF_IA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
     if (_13A & 1) {
         GXInitTexObjLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
@@ -952,6 +1331,50 @@ void NormalMapBase::drawSettingForCapture(MtxPtr pMtx) const {
     GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
     GXSetTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+=======
+    J3DNativeTexture::init(&obj, _4B8->mImage, _4B8->mTIMG->mWidth, _4B8->mTIMG->mHeight, GX_TF_IA8, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    if (_13A & 1) {
+        J3DNativeTexture::initLOD(&obj, GX_NEAR, GX_NEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    } else {
+        J3DNativeTexture::initLOD(&obj, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
+    }
+
+    J3DNativeTexture::load(&obj, id);
+}
+
+void NormalMapBase::drawSettingForCapture(MtxPtr pMtx) const {
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+    J3DNativeState::setClipMode(GX_CLIP_ENABLE);
+    J3DNativeState::setNumChans(1);
+    GXColor ambient = {128, 128, 128, 128};
+    J3DNativeState::setChanAmbColor(GX_COLOR0A0, ambient);
+    GXColor material = {255, 255, 255, 255};
+    J3DNativeState::setChanMatColor(GX_COLOR0A0, material);
+    if (_138 & 8) {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 1, GX_SRC_REG, GX_SRC_VTX, 1, GX_DF_CLAMP, GX_AF_NONE);
+    } else {
+        J3DNativeState::setChanCtrl(GX_COLOR0, 0, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_CLAMP, GX_AF_NONE);
+    }
+
+    J3DNativeState::setChanCtrl(GX_ALPHA0, 1, GX_SRC_REG, GX_SRC_REG, 2, GX_DF_CLAMP, GX_AF_NONE);
+    J3DNativeState::setChanCtrl(GX_COLOR1A1, 0, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    loadDirectLightTex(GX_TEXMAP1);
+    J3DNativeState::setNumTexGens(2);
+    J3DNativeState::setNumIndStages(0);
+    J3DNativeState::setNumTevStages(2);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE0);
+    J3DNativeState::setTevDirect(GX_TEVSTAGE1);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD1, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY, GX_FALSE, GX_PTIDENTITY);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    J3DNativeState::setTevColorS10(GX_TEVREG0, mTevColor0);
+    J3DNativeState::setTevColorS10(GX_TEVREG1, mTevColor1);
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_TEXC, GX_CC_RASC, GX_CC_C1);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_TEXA);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevOrder(GX_TEVSTAGE1, GX_TEXCOORD1, GX_TEXMAP1, GX_COLOR0A0);
+>>>>>>> upstream/main
     GXTevColorArg alpha = GX_CC_TEXA;
     switch (_E8) {
     case 0:
@@ -966,6 +1389,7 @@ void NormalMapBase::drawSettingForCapture(MtxPtr pMtx) const {
     }
 
     if (_138 & 1) {
+<<<<<<< HEAD
         GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, alpha, GX_CC_TEXC);
     } else if (_138 & 2) {
         GXSetTevColorIn(GX_TEVSTAGE1, GX_CC_TEXC, alpha, GX_CC_CPREV, GX_CC_ZERO);
@@ -977,6 +1401,19 @@ void NormalMapBase::drawSettingForCapture(MtxPtr pMtx) const {
     GXSetTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
     GXSetTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
     GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+=======
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, alpha, GX_CC_TEXC);
+    } else if (_138 & 2) {
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_TEXC, alpha, GX_CC_CPREV, GX_CC_ZERO);
+    } else {
+        J3DNativeState::setTevColorIn(GX_TEVSTAGE1, GX_CC_ZERO, GX_CC_CPREV, alpha, GX_CC_ZERO);
+    }
+
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE1, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE1, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, 1, GX_TEVPREV);
+    J3DNativeState::setBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+>>>>>>> upstream/main
 }
 
 void NormalMapBase::loadData(const char* pData, u32 size) {

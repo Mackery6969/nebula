@@ -1,6 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DModel;
 class J3DAnmVtxColor;
@@ -115,6 +121,12 @@ public:
     /* 0x50 */ GXCompType mVtxPosType;
     /* 0x54 */ u8 mVtxNrmFrac;
     /* 0x58 */ GXCompType mVtxNrmType;
+<<<<<<< HEAD
+=======
+    // Entries of each array the renderer has as values (J3DNativeShape): position, normal, NBT, colour 0-1,
+    // texture coordinates 0-7.
+    u32 mNebulaArrayCount[13];
+>>>>>>> upstream/main
 };
 
 class J3DVertexBuffer {

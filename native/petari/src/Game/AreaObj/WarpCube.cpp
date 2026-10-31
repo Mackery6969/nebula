@@ -1,4 +1,8 @@
 #include "Game/AreaObj/WarpCube.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorCameraInfo.hpp"
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Util/AreaObjUtil.hpp"
@@ -83,8 +87,13 @@ void WarpCube::movement() {
 
 void WarpCube::draw() const {
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetCullMode(GX_CULL_NONE);
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+=======
+    J3DNativeState::setCullMode(GX_CULL_NONE);
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+>>>>>>> upstream/main
 
     TVec3f cubeRotate;
     TVec3f up(0.0f, 1.0f, 0.0f);
@@ -92,7 +101,11 @@ void WarpCube::draw() const {
 
     Mtx matrix;
     MR::makeMtxTR(matrix, 0.0f, 0.0f, 0.0f, cubeRotate.x, cubeRotate.y, cubeRotate.z);
+<<<<<<< HEAD
     PSMTXMultVecSR(matrix, &up, &up);
+=======
+    NebulaMtxMultVecSR(matrix, &up, &up);
+>>>>>>> upstream/main
 
     TVec3f cubePos;
     MR::calcCubePos(this, &cubePos);

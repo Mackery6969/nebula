@@ -1,6 +1,10 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASCriticalSection.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRHeap.hpp"
 #include "JSystem/JSupport/JSUList.hpp"
 #include <revolution/os/OSInterrupt.h>
@@ -43,12 +47,20 @@ public:
         return mTree.getEndChild();
     }
 
+<<<<<<< HEAD
     OSMutex& getMutex() {
+=======
+    NebulaMutex& getMutex() {
+>>>>>>> upstream/main
         return mMutex;
     }
 
     /* 0x00 */ JSUTree< JASHeap > mTree;
+<<<<<<< HEAD
     /* 0x1C */ OSMutex mMutex;
+=======
+    /* 0x1C */ NebulaMutex mMutex;
+>>>>>>> upstream/main
     /* 0x34 */ JASDisposer* mDisposer;
     /* 0x38 */ u8* mBase;
     /* 0x3C */ u32 mSize;
@@ -89,10 +101,17 @@ namespace JASThreadingModel {
     public:
         struct Lock {
             Lock(const T&) {
+<<<<<<< HEAD
                 mInterruptState = OSDisableInterrupts();
             }
             ~Lock() {
                 OSRestoreInterrupts(mInterruptState);
+=======
+                mInterruptState = NebulaKernel::disableInterrupts();
+            }
+            ~Lock() {
+                NebulaKernel::restoreInterrupts(mInterruptState);
+>>>>>>> upstream/main
             }
 
             /* 0x00 */ u32 mInterruptState;
@@ -100,19 +119,33 @@ namespace JASThreadingModel {
     };
 
     template < typename T >
+<<<<<<< HEAD
     struct ObjectLevelLockable : public OSMutex {
         ObjectLevelLockable() {
             OSInitMutex(this);
+=======
+    struct ObjectLevelLockable : public NebulaMutex {
+        ObjectLevelLockable() {
+            this->init();
+>>>>>>> upstream/main
         }
 
         struct Lock {
             Lock(T const& mutex) {
                 mMutex = (T*)&mutex;
+<<<<<<< HEAD
                 OSLockMutex(mMutex);
             }
 
             ~Lock() {
                 OSUnlockMutex(mMutex);
+=======
+                mMutex->lock();
+            }
+
+            ~Lock() {
+                mMutex->unlock();
+>>>>>>> upstream/main
             }
 
             /* 0x00 */ T* mMutex;

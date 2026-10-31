@@ -1,8 +1,15 @@
 #include "nw4r/lyt/common.h"
+<<<<<<< HEAD
 #include "nw4r/lyt/layout.h"
 #include <revolution/gx/GXEnum.h>
 #include <revolution/gx/GXGeometry.h>
 #include <revolution/gx/GXVert.h>
+=======
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+#include "nw4r/lyt/layout.h"
+#include <revolution/gx/GXEnum.h>
+#include <revolution/gx/GXGeometry.h>
+>>>>>>> upstream/main
 #include <cstdio>
 
 namespace nw4r {
@@ -101,6 +108,7 @@ namespace nw4r {
                 }
             }
 
+<<<<<<< HEAD
             void SetVertexFormat(bool a1, u8 num) {
                 GXClearVtxDesc();
                 GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
@@ -165,6 +173,50 @@ namespace nw4r {
                 }
 
                 GXEnd();
+=======
+            void DrawQuad(const math::VEC2& basePt, const Size& size, u8 num, const math::VEC2 (*texCoords)[4], const ut::Color* vtxColors) {
+                J3DNativeDraw::begin(GX_QUADS, 4,
+                                     (vtxColors ? NEBULA_SHAPE_COLOR0 : 0) | ((1u << num) - 1u) * NEBULA_SHAPE_TEXCOORD0);
+                J3DNativeDraw::position(basePt.x, basePt.y, 0.0f);
+
+                if (vtxColors) {
+                    J3DNativeDraw::color(vtxColors[0]);
+                }
+
+                for (int i = 0; i < num; i++) {
+                    J3DNativeDraw::texCoord(texCoords[i][0].x, texCoords[i][0].y);
+                }
+
+                J3DNativeDraw::position(basePt.x + size.width, basePt.y, 0.0f);
+
+                if (vtxColors) {
+                    J3DNativeDraw::color(vtxColors[1]);
+                }
+
+                for (int i = 0; i < num; i++) {
+                    J3DNativeDraw::texCoord(texCoords[i][1].x, texCoords[i][1].y);
+                }
+
+                J3DNativeDraw::position(basePt.x + size.width, basePt.y + size.height, 0.0f);
+
+                if (vtxColors) {
+                    J3DNativeDraw::color(vtxColors[3]);
+                }
+
+                for (int i = 0; i < num; i++) {
+                    J3DNativeDraw::texCoord(texCoords[i][3].x, texCoords[i][3].y);
+                }
+
+                J3DNativeDraw::position(basePt.x, basePt.y + size.height, 0.0f);
+
+                if (vtxColors) {
+                    J3DNativeDraw::color(vtxColors[2]);
+                }
+
+                for (int i = 0; i < num; i++) {
+                    J3DNativeDraw::texCoord(texCoords[i][2].x, texCoords[i][2].y);
+                }
+>>>>>>> upstream/main
             }
 
             void DrawQuad(const math::VEC2& basePt, const Size& size, u8 num, const math::VEC2 (*texCoords)[4], const ut::Color* vtxColors,

@@ -1,10 +1,16 @@
 #include "JSystem/J3DGraphBase/J3DShape.hpp"
+<<<<<<< HEAD
 #include "JSystem/J3DGraphBase/J3DGD.hpp"
+=======
+>>>>>>> upstream/main
 #include "JSystem/J3DGraphBase/J3DPacket.hpp"
 #include "JSystem/J3DGraphBase/J3DShapeDraw.hpp"
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
 #include "JSystem/J3DGraphBase/J3DVertex.hpp"
+<<<<<<< HEAD
 #include <revolution/gd.h>
+=======
+>>>>>>> upstream/main
 #include <stdint.h>
 
 void J3DShape::initialize() {
@@ -30,6 +36,10 @@ void J3DShape::initialize() {
     mCurrentViewNo = &j3dDefaultViewNo;
     mHasNBT = false;
     mHasPNMTXIdx = false;
+<<<<<<< HEAD
+=======
+    mNebulaRegistered = false;
+>>>>>>> upstream/main
 }
 
 void J3DShape::addTexMtxIndexInDL(GXAttr attr, u32 valueBase) {
@@ -99,7 +109,10 @@ void J3DShape::addTexMtxIndexInVcd(GXAttr attr) {
     dst->attr = GX_VA_NULL;
     dst->type = GX_NONE;
     mVtxDesc = newVtxDesc;
+<<<<<<< HEAD
     makeVcdVatCmd();
+=======
+>>>>>>> upstream/main
 }
 
 void J3DShape::calcNBTScale(const Vec& param_0, f32 (*param_1)[3][3], f32 (*param_2)[3][3]) {
@@ -115,6 +128,7 @@ u16 J3DShape::countBumpMtxNum() const {
     return num;
 }
 
+<<<<<<< HEAD
 void J3DLoadCPCmd(u8 addr, u32 val) {
     GXCmd1u8(8);
     GXCmd1u8(addr);
@@ -215,10 +229,31 @@ void J3DShape::makeVtxArrayCmd() {
             mHasNBT = true;
             stride[GX_VA_NRM - GX_VA_POS] *= 3;
             array[GX_VA_NRM - GX_VA_POS] = mVertexData->getVtxNBTArray();
+=======
+
+// What the shape's vertex description and its model's formats imply for drawing it: the vertex data's position and
+// normal formats (J3DDeformer reads them), NBT normals and per-vertex position matrices.
+void J3DShape::initVtxAttr() {
+    for (GXVtxAttrFmtList* vtxAttr = mVertexData->getVtxAttrFmtList(); vtxAttr->attr != GX_VA_NULL; vtxAttr++) {
+        if (vtxAttr->attr == GX_VA_POS) {
+            mVertexData->setVtxPosFrac((u8)vtxAttr->frac);
+            mVertexData->setVtxPosType((GXCompType)vtxAttr->type);
+        } else if (vtxAttr->attr == GX_VA_NRM) {
+            mVertexData->setVtxNrmFrac((u8)vtxAttr->frac);
+            mVertexData->setVtxNrmType((GXCompType)vtxAttr->type);
+        }
+    }
+
+    mHasPNMTXIdx = false;
+    for (GXVtxDescList* vtxDesc = mVtxDesc; vtxDesc->attr != GX_VA_NULL; vtxDesc++) {
+        if (vtxDesc->attr == GX_VA_NBT && vtxDesc->type != GX_NONE) {
+            mHasNBT = true;
+>>>>>>> upstream/main
         } else if (vtxDesc->attr == GX_VA_PNMTXIDX && vtxDesc->type != GX_NONE) {
             mHasPNMTXIdx = true;
         }
     }
+<<<<<<< HEAD
 
     for (u32 i = 0; i < 12; i++) {
         if (array[i] != 0)
@@ -251,12 +286,21 @@ void J3DShape::loadPreDrawSetting() const {
         sOldVcdVatCmd = mVcdVatCmd;
     }
 
+=======
+}
+
+void J3DShape::loadPreDrawSetting() const {
+    prepareGeometry();
+>>>>>>> upstream/main
     mCurrentMtx.load();
 }
 
 void J3DShape::setArrayAndBindPipeline() const {
     J3DShapeMtx::setCurrentPipeline((mFlags & 0x1C) >> 2);
+<<<<<<< HEAD
     loadVtxArray();
+=======
+>>>>>>> upstream/main
     j3dSys.setModelDrawMtx(mDrawMtx[*mCurrentViewNo]);
     j3dSys.setModelNrmMtx(mNrmMtx[*mCurrentViewNo]);
     J3DShapeMtx::sCurrentScaleFlag = mScaleFlagArray;
@@ -266,11 +310,15 @@ void J3DShape::setArrayAndBindPipeline() const {
 }
 
 void J3DShape::drawFast() const {
+<<<<<<< HEAD
     if (sOldVcdVatCmd != mVcdVatCmd) {
         GXCallDisplayList(mVcdVatCmd, kVcdVatDLSize);
         sOldVcdVatCmd = mVcdVatCmd;
     }
 
+=======
+    prepareGeometry();
+>>>>>>> upstream/main
     if (sEnvelopeFlag != 0 && !mHasPNMTXIdx)
         mCurrentMtx.load();
 
@@ -286,8 +334,13 @@ void J3DShape::drawFast() const {
                 mShapeDraw[i]->draw();
         }
     } else {
+<<<<<<< HEAD
         J3DFifoLoadPosMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), GX_PNMTX0);
         J3DFifoLoadNrmMtxImm(*j3dSys.getShapePacket()->getBaseMtxPtr(), GX_PNMTX0);
+=======
+        J3DNativeShape::loadPosition(*j3dSys.getShapePacket()->getBaseMtxPtr(), GX_PNMTX0);
+        J3DNativeShape::loadNormal(*j3dSys.getShapePacket()->getBaseMtxPtr(), GX_PNMTX0);
+>>>>>>> upstream/main
         for (u16 n = mMtxGroupNum, i = 0; i < n; i++) {
             if (mShapeDraw[i] != nullptr)
                 mShapeDraw[i]->draw();
@@ -296,16 +349,24 @@ void J3DShape::drawFast() const {
 }
 
 void J3DShape::draw() const {
+<<<<<<< HEAD
     resetVcdVatCache();
+=======
+>>>>>>> upstream/main
     loadPreDrawSetting();
     drawFast();
 }
 
 void J3DShape::simpleDraw() const {
+<<<<<<< HEAD
     resetVcdVatCache();
     loadPreDrawSetting();
     J3DShapeMtx::setCurrentPipeline((mFlags & 0x1C) >> 2);
     loadVtxArray();
+=======
+    loadPreDrawSetting();
+    J3DShapeMtx::setCurrentPipeline((mFlags & 0x1C) >> 2);
+>>>>>>> upstream/main
     for (u16 n = mMtxGroupNum, i = 0; i < n; i++) {
         if (mShapeDraw[i] != nullptr) {
             mShapeDraw[i]->draw();
@@ -314,6 +375,7 @@ void J3DShape::simpleDraw() const {
 }
 
 void J3DShape::simpleDrawCache() const {
+<<<<<<< HEAD
     if (sOldVcdVatCmd != mVcdVatCmd) {
         GXCallDisplayList(mVcdVatCmd, kVcdVatDLSize);
         sOldVcdVatCmd = mVcdVatCmd;
@@ -323,10 +385,19 @@ void J3DShape::simpleDrawCache() const {
         mCurrentMtx.load();
 
     loadVtxArray();
+=======
+    prepareGeometry();
+    if (sEnvelopeFlag && !mHasPNMTXIdx)
+        mCurrentMtx.load();
+
+>>>>>>> upstream/main
     for (u16 n = mMtxGroupNum, i = 0; i < n; i++)
         if (mShapeDraw[i] != nullptr)
             mShapeDraw[i]->draw();
 }
 
+<<<<<<< HEAD
 void* J3DShape::sOldVcdVatCmd;
+=======
+>>>>>>> upstream/main
 bool J3DShape::sEnvelopeFlag;

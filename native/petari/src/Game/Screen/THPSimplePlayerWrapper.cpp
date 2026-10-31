@@ -1,4 +1,8 @@
 #include "Game/Screen/THPSimplePlayerWrapper.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/LiveActor/Nerve.hpp"
 #include "Game/Util/MemoryUtil.hpp"
 #include "Game/Util/NerveUtil.hpp"
@@ -7,6 +11,15 @@
 #include <cstring>
 #ifdef TARGET_PC
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaClock.hpp"
+#include "Game/System/NebulaSystemSettings.hpp"
+#include "Game/System/NebulaDisc.hpp"
+#include <nebula_game_api.h>
+
+extern "C" const NebulaHostServices* nebula_host(void);
+>>>>>>> upstream/main
 
 namespace {
     // The open movie's disc path, for the host's replacement videos (one movie plays at a time).
@@ -45,8 +58,13 @@ THPSimplePlayerWrapper* THPSimplePlayerStaticAudio::mPlayer;
 #endif
 
 namespace {
+<<<<<<< HEAD
     void dvdCallBackFunc(s32 a1, DVDFileInfo* pFileInfo) {
         THPSimplePlayerWrapper* player = (THPSimplePlayerWrapper*)pFileInfo->cb.userData;
+=======
+    void dvdCallBackFunc(s32 a1, NebulaDisc::Request* pRequest) {
+        THPSimplePlayerWrapper* player = (THPSimplePlayerWrapper*)pRequest->mUser;
+>>>>>>> upstream/main
         player->dvdCallBack(a1);
     }
 };  // namespace
@@ -64,9 +82,15 @@ THPSimplePlayerWrapper::THPSimplePlayerWrapper(const char* pName)
     mSoundBuffer[1] = new (32) s32[0x230];
     MR::zeroMemory(mSoundBuffer[0], 0x8C0);
     MR::zeroMemory(mSoundBuffer[1], 0x8C0);
+<<<<<<< HEAD
     DCFlushRange(mSoundBuffer[0], 0x8C0);
     DCFlushRange(mSoundBuffer[1], 0x8C0);
     MR::zeroMemory(&mFileInfo, sizeof(mFileInfo));
+=======
+    mFile.mEntry = -1;
+    mFile.mLength = 0;
+    MR::zeroMemory(&mRequest, sizeof(mRequest));
+>>>>>>> upstream/main
     MR::zeroMemory(&mHeader, sizeof(mHeader));
     MR::zeroMemory(&mFrameComp, sizeof(mFrameComp));
     MR::zeroMemory(&mVideoInfo, sizeof(mVideoInfo));
@@ -85,6 +109,7 @@ THPSimplePlayerWrapper::THPSimplePlayerWrapper(const char* pName)
 }
 
 bool THPSimplePlayerWrapper::init(s32 audio) {
+<<<<<<< HEAD
     LCEnable();
     if (!THPInit()) {
         return false;
@@ -98,6 +123,14 @@ bool THPSimplePlayerWrapper::init(s32 audio) {
     MR::zeroMemory(mSoundBuffer[1], 0x8C0);
     DCFlushRange(mSoundBuffer[0], 0x8C0);
     DCFlushRange(mSoundBuffer[1], 0x8C0);
+=======
+    s32 old = NebulaKernel::disableInterrupts();
+    mSoundBufferIndex = 0;
+    initAudio();
+    NebulaKernel::restoreInterrupts(old);
+    MR::zeroMemory(mSoundBuffer[0], 0x8C0);
+    MR::zeroMemory(mSoundBuffer[1], 0x8C0);
+>>>>>>> upstream/main
     _2F0 = 0;
     _2F4 = 1.0f;
     _2F8 = 0.0f;
@@ -107,7 +140,10 @@ bool THPSimplePlayerWrapper::init(s32 audio) {
 }
 
 void THPSimplePlayerWrapper::quit() {
+<<<<<<< HEAD
     LCDisable();
+=======
+>>>>>>> upstream/main
     JASDriver::registerMixCallback(nullptr, (JASMixMode)3);
     THPSimplePlayerStaticAudio::mPlayer = nullptr;
     _8 = 0;
@@ -140,7 +176,10 @@ bool THPSimplePlayerWrapper::close() {
 
             if (!mReadProgress) {
                 mOpen = 0;
+<<<<<<< HEAD
                 DVDClose(&mFileInfo);
+=======
+>>>>>>> upstream/main
 #ifdef TARGET_PC
                 __NebulaMovieFrame(nullptr, -1, 0.0f, nullptr, nullptr, nullptr, 0, 0);
 #endif
@@ -162,6 +201,7 @@ u32 THPSimplePlayerWrapper::calcNeedMemory() {
     }
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+<<<<<<< HEAD
     u32 size = OSRoundUp32B(mHeader.bufSize) * 20;
     size += OSRoundUp32B(mVideoInfo.xSize * mVideoInfo.ySize);
     size += OSRoundUp32B(mVideoInfo.xSize * mVideoInfo.ySize / 4);
@@ -175,6 +215,21 @@ u32 THPSimplePlayerWrapper::calcNeedMemory() {
 
     if (mAudioExist) {
         size += (OSRoundUp32B(mHeader.audioMaxSamples * 4) * 20);
+=======
+    u32 size = NebulaAlignUp32(mHeader.bufSize) * 20;
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize);
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize / 4);
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize / 4);
+#else
+    u32 size = NebulaAlignUp32(mHeader.bufSize) * 20;
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize * 2);
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize / 2 & 0x7FFFFFFE);
+    size += NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize / 2 & 0x7FFFFFFE);
+#endif
+
+    if (mAudioExist) {
+        size += (NebulaAlignUp32(mHeader.audioMaxSamples * 4) * 20);
+>>>>>>> upstream/main
     }
 
     size += 0x1000;
@@ -188,6 +243,7 @@ bool THPSimplePlayerWrapper::setBuffer(u8* pBuffer) {
             return false;
         }
 
+<<<<<<< HEAD
         u32 ysize = OSRoundUp32B(mVideoInfo.xSize * mVideoInfo.ySize);
         u32 uvsize = OSRoundUp32B(mVideoInfo.xSize * mVideoInfo.ySize / 4);
 
@@ -219,12 +275,40 @@ bool THPSimplePlayerWrapper::setBuffer(u8* pBuffer) {
         pBuffer += uvsize;
         mTextureSet[1].vtexture = pBuffer;
         DCInvalidateRange(pBuffer, uvsize);
+=======
+        u32 ysize = NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize);
+        u32 uvsize = NebulaAlignUp32(mVideoInfo.xSize * mVideoInfo.ySize / 4);
+
+#if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+        mTextureSet.ytexture = pBuffer;
+        pBuffer += ysize;
+        mTextureSet.utexture = pBuffer;
+        pBuffer += uvsize;
+        mTextureSet.vtexture = pBuffer;
+        pBuffer += uvsize;
+#else
+        mTextureSet[0].ytexture = pBuffer;
+        pBuffer += ysize;
+        mTextureSet[0].utexture = pBuffer;
+        pBuffer += uvsize;
+        mTextureSet[0].vtexture = pBuffer;
+        pBuffer += uvsize;
+        mTextureSet[1].ytexture = pBuffer;
+        pBuffer += ysize;
+        mTextureSet[1].utexture = pBuffer;
+        pBuffer += uvsize;
+        mTextureSet[1].vtexture = pBuffer;
+>>>>>>> upstream/main
         pBuffer += uvsize;
 #endif
 
         for (s32 i = 0; i < 20; i++) {
             mReadBuffer[i].ptr = pBuffer;
+<<<<<<< HEAD
             pBuffer += OSRoundUp32B(mHeader.bufSize);
+=======
+            pBuffer += NebulaAlignUp32(mHeader.bufSize);
+>>>>>>> upstream/main
             mReadBuffer[i].isValid = 0;
         }
 
@@ -233,7 +317,11 @@ bool THPSimplePlayerWrapper::setBuffer(u8* pBuffer) {
                 mAudioBuffer[i].buffer = (s16*)pBuffer;
                 mAudioBuffer[i].curPtr = (s16*)pBuffer;
                 mAudioBuffer[i].validSample = 0;
+<<<<<<< HEAD
                 pBuffer += OSRoundUp32B(mHeader.audioMaxSamples * 4);
+=======
+                pBuffer += NebulaAlignUp32(mHeader.audioMaxSamples * 4);
+>>>>>>> upstream/main
             }
         }
 
@@ -264,7 +352,11 @@ bool THPSimplePlayerWrapper::loadStop() {
         mPreFetchState = 0;
 
         if (mReadProgress) {
+<<<<<<< HEAD
             DVDCancel(&mFileInfo.cb);
+=======
+            NebulaDisc::cancel(&mRequest);
+>>>>>>> upstream/main
             mReadProgress = 0;
         }
 
@@ -318,20 +410,31 @@ s32 THPSimplePlayerWrapper::decode(s32 audio) {
                 for (s32 i = 0; i < mFrameComp.numComponents; i++) {
                     switch (mFrameComp.frameComp[i]) {
                     case 0:
+<<<<<<< HEAD
 #ifdef TARGET_PC
                         if (!videoDecode(ptr, *compSize)) {
 #else
                         if (!videoDecode(ptr)) {
 #endif
+=======
+                        if (!videoDecode(ptr, *compSize)) {
+>>>>>>> upstream/main
                             return 1;
                         }
                         break;
                     case 1:
                         u32 sample = THPAudioDecode(mAudioBuffer[mAudioDecodeIndex].buffer, ptr + (*compSize) * audio, 0);
+<<<<<<< HEAD
                         s32 interrupt = OSDisableInterrupts();
                         mAudioBuffer[mAudioDecodeIndex].validSample = sample;
                         mAudioBuffer[mAudioDecodeIndex].curPtr = mAudioBuffer[mAudioDecodeIndex].buffer;
                         OSRestoreInterrupts(interrupt);
+=======
+                        s32 interrupt = NebulaKernel::disableInterrupts();
+                        mAudioBuffer[mAudioDecodeIndex].validSample = sample;
+                        mAudioBuffer[mAudioDecodeIndex].curPtr = mAudioBuffer[mAudioDecodeIndex].buffer;
+                        NebulaKernel::restoreInterrupts(interrupt);
+>>>>>>> upstream/main
                         mAudioDecodeIndex++;
 
                         if (mAudioDecodeIndex >= 20) {
@@ -351,11 +454,15 @@ s32 THPSimplePlayerWrapper::decode(s32 audio) {
             for (s32 i = 0; i < mFrameComp.numComponents; i++) {
                 switch (mFrameComp.frameComp[i]) {
                 case 0:
+<<<<<<< HEAD
 #ifdef TARGET_PC
                     if (!videoDecode(ptr, *compSize)) {
 #else
                     if (!videoDecode(ptr)) {
 #endif
+=======
+                    if (!videoDecode(ptr, *compSize)) {
+>>>>>>> upstream/main
                         return 1;
                     }
                     break;
@@ -442,6 +549,7 @@ s32 THPSimplePlayerWrapper::getTotalFrame() const {
 }
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+<<<<<<< HEAD
 #ifdef TARGET_PC
 bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
     if (__NebulaTHPVideoDecode(pFile, size, mTextureSet.ytexture, mTextureSet.utexture, mTextureSet.vtexture)) {
@@ -449,6 +557,12 @@ bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
 bool THPSimplePlayerWrapper::videoDecode(u8* pFile) {
     if (THPVideoDecode(pFile, mTextureSet.ytexture, mTextureSet.utexture, mTextureSet.vtexture, mTHPWork)) {
 #endif
+=======
+// The host decodes the frame's JPEG data into the texture set's Y, U and V planes (thp_video_decode).
+bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
+    const NebulaHostServices* const host = nebula_host();
+    if (host->thp_video_decode(host->user, pFile, size, mTextureSet.ytexture, mTextureSet.utexture, mTextureSet.vtexture)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -456,6 +570,7 @@ bool THPSimplePlayerWrapper::videoDecode(u8* pFile) {
     return true;
 }
 #else
+<<<<<<< HEAD
 #ifdef TARGET_PC
 bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
     if (__NebulaTHPVideoDecode(pFile, size, mTextureSet[_310].ytexture, mTextureSet[_310].utexture,
@@ -464,6 +579,12 @@ bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
 bool THPSimplePlayerWrapper::videoDecode(u8* pFile) {
     if (THPVideoDecode(pFile, mTextureSet[_310].ytexture, mTextureSet[_310].utexture, mTextureSet[_310].vtexture, mTHPWork)) {
 #endif
+=======
+bool THPSimplePlayerWrapper::videoDecode(u8* pFile, u32 size) {
+    const NebulaHostServices* const host = nebula_host();
+    if (host->thp_video_decode(host->user, pFile, size, mTextureSet[_310].ytexture, mTextureSet[_310].utexture,
+                               mTextureSet[_310].vtexture)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -485,9 +606,15 @@ void THPSimplePlayerWrapper::readFrameAsync() {
         }
 
         mReadProgress = 1;
+<<<<<<< HEAD
         mFileInfo.cb.userData = this;
 
         if (DVDReadAsyncPrio(&mFileInfo, mReadBuffer[mReadIndex].ptr, mReadSize, mCurOffset, ::dvdCallBackFunc, 2) != 1) {
+=======
+        mRequest.mUser = this;
+
+        if (!NebulaDisc::readAsync(&mFile, &mRequest, mReadBuffer[mReadIndex].ptr, mReadSize, mCurOffset, ::dvdCallBackFunc)) {
+>>>>>>> upstream/main
             mReadProgress = 0;
             mDvdError = 1;
         }
@@ -497,13 +624,21 @@ void THPSimplePlayerWrapper::readFrameAsync() {
 }
 
 void THPSimplePlayerWrapper::checkPrefetch() {
+<<<<<<< HEAD
     BOOL in = OSDisableInterrupts();
+=======
+    BOOL in = NebulaKernel::disableInterrupts();
+>>>>>>> upstream/main
     bool isValid = mReadBuffer[mReadIndex].isValid == true;
     if (!isValid && !mReadProgress) {
         readFrameAsync();
     }
 
+<<<<<<< HEAD
     OSRestoreInterrupts(in);
+=======
+    NebulaKernel::restoreInterrupts(in);
+>>>>>>> upstream/main
 }
 
 void THPSimplePlayerWrapper::dvdCallBack(s32 result) {
@@ -539,7 +674,10 @@ void THPSimplePlayerWrapper::readAsyncCallBack(s32 a1) {
             isNerve(GET_NERVE(THPSimplePlayerWrapper, HostTypeReadPreLoad));
         }
 
+<<<<<<< HEAD
         DVDClose(&mFileInfo);
+=======
+>>>>>>> upstream/main
         return;
     }
 
@@ -598,7 +736,11 @@ bool THPSimplePlayerWrapper::tryDvdOpen(const char* pFileName) {
     MR::zeroMemory(&mVideoInfo, sizeof(THPVideoInfo));
     MR::zeroMemory(&mAudioInfo, sizeof(THPAudioInfo));
 
+<<<<<<< HEAD
     if (!DVDOpen(pFileName, &mFileInfo)) {
+=======
+    if (!NebulaDisc::open(pFileName, &mFile)) {
+>>>>>>> upstream/main
         return false;
     }
 
@@ -631,8 +773,13 @@ void THPSimplePlayerWrapper::setupParams() {
 }
 
 namespace {
+<<<<<<< HEAD
     void readAsyncCallBackFunc(s32 a1, DVDFileInfo* pInfo) {
         THPSimplePlayerWrapper* player = (THPSimplePlayerWrapper*)pInfo->cb.userData;
+=======
+    void readAsyncCallBackFunc(s32 a1, NebulaDisc::Request* pRequest) {
+        THPSimplePlayerWrapper* player = (THPSimplePlayerWrapper*)pRequest->mUser;
+>>>>>>> upstream/main
         player->readAsyncCallBack(a1);
     }
 };  // namespace
@@ -642,30 +789,51 @@ void THPSimplePlayerWrapper::exeWait() {
 
 void THPSimplePlayerWrapper::exeReadHeader() {
     if (MR::isFirstStep(this)) {
+<<<<<<< HEAD
         mFileInfo.cb.userData = this;
         DVDReadAsyncPrio(&mFileInfo, WorkBuffer, 64, _C, ::readAsyncCallBackFunc, 2);
+=======
+        mRequest.mUser = this;
+        NebulaDisc::readAsync(&mFile, &mRequest, WorkBuffer, 64, _C, ::readAsyncCallBackFunc);
+>>>>>>> upstream/main
     }
 }
 
 void THPSimplePlayerWrapper::exeReadFrameComp() {
     if (MR::isFirstStep(this)) {
+<<<<<<< HEAD
         mFileInfo.cb.userData = this;
         _C = mHeader.compInfoDataOffsets;
         DVDReadAsyncPrio(&mFileInfo, WorkBuffer, 32, _C, ::readAsyncCallBackFunc, 2);
+=======
+        mRequest.mUser = this;
+        _C = mHeader.compInfoDataOffsets;
+        NebulaDisc::readAsync(&mFile, &mRequest, WorkBuffer, 32, _C, ::readAsyncCallBackFunc);
+>>>>>>> upstream/main
     }
 }
 
 void THPSimplePlayerWrapper::exeReadVideoComp() {
     if (MR::isFirstStep(this)) {
+<<<<<<< HEAD
         mFileInfo.cb.userData = this;
         DVDReadAsyncPrio(&mFileInfo, WorkBuffer, 32, _C, ::readAsyncCallBackFunc, 2);
+=======
+        mRequest.mUser = this;
+        NebulaDisc::readAsync(&mFile, &mRequest, WorkBuffer, 32, _C, ::readAsyncCallBackFunc);
+>>>>>>> upstream/main
     }
 }
 
 void THPSimplePlayerWrapper::exeReadAudioComp() {
     if (MR::isFirstStep(this)) {
+<<<<<<< HEAD
         mFileInfo.cb.userData = this;
         DVDReadAsyncPrio(&mFileInfo, WorkBuffer, 32, _C, ::readAsyncCallBackFunc, 2);
+=======
+        mRequest.mUser = this;
+        NebulaDisc::readAsync(&mFile, &mRequest, WorkBuffer, 32, _C, ::readAsyncCallBackFunc);
+>>>>>>> upstream/main
     }
 }
 
@@ -687,12 +855,18 @@ void THPSimplePlayerWrapper::endReadHeader() {
     swapWords(&mHeader.version, sizeof(mHeader) - sizeof(mHeader.magic));
 #endif
     if (strcmp(mHeader.magic, "THP")) {
+<<<<<<< HEAD
         DVDClose(&mFileInfo);
+=======
+>>>>>>> upstream/main
         return;
     }
 
     if (mHeader.version != 0x11000) {
+<<<<<<< HEAD
         DVDClose(&mFileInfo);
+=======
+>>>>>>> upstream/main
     }
 }
 
@@ -726,7 +900,11 @@ void THPSimplePlayerWrapper::endReadAudioComp() {
 
 void THPSimplePlayerWrapper::exeReadPreLoad() {
     if (MR::isFirstStep(this)) {
+<<<<<<< HEAD
         DVDReadAsyncPrio(&mFileInfo, mReadBuffer[mReadIndex].ptr, mReadSize, mCurOffset, ::readAsyncCallBackFunc, 2);
+=======
+        NebulaDisc::readAsync(&mFile, &mRequest, mReadBuffer[mReadIndex].ptr, mReadSize, mCurOffset, ::readAsyncCallBackFunc);
+>>>>>>> upstream/main
     }
 
     if (!_314) {
@@ -782,7 +960,11 @@ bool THPSimplePlayerWrapper::tryFinishDvdOpen() {
 }
 
 void THPSimplePlayerWrapper::initAudio() {
+<<<<<<< HEAD
     if (!SCGetSoundMode()) {
+=======
+    if (NebulaSystemSettings::soundMode() == NebulaSystemSettings::SoundModeMono) {
+>>>>>>> upstream/main
         _30C = 1;
     } else {
         _30C = 0;
@@ -805,10 +987,17 @@ s16* THPSimplePlayerWrapper::audioCallback(s32 sample) {
         return nullptr;
     }
 
+<<<<<<< HEAD
     s32 en = OSEnableInterrupts();
     mSoundBufferIndex ^= 1;
     mixAudio((s16*)mSoundBuffer[mSoundBufferIndex], sample);
     OSRestoreInterrupts(en);
+=======
+    s32 en = NebulaKernel::enableInterrupts();
+    mSoundBufferIndex ^= 1;
+    mixAudio((s16*)mSoundBuffer[mSoundBufferIndex], sample);
+    NebulaKernel::restoreInterrupts(en);
+>>>>>>> upstream/main
     return (s16*)mSoundBuffer[mSoundBufferIndex];
 }
 
@@ -969,7 +1158,11 @@ bool THPSimplePlayerWrapper::setVolume(s32 volume, s32 time) {
         time = 0;
     }
 
+<<<<<<< HEAD
     s32 en = OSEnableInterrupts();
+=======
+    s32 en = NebulaKernel::enableInterrupts();
+>>>>>>> upstream/main
     mTargetVolume = (f32)volume;
 
     if (time > 0) {
@@ -980,7 +1173,11 @@ bool THPSimplePlayerWrapper::setVolume(s32 volume, s32 time) {
         mCurrentVolume = mTargetVolume;
     }
 
+<<<<<<< HEAD
     OSRestoreInterrupts(en);
+=======
+    NebulaKernel::restoreInterrupts(en);
+>>>>>>> upstream/main
     return true;
 }
 
@@ -989,9 +1186,15 @@ bool THPSimplePlayerWrapper::isPreLoading() const {
 }
 
 void THPSimplePlayerWrapper::setUnpauseFrameFlag() {
+<<<<<<< HEAD
     s32 en = OSDisableInterrupts();
     _2F0 = 1;
     OSRestoreInterrupts(en);
+=======
+    s32 en = NebulaKernel::disableInterrupts();
+    _2F0 = 1;
+    NebulaKernel::restoreInterrupts(en);
+>>>>>>> upstream/main
 }
 
 s16* THPSimplePlayerStaticAudio::audioCallback(s32 audio) {

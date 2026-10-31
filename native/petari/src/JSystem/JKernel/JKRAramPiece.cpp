@@ -1,4 +1,9 @@
 #include "JSystem/JKernel/JKRAramPiece.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRAram.hpp"
 #include "JSystem/JKernel/JKRAramStream.hpp"
 #include "JSystem/JKernel/JKRDecomp.hpp"
@@ -20,16 +25,27 @@ void JKRAramPiece::sendCommand(JKRAMCommand* command) {
 }
 
 JSUList< JKRAMCommand > JKRAramPiece::sAramPieceCommandList;
+<<<<<<< HEAD
 OSMutex JKRAramPiece::mMutex;
+=======
+NebulaMutex JKRAramPiece::mMutex;
+>>>>>>> upstream/main
 
 JKRAMCommand* JKRAramPiece::orderAsync(int direction, uintptr_t source, uintptr_t destination, u32 length, JKRAramBlock* block,
                                        JKRAMCommand::AsyncCallback callback) {
     lock();
     if ((source & 0x1f) != 0 || (destination & 0x1f) != 0) {
+<<<<<<< HEAD
         OSReport("direction = %x\n", direction);
         OSReport("source = %x\n", source);
         OSReport("destination = %x\n", destination);
         OSReport("length = %x\n", length);
+=======
+        JUTNativeLog("direction = %x\n", direction);
+        JUTNativeLog("source = %x\n", source);
+        JUTNativeLog("destination = %x\n", destination);
+        JUTNativeLog("length = %x\n", length);
+>>>>>>> upstream/main
         JUTException::panic(__FILE__, 108, "illegal address. abort.");
     }
 
@@ -37,7 +53,11 @@ JKRAMCommand* JKRAramPiece::orderAsync(int direction, uintptr_t source, uintptr_
     JKRAMCommand* command = JKRAramPiece::prepareCommand(direction, source, destination, length, block, callback);
     message->setting(1, command);
 
+<<<<<<< HEAD
     OSSendMessage(&JKRAram::sMessageQueue, message, OS_MESSAGE_BLOCK);
+=======
+    (JKRAram::sMessageQueue).send(message, true);
+>>>>>>> upstream/main
     if (command->mCallback != NULL) {
         sAramPieceCommandList.append(&command->mPieceLink);
     }
@@ -47,17 +67,29 @@ JKRAMCommand* JKRAramPiece::orderAsync(int direction, uintptr_t source, uintptr_
 }
 
 BOOL JKRAramPiece::sync(JKRAMCommand* command, int is_non_blocking) {
+<<<<<<< HEAD
     OSMessage message;
 
     lock();
     if (is_non_blocking == 0) {
         OSReceiveMessage(&command->mMessageQueue, &message, OS_MESSAGE_BLOCK);
+=======
+    void* message;
+
+    lock();
+    if (is_non_blocking == 0) {
+        command->mMessageQueue.receive(&message, true);
+>>>>>>> upstream/main
         sAramPieceCommandList.remove(&command->mPieceLink);
         unlock();
         return TRUE;
     }
 
+<<<<<<< HEAD
     if (!OSReceiveMessage(&command->mMessageQueue, &message, OS_MESSAGE_NOBLOCK)) {
+=======
+    if (!command->mMessageQueue.receive(&message, false)) {
+>>>>>>> upstream/main
         unlock();
         return FALSE;
     }
@@ -88,14 +120,24 @@ void JKRAramPiece::doneDMA(uintptr_t requestAddress) {
     } else if (command->mCallback) {
         (*command->mCallback)(requestAddress);
     } else if (command->field_0x5C) {
+<<<<<<< HEAD
         OSSendMessage(command->field_0x5C, command, OS_MESSAGE_NOBLOCK);
     } else {
         OSSendMessage(&command->mMessageQueue, command, OS_MESSAGE_NOBLOCK);
+=======
+        command->field_0x5C->send(command, false);
+    } else {
+        command->mMessageQueue.send(command, false);
+>>>>>>> upstream/main
     }
 }
 
 JKRAMCommand::JKRAMCommand() : mPieceLink(this), field_0x30(this) {
+<<<<<<< HEAD
     OSInitMessageQueue(&mMessageQueue, &mMessage, 1);
+=======
+    mMessageQueue.init(&mMessage, 1);
+>>>>>>> upstream/main
     mCallback = NULL;
     field_0x5C = NULL;
     field_0x60 = 0;

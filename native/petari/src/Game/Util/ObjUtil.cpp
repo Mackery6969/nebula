@@ -952,7 +952,11 @@ void MR::findNamePosOnGround(const char* pName, MtxPtr pMtx) {
         makeMtxUpFrontPos(&mtx, -gravity, front, hitPos);
     }
 
+<<<<<<< HEAD
     PSMTXCopy(mtx.toMtxPtr(), pMtx);
+=======
+    NebulaMtxCopy(mtx.toMtxPtr(), pMtx);
+>>>>>>> upstream/main
 }
 
 bool MR::tryFindNamePos(const char* pName, MtxPtr pMtx) {

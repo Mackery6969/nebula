@@ -79,6 +79,7 @@ typedef unsigned long u32;
 typedef unsigned long long u64;
 #endif
 
+<<<<<<< HEAD
 typedef volatile u8 vu8;
 typedef volatile u16 vu16;
 typedef volatile u32 vu32;
@@ -92,6 +93,13 @@ typedef float f32;
 typedef double f64;
 typedef volatile f32 vf32;
 typedef volatile f64 vf64;
+=======
+typedef volatile u32 vu32;
+typedef volatile s32 vs32;
+
+typedef float f32;
+typedef double f64;
+>>>>>>> upstream/main
 
 typedef int BOOL;
 
@@ -207,9 +215,12 @@ typedef int BOOL;
 #define ARRAY_SIZEU(o) (sizeof(o) / sizeof(o[0]))
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
+<<<<<<< HEAD
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 #define FOURCC(c0, c1, c2, c3) (u32)((c0 & 0xFF) << 24 | (c1 & 0xFF) << 16 | (c2 & 0xFF) << 8 | (c3 & 0xFF))
+=======
+>>>>>>> upstream/main
 
 #define IS_ALIGNED(x, align) (((unsigned long)(x) & ((align) - 1)) == 0)
 #define IS_NOT_ALIGNED(X, N) (((X) & ((N) - 1)) != 0)

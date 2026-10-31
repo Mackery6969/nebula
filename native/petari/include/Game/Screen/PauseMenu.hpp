@@ -35,9 +35,12 @@ public:
     void exeConfirm();
     void exeGameDataSave();
     void exeLuigiLetter();
+<<<<<<< HEAD
 #ifdef TARGET_PC
     bool isSelecting() const;  // choosing, with no question, save or letter up
 #endif
+=======
+>>>>>>> upstream/main
 
     /* 0x20 */ ButtonPaneController* _20;
     /* 0x24 */ ButtonPaneController* _24;

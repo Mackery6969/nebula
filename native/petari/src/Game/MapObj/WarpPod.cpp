@@ -1,4 +1,9 @@
 #include "Game/MapObj/WarpPod.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeDraw.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorCameraInfo.hpp"
 #include "Game/LiveActor/LiveActorGroup.hpp"
 #include "Game/Scene/SceneFunction.hpp"
@@ -499,9 +504,15 @@ void WarpPod::initDraw() {
         }
 
         TPos3f rotation;
+<<<<<<< HEAD
         PSMTXRotAxisRad(rotation, axis, startAngle * (1.0f - blend) + halfAngle * blend);
         TVec3f point;
         PSMTXMultVecSR(rotation, arcStart, point);
+=======
+        NebulaMtxRotAxisRad(rotation, axis, startAngle * (1.0f - blend) + halfAngle * blend);
+        TVec3f point;
+        NebulaMtxMultVecSR(rotation, arcStart, point);
+>>>>>>> upstream/main
         TVec3f position(arcCenter + point);
         _C4[i] = position + up * 200.0f;
     }
@@ -530,6 +541,7 @@ void WarpPod::drawCylinder(u32) const {
     }
 
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
     MR::ddSetVtxFormat(2);
     MR::ddLightingOff();
@@ -539,6 +551,17 @@ void WarpPod::drawCylinder(u32) const {
     GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, GX_TB_ADDHALF, GX_TEVPREV);
     GXSetTevColor(GX_TEVREG0, ::gGlowEffectEnvColor[mGlowColorIndex]);
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+=======
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+    MR::ddSetVtxFormat(2);
+    MR::ddLightingOff();
+    J3DNativeState::setTevColorIn(GX_TEVSTAGE0, GX_CC_C0, GX_CC_ONE, GX_CC_TEXA, GX_CC_ZERO);
+    J3DNativeState::setTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_CC_APREV, GX_TEVPREV);
+    J3DNativeState::setTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_KONST, GX_CA_ZERO);
+    J3DNativeState::setTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_2, GX_TB_ADDHALF, GX_TEVPREV);
+    J3DNativeState::setTevColor(GX_TEVREG0, ::gGlowEffectEnvColor[mGlowColorIndex]);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
+>>>>>>> upstream/main
 
     _D4->load(GX_TEXMAP0);
     _D8->load(GX_TEXMAP1);
@@ -637,7 +660,11 @@ void WarpPod::drawCylinder(u32) const {
         vecC0 = _C4[i] + vec164;
         vecB4 = _C4[i] - vec164;
 
+<<<<<<< HEAD
         GXBegin(GX_QUADS, GX_VTXFMT0, 8);
+=======
+        J3DNativeDraw::begin(GX_QUADS, 8, MR::ddVtxAttributes());
+>>>>>>> upstream/main
 
         MR::ddSendVtxData(vecA8, previousTexCoords[0]);
         MR::ddSendVtxData(vecD8, currentTexCoords[0]);
@@ -676,7 +703,11 @@ void WarpPod::draw() const {
     }
 
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+=======
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_FALSE);
+>>>>>>> upstream/main
 
     for (u32 i = 0; i < _C8; i++) {
         TDDraw::drawCylinder(_C4[i], _C4[i + 1] - _C4[i], 100.0f, 0x40406040, 0x40406040, 8);

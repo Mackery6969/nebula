@@ -1,7 +1,14 @@
 # Architecture
 
+<<<<<<< HEAD
 Nebula runs the North American release of Super Mario Galaxy (`RMGE01`, revision 0) as native code. The game's code
 is the Petari decompilation compiled for the PC; the user's disc supplies only the game's files. Nothing translates
+=======
+Nebula runs Super Mario Galaxy's releases for North America (`RMGE01`), Europe (`RMGP01`) and Japan (`RMGJ01`),
+revision 0, as native code. The game's code is the Petari decompilation compiled for the PC, once for all three: where
+their code differs (Petari's `VERSION` switches between them, five places), the module follows the disc's game id
+(`native/sdk/region.c`, `NebulaRegion.hpp`). The user's disc supplies only the game's files. Nothing translates
+>>>>>>> upstream/main
 or interprets PowerPC instructions at any point.
 
 ## Repository layout
@@ -13,7 +20,11 @@ or interprets PowerPC instructions at any point.
 | `native/host` | `NebulaNative.exe`'s entry point: loads the game module and connects it to the services below |
 | `native/include/nebula_game_api.h` | The C interface between the game module and the host |
 | `runtime/src`, `runtime/include/galaxy` | Host services: audio, input and controllers, settings, saves, mods, Mii import, crash reports |
+<<<<<<< HEAD
 | `runtime/src/gx`, `runtime/include/galaxy/gx` | The GX graphics backend: command parsing, Direct3D 12 and Vulkan renderers, upscaling, interpolation |
+=======
+| `runtime/src/render`, `runtime/include/galaxy/render` | The GX graphics backend: command parsing, Direct3D 12 and Vulkan renderers, upscaling, interpolation |
+>>>>>>> upstream/main
 | `platform/sdl`, `platform/android` | The SDL3 host (Linux, Android) and the Android app |
 | `crates/nebula-import` | Disc image reading and `game.pak` packing (Setup and the Android app) |
 | `installer/src` | Setup (`Setup/`), the launcher (`Launcher/`), shared code (`Common/`) |
@@ -40,7 +51,11 @@ compiler flags, byte order, 64-bit pointers in 32-bit data, the console's memory
 through the `nebula_game_*` entry points:
 
 - **Video timing**: a 60 Hz retrace drives the game's frames.
+<<<<<<< HEAD
 - **Graphics** (`runtime/src/gx`): Direct3D 12 (or Vulkan in `NebulaNativeVk.exe`), internal resolution up to 16x,
+=======
+- **Graphics** (`runtime/src/render`): Direct3D 12 (or Vulkan in `NebulaNativeVk.exe`), internal resolution up to 16x,
+>>>>>>> upstream/main
   SMAA, FXAA, MSAA, FSR 3, DLSS, frame interpolation, texture packs and HD movie replacement.
 - **Input**: keyboard, mouse and controllers mapped to one Wii Remote with a Nunchuk ([KEYBOARD_CONTROLS.md](KEYBOARD_CONTROLS.md)).
 - **Storage**: disc reads from `game.pak`, saves in a folder laid out like the Wii's internal memory.

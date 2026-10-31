@@ -3,7 +3,13 @@
 #include "Inline.hpp"
 
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 #include <stdint.h>
 
 class J3DMatPacket;
@@ -74,6 +80,7 @@ inline int calcDifferedBufferSize_TevStageDirectSize(u32 param_1) {
     return param_1 * 5;
 }
 
+<<<<<<< HEAD
 class J3DDisplayListObj {
 public:
     J3DDisplayListObj() {
@@ -109,6 +116,24 @@ public:
     /* 0x8 */ u32 mSize;
     /* 0xC */ u32 mMaxSize;
 };  // Size: 0x10
+=======
+// A material's typed snapshot (J3DNativeMaterial), where J3D kept the material's display list: made with its owner
+// (a material, a material packet, an instance's shape packet), refreshed where J3D built or patched the list.
+class J3DDisplayListObj {
+public:
+    J3DDisplayListObj() {
+        mpNebulaMaterial = nullptr;
+        mNebulaCaptured = false;
+        mNebulaDiffFlags = 0;
+    }
+
+    J3DError newDisplayList();
+
+    struct NebulaMaterialParts* mpNebulaMaterial;
+    bool mNebulaCaptured;
+    u32 mNebulaDiffFlags;
+};
+>>>>>>> upstream/main
 
 class J3DPacket {
 public:
@@ -159,8 +184,12 @@ class J3DDrawPacket : public J3DPacket {
 public:
     J3DDrawPacket();
     ~J3DDrawPacket();
+<<<<<<< HEAD
     J3DError newDisplayList(u32);
     J3DError newSingleDisplayList(u32);
+=======
+    J3DError newDisplayList();
+>>>>>>> upstream/main
     virtual void draw();
 
     J3DDisplayListObj* getDisplayListObj() {
@@ -175,6 +204,7 @@ public:
         return mpDisplayListObj;
     }
 
+<<<<<<< HEAD
     void beginPatch() {
         mpDisplayListObj->beginPatch();
     }
@@ -202,6 +232,8 @@ public:
         return mpDisplayListObj->mSize;
     }
 
+=======
+>>>>>>> upstream/main
     enum {
         LOCKED = 0x01,
     };
@@ -283,8 +315,11 @@ class J3DMatPacket : public J3DDrawPacket {
 public:
     J3DMatPacket();
     void addShapePacket(J3DShapePacket*);
+<<<<<<< HEAD
     void beginDiff();
     void endDiff();
+=======
+>>>>>>> upstream/main
     bool isSame(J3DMatPacket*) const;
 
     J3DMaterial* getMaterial() const {

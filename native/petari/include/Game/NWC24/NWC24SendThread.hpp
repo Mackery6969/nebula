@@ -1,12 +1,20 @@
 #pragma once
 
 #include <revolution/nwc24.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include <revolution/os.h>
 
 class JKRHeap;
 struct NWC24MsgObj;
 
+<<<<<<< HEAD
 class NWC24SendThread : OSThread {
+=======
+class NWC24SendThread : NebulaThread {
+>>>>>>> upstream/main
 public:
     NWC24SendThread(s32, JKRHeap*);
 
@@ -44,9 +52,15 @@ private:
     static NWC24Err setToMyself(NWC24MsgObj*);
 
 private:
+<<<<<<< HEAD
     static OSMessage* mMessage;
     static s32 mMessageMax;
     static OSMessageQueue mMessageQueue;
+=======
+    static void** mMessage;
+    static s32 mMessageMax;
+    static NebulaMessageQueue mMessageQueue;
+>>>>>>> upstream/main
 
     u32 _unused;
 

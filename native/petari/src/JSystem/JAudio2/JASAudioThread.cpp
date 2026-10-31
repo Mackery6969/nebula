@@ -1,4 +1,8 @@
 #include "JSystem/JAudio2/JASAudioThread.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASAiCtrl.hpp"
 #include "JSystem/JAudio2/JASChannel.hpp"
 #include "JSystem/JAudio2/JASDSPChannel.hpp"
@@ -8,13 +12,20 @@
 #include "JSystem/JAudio2/JASProbe.hpp"
 #include "JSystem/JAudio2/JASReport.hpp"
 #include "JSystem/JKernel/JKRSolidHeap.hpp"
+<<<<<<< HEAD
 #include <revolution/dsp.h>
+=======
+>>>>>>> upstream/main
 #include <stdint.h>
 
 inline JASAudioThread::JASAudioThread(int stackSize, int msgCount, u32 threadPriority)
     : JKRThread(JASDram, threadPriority, msgCount, stackSize), JASGlobalInstance< JASAudioThread >(true) {
     sbPauseFlag = false;
+<<<<<<< HEAD
     OSInitThreadQueue(&sThreadQueue);
+=======
+    sThreadQueue.init();
+>>>>>>> upstream/main
 }
 
 void JASAudioThread::create(s32 threadPriority) {
@@ -32,23 +43,36 @@ void JASAudioThread::stop() {
 volatile int JASAudioThread::snIntCount;
 
 void* JASAudioThread::run() {
+<<<<<<< HEAD
     OSInitFastCast();
     JASDriver::initAI(DMACallback);
     JASDsp::boot(DSPCallback);
+=======
+    JASDriver::initAI(DMACallback);
+    JASDsp::boot();
+>>>>>>> upstream/main
     JASDsp::initBuffer();
     JASDSPChannel::initAll();
 
     JASPoolAllocObject_MultiThreaded< JASChannel >::newMemPool(0x48);
     JASDriver::startDMA();
 
+<<<<<<< HEAD
     OSMessage msg;
+=======
+    void* msg;
+>>>>>>> upstream/main
     while (true) {
         msg = waitMessageBlock();
         switch ((intptr_t)msg) {
         case AUDIOMSG_DMA:
             if (sbPauseFlag) {
                 JASDriver::stopDMA();
+<<<<<<< HEAD
                 OSSleepThread(&sThreadQueue);
+=======
+                sThreadQueue.sleep();
+>>>>>>> upstream/main
             }
 
             JASDriver::updateDac();
@@ -70,7 +94,11 @@ void* JASAudioThread::run() {
 
         case AUDIOMSG_STOP:
             JASDriver::stopDMA();
+<<<<<<< HEAD
             OSExitThread(nullptr);
+=======
+            NebulaKernel::exit(nullptr);
+>>>>>>> upstream/main
             continue;
         }
     }
@@ -84,6 +112,7 @@ void JASAudioThread::DMACallback() {
     }
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 // Natively the host's DSP program finishes a subframe inside DSPSendCommands2 (dsptask.cpp), which posts the message
 // the DSP's 0xF355FF00 mail produced here.
@@ -112,3 +141,10 @@ void JASAudioThread::DSPCallback(void*) {
     }
 }
 #endif
+=======
+// The host's mixer finishes a subframe inside JASDsp::releaseHalt, which posts the message the DSP's 0xF355FF00 mail
+// produced on the console.
+void JASAudioThread_postDSPMessage() {
+    JASAudioThread::getInstance()->sendMessage((void*)AUDIOMSG_DSP);
+}
+>>>>>>> upstream/main

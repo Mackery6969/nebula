@@ -37,6 +37,10 @@
 #include <JSystem/JMath/JMATrigonometric.hpp>
 #include <JSystem/JMath/JMath.hpp>
 #include <revolution/mtx.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NrvWaterBazooka {
     NEW_NERVE(WaterBazookaNrvWaitForBattle, WaterBazooka, WaitForBattle);
@@ -944,7 +948,11 @@ bool WaterBazooka::tryShotBullet() {
     } else {
 #ifdef TARGET_PC
         static_cast< WaterPressureBullet* >(bullet)->shotWaterBullet(
+<<<<<<< HEAD
             this, posMtx, 40.0f, true, true, __NebulaCodePatch(NEBULA_PATCH_WATER_BAZOOKA_SHOT_FLAG, nullptr) != 0,
+=======
+            this, posMtx, 40.0f, true, true, NebulaHost::codePatch(NEBULA_PATCH_WATER_BAZOOKA_SHOT_FLAG, nullptr) != 0,
+>>>>>>> upstream/main
             &mCameraInfo);
 #else
         static_cast< WaterPressureBullet* >(bullet)->shotWaterBullet(this, posMtx, 40.0f, true, true, false, &mCameraInfo);

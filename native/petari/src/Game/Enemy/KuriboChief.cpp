@@ -1,4 +1,8 @@
 #include "Game/Enemy/KuriboChief.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 #include "Game/Enemy/AnimScaleController.hpp"
 #include "Game/Enemy/ItemGenerator.hpp"
 #include "Game/Enemy/WalkerStateBindStarPointer.hpp"
@@ -198,7 +202,11 @@ void KuriboChief::makeArchiveList(NameObjArchiveListCollector* pCollector, const
 }
 
 void KuriboChief_FORCE_MATCH_DATA() {
+<<<<<<< HEAD
     OSReport("head");
+=======
+    JUTNativeLog("head");
+>>>>>>> upstream/main
 }
 
 void KuriboChief::kill() {

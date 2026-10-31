@@ -1,6 +1,10 @@
 #define J3D_TEV_STAGE_MUTABLE_DEFAULTS
 
 #include "JSystem/J3DGraphBase/J3DMaterial.hpp"
+<<<<<<< HEAD
+=======
+#include "JSystem/J3DGraphBase/J3DNativeMaterial.hpp"
+>>>>>>> upstream/main
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
 
 J3DColorBlock* J3DMaterial::createColorBlock(u32 flags) {
@@ -178,6 +182,7 @@ void J3DMaterial::initialize() {
     mSharedDLObj = NULL;
 }
 
+<<<<<<< HEAD
 u32 J3DMaterial::countDLSize() {
     return (mColorBlock->countDLSize() + mTexGenBlock->countDLSize() + mTevBlock->countDLSize() + mIndBlock->countDLSize() + mPEBlock->countDLSize() +
             31) &
@@ -197,16 +202,26 @@ void J3DMaterial::makeDisplayList_private(J3DDisplayListObj* pDLObj) {
     J3DGDSetNumTexGens(mTexGenBlock->getTexGenNum());
     pDLObj->endDL();
 }
+=======
+>>>>>>> upstream/main
 
 void J3DMaterial::makeDisplayList() {
     if (!j3dSys.getMatPacket()->isLocked()) {
         j3dSys.getMatPacket()->mDiffFlag = mDiffFlag;
+<<<<<<< HEAD
         makeDisplayList_private(j3dSys.getMatPacket()->getDisplayListObj());
+=======
+        J3DNativeMaterial::capture(this, j3dSys.getMatPacket()->mpTexture, j3dSys.getMatPacket()->getDisplayListObj());
+>>>>>>> upstream/main
     }
 }
 
 void J3DMaterial::makeSharedDisplayList() {
+<<<<<<< HEAD
     makeDisplayList_private(mSharedDLObj);
+=======
+    J3DNativeMaterial::capture(this, j3dSys.getTexture(), mSharedDLObj);
+>>>>>>> upstream/main
 }
 
 void J3DMaterial::load() {
@@ -219,13 +234,18 @@ void J3DMaterial::load() {
 void J3DMaterial::loadSharedDL() {
     j3dSys.setMaterialMode(mMaterialMode);
     if (!j3dSys.checkFlag(2)) {
+<<<<<<< HEAD
         mSharedDLObj->callDL();
+=======
+        J3DNativeMaterial::send(this, j3dSys.getTexture(), mSharedDLObj);
+>>>>>>> upstream/main
         loadNBTScale(*mTexGenBlock->getNBTScale());
     }
 }
 
 void J3DMaterial::patch() {
     j3dSys.getMatPacket()->mDiffFlag = mDiffFlag;
+<<<<<<< HEAD
     j3dSys.getMatPacket()->beginPatch();
     mTevBlock->patch();
     mColorBlock->patch();
@@ -248,6 +268,16 @@ void J3DMaterial::diff(u32 diffFlags) {
         mColorBlock->diff(diffFlags);
 
         j3dSys.getMatPacket()->endDiff();
+=======
+    J3DNativeMaterial::capture(this, j3dSys.getMatPacket()->mpTexture, j3dSys.getMatPacket()->getDisplayListObj());
+}
+
+void J3DMaterial::diff(u32 diffFlags) {
+    // An instance's animated values, into its shape packet's differed snapshot (the parts `diffFlags` names).
+    if (j3dSys.getMatPacket()->isEnabled_Diff()) {
+        J3DNativeMaterial::capture(this, j3dSys.getMatPacket()->mpTexture,
+                                   j3dSys.getMatPacket()->mpInitShapePacket->getDisplayListObj(), diffFlags);
+>>>>>>> upstream/main
     }
 }
 
@@ -311,14 +341,22 @@ void J3DMaterial::change() {
     }
 }
 
+<<<<<<< HEAD
 s32 J3DMaterial::newSharedDisplayList(u32 dlSize) {
+=======
+s32 J3DMaterial::newSharedDisplayList() {
+>>>>>>> upstream/main
     if (mSharedDLObj == NULL) {
         mSharedDLObj = new J3DDisplayListObj();
         if (mSharedDLObj == NULL) {
             return kJ3DError_Alloc;
         }
 
+<<<<<<< HEAD
         s32 ret = mSharedDLObj->newDisplayList(dlSize);
+=======
+        s32 ret = mSharedDLObj->newDisplayList();
+>>>>>>> upstream/main
         if (ret != kJ3DError_Success) {
             return ret;
         }
@@ -327,6 +365,7 @@ s32 J3DMaterial::newSharedDisplayList(u32 dlSize) {
     return kJ3DError_Success;
 }
 
+<<<<<<< HEAD
 s32 J3DMaterial::newSingleSharedDisplayList(u32 dlSize) {
     if (mSharedDLObj == NULL) {
         mSharedDLObj = new J3DDisplayListObj();
@@ -342,6 +381,8 @@ s32 J3DMaterial::newSingleSharedDisplayList(u32 dlSize) {
 
     return kJ3DError_Success;
 }
+=======
+>>>>>>> upstream/main
 
 void J3DPatchedMaterial::initialize() {
     J3DMaterial::initialize();
@@ -362,8 +403,14 @@ void J3DPatchedMaterial::load() {
 
 void J3DPatchedMaterial::loadSharedDL() {
     j3dSys.setMaterialMode(mMaterialMode);
+<<<<<<< HEAD
     if (!j3dSys.checkFlag(0x02))
         mSharedDLObj->callDL();
+=======
+    if (!j3dSys.checkFlag(0x02)) {
+        J3DNativeMaterial::send(this, j3dSys.getTexture(), mSharedDLObj);
+    }
+>>>>>>> upstream/main
 }
 
 void J3DPatchedMaterial::reset() {
@@ -391,8 +438,14 @@ void J3DLockedMaterial::load() {
 
 void J3DLockedMaterial::loadSharedDL() {
     j3dSys.setMaterialMode(mMaterialMode);
+<<<<<<< HEAD
     if (!j3dSys.checkFlag(0x02))
         mSharedDLObj->callDL();
+=======
+    if (!j3dSys.checkFlag(0x02)) {
+        J3DNativeMaterial::send(this, j3dSys.getTexture(), mSharedDLObj);
+    }
+>>>>>>> upstream/main
 }
 
 void J3DLockedMaterial::patch() {

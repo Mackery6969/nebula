@@ -1,6 +1,10 @@
 #pragma once
 
 #include "JSystem/JKernel/JKRDisposer.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRHeap.hpp"
 
 #include <revolution/os.h>
@@ -27,7 +31,11 @@ public:
 
     JKRThread(u32 stack_size, int message_count, int param_3);
     JKRThread(JKRHeap* heap, u32 stack_size, int message_count, int param_4);
+<<<<<<< HEAD
     JKRThread(OSThread* thread, int message_count);
+=======
+    JKRThread(NebulaThread* thread, int message_count);
+>>>>>>> upstream/main
 
     virtual ~JKRThread();
     virtual void* run() {
@@ -37,7 +45,11 @@ public:
     void setCommon_mesgQueue(JKRHeap* heap, int message_count);
     void setCommon_heapSpecified(JKRHeap* heap, u32 stack_size, int param_3);
 
+<<<<<<< HEAD
     OSThread* getThreadRecord() const {
+=======
+    NebulaThread* getThreadRecord() const {
+>>>>>>> upstream/main
         return mThread;
     }
     void* getStack() const {
@@ -58,6 +70,7 @@ public:
     }
 
     void resume() {
+<<<<<<< HEAD
         OSResumeThread(mThread);
     }
     BOOL sendMessage(OSMessage message) {
@@ -84,10 +97,39 @@ public:
     }
     void jamMessageBlock(OSMessage message) {
         OSJamMessage(&mMessageQueue, message, OS_MESSAGE_BLOCK);
+=======
+        NebulaKernel::resume(mThread);
+    }
+    BOOL sendMessage(void* message) {
+        return mMessageQueue.send(message, false);
+    }
+    void sendMessageBlock(void* message) {
+        mMessageQueue.send(message, true);
+    }
+    void* waitMessage() {
+        void* message;
+        mMessageQueue.receive(&message, false);
+        return message;
+    }
+
+    void* waitMessage(BOOL* received) {
+        void* message;
+        *received = mMessageQueue.receive(&message, false);
+        return message;
+    }
+    void* waitMessageBlock() {
+        void* message;
+        mMessageQueue.receive(&message, true);
+        return message;
+    }
+    void jamMessageBlock(void* message) {
+        mMessageQueue.jam(message, true);
+>>>>>>> upstream/main
     }
 
     static void* start(void* pData);
 
+<<<<<<< HEAD
     static JKRThread* searchThread(OSThread*);
 
     /* 0x18 */ JSULink< JKRThread > mThreadListLink;
@@ -95,6 +137,15 @@ public:
     /* 0x2C */ OSThread* mThread;
     /* 0x30 */ OSMessageQueue mMessageQueue;
     /* 0x50 */ OSMessage* mMesgBuffer;
+=======
+    static JKRThread* searchThread(NebulaThread*);
+
+    /* 0x18 */ JSULink< JKRThread > mThreadListLink;
+    /* 0x28 */ JKRHeap* mHeap;
+    /* 0x2C */ NebulaThread* mThread;
+    /* 0x30 */ NebulaMessageQueue mMessageQueue;
+    /* 0x50 */ void** mMesgBuffer;
+>>>>>>> upstream/main
     /* 0x54 */ s32 mMessageCount;
     /* 0x58 */ void* mStackMemory;
     /* 0x5C */ u32 mStackSize;

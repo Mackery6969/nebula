@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ShadowVolumeDrawer.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Scene/SceneObjHolder.hpp"
 #include "Game/Util/DrawUtil.hpp"
@@ -82,6 +86,7 @@ void ShadowVolumeDrawer::draw() const {
     if (isDraw()) {
         loadModelDrawMtx();
         GXColor shapeColor = reinterpret_cast< GXColor& >(::sShapeColor);
+<<<<<<< HEAD
         GXSetTevColor(GX_TEVREG0, shapeColor);
         GXSetColorUpdate(0);
         GXSetDstAlpha(0, 0);
@@ -94,6 +99,20 @@ void ShadowVolumeDrawer::draw() const {
         GXSetCullMode(GX_CULL_NONE);
         GXSetColorUpdate(1);
         GXSetDstAlpha(1, 0);
+=======
+        J3DNativeState::setTevColor(GX_TEVREG0, shapeColor);
+        J3DNativeState::setColorUpdate(0);
+        J3DNativeState::setDstAlpha(0, 0);
+        J3DNativeState::setCullMode(GX_CULL_FRONT);
+        J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_ONE, GX_BL_ONE, GX_LO_COPY);
+        drawShape();
+        J3DNativeState::setCullMode(GX_CULL_BACK);
+        J3DNativeState::setBlendMode(GX_BM_SUBTRACT, GX_BL_ZERO, GX_BL_ZERO, GX_LO_COPY);
+        drawShape();
+        J3DNativeState::setCullMode(GX_CULL_NONE);
+        J3DNativeState::setColorUpdate(1);
+        J3DNativeState::setDstAlpha(1, 0);
+>>>>>>> upstream/main
     }
 }
 

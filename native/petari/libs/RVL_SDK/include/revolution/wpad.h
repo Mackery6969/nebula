@@ -14,17 +14,24 @@ typedef void (*WPADConnectCallback)(s32 chan, s32 reason);
 typedef void (*WPADCallback)(s32 chan, s32 result);
 typedef void* (*WPADAlloc)(u32 size);
 typedef u8 (*WPADFree)(void* ptr);
+<<<<<<< HEAD
 typedef void (*WPADSyncDeviceCallback)(s32 result, s32 num);
 typedef void (*WPADSamplingCallback)(s32 chan);
 typedef void (*WPADFlushCallback)(u32 result);
 
 typedef u32 WPADDeviceType;
 typedef s32 WPADChannel;
+=======
+typedef void (*WPADSamplingCallback)(s32 chan);
+>>>>>>> upstream/main
 
 #define WPAD_CHAN0 0
 #define WPAD_CHAN1 1
 #define WPAD_CHAN2 2
+<<<<<<< HEAD
 #define WPAD_CHAN3 3
+=======
+>>>>>>> upstream/main
 
 #define WPAD_MAX_CONTROLLERS 4
 
@@ -45,6 +52,7 @@ typedef s32 WPADChannel;
 #define WPAD_BUTTON_C 0x4000
 #define WPAD_BUTTON_HOME 0x8000
 
+<<<<<<< HEAD
 #define WPAD_CL_BUTTON_UP 0x0001
 #define WPAD_CL_BUTTON_LEFT 0x0002
 #define WPAD_CL_TRIGGER_ZR 0x0004
@@ -62,6 +70,8 @@ typedef s32 WPADChannel;
 #define WPAD_CL_BUTTON_DOWN 0x4000
 #define WPAD_CL_BUTTON_RIGHT 0x8000
 
+=======
+>>>>>>> upstream/main
 #define WPAD_DPD_MAX_OBJECTS 4
 #define WPAD_DPD_IMG_RESO_WX 1024
 #define WPAD_DPD_IMG_RESO_WY 768
@@ -69,10 +79,13 @@ typedef s32 WPADChannel;
 #define WPAD_DEV_CORE 0
 #define WPAD_DEV_FREESTYLE 1
 #define WPAD_DEV_CLASSIC 2
+<<<<<<< HEAD
 #define WPAD_DEV_MPLS 5
 #define WPAD_DEV_MPLS_FREESTYLE 6
 #define WPAD_DEV_MPLS_CLASSIC 7
 #define WPAD_DEV_MPLS_FUTURE 250
+=======
+>>>>>>> upstream/main
 #define WPAD_DEV_FUTURE 251
 #define WPAD_DEV_NOT_SUPPORTED 252
 #define WPAD_DEV_NOT_FOUND 253
@@ -87,6 +100,7 @@ typedef s32 WPADChannel;
 #define WPAD_FMT_CLASSIC 6
 #define WPAD_FMT_CLASSIC_ACC 7
 #define WPAD_FMT_CLASSIC_ACC_DPD 8
+<<<<<<< HEAD
 #define WPAD_FMT_CORE_ACC_DPD_FULL 9
 
 #define WPAD_STATE_DISABLED 0
@@ -99,6 +113,14 @@ typedef s32 WPADChannel;
 #define WPAD_BATTERY_LEVEL_LOW 1
 #define WPAD_BATTERY_LEVEL_MEDIUM 2
 #define WPAD_BATTERY_LEVEL_HIGH 3
+=======
+
+#define WPAD_STATE_DISABLED 0
+#define WPAD_STATE_SETUP 3
+
+#define WPAD_BATTERY_LEVEL_CRITICAL 0
+#define WPAD_BATTERY_LEVEL_LOW 1
+>>>>>>> upstream/main
 #define WPAD_BATTERY_LEVEL_MAX 4
 
 #define WPAD_SENSOR_BAR_POS_BOTTOM 0
@@ -108,14 +130,18 @@ typedef s32 WPADChannel;
 #define WPAD_ERR_NO_CONTROLLER -1
 #define WPAD_ERR_BUSY -2
 #define WPAD_ERR_TRANSFER -3
+<<<<<<< HEAD
 #define WPAD_ERR_INVALID -4
 #define WPAD_ERR_NOPERM -5
 #define WPAD_ERR_BROKEN -6
+=======
+>>>>>>> upstream/main
 #define WPAD_ERR_CORRUPTED -7
 
 #define WPAD_RX_DATASIZE 96
 #define WPAD_COMMAND_CMD_MAX_LEN 24
 #define WPAD_COMMAND_EXT_MAX_LEN 12
+<<<<<<< HEAD
 #define WPAD_COMMAND_BUF_LEN 22
 
 #define WPAD_HIDREP_BASE 0x10
@@ -153,6 +179,8 @@ typedef s32 WPADChannel;
 #define SPK_RESET 0x80
 #define SPK_CTRL_REG 0x04a20008
 #define SPK_CTRL_PLAY 1
+=======
+>>>>>>> upstream/main
 
 typedef struct DPDObject {
     s16 x;
@@ -161,6 +189,7 @@ typedef struct DPDObject {
     u8 traceId;
 } DPDObject;
 
+<<<<<<< HEAD
 typedef struct DPDObjEx {
     s16 range_x1;
     s16 range_y1;
@@ -182,6 +211,8 @@ typedef struct WPADStatusEx {
 
 } WPADStatusEx;
 
+=======
+>>>>>>> upstream/main
 typedef struct WPADInfo {
     BOOL dpd;
     BOOL speaker;
@@ -194,6 +225,7 @@ typedef struct WPADInfo {
     u8 firmware;
 } WPADInfo;
 
+<<<<<<< HEAD
 typedef enum {
     WPAD_RESULT_ERR_3 = -3,
     WPAD_RESULT_ERR_2,
@@ -202,6 +234,8 @@ typedef enum {
     WPAD_RESULT_SUCCESS = 0,
 } WPADResult;
 
+=======
+>>>>>>> upstream/main
 typedef struct WPADStatus {
     u16 button;
     s16 accX;
@@ -469,7 +503,10 @@ BOOL WPADiPushCommand(WPADCmdQueue*, WPADCommand);
 
 void WPADSetAutoSamplingBuf(s32, void*, u32);
 
+<<<<<<< HEAD
 #define WPADStartMotor(chan) WPADControlMotor((chan), WPAD_MOTOR_RUMBLE)
+=======
+>>>>>>> upstream/main
 #define WPADStopMotor(chan) WPADControlMotor((chan), WPAD_MOTOR_STOP)
 
 extern WPADMEMControlBlock _wmb[WPAD_MAX_CONTROLLERS];

@@ -21,12 +21,15 @@ public:
     /// @brief Adds to the number of Purple Coins by one.
     void incPurpleCoin();
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
     /// @brief Online co-op: adds the coins another player in this instance took (sm64coopdx's collect_coin): the
     /// count only, without the life, the 1-Up or the player's own statistics.
     void incCoinOfOtherPlayer(int num);
 #endif
 
+=======
+>>>>>>> upstream/main
     /// @brief Adds to the number of Star Bits by the given term.
     /// @param num The number of Star Bits to add.
     void incStarPiece(int num);

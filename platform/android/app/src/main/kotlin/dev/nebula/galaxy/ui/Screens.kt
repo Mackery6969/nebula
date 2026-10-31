@@ -252,7 +252,11 @@ private fun DiscScreen(model: LauncherModel, onChoose: () -> Unit) {
                 Gap(12.dp)
                 Text("This disc image can't be used", style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
                 Gap(8.dp)
+<<<<<<< HEAD
                 Lead(identity.message.ifEmpty { "It is not the North American Super Mario Galaxy (RMGE01)." })
+=======
+                Lead(identity.message.ifEmpty { "It is not Super Mario Galaxy for North America, Europe or Japan." })
+>>>>>>> upstream/main
                 Gap(28.dp)
                 PrimaryAction("Choose another", Icons.Rounded.FolderOpen, onChoose, Modifier.fillMaxWidth())
             }

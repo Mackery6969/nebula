@@ -21,6 +21,12 @@ J3DVertexData::J3DVertexData() {
     mVtxPosType = GX_F32;
     mVtxNrmFrac = 0;
     mVtxNrmType = GX_F32;
+<<<<<<< HEAD
+=======
+    for (int i = 0; i < 13; ++i) {
+        mNebulaArrayCount[i] = 0;
+    }
+>>>>>>> upstream/main
 }
 
 void J3DVertexBuffer::setVertexData(J3DVertexData* data) {

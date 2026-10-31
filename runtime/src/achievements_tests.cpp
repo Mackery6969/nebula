@@ -76,6 +76,7 @@ int main() {
     ach::set_path_for_tests(path);
     expect(ach::unlocked("no_miss_120") && ach::unlocked("coins999"), "read back after the batch");
 
+<<<<<<< HEAD
     // Another player's unlock (online co-op): on the day it was unlocked in the room's save.
     ach::set_path_for_tests(path);
     {
@@ -95,6 +96,8 @@ int main() {
     ach::set_path_for_tests(path);
     expect(ach::unlocked_time("luigi_play") == 1767225600, "the time is kept across sessions");
 
+=======
+>>>>>>> upstream/main
     // An entry whose day cannot be read is unlocked all the same.
     {
         std::ofstream out(path, std::ios::trunc);
@@ -102,7 +105,10 @@ int main() {
     }
     ach::set_path_for_tests(path);
     expect(ach::unlocked("comets") && ach::unlocked_date("comets") == 1, "unlocked on an unreadable day: 1");
+<<<<<<< HEAD
     expect(ach::unlocked_time("comets") == 0, "with no time");
+=======
+>>>>>>> upstream/main
 
     std::filesystem::remove(path);
     if (s_failures == 0) std::printf("achievements: all passed\n");

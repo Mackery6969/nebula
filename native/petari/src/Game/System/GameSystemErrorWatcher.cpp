@@ -18,6 +18,7 @@
 #define WII_REMOTE_STATUS_UNPLAGGED 3
 
 namespace {
+<<<<<<< HEAD
     const GameSystemErrorWatcher::Message cMessageFatalError = {
         "DISC_04",
         ErrorMessageWindow::MessageType_System,
@@ -34,6 +35,8 @@ namespace {
         "DISC_03",
         ErrorMessageWindow::MessageType_System,
     };
+=======
+>>>>>>> upstream/main
     const GameSystemErrorWatcher::Message cMessageUnplagged = {
         "CONT_01",
         ErrorMessageWindow::MessageType_Game,
@@ -60,7 +63,11 @@ namespace {
 
 GameSystemErrorWatcher::GameSystemErrorWatcher()
     : NerveExecutor("ErrorWatcher"), mWindow(nullptr), mMessage(nullptr), mUnplaggedTexMap(nullptr), mBatteryLayout(nullptr),
+<<<<<<< HEAD
       mDriveStatus(DVD_STATE_END), _1C(nullptr), mWiiRemoteStatus(WII_REMOTE_STATUS_OK), mCounterIgnoreCheckFreeStyle(0),
+=======
+      _1C(nullptr), mWiiRemoteStatus(WII_REMOTE_STATUS_OK), mCounterIgnoreCheckFreeStyle(0),
+>>>>>>> upstream/main
       mCounterDecideDisconnect(::sCounterMaxDecideDisconnect), mWiiRemoteBattery(WPAD_BATTERY_LEVEL_MAX), mPermissionUpdateWiiRemoteStatus(false) {
     mWindow = new ErrorMessageWindow();
     mWindow->initWithoutIter();
@@ -82,8 +89,11 @@ void GameSystemErrorWatcher::movement() {
     mWindow->movement();
     mWindow->calcAnim();
 
+<<<<<<< HEAD
     mDriveStatus = DVDGetDriveStatus();
 
+=======
+>>>>>>> upstream/main
     updateWiiRemoteStatus();
     updateNerve();
 
@@ -247,6 +257,7 @@ void GameSystemErrorWatcher::updateWiiRemoteStatus() {
 }
 
 const GameSystemErrorWatcher::Message* GameSystemErrorWatcher::getProperMessageId() const {
+<<<<<<< HEAD
     switch (mDriveStatus) {
     case DVD_STATE_FATAL_ERROR:
         return &::cMessageFatalError;
@@ -258,6 +269,8 @@ const GameSystemErrorWatcher::Message* GameSystemErrorWatcher::getProperMessageI
         return &::cMessageRetry;
     }
 
+=======
+>>>>>>> upstream/main
     switch (mWiiRemoteStatus) {
     case WII_REMOTE_STATUS_UNPLAGGED:
         return &::cMessageUnplagged;
@@ -271,6 +284,7 @@ const GameSystemErrorWatcher::Message* GameSystemErrorWatcher::getProperMessageI
 }
 
 const nw4r::lyt::TexMap* GameSystemErrorWatcher::getProperErrorTexMap() const {
+<<<<<<< HEAD
     switch (mDriveStatus) {
     case DVD_STATE_FATAL_ERROR:
         return nullptr;
@@ -282,6 +296,8 @@ const nw4r::lyt::TexMap* GameSystemErrorWatcher::getProperErrorTexMap() const {
         return nullptr;
     }
 
+=======
+>>>>>>> upstream/main
     switch (mWiiRemoteStatus) {
     case WII_REMOTE_STATUS_UNPLAGGED:
         return mUnplaggedTexMap;

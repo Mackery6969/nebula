@@ -1,4 +1,8 @@
 #include "Game/Screen/NebulaAchievementBoard.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/JUtility/JUTNativeLog.hpp>
+>>>>>>> upstream/main
 
 #ifdef TARGET_PC
 #include "Game/Screen/NebulaMenuFocus.hpp"
@@ -30,8 +34,13 @@
 #include <nw4r/ut/Font.h>
 #include <revolution/gx.h>
 #include <revolution/os.h>
+<<<<<<< HEAD
 #include <revolution/tpl.h>
 #include <revolution/wpad.h>
+=======
+#include <revolution/wpad.h>
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace NrvNebulaAchievementBoard {
     NEW_NERVE(NebulaAchievementBoardNrvAppear, NebulaAchievementBoard, Appear);
@@ -259,7 +268,10 @@ namespace {
         StatHidden,
         StatGreenStars,
         StatLumas,
+<<<<<<< HEAD
         StatPowerStarsCollected,
+=======
+>>>>>>> upstream/main
         StatJumps,
         StatSpins,
         StatCoins,
@@ -269,12 +281,20 @@ namespace {
         StatOneUps,
         StatPlayTime,
         StatNum,
+<<<<<<< HEAD
         StatFirstAllTime = StatPowerStarsCollected,
+=======
+        StatFirstAllTime = StatJumps,
+>>>>>>> upstream/main
     };
 
     const char* const cStatLabels[StatNum] = {
         "StatPowerStars", "StatStarBits", "StatLives", "StatChapters", "StatComets", "StatPurpleCoins",
+<<<<<<< HEAD
         "StatHidden", "StatGreenStars", "StatLumas", "StatPowerStarsCollected", "StatJumps", "StatSpins", "StatCoins",
+=======
+        "StatHidden", "StatGreenStars", "StatLumas", "StatJumps", "StatSpins", "StatCoins",
+>>>>>>> upstream/main
         "StatStarBitsCollected", "StatLivesLost", "StatGameOvers", "StatOneUps", "StatPlayTime",
     };
 
@@ -1114,7 +1134,11 @@ void NebulaAchievementBoard::init(const JMapInfoIter& rIter) {
     new (&p->mButton) NebulaPaneKit();
     Pane* pRoot = pManager->mLayout->mpRootPane;
     if (pRoot == nullptr || !p->mText.init(pManager->mLayoutHolder) || !p->mButton.init(MR::createAndAddLayoutHolder("BackButton.arc"))) {
+<<<<<<< HEAD
         OSReport("NebulaAchievementBoard: no InformationWindow or BackButton layout\n");
+=======
+        JUTNativeLog("NebulaAchievementBoard: no InformationWindow or BackButton layout\n");
+>>>>>>> upstream/main
         return;
     }
     const bool ringed = p->mWindow.init(MR::createAndAddLayoutHolder("SysInfoWindowMini.arc"));
@@ -1134,7 +1158,11 @@ void NebulaAchievementBoard::init(const JMapInfoIter& rIter) {
             void* pTpl = pHolder != nullptr ? pHolder->GetResource('timg', pIcon->mTexture, nullptr) : nullptr;
             if (pTpl != nullptr) {
                 p->mTextures[i] = new nw4r::lyt::TexMap();
+<<<<<<< HEAD
                 p->mTextures[i]->ReplaceImage(static_cast< TPLPalette* >(pTpl), 0);
+=======
+                p->mTextures[i]->ReplaceImage(pTpl, 0);
+>>>>>>> upstream/main
             }
         } else if (MR::isExistResourceInArc(pIcon->mArchive, pIcon->mTexture)) {
             p->mTextures[i] = MR::createLytTexMap(pIcon->mArchive, pIcon->mTexture);
@@ -1388,7 +1416,11 @@ void NebulaAchievementBoard::init(const JMapInfoIter& rIter) {
 
     mParts = p;
     pManager->rebuildPaneInfo();
+<<<<<<< HEAD
     OSReport("NebulaAchievementBoard: %d cards, %s windows\n", p->mCardNum, ringed ? "ringed" : "plain");
+=======
+    JUTNativeLog("NebulaAchievementBoard: %d cards, %s windows\n", p->mCardNum, ringed ? "ringed" : "plain");
+>>>>>>> upstream/main
 }
 
 void NebulaAchievementBoard::open() {
@@ -1412,7 +1444,11 @@ void NebulaAchievementBoard::open() {
     p->mPointerIn = false;
     p->mOverBack = false;
     NebulaMenuFocus::holdCurrent(&p->mRepeat);
+<<<<<<< HEAD
     (void)__NebulaPointerWheel();  // turns from before it opened scroll nothing
+=======
+    (void)NebulaHost::pointerWheel();  // turns from before it opened scroll nothing
+>>>>>>> upstream/main
     p->mFrame = 0;
     p->mSwitchFrame = 0;
     p->mSwitchDirection = 0;
@@ -1528,9 +1564,12 @@ void NebulaAchievementBoard::open() {
         case StatLumas:
             current = file.mLumasFed, goal = file.mLumasFedMax, glyph = 'c';
             break;
+<<<<<<< HEAD
         case StatPowerStarsCollected:
             count = NebulaAchievements::getStat(NebulaStat_PowerStars), glyph = '7';
             break;
+=======
+>>>>>>> upstream/main
         case StatJumps:
             count = NebulaAchievements::getStat(NebulaStat_Jumps);
             break;
@@ -1671,7 +1710,11 @@ void NebulaAchievementBoard::exeAppear() {
 
 void NebulaAchievementBoard::exeWait() {
     NebulaBoardParts* p = mParts;
+<<<<<<< HEAD
     const s32 wheel = __NebulaPointerWheel();
+=======
+    const s32 wheel = NebulaHost::pointerWheel();
+>>>>>>> upstream/main
     if (MR::isSystemWipeActive()) {
         return;  // the board takes no input while it comes out of the black
     }

@@ -26,6 +26,12 @@
 #include <string_view>
 
 #if defined(_WIN32)
+<<<<<<< HEAD
+=======
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+>>>>>>> upstream/main
 #pragma comment(lib, "Shell32.lib")
 #endif
 
@@ -37,6 +43,7 @@ RuntimeSettings s_settings{};
 std::uint64_t s_input_mode_generation = 1u;
 std::shared_mutex s_settings_lock;
 
+<<<<<<< HEAD
 // Printable ASCII only, with no surrounding spaces, at most `limit` bytes: the file stays one line per key and the
 // game's font draws every character.
 std::string sanitize_coop_text(std::string_view text, std::size_t limit = kCoopTextLimit) {
@@ -72,6 +79,8 @@ bool parse_port(std::string_view text, std::uint16_t& port) {
     return true;
 }
 
+=======
+>>>>>>> upstream/main
 RuntimeSettings sanitize_settings(RuntimeSettings settings) {
     switch (settings.input_mode) {
     case RuntimeInputMode::Auto:
@@ -96,6 +105,7 @@ RuntimeSettings sanitize_settings(RuntimeSettings settings) {
         ? std::clamp(settings.audio.wiimote_speaker, 0.0f, 4.0f)
         : 0.0f;
     settings.text_speed = std::clamp(settings.text_speed, 1u, 4u);
+<<<<<<< HEAD
     if (settings.language != GameLanguage::French && settings.language != GameLanguage::Spanish) {
         settings.language = GameLanguage::English;
     }
@@ -116,6 +126,11 @@ RuntimeSettings sanitize_settings(RuntimeSettings settings) {
         settings.coop.character = CoopCharacter::Mario;
     }
     settings.coop.join_address = sanitize_coop_text(settings.coop.join_address, kCoopAddressLimit);
+=======
+    if (std::find(std::begin(kGameLanguages), std::end(kGameLanguages), settings.language) == std::end(kGameLanguages)) {
+        settings.language = GameLanguage::Auto;
+    }
+>>>>>>> upstream/main
     return settings;
 }
 
@@ -200,12 +215,17 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
     } else if (std::strcmp(key, "discord_status") == 0) {
         settings.discord_status = value[0] != '0';
     } else if (std::strcmp(key, "button_icons") == 0) {
+<<<<<<< HEAD
         for (unsigned i = 0; i <= static_cast<unsigned>(ButtonIcons::PlayStation); ++i) {
+=======
+        for (unsigned i = 0; i <= static_cast<unsigned>(ButtonIcons::Keyboard); ++i) {
+>>>>>>> upstream/main
             if (_stricmp(value, button_icons_key(static_cast<ButtonIcons>(i))) == 0) {
                 settings.button_icons = static_cast<ButtonIcons>(i);
             }
         }
     } else if (std::strcmp(key, "language") == 0) {
+<<<<<<< HEAD
         for (const GameLanguage language : {GameLanguage::English, GameLanguage::French, GameLanguage::Spanish}) {
             if (_stricmp(value, game_language_key(language)) == 0) settings.language = language;
         }
@@ -247,6 +267,12 @@ void apply_kv(RuntimeSettings& settings, const char* key, const char* value) {
         for (const CoopPvpMode mode : {CoopPvpMode::Classic, CoopPvpMode::Revamped}) {
             if (_stricmp(value, coop_pvp_mode_key(mode)) == 0) settings.coop.pvp_mode = mode;
         }
+=======
+        if (_stricmp(value, game_language_key(GameLanguage::Auto)) == 0) settings.language = GameLanguage::Auto;
+        for (const GameLanguage language : kGameLanguages) {
+            if (_stricmp(value, game_language_key(language)) == 0) settings.language = language;
+        }
+>>>>>>> upstream/main
     }
 }
 
@@ -409,6 +435,7 @@ RuntimeSettings get_runtime_settings() {
 }
 
 namespace {
+<<<<<<< HEAD
 // 0 until the game first asks for its language, then that language's SC code.
 std::atomic<std::uint8_t> s_running_language{0u};
 // A bit for each GameLanguage on the disc (bit `value`); all until set_disc_languages.
@@ -422,10 +449,63 @@ const char* disc_folder(GameLanguage language) noexcept {
     case GameLanguage::English: break;
     }
     return "UsEnglish";
+=======
+// kNotAsked until the game first asks for its language, then that language's SC code.
+constexpr std::uint8_t kNotAsked = 0xFFu;
+std::atomic<std::uint8_t> s_running_language{kNotAsked};
+// A bit for each GameLanguage on the disc (bit `value`); all until set_disc_languages.
+std::atomic<std::uint32_t> s_disc_languages{~0u};
+
+// The language a disc's folder holds, whatever its release ("UsEnglish", "EuEnglish": English); Auto for none.
+GameLanguage folder_language(std::string_view folder) noexcept {
+    static constexpr std::pair<std::string_view, GameLanguage> kNames[] = {
+        {"Japanese", GameLanguage::Japanese}, {"English", GameLanguage::English}, {"German", GameLanguage::German},
+        {"French", GameLanguage::French},     {"Spanish", GameLanguage::Spanish}, {"Italian", GameLanguage::Italian},
+        {"Dutch", GameLanguage::Dutch}};
+    if (folder.size() < 3u) return GameLanguage::Auto;
+    for (const auto& [name, language] : kNames) {
+        if (folder.substr(2) == name) return language;
+    }
+    return GameLanguage::Auto;
+}
+
+// The system's language as a game language (Auto: none of the game's).
+GameLanguage system_language() noexcept {
+#if defined(_WIN32)
+    switch (PRIMARYLANGID(GetUserDefaultUILanguage())) {
+    case LANG_JAPANESE: return GameLanguage::Japanese;
+    case LANG_ENGLISH: return GameLanguage::English;
+    case LANG_GERMAN: return GameLanguage::German;
+    case LANG_FRENCH: return GameLanguage::French;
+    case LANG_SPANISH: return GameLanguage::Spanish;
+    case LANG_ITALIAN: return GameLanguage::Italian;
+    case LANG_DUTCH: return GameLanguage::Dutch;
+    default: return GameLanguage::Auto;
+    }
+#else
+    // POSIX locales ("de_DE.UTF-8"): LC_ALL, LC_MESSAGES, then LANG.
+    const char* locale = nullptr;
+    for (const char* name : {"LC_ALL", "LC_MESSAGES", "LANG"}) {
+        locale = std::getenv(name);
+        if (locale != nullptr && locale[0] != '\0') break;
+    }
+    if (locale == nullptr) return GameLanguage::Auto;
+    const std::string_view code(locale, std::min<std::size_t>(std::strlen(locale), 2u));
+    static constexpr std::pair<std::string_view, GameLanguage> kCodes[] = {
+        {"ja", GameLanguage::Japanese}, {"en", GameLanguage::English}, {"de", GameLanguage::German},
+        {"fr", GameLanguage::French},   {"es", GameLanguage::Spanish}, {"it", GameLanguage::Italian},
+        {"nl", GameLanguage::Dutch}};
+    for (const auto& [prefix, language] : kCodes) {
+        if (code == prefix) return language;
+    }
+    return GameLanguage::Auto;
+#endif
+>>>>>>> upstream/main
 }
 }  // namespace
 
 void set_disc_languages(std::span<const std::string> folders) noexcept {
+<<<<<<< HEAD
     std::uint32_t bits = 1u << static_cast<unsigned>(GameLanguage::English);  // English whatever (the fallback)
     for (const GameLanguage language : {GameLanguage::French, GameLanguage::Spanish}) {
         if (std::find(folders.begin(), folders.end(), disc_folder(language)) != folders.end()) {
@@ -437,15 +517,47 @@ void set_disc_languages(std::span<const std::string> folders) noexcept {
 
 bool game_language_on_disc(GameLanguage language) noexcept {
     return (s_disc_languages.load(std::memory_order_acquire) >> static_cast<unsigned>(language) & 1u) != 0u;
+=======
+    std::uint32_t bits = 0u;
+    for (const std::string& folder : folders) {
+        if (const GameLanguage language = folder_language(folder); language != GameLanguage::Auto) {
+            bits |= 1u << static_cast<unsigned>(language);
+        }
+    }
+    // A disc without language folders the game knows (not one it plays): English, as the game's own fallback.
+    s_disc_languages.store(bits != 0u ? bits : 1u << static_cast<unsigned>(GameLanguage::English),
+                           std::memory_order_release);
+}
+
+bool game_language_on_disc(GameLanguage language) noexcept {
+    return language != GameLanguage::Auto &&
+           (s_disc_languages.load(std::memory_order_acquire) >> static_cast<unsigned>(language) & 1u) != 0u;
+}
+
+GameLanguage game_language_resolved(GameLanguage setting) noexcept {
+    if (game_language_on_disc(setting)) return setting;
+    if (const GameLanguage system = system_language(); game_language_on_disc(system)) return system;
+    if (game_language_on_disc(GameLanguage::English)) return GameLanguage::English;
+    for (const GameLanguage language : kGameLanguages) {
+        if (game_language_on_disc(language)) return language;
+    }
+    return GameLanguage::English;
+>>>>>>> upstream/main
 }
 
 GameLanguage game_language_for_boot() noexcept {
     std::uint8_t running = s_running_language.load(std::memory_order_acquire);
+<<<<<<< HEAD
     if (running == 0u) {
         std::uint8_t expected = 0u;
         GameLanguage setting = get_runtime_settings().language;
         if (!game_language_on_disc(setting)) setting = GameLanguage::English;
         const auto chosen = static_cast<std::uint8_t>(setting);
+=======
+    if (running == kNotAsked) {
+        std::uint8_t expected = kNotAsked;
+        const auto chosen = static_cast<std::uint8_t>(game_language_resolved(get_runtime_settings().language));
+>>>>>>> upstream/main
         running = s_running_language.compare_exchange_strong(expected, chosen, std::memory_order_acq_rel)
             ? chosen : expected;
     }
@@ -454,20 +566,38 @@ GameLanguage game_language_for_boot() noexcept {
 
 bool running_game_language(GameLanguage& language) noexcept {
     const std::uint8_t running = s_running_language.load(std::memory_order_acquire);
+<<<<<<< HEAD
     if (running == 0u) return false;
+=======
+    if (running == kNotAsked) return false;
+>>>>>>> upstream/main
     language = static_cast<GameLanguage>(running);
     return true;
 }
 
 const char* button_icons_key(ButtonIcons icons) noexcept {
+<<<<<<< HEAD
     static constexpr const char* kKeys[] = {"auto", "wii", "xbox", "nintendo", "playstation"};
+=======
+    static constexpr const char* kKeys[] = {"auto", "wii", "xbox", "nintendo", "playstation", "keyboard"};
+>>>>>>> upstream/main
     return kKeys[std::min<std::size_t>(static_cast<std::size_t>(icons), std::size(kKeys) - 1u)];
 }
 
 const char* game_language_key(GameLanguage language) noexcept {
     switch (language) {
+<<<<<<< HEAD
     case GameLanguage::French: return "french";
     case GameLanguage::Spanish: return "spanish";
+=======
+    case GameLanguage::Japanese: return "japanese";
+    case GameLanguage::German: return "german";
+    case GameLanguage::French: return "french";
+    case GameLanguage::Spanish: return "spanish";
+    case GameLanguage::Italian: return "italian";
+    case GameLanguage::Dutch: return "dutch";
+    case GameLanguage::Auto: return "auto";
+>>>>>>> upstream/main
     case GameLanguage::English: break;
     }
     return "english";
@@ -556,6 +686,7 @@ bool save_runtime_settings_to_file() {
                  << "text_speed=" << settings.text_speed << '\n'
                  << "language=" << game_language_key(settings.language) << '\n'
                  << "discord_status=" << (settings.discord_status ? 1 : 0) << '\n'
+<<<<<<< HEAD
                  << "button_icons=" << button_icons_key(settings.button_icons) << '\n';
         // Co-op isn't playable yet: its keys appear once someone sets them.
         const RuntimeCoopSettings defaults{};
@@ -583,6 +714,10 @@ bool save_runtime_settings_to_file() {
         }
         if (settings.coop.cheats != defaults.cheats) contents << "coop_cheats=" << (settings.coop.cheats ? 1 : 0) << '\n';
         contents << input::format_controls_settings(input::get_controls_config());
+=======
+                 << "button_icons=" << button_icons_key(settings.button_icons) << '\n'
+                 << input::format_controls_settings(input::get_controls_config());
+>>>>>>> upstream/main
         if (!contents) {
             return false;
         }
@@ -596,6 +731,7 @@ bool save_runtime_settings_to_file() {
     }
 }
 
+<<<<<<< HEAD
 bool parse_coop_endpoint(std::string_view text, std::string& host, std::uint16_t& port) {
     text = trim(text);
     std::string_view name;
@@ -648,6 +784,8 @@ const char* coop_character_key(CoopCharacter character) noexcept {
     return character == CoopCharacter::Luigi ? "luigi" : "mario";
 }
 
+=======
+>>>>>>> upstream/main
 const char* runtime_input_mode_name(RuntimeInputMode mode) {
     switch (mode) {
     case RuntimeInputMode::KeyboardMouse:

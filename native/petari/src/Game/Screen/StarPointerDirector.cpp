@@ -1,4 +1,8 @@
 #include "Game/Screen/StarPointerDirector.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
 #endif
@@ -6,7 +10,10 @@
 #include "Game/Screen/StarPointerController.hpp"
 #include "Game/Screen/StarPointerGuidance.hpp"
 #include "Game/Screen/StarPointerLayout.hpp"
+<<<<<<< HEAD
 #include "Game/System/DrawSyncManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/System/GameSystem.hpp"
 #include "Game/System/GameSystemObjHolder.hpp"
 #include "Game/Util/CameraUtil.hpp"
@@ -165,6 +172,7 @@ void StarPointerTransformHolder::movement() {
 
 StarPointerPeekZ::StarPointerPeekZ() {
     mInfos = new DpdInfo*[2];
+<<<<<<< HEAD
     mToken = DrawSyncManager::sInstance->setCallback(2, 1, this);
 }
 
@@ -176,12 +184,24 @@ void StarPointerPeekZ::setDrawSyncToken() {
 }
 
 void StarPointerPeekZ::drawSyncCallback(u16 token) {
+=======
+}
+
+void StarPointerPeekZ::setDrawSyncToken() {
+    J3DNativeView::getProjectionv(mProjectionParameters);
+    J3DNativeView::getViewportv(mViewportParameters);
+    J3DNativeView::captureReadback(cReadbackChannel);
+>>>>>>> upstream/main
     for (s32 channel = 0; channel < StarPointerFunction::getNumStarPointer(); channel++) {
         if (MR::isInRange(mInfos[channel]->mPos.x, 0.0f, MR::getScreenWidth() - 1) &&
             MR::isInRange(mInfos[channel]->mPos.y, 0.0f, MR::getScreenHeight() - 1)) {
             TVec2f pos;
             MR::convertScreenPosToFrameBufferPos(&pos, mInfos[channel]->mPos);
+<<<<<<< HEAD
             GXPeekZ((s32)(pos.x), (s32)(pos.y), &mInfos[channel]->mZDepth);
+=======
+            mInfos[channel]->mZDepth = J3DNativeView::readbackDepth(cReadbackChannel, (s32)(pos.x), (s32)(pos.y));
+>>>>>>> upstream/main
             mInfos[channel]->mDrawReady = true;
         }
     }

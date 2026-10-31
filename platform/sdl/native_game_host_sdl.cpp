@@ -6,12 +6,18 @@
 #include "sdl_host.h"
 
 #include "galaxy/content_viewport.h"
+<<<<<<< HEAD
 #include "galaxy/controller_roster.h"
+=======
+>>>>>>> upstream/main
 #include "galaxy/input_bindings.h"
 #include "galaxy/jaudio_host_mixer.h"
 #include "galaxy/native_host.h"
 #include "galaxy/native_input.h"
+<<<<<<< HEAD
 #include "galaxy/native_settings_pad.h"
+=======
+>>>>>>> upstream/main
 #include "galaxy/platform_time.h"
 #include "galaxy/pointer_control.h"
 #include "galaxy/runtime_settings.h"
@@ -22,7 +28,10 @@
 
 #include <algorithm>
 #include <array>
+<<<<<<< HEAD
 #include <atomic>
+=======
+>>>>>>> upstream/main
 #include <cmath>
 #include <cstring>
 #include <sstream>
@@ -44,6 +53,7 @@ constexpr std::uint8_t kTapPressReports = 10;
 constexpr std::uint64_t kTapHoverMs = 200;
 constexpr float kTriggerThreshold = 96.0f / 255.0f;  // the Windows host's XInput trigger threshold
 
+<<<<<<< HEAD
 // Nebula's settings menu (native_settings_sdl.cpp): whether it shows, and where its keys go (install_native_settings_pad_hooks).
 std::atomic<NativeSettingsVisibleProvider> g_settings_visible{nullptr};
 std::atomic<NativeSettingsKeySink> g_settings_key_sink{nullptr};
@@ -153,6 +163,8 @@ void route_settings_pads(sdl::InputState& state, bool capture_finished) {
     }
 }
 
+=======
+>>>>>>> upstream/main
 const in::ControlsConfig& live_controls() {
     static in::ControlsConfig config = in::get_controls_config();
     static std::uint64_t generation = in::controls_config_generation();
@@ -219,6 +231,7 @@ in::WiimoteInputSnapshot native_game_wiimote_snapshot(std::uint64_t, bool ir_ena
     const in::tilt::Section section = tilt_section == 1u ? in::tilt::Section::StarBall
         : tilt_section == 2u ? in::tilt::Section::Ray
         : in::tilt::Section::None;
+<<<<<<< HEAD
     sdl::InputState state = sdl::input_state();
     const in::ControlsConfig& config = live_controls();
     in::WiimoteInputSnapshot snapshot{};
@@ -237,6 +250,12 @@ in::WiimoteInputSnapshot native_game_wiimote_snapshot(std::uint64_t, bool ir_ena
         state.keys = {};
     }
 
+=======
+    const sdl::InputState state = sdl::input_state();
+    const in::ControlsConfig& config = live_controls();
+    in::WiimoteInputSnapshot snapshot{};
+
+>>>>>>> upstream/main
     // Gamepads: the bindings and tuning of each one's scheme, as on Windows.
     static std::array<std::uint32_t, sdl::kMaxPads> s_previous{};
     in::LogicalInput pads{};
@@ -388,6 +407,7 @@ GamePaths locate_game(const std::filesystem::path& input) {
 void install_host_pointer_provider(HostPointerProvider) noexcept {}
 void install_host_pointer_transition_provider(HostPointerTransitionProvider) noexcept {}
 void install_native_keyboard_capture_provider(NativeKeyboardCaptureProvider) noexcept {}
+<<<<<<< HEAD
 void install_native_settings_pad_hooks(NativeSettingsVisibleProvider visible, NativeSettingsKeySink sink) noexcept {
     g_settings_visible.store(visible, std::memory_order_release);
     g_settings_key_sink.store(sink, std::memory_order_release);
@@ -449,6 +469,12 @@ input::ButtonIconSpec button_icons(bool) noexcept {
 }
 
 // Sound: the JAudio DSP program on the game's command words, its blocks through an SDL audio stream.
+=======
+void install_native_settings_pad_hooks(NativeSettingsVisibleProvider, NativeSettingsKeySink) noexcept {}
+void set_env_flag_cache_enabled(bool) noexcept {}
+
+// Sound: the JAudio DSP program on the game's channel records, its blocks through an SDL audio stream.
+>>>>>>> upstream/main
 struct NativeGameAudio::State {
     JAudioHostMixer mixer;
     SDL_AudioStream* stream = nullptr;
@@ -465,6 +491,7 @@ NativeGameAudio::~NativeGameAudio() {
     }
 }
 
+<<<<<<< HEAD
 namespace {
 // An address's bytes in the native game's regions.
 std::byte* native_game_resolve(void* user, std::uint32_t address, std::uint32_t size) {
@@ -514,6 +541,27 @@ bool NativeGameAudio::dsp_command(const std::uint32_t* words, std::uint32_t coun
         break;
     }
     return false;
+=======
+void NativeGameAudio::setup(std::uint32_t channels, void* channel_records, const std::int16_t* resample_filter,
+                            const std::int16_t* adpcm_filter, const NebulaJAudioFxLine* fx_lines) {
+    state_->mixer.setup(channels, static_cast<std::byte*>(channel_records), resample_filter, adpcm_filter, fx_lines);
+}
+
+void NativeGameAudio::set_aux(const void* base, std::uint32_t size) {
+    state_->mixer.set_aux(static_cast<const std::byte*>(base), size);
+}
+
+void NativeGameAudio::frame(std::uint32_t subframes, std::uint32_t mixer_level, std::int16_t* left,
+                            std::int16_t* right) {
+    // The volume categories, once an audio frame (master applies to the stream's output).
+    const galaxy::RuntimeAudioSettings audio = galaxy::get_runtime_settings().audio;
+    state_->mixer.set_bus_gains({1.0f, audio.music, audio.voice, audio.sfx, audio.ambience, audio.cutscene});
+    state_->mixer.sync_frame(subframes, mixer_level, left, right);
+}
+
+bool NativeGameAudio::mix(std::uint32_t group, std::uint32_t active) {
+    return state_->mixer.release_halt(group, active);
+>>>>>>> upstream/main
 }
 
 void NativeGameAudio::set_channel_owner(std::uint32_t (*owner)(std::uint32_t, std::uint32_t*)) {
@@ -536,6 +584,7 @@ bool NativeGameAudio::play(std::span<const std::byte> block, std::uint32_t sampl
         }
         s.rate = sample_rate;
     }
+<<<<<<< HEAD
     // The AI's frames: right then left, big-endian; the stream's: left then right, native order.
     const std::size_t count = block.size() / 4u;
     s.frames.resize(count * 2u);
@@ -545,6 +594,14 @@ bool NativeGameAudio::play(std::span<const std::byte> block, std::uint32_t sampl
         const auto left = static_cast<std::int16_t>((bytes[i * 4u + 2u] << 8) | bytes[i * 4u + 3u]);
         s.frames[i * 2u] = left;
         s.frames[i * 2u + 1u] = right;
+=======
+    // The AI's frames: right then left; the stream's: left then right.
+    const std::size_t count = block.size() / 4u;
+    s.frames.resize(count * 2u);
+    std::memcpy(s.frames.data(), block.data(), count * 4u);
+    for (std::size_t i = 0; i < count; ++i) {
+        std::swap(s.frames[i * 2u], s.frames[i * 2u + 1u]);
+>>>>>>> upstream/main
     }
     s.block_bytes = count * 4u;
     return SDL_PutAudioStreamData(s.stream, s.frames.data(), static_cast<int>(count * 4u));
@@ -580,12 +637,19 @@ std::string NativeGameAudio::stats_line() const {
     std::ostringstream line;
     line << "setups=" << s.setups << " frames=" << s.frames << " subframes=" << s.subframes
          << " channel-renders=" << s.channel_renders << " adpcm-blocks=" << s.adpcm_blocks << " pcm=" << s.pcm_renders
+<<<<<<< HEAD
          << " streams=" << s.stream_renders << " oscillators=" << s.oscillator_renders << " fir=" << s.fir_renders
          << " iir=" << s.iir_renders << " auto-mixer=" << s.auto_mixer_renders
          << " fx-line-subframes=" << s.fx_line_subframes << " unresolved=" << s.unresolved_reads
          << " unsupported-osc=" << s.unsupported_oscillators << " ignored=" << s.ignored_commands
          << " stray=" << s.stray_releases << " varam=0x" << std::hex << state_->mixer.varam() << std::dec
          << " mix-ms=" << s.mix_ns / 1000000u;
+=======
+         << " oscillators=" << s.oscillator_renders << " fir=" << s.fir_renders
+         << " iir=" << s.iir_renders << " auto-mixer=" << s.auto_mixer_renders
+         << " fx-line-subframes=" << s.fx_line_subframes << " unresolved=" << s.unresolved_reads
+         << " unsupported-osc=" << s.unsupported_oscillators << " stray=" << s.stray_releases << " mix-ms=" << s.mix_ns / 1000000u;
+>>>>>>> upstream/main
     return line.str();
 }
 

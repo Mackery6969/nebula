@@ -4,7 +4,13 @@
 #include "JSystem/J3DGraphAnimator/J3DVtxShader.hpp"
 #include "JSystem/J3DGraphBase/J3DPacket.hpp"
 #include "JSystem/J3DGraphBase/J3DVertex.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DModelData;
 class J3DMtxBuffer;
@@ -92,7 +98,11 @@ public:
     }
 
     void setBaseTRMtx(Mtx m) {
+<<<<<<< HEAD
         PSMTXCopy(m, mBaseTransformMtx);
+=======
+        NebulaMtxCopy(m, mBaseTransformMtx);
+>>>>>>> upstream/main
     }
 
     u32 getMtxCalcMode() {

@@ -1,14 +1,19 @@
 #ifndef RVL_FACE_LIBRARY_INTERNAL_DATABASE_H
 #define RVL_FACE_LIBRARY_INTERNAL_DATABASE_H
+<<<<<<< HEAD
 #include "RFLi_HiddenDatabase.h"
 #include "RFLi_Types.h"
 #include <revolution/mem.h>
 #include <revolution/os.h>
+=======
+#include "RFLi_Types.h"
+>>>>>>> upstream/main
 #include <revolution/types.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 typedef struct RFLiDatabase {
     u32 identifier;                        // at 0x0
     RFLiCharData rawData[RFL_DB_CHAR_MAX]; // at 0x4
@@ -57,10 +62,15 @@ void RFLiConvertRaw2HRaw(const RFLiCharData* data, RFLiHiddenCharData* out);
 RFLErrcode RFLiGetCharRawData(RFLiCharData* out, u16 index);
 RFLErrcode RFLiGetCharInfo(RFLiCharInfo* out, u16 index);
 void RFLiSetTemporaryID(RFLiCharInfo* info);
+=======
+// The official database: the host's Mii records by slot (RFL_Database.c).
+RFLErrcode RFLiGetCharInfo(RFLiCharInfo* out, u16 index);
+>>>>>>> upstream/main
 BOOL RFLiIsSameID(const RFLCreateID* id1, const RFLCreateID* id2);
 BOOL RFLiIsValidID(const RFLCreateID* id);
 BOOL RFLiIsSpecialID(const RFLCreateID* id);
 BOOL RFLiIsTemporaryID(const RFLCreateID* id);
+<<<<<<< HEAD
 BOOL RFLiIsValidName(const RFLiCharData* data);
 BOOL RFLiIsValidName2(const RFLiCharInfo* info);
 BOOL RFLiGetIsolation(void);
@@ -69,6 +79,9 @@ BOOL RFLiDBIsLoaded(void);
 u16 RFLiCalculateCRC(const void* p, u32 len);
 void RFLiCreateHeaderCRCAsync(RFLiExCallback callback);
 void RFLiCheckHeaderCRCAsync(RFLiExCallback callback);
+=======
+BOOL RFLiIsValidName2(const RFLiCharInfo* info);
+>>>>>>> upstream/main
 
 #ifdef __cplusplus
 }

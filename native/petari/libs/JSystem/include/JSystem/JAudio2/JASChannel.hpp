@@ -1,11 +1,21 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASHeapCtrl.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASLfo.hpp"
 #include "JSystem/JAudio2/JASOscillator.hpp"
 #include "JSystem/JAudio2/JASSoundParams.hpp"
 #include "JSystem/JAudio2/JASWaveInfo.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 struct JASDSPChannel;
 
@@ -215,8 +225,14 @@ public:
         /* 0x104 */ int mProgNo;
     };
 
+<<<<<<< HEAD
     static OSMessageQueue sBankDisposeMsgQ;
     static OSMessage sBankDisposeMsg[16];
     static OSMessage sBankDisposeList[16];
+=======
+    static NebulaMessageQueue sBankDisposeMsgQ;
+    static void* sBankDisposeMsg[16];
+    static void* sBankDisposeList[16];
+>>>>>>> upstream/main
     static int sBankDisposeListSize;
 };

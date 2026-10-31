@@ -1,13 +1,24 @@
 #include "Game/System/FileHolder.hpp"
+<<<<<<< HEAD
 #include "Game/Util.hpp"
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include "Game/Util.hpp"
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 #define FILE_HOLDER_STATE_NONE 0
 #define FILE_HOLDER_STATE_READING 1
 #define FILE_HOLDER_STATE_DONE 2
 
 FileHolderFileEntry::FileHolderFileEntry(const char* pFilePath, JKRHeap* pHeap, void* pContext)
+<<<<<<< HEAD
     : mEntryNum(DVDConvertPathToEntrynum(pFilePath)), mContext(nullptr), mHeap(pHeap), mState(FILE_HOLDER_STATE_NONE), mContextSet(true) {
     OSInitMessageQueue(&mQueue, &mMessage, 1);
+=======
+    : mEntryNum(NebulaDisc::find(pFilePath)), mContext(nullptr), mHeap(pHeap), mState(FILE_HOLDER_STATE_NONE), mContextSet(true) {
+    mQueue.init(&mMessage, 1);
+>>>>>>> upstream/main
 
     if (pContext) {
         mContextSet = false;
@@ -23,8 +34,13 @@ FileHolderFileEntry::~FileHolderFileEntry() {
 
 void FileHolderFileEntry::waitReadDone() {
     if (mState != FILE_HOLDER_STATE_DONE) {
+<<<<<<< HEAD
         OSMessage msg;
         OSReceiveMessage(&mQueue, &msg, OS_MESSAGE_BLOCK);
+=======
+        void* msg;
+        mQueue.receive(&msg, true);
+>>>>>>> upstream/main
         mState = FILE_HOLDER_STATE_DONE;
     }
 }
@@ -33,7 +49,11 @@ void FileHolderFileEntry::setContext(void* pContext, JKRHeap* pHeap) {
     mContext = pContext;
     mHeap = pHeap;
 
+<<<<<<< HEAD
     OSSendMessage(&mQueue, nullptr, OS_MESSAGE_NOBLOCK);
+=======
+    mQueue.send(nullptr, false);
+>>>>>>> upstream/main
     mState = FILE_HOLDER_STATE_READING;
 }
 
@@ -82,7 +102,11 @@ FileHolderFileEntry** FileHolder::removeFile(const char* pFilePath) {
 }
 
 FileHolderFileEntry* FileHolder::findEntry(const char* pFilePath) const {
+<<<<<<< HEAD
     s32 entryNum = DVDConvertPathToEntrynum(pFilePath);
+=======
+    s32 entryNum = NebulaDisc::find(pFilePath);
+>>>>>>> upstream/main
     for (FileHolderFileEntry* const* pEntry = mEntries.begin(); pEntry != mEntries.end(); pEntry++) {
         if (entryNum == (*pEntry)->mEntryNum) {
             return *pEntry;

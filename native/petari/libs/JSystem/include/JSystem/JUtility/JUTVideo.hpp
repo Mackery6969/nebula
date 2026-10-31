@@ -1,7 +1,15 @@
 #pragma once
 
+<<<<<<< HEAD
 #include <revolution.h>
 #include <revolution/vi.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#include "Game/System/NebulaKernel.hpp"
+#include "Game/System/NebulaFrameClock.hpp"
+>>>>>>> upstream/main
 
 typedef u8 (*Pattern)[2];
 
@@ -15,14 +23,20 @@ public:
     // TODO: return types not confirmed
     static JUTVideo* createManager(GXRenderModeObj const*);
     static void destroyManager();
+<<<<<<< HEAD
     static void drawDoneStart();
     static void dummyNoDrawWait();
+=======
+>>>>>>> upstream/main
     void setRenderMode(GXRenderModeObj const*);
     void waitRetraceIfNeed();
 
     static void preRetraceProc(u32);
     static void postRetraceProc(u32);
+<<<<<<< HEAD
     static void drawDoneCallback();
+=======
+>>>>>>> upstream/main
 
     u16 getFbWidth() const {
         return mRenderObj->fbWidth;
@@ -46,19 +60,26 @@ public:
     u8* getVFilter() const {
         return mRenderObj->vfilter;
     }
+<<<<<<< HEAD
     OSMessageQueue* getMessageQueue() {
+=======
+    NebulaMessageQueue* getMessageQueue() {
+>>>>>>> upstream/main
         return &mMessageQueue;
     }
 
     static JUTVideo* getManager() {
         return sManager;
     }
+<<<<<<< HEAD
     static OSTick getVideoInterval() {
         return sVideoInterval;
     }
     static OSTick getVideoLastTick() {
         return sVideoLastTick;
     }
+=======
+>>>>>>> upstream/main
 
     GXRenderModeObj* getRenderMode() const {
         return mRenderObj;
@@ -66,8 +87,11 @@ public:
 
 private:
     static JUTVideo* sManager;
+<<<<<<< HEAD
     static OSTick sVideoLastTick;
     static OSTick sVideoInterval;
+=======
+>>>>>>> upstream/main
 
 private:
     /* 0x04 */ _GXRenderModeObj* mRenderObj;
@@ -76,14 +100,24 @@ private:
     /* 0x10 */ u32 field_0x10;
     /* 0x14 */ u32 field_0x14;
     /* 0x18 */ u32 field_0x18;
+<<<<<<< HEAD
     /* 0x1C */ VIRetraceCallback mPreRetraceCallback;
     /* 0x20 */ VIRetraceCallback mPostRetraceCallback;
+=======
+    /* 0x1C */ NebulaFrameClock::Hook mPreRetraceCallback;
+    /* 0x20 */ NebulaFrameClock::Hook mPostRetraceCallback;
+>>>>>>> upstream/main
     /* 0x24 */ Callback mPreCallback;
     /* 0x28 */ Callback mPostCallback;
     /* 0x2C */ bool mSetBlack;
     /* 0x30 */ s32 mSetBlackFrameCount;
+<<<<<<< HEAD
     /* 0x34 */ OSMessage mMessage;
     /* 0x38 */ OSMessageQueue mMessageQueue;
+=======
+    /* 0x34 */ void* mMessage;
+    /* 0x38 */ NebulaMessageQueue mMessageQueue;
+>>>>>>> upstream/main
 };
 
 inline JUTVideo* JUTGetVideoManager() {

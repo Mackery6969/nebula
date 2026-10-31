@@ -16,7 +16,10 @@ public:
     void hide();
     void show();
     void initShapeNodes(J3DDrawMtxData*, J3DVertexData*);
+<<<<<<< HEAD
     void sortVcdVatCmd();
+=======
+>>>>>>> upstream/main
 
     virtual ~J3DShapeTable() {
     }

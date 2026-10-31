@@ -1,6 +1,10 @@
 #pragma once
 
 #include "Game/LiveActor/LiveActor.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/Util/NativeMesh.hpp"
+>>>>>>> upstream/main
 
 class JUTTexture;
 class OceanSpherePoint;
@@ -53,8 +57,13 @@ public:
     OceanSpherePoint* getPlanePointRightLower(int row, int col) const;
     void loadMaterialFace() const;
     void loadMaterialBack() const;
+<<<<<<< HEAD
     void drawSphere(bool useEnvMap, bool useGD) const;
     void sendVertex(const OceanSpherePoint* pPoint, bool useEnvMap, bool useGD) const;
+=======
+    void drawSphere(bool useEnvMap, NativeMesh* pMesh) const;
+    void sendVertex(const OceanSpherePoint* pPoint, bool useEnvMap, NativeMesh* pMesh) const;
+>>>>>>> upstream/main
 
     /* 0x8C */ f32 mRadius;
     /* 0x90 */ f32 mRadiusTarget;
@@ -91,10 +100,16 @@ public:
     /* 0x109 */ u8 _109;
     /* 0x10A */ u8 _10A;
     /* 0x10B */ u8 _10B;
+<<<<<<< HEAD
     /* 0x10C */ u32 mDispListFaceLen;
     /* 0x110 */ u8* mDispListFace;
     /* 0x114 */ u32 mDispListBackLen;
     /* 0x118 */ u8* mDispListBack;
+=======
+    // The sphere's face and back as the renderer draws them.
+    NativeMesh mMeshFace;
+    NativeMesh mMeshBack;
+>>>>>>> upstream/main
     /* 0x11C */ bool mAlwaysUseRealDrawing;
     /* 0x11D */ bool mIsCameraInside;
     /* 0x11E */ bool mIsStartPosCamera;

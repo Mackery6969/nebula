@@ -1,4 +1,9 @@
 #include "Game/Scene/ScenarioSelectScene.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <JSystem/J3DGraphBase/J3DNativeView.hpp>
+>>>>>>> upstream/main
 #include "Game/Camera/CameraContext.hpp"
 #include "Game/Effect/EffectSystem.hpp"
 #include "Game/Effect/EffectSystemUtil.hpp"
@@ -120,12 +125,20 @@ void ScenarioSelectScene::calcViewAndEntry() {
     bool res = isExecForeground() && _28 == 0;
 
     if (res) {
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).lock();
+>>>>>>> upstream/main
         setupCameraMtx();
         j3dSys.mDrawBuffer[0] = _20;
         j3dSys.mDrawBuffer[1] = _24;
         mScenarioLayout->calcViewAndEntryStarModel();
+<<<<<<< HEAD
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
     }
 }
 
@@ -133,7 +146,11 @@ void ScenarioSelectScene::draw() const {
     bool res = isExecForeground() && _28 == 0;
 
     if (res) {
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).lock();
+>>>>>>> upstream/main
         setupCameraMtx();
         j3dSys.drawInit();
         j3dSys.mDrawMode = 3;
@@ -142,7 +159,11 @@ void ScenarioSelectScene::draw() const {
         j3dSys.mDrawMode = 4;
         _24->draw();
         _24->frameInit();
+<<<<<<< HEAD
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
         MR::Effect::drawEffect3D(mEffectSystem, mCameraContext->getViewMtx());
         mScenarioLayout->draw();
         MR::Effect::drawEffect2D(mEffectSystem);
@@ -211,8 +232,13 @@ bool ScenarioSelectScene::isResetEnd() const {
 }
 
 void ScenarioSelectScene::setupCameraMtx() const {
+<<<<<<< HEAD
     PSMTXCopy(mCameraContext->getViewMtx(), j3dSys.mViewMtx);
     GXSetProjection(mCameraContext->mProjection, GX_PERSPECTIVE);
+=======
+    NebulaMtxCopy(mCameraContext->getViewMtx(), j3dSys.mViewMtx);
+    J3DNativeView::setProjection(mCameraContext->mProjection, GX_PERSPECTIVE);
+>>>>>>> upstream/main
 }
 
 bool ScenarioSelectScene::trySetCurrentScenarioNo() const {

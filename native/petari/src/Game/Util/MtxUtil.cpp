@@ -295,18 +295,32 @@ namespace MR {
 
     void blendMtxRotate(MtxPtr pMtxA, MtxPtr pMtxB, f32 blend, MtxPtr pDst) {
         Quaternion quatA, quatB, quatR;
+<<<<<<< HEAD
         C_QUATMtx(&quatA, pMtxA);
         C_QUATMtx(&quatB, pMtxB);
         JMAQuatLerp(&quatA, &quatB, blend, &quatR);
         PSMTXQuat(pDst, &quatR);
+=======
+        NebulaQuatFromMtx(&quatA, pMtxA);
+        NebulaQuatFromMtx(&quatB, pMtxB);
+        JMAQuatLerp(&quatA, &quatB, blend, &quatR);
+        NebulaMtxQuat(pDst, &quatR);
+>>>>>>> upstream/main
     }
 
     void blendMtxRotateSlerp(MtxPtr pMtxA, MtxPtr pMtxB, f32 blend, MtxPtr pDst) {
         Quaternion quatA, quatB, quatR;
+<<<<<<< HEAD
         C_QUATMtx(&quatA, pMtxA);
         C_QUATMtx(&quatB, pMtxB);
         C_QUATSlerp(&quatA, &quatB, &quatR, blend);
         PSMTXQuat(pDst, &quatR);
+=======
+        NebulaQuatFromMtx(&quatA, pMtxA);
+        NebulaQuatFromMtx(&quatB, pMtxB);
+        NebulaQuatSlerp(&quatA, &quatB, &quatR, blend);
+        NebulaMtxQuat(pDst, &quatR);
+>>>>>>> upstream/main
     }
 
     void blendMtx(MtxPtr pMtxA, MtxPtr pMtxB, f32 blend, MtxPtr pDst) {
@@ -516,8 +530,13 @@ namespace MR {
         pY = &axisY;
         pZ = &axisZ;
 
+<<<<<<< HEAD
         PSVECCrossProduct(pY, pZ, &axisX);
         PSVECCrossProduct(pZ, &axisX, pY);
+=======
+        NebulaVecCrossProduct(pY, pZ, &axisX);
+        NebulaVecCrossProduct(pZ, &axisX, pY);
+>>>>>>> upstream/main
 
         axisX.normalize();
         pY->normalize();
@@ -747,11 +766,19 @@ namespace MR {
         TVec3f localY(0.0f, 1.0f, 0.0f);
 
         Mtx invA;
+<<<<<<< HEAD
         PSMTXInverse(pMtxA, invA);
 
         TVec3f axisYA, axisYB;
         PSMTXMultVecSR(invA, &localY, &axisYA);
         PSMTXMultVecSR(pMtxB, &axisYA, &axisYB);
+=======
+        NebulaMtxInverse(pMtxA, invA);
+
+        TVec3f axisYA, axisYB;
+        NebulaMtxMultVecSR(invA, &localY, &axisYA);
+        NebulaMtxMultVecSR(pMtxB, &axisYA, &axisYB);
+>>>>>>> upstream/main
 
         TVec3f cross = localY.cross(axisYB);
 
@@ -881,8 +908,13 @@ namespace MR {
 
     void rotAxisVecRad(const TVec3f& rAxis, const TVec3f& rVec, TVec3f* pOut, f32 rad) {
         Mtx rot;
+<<<<<<< HEAD
         PSMTXRotAxisRad(rot, &rVec, rad);
         PSMTXMultVec(rot, &rAxis, pOut);
+=======
+        NebulaMtxRotAxisRad(rot, &rVec, rad);
+        NebulaMtxMultVec(rot, &rAxis, pOut);
+>>>>>>> upstream/main
     }
 };  // namespace MR
 

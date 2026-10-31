@@ -228,14 +228,24 @@ void MarioShadowProjmapMtxSetter::update() {
     TPos3f effectMtx;
     TPos3f translationMtx;
     if (height > 0.0f) {
+<<<<<<< HEAD
         PSMTXTrans(translationMtx, -playerPos.x, -playerPos.y, -playerPos.z);
     } else {
         PSMTXTrans(translationMtx, 1000000.0f, 1000000.0f, 1000000.0f);
+=======
+        NebulaMtxTrans(translationMtx, -playerPos.x, -playerPos.y, -playerPos.z);
+    } else {
+        NebulaMtxTrans(translationMtx, 1000000.0f, 1000000.0f, 1000000.0f);
+>>>>>>> upstream/main
     }
 
     TPos3f rotationMtx;
     MR::makeMtxRotate(rotationMtx, -*MR::getPlayerShadowRotate());
+<<<<<<< HEAD
     PSMTXConcat(rotationMtx, translationMtx, effectMtx);
+=======
+    NebulaMtxConcat(rotationMtx, translationMtx, effectMtx);
+>>>>>>> upstream/main
     mProjmapMtxSetter->mEffectMtx.set(effectMtx);
     mProjmapMtxSetter->update();
 }

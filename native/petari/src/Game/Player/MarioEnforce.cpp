@@ -182,7 +182,11 @@ void Mario::recordRelativePosition() {
             invalidateRelativePosition();
         } else {
             pPosition = &mActor->mPosition;
+<<<<<<< HEAD
             PSMTXMultVec(*_8C8->getBaseInvMtx(), pPosition, &_8A4);
+=======
+            NebulaMtxMultVec(*_8C8->getBaseInvMtx(), pPosition, &_8A4);
+>>>>>>> upstream/main
         }
     }
 
@@ -191,7 +195,11 @@ void Mario::recordRelativePosition() {
             _8CC[0]->mIdx = -1;
         } else {
             pPosition = &mActor->mPosition;
+<<<<<<< HEAD
             PSMTXMultVec(*_8CC[0]->getBaseInvMtx(), pPosition, &_8B0);
+=======
+            NebulaMtxMultVec(*_8CC[0]->getBaseInvMtx(), pPosition, &_8B0);
+>>>>>>> upstream/main
         }
     }
 
@@ -200,7 +208,11 @@ void Mario::recordRelativePosition() {
             _8CC[1]->mIdx = -1;
         } else {
             pPosition = &mActor->mPosition;
+<<<<<<< HEAD
             PSMTXMultVec(*_8CC[1]->getBaseInvMtx(), pPosition, &_8BC);
+=======
+            NebulaMtxMultVec(*_8CC[1]->getBaseInvMtx(), pPosition, &_8BC);
+>>>>>>> upstream/main
         }
     }
 }
@@ -240,7 +252,11 @@ u32 Mario::moveRelativePosition(u32) {
     }
 
     TVec3f movePos;
+<<<<<<< HEAD
     PSMTXMultVec(*rTri->getBaseMtx(), &_8A4, &movePos);
+=======
+    NebulaMtxMultVec(*rTri->getBaseMtx(), &_8A4, &movePos);
+>>>>>>> upstream/main
     _184 = movePos - mPosition;
 
     if (isSwimming()) {
@@ -298,7 +314,11 @@ u32 Mario::moveRelativePositionWall() {
 
         const TVec3f* relPos = &mRelativeWallPos[i];
         TVec3f movePos;
+<<<<<<< HEAD
         PSMTXMultVec(*tri->getBaseMtx(), relPos, &movePos);
+=======
+        NebulaMtxMultVec(*tri->getBaseMtx(), relPos, &movePos);
+>>>>>>> upstream/main
 
         TVec3f add(movePos);
         add -= mPosition;
@@ -324,12 +344,20 @@ u32 Mario::moveRelativePositionWall() {
 
 void Mario::recordLastGround() {
     *_474 = *mGroundPolygon;
+<<<<<<< HEAD
     PSMTXMultVec(*_474->getBaseInvMtx(), &mGroundPos, &_4BC);
+=======
+    NebulaMtxMultVec(*_474->getBaseInvMtx(), &mGroundPos, &_4BC);
+>>>>>>> upstream/main
 }
 
 void Mario::getLastGroundPos(TVec3f* pPos) const {
     if (_474->isValid()) {
+<<<<<<< HEAD
         PSMTXMultVec(*_474->getBaseMtx(), &_4BC, pPos);
+=======
+        NebulaMtxMultVec(*_474->getBaseMtx(), &_4BC, pPos);
+>>>>>>> upstream/main
     } else {
         pPos->zero();
     }

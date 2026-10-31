@@ -1,6 +1,10 @@
 #include "JSystem/JKernel/JKRDvdFile.hpp"
+<<<<<<< HEAD
 #include "JSystem/JUtility/JUTException.hpp"
 #include <stdint.h>
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 
 JKRDvdFile::JKRDvdFile() : mDvdLink(this) {
     initiate();
@@ -21,6 +25,7 @@ JKRDvdFile::~JKRDvdFile() {
 }
 
 void JKRDvdFile::initiate(void) {
+<<<<<<< HEAD
     mDvdFile = this;
     OSInitMutex(&mMutex1);
     OSInitMutex(&mMutex2);
@@ -28,15 +33,26 @@ void JKRDvdFile::initiate(void) {
     OSInitMessageQueue(&mMessageQueue1, &mMessage1, 1);
     mOSThread = NULL;
     field_0x50 = 0;
+=======
+    mMutex1.init();
+    mMutex2.init();
+    field_0x50 = NULL;
+>>>>>>> upstream/main
     field_0x58 = 0;
 }
 
 bool JKRDvdFile::open(const char* name) {
     if (!mIsAvailable) {
+<<<<<<< HEAD
         mIsAvailable = DVDOpen(name, &mFileInfo);
         if (mIsAvailable) {
             sDvdList.append(&mDvdLink);
             getStatus();
+=======
+        mIsAvailable = NebulaDisc::open(name, &mFile);
+        if (mIsAvailable) {
+            sDvdList.append(&mDvdLink);
+>>>>>>> upstream/main
         }
     }
     return mIsAvailable;
@@ -44,15 +60,22 @@ bool JKRDvdFile::open(const char* name) {
 
 bool JKRDvdFile::open(s32 entryNum) {
     if (!mIsAvailable) {
+<<<<<<< HEAD
         mIsAvailable = DVDFastOpen(entryNum, &mFileInfo);
         if (mIsAvailable) {
             sDvdList.append(&mDvdLink);
             getStatus();
+=======
+        mIsAvailable = NebulaDisc::open(entryNum, &mFile);
+        if (mIsAvailable) {
+            sDvdList.append(&mDvdLink);
+>>>>>>> upstream/main
         }
     }
     return mIsAvailable;
 }
 
+<<<<<<< HEAD
 void JKRDvdFile::close() {
     if (mIsAvailable) {
         if (DVDClose(&mFileInfo) != 0) {
@@ -81,6 +104,21 @@ s32 JKRDvdFile::readData(void* param_1, s32 length, s32 param_3) {
     mOSThread = NULL;
     OSUnlockMutex(&mMutex1);
 
+=======
+// A disc file holds nothing on the host: closing it only takes it off the list.
+void JKRDvdFile::close() {
+    if (mIsAvailable) {
+        mIsAvailable = false;
+        sDvdList.remove(&mDvdLink);
+    }
+}
+
+// One reader at a time; it sleeps while the host reads (NebulaDisc::read).
+s32 JKRDvdFile::readData(void* pDst, s32 length, s32 offset) {
+    mMutex1.lock();
+    const s32 result = NebulaDisc::read(&mFile, pDst, length, offset);
+    mMutex1.unlock();
+>>>>>>> upstream/main
     return result;
 }
 
@@ -88,6 +126,7 @@ s32 JKRDvdFile::writeData(void const* param_0, s32 length, s32 param_2) {
     return -1;
 }
 
+<<<<<<< HEAD
 s32 JKRDvdFile::sync(void) {
     OSMessage message;
     OSLockMutex(&mMutex1);
@@ -107,4 +146,6 @@ void JKRDvdFile::doneProcess(s32 id, DVDFileInfo* fileInfo) {
     OSSendMessage(&dvdFile->mMessageQueue2, (OSMessage)(intptr_t)id, OS_MESSAGE_NOBLOCK);
 }
 
+=======
+>>>>>>> upstream/main
 JSUList< JKRDvdFile > JKRDvdFile::sDvdList;

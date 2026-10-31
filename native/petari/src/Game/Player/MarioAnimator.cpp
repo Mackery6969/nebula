@@ -69,9 +69,15 @@ void MarioAnimator::init() {
     _20 = 0.0f;
     _24 = 1.0f;
 
+<<<<<<< HEAD
     PSMTXIdentity(_28.toMtxPtr());
     PSMTXIdentity(_7C.toMtxPtr());
     PSMTXIdentity(_AC.toMtxPtr());
+=======
+    NebulaMtxIdentity(_28.toMtxPtr());
+    NebulaMtxIdentity(_7C.toMtxPtr());
+    NebulaMtxIdentity(_AC.toMtxPtr());
+>>>>>>> upstream/main
 
     _58 = 0.0f;
     _5C = 0.0f;
@@ -102,7 +108,11 @@ void MarioAnimator::init() {
     changeDefaultUpper("\212\356\226\173" /* 基本 */);
     mXanimePlayerUpper->changeAnimation("\212\356\226\173" /* 基本 */);
     mXanimePlayerUpper->mCore->shareJointTransform(mXanimePlayer->mCore);
+<<<<<<< HEAD
     PSMTXCopy(MR::tmpMtxRotYRad(PI), _DC.toMtxPtr());
+=======
+    NebulaMtxCopy(MR::tmpMtxRotYRad(PI), _DC.toMtxPtr());
+>>>>>>> upstream/main
 }
 
 bool MarioAnimator::isAnimationStop() const {
@@ -619,7 +629,11 @@ void MarioAnimator::setTilt() {
 }
 
 void MarioAnimator::resetTilt() {
+<<<<<<< HEAD
     PSMTXIdentity(_28.toMtxPtr());
+=======
+    NebulaMtxIdentity(_28.toMtxPtr());
+>>>>>>> upstream/main
     _58 = 0.0f;
     _5C = 0.0f;
     _60.zero();
@@ -700,7 +714,11 @@ void MarioAnimator::setHoming() {
         jt->_64 = _7C.toMtxPtr();
     } else {
         Mtx identMtx;
+<<<<<<< HEAD
         PSMTXIdentity(identMtx);
+=======
+        NebulaMtxIdentity(identMtx);
+>>>>>>> upstream/main
         MR::blendMtx(_7C.toMtxPtr(), identMtx, 0.1f, _7C.toMtxPtr());
     }
 
@@ -990,9 +1008,15 @@ void MarioAnimator::updateJointRumble() {
             hipRot = getFrontVec().dot(dir) > 0.707f ? hipRot : 0.9f * _118;
         }
 
+<<<<<<< HEAD
         PSMTXRotRad(_AC.toMtxPtr(), 'Z', hipRot);
     } else {
         PSMTXIdentity(_AC.toMtxPtr());
+=======
+        NebulaMtxRotRad(_AC.toMtxPtr(), 'Z', hipRot);
+    } else {
+        NebulaMtxIdentity(_AC.toMtxPtr());
+>>>>>>> upstream/main
     }
 
     _118 = hipRot;
@@ -1012,7 +1036,11 @@ void MarioAnimator::addRumblePower(f32 power, u32 time) {
 }
 
 void MarioAnimator::setUpperRotateY(f32 angle) {
+<<<<<<< HEAD
     PSMTXRotRad(_AC.toMtxPtr(), 'X', angle);
+=======
+    NebulaMtxRotRad(_AC.toMtxPtr(), 'X', angle);
+>>>>>>> upstream/main
     XanimeCore* core = mXanimePlayer->mCore;
     XjointTransform* jt = core->getJointTransform(static_cast< u16 >(MR::getJointIndex(mActor, "Spine2")));
     jt->_64 = _AC.toMtxPtr();
@@ -1147,7 +1175,11 @@ void MarioAnimator::switchMirrorMode() {
 
         Mtx invBase;
         MtxPtr base = mActor->getBaseMtx();
+<<<<<<< HEAD
         PSMTXInverse(base, invBase);
+=======
+        NebulaMtxInverse(base, invBase);
+>>>>>>> upstream/main
         MR::multMtx(_DC, invBase, MR::tmpMtxRotYRad(PI));
 
         base = mActor->getBaseMtx();

@@ -14,6 +14,7 @@ typedef s16 __OSInterrupt;
 typedef void (*__OSInterruptHandler)(__OSInterrupt, OSContext*);
 typedef u32 OSInterruptMask;
 
+<<<<<<< HEAD
 #define __OS_INTERRUPT_MEM_0 0
 #define __OS_INTERRUPT_MEM_1 1
 #define __OS_INTERRUPT_MEM_2 2
@@ -91,6 +92,8 @@ typedef u32 OSInterruptMask;
      OS_INTERRUPTMASK_PI_VI | OS_INTERRUPTMASK_PI_PE_TOKEN | OS_INTERRUPTMASK_PI_PE_FINISH | OS_INTERRUPTMASK_PI_DEBUG | OS_INTERRUPTMASK_PI_HSP |   \
      OS_INTERRUPTMASK_PI_ACR)
 
+=======
+>>>>>>> upstream/main
 BOOL OSDisableInterrupts(void);
 BOOL OSEnableInterrupts(void);
 BOOL OSRestoreInterrupts(BOOL) NO_INLINE;

@@ -54,6 +54,7 @@ void WPad::update() {
     _34 = true;
 }
 
+<<<<<<< HEAD
 #ifdef TARGET_PC
 void WPad::holdForMenu() {
     mButton->holdForMenu();
@@ -71,6 +72,8 @@ void WPad::holdForMenu() {
 }
 #endif
 
+=======
+>>>>>>> upstream/main
 WPadRumble* WPad::getRumbleInstance() const {
     return _18->getRumbleInstance();
 }

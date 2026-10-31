@@ -1,4 +1,8 @@
 #include "Game/AreaObj/BigBubbleGoalArea.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Ride/BigBubble.hpp"
 #include "Game/Scene/SceneFunction.hpp"
 #include "Game/Util/AreaObjUtil.hpp"
@@ -64,8 +68,13 @@ void BigBubbleGoalArea::draw() const {
     }
 
     TDDraw::setup(0, 1, 0);
+<<<<<<< HEAD
     GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
     GXSetCullMode(GX_CULL_BACK);
+=======
+    J3DNativeState::setZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
+    J3DNativeState::setCullMode(GX_CULL_BACK);
+>>>>>>> upstream/main
 
     f32 f = TWO_PI * (mMeterDisplayAmount / mMeterCapacity);
 

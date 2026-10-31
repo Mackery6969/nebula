@@ -1,4 +1,8 @@
 #include "Game/Screen/WipeFade.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/Util/DrawUtil.hpp"
 #include "Game/Util/LayoutUtil.hpp"
 #include "Game/Util/MathUtil.hpp"
@@ -35,8 +39,13 @@ void WipeFade::draw() const {
         alpha = 1.0f - alpha;
     }
 
+<<<<<<< HEAD
     GXSetColorUpdate(GX_TRUE);
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+=======
+    J3DNativeState::setColorUpdate(GX_TRUE);
+    J3DNativeState::setBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_NOOP);
+>>>>>>> upstream/main
 
     GXColor fillColor;
     fillColor.r = mFillColor.r;

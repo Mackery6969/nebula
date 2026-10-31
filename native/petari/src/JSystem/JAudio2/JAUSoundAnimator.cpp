@@ -156,7 +156,11 @@ bool JAUSoundAnimator::playsSound(const JAUSoundAnimationSound* pAnimation, cons
         if (mTime != pAnimation->mPlayTime) {
             return false;
         }
+<<<<<<< HEAD
     } else if (pAnimation->playsAtIntervals() && pAnimation->mPlayTime != mTime % pAnimation->mRepeatInterval) {
+=======
+    } else if (pAnimation->playsAtIntervals() && pAnimation->mPlayTime != (pAnimation->mRepeatInterval != 0 ? mTime % pAnimation->mRepeatInterval : mTime)) {
+>>>>>>> upstream/main
         return false;
     }
 

@@ -3,7 +3,11 @@
 The GX backend (`galaxy::gx`, the `galaxy_gx` static library) turns the GX command stream that
 the game writes into Direct3D 12 work. It implements what Super Mario Galaxy uses, not the whole
 GX hardware, and is not derived from Dolphin's video backend. Headers are in
+<<<<<<< HEAD
 `runtime/include/galaxy/gx/`, sources in `runtime/src/gx/`.
+=======
+`runtime/include/galaxy/render/`, sources in `runtime/src/render/`.
+>>>>>>> upstream/main
 
 ## Design decisions
 
@@ -13,7 +17,11 @@ GX hardware, and is not derived from Dolphin's video backend. Headers are in
 | Render targets | All draws go to an offscreen EFB (RGBA8 and D24S8, 640x528 times the internal scale). `GXCopyDisp` copies into an XFB texture; presentation scales the XFB the video interface selected | EFB-to-texture copies, which the game relies on, need a real EFB |
 | Depth format | `D24_UNORM_S8_UINT`, reversed | Matches the Wii's 24-bit Z; copy-clear values map exactly |
 | Shader compilation | Specialized pipelines compiled on worker threads, an uber shader while they compile, and a disk cache | No compile stalls on the render thread; no uber-shader cost in steady state |
+<<<<<<< HEAD
 | Texture invalidation | Explicit only (`GXInvalidateTexAll`, EFB copies to the same address) | Hashing texture contents costs too much on low-end CPUs |
+=======
+| Texture data | The game hands each image's bytes over where it loads or rewrites it (`texture_image`); the renderer decodes from its copy. Images not handed over yet decode from game memory, invalidated by the game's flushes | Records name images by identity; no hashing of texture contents on low-end CPUs |
+>>>>>>> upstream/main
 | Byte order | Checked big-endian reads for commands; SSSE3 byte-swap kernels for vertex arrays | Vertex data is the hot path |
 | Unknown input | Unknown opcodes, register writes, truncated payloads and unresolvable guest pointers raise `GxFatalError` and write a `.gxdump` | Unsupported behaviour must not be skipped silently |
 
@@ -27,12 +35,45 @@ The parser reads an opcode-dispatched, big-endian byte stream:
 | `0x08` | LOAD_CP_REG | u8 register, u32 value (vertex descriptors, attribute formats, array bases) |
 | `0x10` | LOAD_XF_REG | u16 count-1, u16 base, count u32 values (matrices, texgen, channels, projection) |
 | `0x20`, `0x28`, `0x30`, `0x38` | LOAD_INDX A-D | u16 index, u16 length and address: indexed matrix load from guest arrays (skinning) |
+<<<<<<< HEAD
 | `0x40` | CALL_DL | u32 guest address, u32 size: nested display list, depth up to 4 |
+=======
+>>>>>>> upstream/main
 | `0x48` | INVAL_VTX_CACHE | none |
 | `0x61` | LOAD_BP_REG | u32: register in bits 31-24, value in bits 23-0 |
 | `0x80`-`0xBF` | DRAW | primitive in bits 7-3, vertex format in bits 2-0; u16 count and the vertex data |
 
+<<<<<<< HEAD
 BP register numbers are named in `gx_bitfields.h` (`namespace bp`).
+=======
+BP register numbers are named in `gx_bitfields.h` (`namespace bp`). Display lists (`0x40`) are no longer sent: the game's
+geometry arrives as records, and the parser treats `0x40` as an unknown command.
+
+## Native record stream
+
+The game also hands the renderer typed records (`native/include/nebula_game_api.h`, host services), the native
+path that replaces the GX stream step by step. Each record carries the GX writer's position when it was made, so
+`run_stream` applies records and remaining GX commands in the order the game issued them.
+
+| Game side | Record | Host side |
+|---|---|---|
+| `J3DNativeShape` (J3D shapes) | `shape_array`, `shape_geometry` once; `shape_draw` with its matrices, current matrices and texgen overrides | `native_shapes` expands corners into resident vertices; `draw_record_shape` |
+| `J3DNativeMaterial` (J3D materials, per-instance differed parts) | `material` (`NebulaMaterial`: every block's values) | `native_material::apply` |
+| `NativeMesh` (geometry the game builds once: water road, ocean ring and pipe, spheres, electric rails) | the shape records, positions owned or the game's arrays by key | as shapes; owned positions keep the direct-vertex classification |
+| `J3DNativeDraw` (vertices sent as drawn: effects, shadows, 2D, text, particles, movie quad) | `immediate` (`NebulaImmediate`: primitive and typed vertex arrays) | `draw_record_immediate`, batched like direct draws |
+| `J3DStateList` (state lists built once: Mario's, CollisionShadow) and `J3DNativeState` (state set as the game draws: TEV, blend, depth, channels, texgens, counts, cull, lights, pixel format, fog) | `state` (`NebulaStateOp`: GX setter semantics; a partial setter changes only its fields of the live register) | `native_state::encode`, applied with the parser's side effects (copy, texture invalidation, TLUT load) |
+| `J3DNativeView` (projection, viewport, depth scale, scissor: kept game-side for read-back) | `state` | as above |
+| `J3DNativeState` copies (settings kept game-side) | `state` `NEBULA_STATE_COPY` | GXCopyDisp/GXCopyTex's sequence on the live Z, blend and pixel state, then `on_efb_copy` |
+| `J3DNativeShape::send*` (matrices the game loads) | a state-only `shape_draw` | `apply_record_matrices` |
+| RVLFaceLib (Miis) | its state through C entry points; its shapes as immediate vertices from its own index streams | as above |
+
+Values the game reads back or that decide whether a setter writes (cull mode, pixel format, copy settings, the view)
+are kept in the game's native layer. Each op's encoding was checked against the SDK function it replaces before the
+conversion (random arguments and register files; every register, XF and CP word, light memory and, for copies, the
+write sequence). Texture coordinate scales are not sent: the renderer derives each coordinate's scale from the
+texture sampled with it (`coordinate_scales`). What still goes through the GX stream: the frame's sync calls, Nebula's
+own markers, and the state GX's initialisation writes.
+>>>>>>> upstream/main
 
 ## Components
 
@@ -62,7 +103,11 @@ FIFO bytes --> FifoParser --(FifoSink callbacks)--> GxBackend
 | `texture_cache.h` | Texture format decoding, palettes, EFB copy aliases, invalidation |
 | `efb_copy.h` | XFB registry and copy geometry |
 | `renderer_d3d12.h` | Device, swap chain, EFB targets, upload rings, draw submission |
+<<<<<<< HEAD
 | `gx_backend.h` | `GxBackend`, which implements `FifoSink` |
+=======
+| `render_core.h` | `GxBackend`, which implements `FifoSink` |
+>>>>>>> upstream/main
 
 The register, parser, vertex and shader headers include no Windows or Direct3D headers, so their
 tests run as plain programs and replay `.gxdump` captures.
@@ -153,7 +198,11 @@ INTENSITY. Interpolated frames replay both (`ReplayKind::Bloom`).
 
 Enhanced lighting (`enhanced_lighting.h`, `shader_gen.cpp` `kEnhancedLighting`) shades lit and
 environment-mapped draws per pixel from the game's GX lights: authored falloff summed in linear
+<<<<<<< HEAD
 light, a sky hemisphere about the player's up (`GxVsConstants::sky_up`, from the 3D scene marker),
+=======
+light, a sky hemisphere about the player's up (`VertexConstants::sky_up`, from the 3D scene marker),
+>>>>>>> upstream/main
 the sky's Fresnel reflection, GGX highlights with specular antialiasing; the material table
 decides metal. Ambient occlusion (`ambient_occlusion.{h,cpp,hlsl}`) runs GTAO on the EFB depth
 when the first translucent phase begins and multiplies the opaque scene's colour; in-between
@@ -176,21 +225,37 @@ them with Phong tessellation (Boubekeur and Alexa 2008).
   and told from later contents of that memory by a 64-word fingerprint.
 - **Draws**: a perspective scene draw with indexed positions, no NBT, from a registered model, is
   drawn as patches (`kVsKeyCurved`; `primitive_topology` type 4 with the vertex output variant
+<<<<<<< HEAD
   in bits 4-5). The vertex loader writes each vertex's displacement normal (`GxVertexOut::bend`);
+=======
+  in bits 4-5). The vertex loader writes each vertex's displacement normal (`RenderVertex::bend`);
+>>>>>>> upstream/main
   the vertex shader turns it into eye space (the cofactor of the position matrix).
 - **Hull stage**: a patch wholly outside the view's side planes or behind the eye, at the most
   its curve can bulge, gets no triangles; otherwise each edge is cut into
   `clamp(sqrt(chord_px * angle / 2), 1, 16)` segments (fractional odd, symmetric per edge, so
   neighbours agree), where `angle` is between its ends' displacement normals: flat edges stay one
   segment.
+<<<<<<< HEAD
 - **Domain stage**: every field is blended barycentrically; the point moves three quarters of the
   way to the blend of its projections onto the corners' tangent planes (alpha 0.75). The move is
+=======
+- **Domain stage**: every field is blended barycentrically; the point moves half way to the
+  blend of its projections onto the corners' tangent planes (alpha 0.5). The move is
+>>>>>>> upstream/main
   applied to the clip position (with the frame's jitter), the per-pixel lighting position and
   both motion positions (the previous one by the same eye-space move), so DLSS, interpolation
   and ray tracing see the rounded surface.
 - Uber stand-ins draw the same patches as plain triangles (`flat_render_state`). Vulkan uses the
+<<<<<<< HEAD
   same HLSL stages through glslang (tessellation control and evaluation, lower-left domain
   origin), where the device has `tessellationShader`.
+=======
+  same HLSL stages through glslang (tessellation control and evaluation; the default upper-left
+  domain origin keeps `triangle_cw` wound as the patch, so patches cull as triangles; texture
+  coordinates as eight members, which glslang sizes by the patch), where the device has
+  `tessellationShader` and the driver builds them (not NVIDIA's: `DeviceQuirks::no_tessellation`).
+>>>>>>> upstream/main
 - `GALAXY_TEST_CURVED_AB=1` draws flat in frames that end in an odd present, for same-run A/B
   snapshots.
 

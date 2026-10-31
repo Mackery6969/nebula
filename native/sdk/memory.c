@@ -1,8 +1,13 @@
 /* The game's memory (docs/NATIVE_PORT.md, "Memory and the GPU's addresses"): one host reservation in the console's
+<<<<<<< HEAD
    physical layout, MEM1 at physical 0 and MEM2 at 0x10000000, each larger than the console's to allow for 8-byte
    pointers. OSCachedToPhysical/OSPhysicalToCached map arena pointers to those physical addresses; the game module's
    own image (static display lists and arrays the game gives GX) is a second window, in the unused span between MEM1
    and MEM2, so every address the GPU sees stays below 512 MB (a texture's base is 24 bits of address >> 5). */
+=======
+   layout, MEM1 at offset 0 and MEM2 at 0x10000000, each larger than the console's to allow for 8-byte pointers.
+   nebula_image_range gives the game module's image (the kernel's stack reports). */
+>>>>>>> upstream/main
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,8 +30,12 @@ enum {
     kMem2Physical = 0x10000000u,
     kMem2Size = 0x10000000u, /* 256 MB (the console's 64 MB plus room) */
     kReserveSize = 0x20000000u,
+<<<<<<< HEAD
     kImageWindow = 0x08000000u, /* the module image, between MEM1's end and MEM2 */
     kImageWindowSize = 0x08000000u,
+=======
+    kImageSpan = 0x08000000u, /* the image's extent where the loader does not report it */
+>>>>>>> upstream/main
     kStackPoolSize = 0x02000000u, /* 32 MB at the top of MEM2: game threads' native stacks */
 };
 
@@ -43,6 +52,7 @@ void nebula_image_range(uintptr_t* base, uintptr_t* size) {
     *size = sImageSize;
 }
 
+<<<<<<< HEAD
 void nebula_memory_regions(NebulaMemoryRegion* out, int* count) {
     out[0].physical = kMem1Physical;
     out[0].size = kMem1Size;
@@ -56,6 +66,8 @@ void nebula_memory_regions(NebulaMemoryRegion* out, int* count) {
     *count = 3;
 }
 
+=======
+>>>>>>> upstream/main
 static void find_image(void) {
 #if defined(_WIN32)
     const IMAGE_NT_HEADERS* nt = (const IMAGE_NT_HEADERS*)((const uint8_t*)&__ImageBase + __ImageBase.e_lfanew);
@@ -66,12 +78,17 @@ static void find_image(void) {
     if (dladdr((void*)&find_image, &info) != 0) {
         sImageBase = (uintptr_t)info.dli_fbase;
     }
+<<<<<<< HEAD
     /* The window's whole span; it only needs to cover the image. */
     sImageSize = kImageWindowSize;
 #endif
     if (sImageSize > kImageWindowSize) {
         nebula_fatal("the module image (%llu bytes) is larger than its physical window", (unsigned long long)sImageSize);
     }
+=======
+    sImageSize = kImageSpan;
+#endif
+>>>>>>> upstream/main
 }
 
 /* The arena is aligned to its own size, so an arena pointer's low 29 bits are its physical address: what the game
@@ -110,6 +127,7 @@ int nebula_memory_init(void) {
     return 1;
 }
 
+<<<<<<< HEAD
 uint32_t __NebulaToPhysical(const void* addr) {
     const uintptr_t a = (uintptr_t)addr;
     const uintptr_t arena = (uintptr_t)sArena;
@@ -149,6 +167,8 @@ void* __NebulaFromPhysical(uint32_t paddr) {
     return NULL;
 }
 
+=======
+>>>>>>> upstream/main
 /* The arena the OS hands out (OSGetMEM1ArenaLo etc.): MEM1 past low memory, the boot stack and the console's
    reserved first part; MEM2 below the stack pool. */
 void nebula_memory_arenas(void** mem1Lo, void** mem1Hi, void** mem2Lo, void** mem2Hi) {
@@ -176,15 +196,20 @@ void nebula_memory_guard(void* p, size_t size) {
 #endif
 }
 
+<<<<<<< HEAD
 /* Data cache maintenance. Natively no cache needs flushing, but the game flushes every range it writes for the GPU
    (display lists, vertex and texture data) before the GPU reads it, as the console requires: each flush tells the
    renderer to drop what it holds of that memory. Invalidation has nothing to do; DCZeroRange zeroes whole 32-byte
    blocks as the console's dcbz does. */
+=======
+/* The game rewrote memory an image may have been handed over from (NebulaRender::memoryRewritten, DMA copies). */
+>>>>>>> upstream/main
 void nebula_gpu_coherent(const void* addr, uint32_t nBytes) {
     const NebulaHostServices* host = nebula_host();
     if (nBytes == 0 || host == NULL || host->gpu_coherent == NULL) {
         return;
     }
+<<<<<<< HEAD
     const uintptr_t a = (uintptr_t)addr;
     if (a - (uintptr_t)sArena < kReserveSize) {
         host->gpu_coherent(host->user, (uint32_t)(a - (uintptr_t)sArena), nBytes);
@@ -218,4 +243,7 @@ void LCEnable(void) {
 void LCDisable(void) {
 }
 void PPCSync(void) {
+=======
+    host->gpu_coherent(host->user, addr, nBytes);
+>>>>>>> upstream/main
 }

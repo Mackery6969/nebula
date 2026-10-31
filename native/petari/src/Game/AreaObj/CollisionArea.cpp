@@ -336,7 +336,11 @@ void AreaPolygon::setSurface(s32 surface) {
         static_cast< AreaFormCube* >(mForm)->calcWorldMtx(&matrix);
         static_cast< AreaFormCube* >(mForm)->calcWorldPos(&mPosition);
     } else {
+<<<<<<< HEAD
         PSMTXCopy(_128, matrix);
+=======
+        NebulaMtxCopy(_128, matrix);
+>>>>>>> upstream/main
         MR::extractMtxTrans(_128, &mPosition);
     }
 

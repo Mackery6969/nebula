@@ -13,11 +13,14 @@ public:
 
     /// @brief Updates the state of the Wii Remote's buttons.
     void update();
+<<<<<<< HEAD
 #ifdef TARGET_PC
     /// @brief Releases every button for the rest of the frame (WPad::holdForMenu). A button held on stays released
     /// until pressed again.
     void holdForMenu();
 #endif
+=======
+>>>>>>> upstream/main
 
     /// @brief Determines if up on the +Control Pad is pressed.
     /// @return `true` if up is pressed, `false` otherwise.

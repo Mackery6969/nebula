@@ -54,8 +54,17 @@ public:
         /* 0x04 */ u32 mCurrBrightness;
         /* 0x08 */ TVec2f mObjCenter;
         /* 0x10 */ TVec2f mCenter;
+<<<<<<< HEAD
     };
 
+=======
+        u32 mReadback;  // the lens flare's readback channel it measures in
+    };
+
+    // The lens flare's two readback channels (its BrightCamInfo indices 0 and 1).
+    static const u32 cReadbackChannel = 3;
+
+>>>>>>> upstream/main
     BrightObjBase();
 
     virtual ~BrightObjBase();

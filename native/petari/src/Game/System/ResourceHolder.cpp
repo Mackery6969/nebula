@@ -1,4 +1,8 @@
 #include "Game/System/ResourceHolder.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Animation/MaterialAnmBuffer.hpp"
 #include "Game/Util/MemoryUtil.hpp"
 #include "Game/Util/ModelUtil.hpp"
@@ -9,9 +13,18 @@
 #include <JSystem/J3DGraphLoader/J3DModelLoader.hpp>
 #include <cstdio>
 #include <cstring>
+<<<<<<< HEAD
 #include <revolution.h>
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+#ifdef TARGET_PC
+#include "Game/Util/MotionSignal.hpp"
+#include "JSystem/J3DGraphBase/J3DNativeShape.hpp"
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -206,9 +219,15 @@ ResFileInfo* ResourceHolder::createAndRegisterObject(const char* pName, void* pD
     }
 
     if (strstr(pName, ".bmt") != nullptr) {
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
         ResFileInfo* ret = mBmtResTable->add(pName, J3DModelLoaderDataBase::loadMaterialTable(pData), true);
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).lock();
+        ResFileInfo* ret = mBmtResTable->add(pName, J3DModelLoaderDataBase::loadMaterialTable(pData), true);
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
         return ret;
     }
 
@@ -221,15 +240,29 @@ ResFileInfo* ResourceHolder::createAndRegisterObject(const char* pName, void* pD
     }
 
     if (strstr(pName, ".bdl") != nullptr) {
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
         J3DModelData* modelData = J3DModelLoaderDataBase::loadBinaryDisplayList(pData, J3DMLF_Material_UseIndirect | J3DMLF_UseUniqueMaterials);
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).lock();
+        J3DModelData* modelData = J3DModelLoaderDataBase::loadBinaryDisplayList(pData, J3DMLF_Material_UseIndirect | J3DMLF_UseUniqueMaterials);
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
         MR::initEnvelopeAndEnvMapOrProjMapModelData(modelData);
         if (MR::isUseFur(modelData) || MR::strcasecmp(pName, "MarioShadow.bdl") == 0) {
             MR::downFracVtx(modelData);
         }
+<<<<<<< HEAD
 #ifdef TARGET_PC
         MotionSignal::modelResource(modelData, pName);
+=======
+        // Lists for its materials, made from their MAT3 data as a .bmd model's are (J3DModelLoader skips the file's).
+        modelData->newSharedDisplayList(0);
+#ifdef TARGET_PC
+        MotionSignal::modelResource(modelData, pName);
+        J3DNativeShape::registerModel(modelData);
+>>>>>>> upstream/main
 #endif
         return mModelResTable->add(pName, modelData, true);
     }
@@ -240,6 +273,10 @@ ResFileInfo* ResourceHolder::createAndRegisterObject(const char* pName, void* pD
         modelData->newSharedDisplayList(0);
 #ifdef TARGET_PC
         MotionSignal::modelResource(modelData, pName);
+<<<<<<< HEAD
+=======
+        J3DNativeShape::registerModel(modelData);
+>>>>>>> upstream/main
 #endif
         return mModelResTable->add(pName, modelData, true);
     }
@@ -256,9 +293,15 @@ void ResourceHolder::backupInitMaterialData(const J3DModelData* pModelData) {
         for (u32 mtxIdx = 0; mtxIdx < 8; mtxIdx++) {
             J3DTexMtx* texMtx = material->getTexGenBlock()->getTexMtx(mtxIdx);
             if (texMtx != nullptr) {
+<<<<<<< HEAD
                 PSMTX44Copy(texMtx->getTexMtxInfo().mEffectMtx, mBackupMaterialData[matIdx * 8 + mtxIdx]);
             } else {
                 PSMTX44Identity(mBackupMaterialData[matIdx * 8 + mtxIdx]);
+=======
+                NebulaMtx44Copy(texMtx->getTexMtxInfo().mEffectMtx, mBackupMaterialData[matIdx * 8 + mtxIdx]);
+            } else {
+                NebulaMtx44Identity(mBackupMaterialData[matIdx * 8 + mtxIdx]);
+>>>>>>> upstream/main
             }
         }
     }

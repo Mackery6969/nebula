@@ -1,4 +1,10 @@
 #include "Game/MapObj/ShockWaveGenerator.hpp"
+<<<<<<< HEAD
+=======
+#ifdef TARGET_PC
+#include "Game/System/NebulaRegion.hpp"
+#endif
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorCameraInfo.hpp"
 #include "Game/LiveActor/HitSensor.hpp"
 #include "Game/LiveActor/Nerve.hpp"
@@ -58,7 +64,15 @@ void ShockWaveGenerator::exeWait() {
         MR::startBtk(this, "SpinHit");
         MR::setBrkFrameAndStop(this, 0.0f);
         MR::setBtkFrameAndStop(this, 0.0f);
+<<<<<<< HEAD
 #if (VERSION == RMGP01 || VERSION == RMGK01)
+=======
+#ifdef TARGET_PC
+        if (NebulaRegion::isPal()) {
+            MR::validateClipping(this);
+        }
+#elif (VERSION == RMGP01 || VERSION == RMGK01)
+>>>>>>> upstream/main
         MR::validateClipping(this);
 #endif
     }
@@ -126,14 +140,32 @@ bool ShockWaveGenerator::isPlayerInCameraStartRange() const {
 }
 
 void ShockWaveGenerator::startShockWave() {
+<<<<<<< HEAD
 #if (VERSION == RMGP01 || VERSION == RMGK01)
+=======
+#ifdef TARGET_PC
+    if (NebulaRegion::isPal()) {
+        MR::invalidateClipping(this);
+    }
+#elif (VERSION == RMGP01 || VERSION == RMGK01)
+>>>>>>> upstream/main
     MR::invalidateClipping(this);
 #endif
 
     MR::startSound(this, "SE_OJ_SHOCK_WAVE_GENERATE");
     if (mCameraInfo != nullptr) {
         if (isPlayerInCameraStartRange()) {
+<<<<<<< HEAD
 #if (VERSION == RMGJ01 || VERSION == RMGE01)
+=======
+#ifdef TARGET_PC
+            if (!NebulaRegion::isPal()) {
+                MR::requestStartDemoWithoutCinemaFrame(this, ::cDemoCameraName, GET_NERVE(ShockWaveGenerator, ShockWaveGeneratorNrvDemoEcho), nullptr);
+            } else if (MR::tryStartDemoWithoutCinemaFrame(this, ::cDemoCameraName)) {
+                setNerve(GET_NERVE(ShockWaveGenerator, ShockWaveGeneratorNrvDemoEcho));
+            }
+#elif (VERSION == RMGJ01 || VERSION == RMGE01)
+>>>>>>> upstream/main
             MR::requestStartDemoWithoutCinemaFrame(this, ::cDemoCameraName, GET_NERVE(ShockWaveGenerator, ShockWaveGeneratorNrvDemoEcho), nullptr);
 #else
             if (MR::tryStartDemoWithoutCinemaFrame(this, ::cDemoCameraName)) {

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "JSystem/JAudio2/JASGadget.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "JSystem/JAudio2/JASGlobal.hpp"
 #include "JSystem/JKernel/JKRThread.hpp"
 
@@ -16,7 +20,10 @@ struct JASAudioThread : public JKRThread, public JASGlobalInstance< JASAudioThre
     void stop();
     virtual void* run();
     static void DMACallback();
+<<<<<<< HEAD
     static void DSPCallback(void*);
+=======
+>>>>>>> upstream/main
 
     static JASAudioThread* getThreadPointer() {
         return getInstance();
@@ -28,7 +35,11 @@ struct JASAudioThread : public JKRThread, public JASGlobalInstance< JASAudioThre
         snIntCount = intCount;
     }
 
+<<<<<<< HEAD
     /* 0x7C */ OSThreadQueue sThreadQueue;
+=======
+    /* 0x7C */ NebulaThreadQueue sThreadQueue;
+>>>>>>> upstream/main
     /* 0x84 */ bool sbPauseFlag;  // type unsure
 
     static volatile int snIntCount;  // type unsure

@@ -4,7 +4,13 @@
 #include "JSystem/J3DGraphBase/J3DPacket.hpp"
 #include "JSystem/J3DGraphBase/J3DShape.hpp"
 #include "JSystem/J3DGraphBase/J3DStruct.hpp"
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 class J3DShape;
 class J3DJoint;
@@ -44,6 +50,7 @@ public:
     static u32 calcSizeIndBlock(int);
     static u32 calcSizePEBlock(u32, u32);
     void initialize();
+<<<<<<< HEAD
     u32 countDLSize();
     void makeDisplayList_private(J3DDisplayListObj*);
     void setCurrentMtx();
@@ -51,6 +58,12 @@ public:
     void copy(J3DMaterial*);
     s32 newSharedDisplayList(u32);
     s32 newSingleSharedDisplayList(u32);
+=======
+    void setCurrentMtx();
+    void calcCurrentMtx();
+    void copy(J3DMaterial*);
+    s32 newSharedDisplayList();
+>>>>>>> upstream/main
 
     inline J3DMaterialAnm* getMaterialAnm() {
 #ifdef TARGET_PC

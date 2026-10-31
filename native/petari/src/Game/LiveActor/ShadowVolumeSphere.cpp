@@ -1,4 +1,8 @@
 #include "Game/LiveActor/ShadowVolumeSphere.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/Util/CameraUtil.hpp"
 #include <revolution/gx.h>
@@ -50,6 +54,11 @@ void ShadowVolumeSphere::loadModelDrawMtx() const {
     controller->getProjectionPos(&position);
     mtx.setTrans(position);
 
+<<<<<<< HEAD
     PSMTXConcat(MR::getCameraViewMtx(), mtx, mtx);
     GXLoadPosMtxImm(mtx, 0);
+=======
+    NebulaMtxConcat(MR::getCameraViewMtx(), mtx, mtx);
+    J3DNativeShape::sendPosition(mtx, 0);
+>>>>>>> upstream/main
 }

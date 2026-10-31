@@ -1,5 +1,8 @@
 #include "JSystem/JKernel/JKRDvdArchive.hpp"
+<<<<<<< HEAD
 #include "JSystem/JKernel/JKRAramArchive.hpp"
+=======
+>>>>>>> upstream/main
 #include "JSystem/JKernel/JKRArchive.hpp"
 #include "JSystem/JKernel/JKRCompression.hpp"
 #include "JSystem/JKernel/JKRDecomp.hpp"
@@ -12,6 +15,20 @@
 #include <cstring>
 #include <mem.h>
 
+<<<<<<< HEAD
+=======
+namespace {
+    // A file entry's compression from its attribute flags: none, SZP (0x80 clear) or SZS.
+    int JKRConvertAttrToCompressionType(int arg) {
+        if ((arg & 0x4) == 0) {
+            return 0;
+        }
+
+        return ((arg & 0x80) != 0) + 1;
+    }
+}  // namespace
+
+>>>>>>> upstream/main
 JKRDvdArchive::JKRDvdArchive(s32 entryNum, EMountDirection mountDir) : JKRArchive(entryNum, MOUNT_MODE_DVD) {
     mMountDir = mountDir;
 
@@ -76,7 +93,10 @@ bool JKRDvdArchive::open(s32 entryNum) {
     } else {
         JKRDvdRipper::loadToMainRAM(entryNum, reinterpret_cast< u8* >(header), EXPAND_SWITCH_UNKNOWN1, 32, nullptr,
                                     JKRDvdRipper::ALLOC_DIRECTION_FORWARD, 0, &_5C, nullptr);
+<<<<<<< HEAD
         DCInvalidateRange(header, 32);
+=======
+>>>>>>> upstream/main
 
         int alignment = mMountDir == MOUNT_DIRECTION_1 ? 32 : -32;
         mInfoBlock = reinterpret_cast< RarcInfoBlock* >(JKRHeap::alloc(header->mFileDataOffset, alignment, mHeap));
@@ -85,7 +105,10 @@ bool JKRDvdArchive::open(s32 entryNum) {
         } else {
             JKRDvdRipper::loadToMainRAM(entryNum, reinterpret_cast< u8* >(mInfoBlock), EXPAND_SWITCH_UNKNOWN1, header->mFileDataOffset, nullptr,
                                         JKRDvdRipper::ALLOC_DIRECTION_FORWARD, 32, nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(mInfoBlock, header->mFileDataOffset);
+=======
+>>>>>>> upstream/main
 
             mDirs = reinterpret_cast< SDIDirEntry* >(reinterpret_cast< u8* >(mInfoBlock) + mInfoBlock->mDirOffset);
             mFiles = reinterpret_cast< SDIFileEntry* >(reinterpret_cast< u8* >(mInfoBlock) + mInfoBlock->mFileOffset);
@@ -219,7 +242,10 @@ u32 JKRDvdArchive::getExpandedResSize(const void* pArg) const {
     JKRDvdRipper::loadToMainRAM(mEntryNum, alignedPointer, EXPAND_SWITCH_UNKNOWN2, 0x20, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD,
                                 _64 + fileEntry->mDataOffset, nullptr, nullptr);
 
+<<<<<<< HEAD
     DCInvalidateRange(alignedPointer, 0x20);
+=======
+>>>>>>> upstream/main
 
     u32 size2 = JKRDecompExpandSize(alignedPointer);
     const_cast< JKRDvdArchive* >(this)->setExpandSize(fileEntry, size2);
@@ -242,7 +268,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
 
             JKRDvdRipper::loadToMainRAM(entryNum, pDestination, EXPAND_SWITCH_UNKNOWN0, readSize, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD,
                                         offset, nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(pDestination, readSize);
+=======
+>>>>>>> upstream/main
             return readSize;
         }
 
@@ -253,7 +282,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
 
             JKRDvdRipper::loadToMainRAM(entryNum, header, EXPAND_SWITCH_UNKNOWN2, 0x20, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD, offset,
                                         nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(header, 0x20);
+=======
+>>>>>>> upstream/main
 
             u32 readSize = JKRDecompExpandSize(header);
             u32 alignedExpandedSize = ALIGN_NEXT(readSize, 32);
@@ -263,7 +295,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
 
             JKRDvdRipper::loadToMainRAM(entryNum, pDestination, EXPAND_SWITCH_UNKNOWN1, alignedExpandedSize, nullptr,
                                         JKRDvdRipper::ALLOC_DIRECTION_FORWARD, offset, nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(pDestination, alignedExpandedSize);
+=======
+>>>>>>> upstream/main
 
             return readSize;
         }
@@ -276,7 +311,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
 
         JKRDvdRipper::loadToMainRAM(entryNum, pDestination, EXPAND_SWITCH_UNKNOWN1, sourceSize, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD,
                                     offset, nullptr, nullptr);
+<<<<<<< HEAD
         DCInvalidateRange(pDestination, sourceSize);
+=======
+>>>>>>> upstream/main
         return sourceSize;
     }
     case 1: {
@@ -306,7 +344,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
             buffer = static_cast< u8* >(pHeap->alloc(alignedSourceSize, 0x20, pHeap));
             JKRDvdRipper::loadToMainRAM(entryNum, buffer, EXPAND_SWITCH_UNKNOWN0, alignedSourceSize, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD,
                                         offset, nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(buffer, alignedSourceSize);
+=======
+>>>>>>> upstream/main
 
             *pOutBuffer = buffer;
             return alignedSourceSize;
@@ -319,14 +360,20 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
 
             JKRDvdRipper::loadToMainRAM(entryNum, header, EXPAND_SWITCH_UNKNOWN2, 0x20, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD, offset,
                                         nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(header, 0x20);
+=======
+>>>>>>> upstream/main
 
             expandedSize = JKRDecompExpandSize(header);
             buffer = static_cast< u8* >(pHeap->alloc(expandedSize, 0x20, pHeap));
 
             JKRDvdRipper::loadToMainRAM(entryNum, buffer, EXPAND_SWITCH_UNKNOWN1, expandedSize, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD,
                                         offset, nullptr, nullptr);
+<<<<<<< HEAD
             DCInvalidateRange(buffer, expandedSize);
+=======
+>>>>>>> upstream/main
             *pOutBuffer = buffer;
             return expandedSize;
         }
@@ -336,7 +383,10 @@ u32 JKRDvdArchive::fetchResource_subroutine(s32 entryNum, u32 offset, u32 source
         buffer = static_cast< u8* >(pHeap->alloc(alignedSourceSize, 0x20, pHeap));
         JKRDvdRipper::loadToMainRAM(entryNum, buffer, EXPAND_SWITCH_UNKNOWN1, sourceSize, nullptr, JKRDvdRipper::ALLOC_DIRECTION_FORWARD, offset,
                                     nullptr, nullptr);
+<<<<<<< HEAD
         DCInvalidateRange(buffer, sourceSize);
+=======
+>>>>>>> upstream/main
         *pOutBuffer = buffer;
         return alignedSourceSize;
     }

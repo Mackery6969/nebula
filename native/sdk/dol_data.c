@@ -138,7 +138,11 @@ const void* __NebulaDolTable(u32 kind, const void* compiled) {
         if (same) {
             return compiled;
         }
+<<<<<<< HEAD
         nebula_log("main.dol: Grand Galaxy %u's comet schedule differs from the game's (a mod's): main.dol's used\n", (unsigned)kind + 1);
+=======
+        nebula_log("main.dol: Grand Galaxy %u's comet schedule differs from the game's (a mod's): main.dol's used\n", kind + 1);
+>>>>>>> upstream/main
         return tables[kind];
     }
     if (kind == NEBULA_DOL_EVENT_FLAGS) {
@@ -205,7 +209,11 @@ void nebula_load_dol_data(void) {
         }
         if (!found) {
             nebula_fatal("%s (0x%08X, 0x%X bytes) is not in the disc's main.dol: not the game version this build is for",
+<<<<<<< HEAD
                          kTables[t].name, (unsigned)want, (unsigned)kTables[t].size);
+=======
+                         kTables[t].name, want, kTables[t].size);
+>>>>>>> upstream/main
         }
     }
 }

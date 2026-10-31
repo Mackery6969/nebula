@@ -1,13 +1,25 @@
 #include "Game/Speaker/SpkSpeakerCtrl.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Speaker/SpkMixingBuffer.hpp"
 #include "Game/Speaker/SpkSound.hpp"
 #include <JSystem/JAudio2/JASCriticalSection.hpp>
 #include <mem.h>
+<<<<<<< HEAD
 #include <revolution/os/OSAlarm.h>
 #include <revolution/wenc.h>
 #include <revolution/wpad.h>
 
 OSAlarm sSpeakerAlarm;
+=======
+#include "Game/System/NebulaKernel.hpp"
+#include <revolution/wenc.h>
+#include <revolution/wpad.h>
+
+NebulaAlarm sSpeakerAlarm;
+>>>>>>> upstream/main
 SpeakerInfo sSpeakerInfo[WPAD_MAX_CONTROLLERS];
 SpkSoundHandle sAdjustSoundHandle[WPAD_MAX_CONTROLLERS];
 SpkMixingBuffer* sMixingBuffer;
@@ -19,9 +31,15 @@ namespace {
 };  // namespace
 
 void SpkSpeakerCtrl::setMixingBuffer(SpkMixingBuffer* pMixingBuffer) {
+<<<<<<< HEAD
     BOOL status = OSDisableInterrupts();
     sMixingBuffer = pMixingBuffer;
     OSRestoreInterrupts(status);
+=======
+    BOOL status = NebulaKernel::disableInterrupts();
+    sMixingBuffer = pMixingBuffer;
+    NebulaKernel::restoreInterrupts(status);
+>>>>>>> upstream/main
 }
 
 void SpkSpeakerCtrl::setup() {
@@ -39,8 +57,13 @@ void SpkSpeakerCtrl::setup() {
         memset(&sSpeakerInfo[i].mWENCInfo, 0, sizeof(WENCInfo));
     }
 
+<<<<<<< HEAD
     OSCreateAlarm(&sSpeakerAlarm);
     OSSetPeriodicAlarm(&sSpeakerAlarm, OSGetTime(), OSNanosecondsToTicks(6666667), SpkSpeakerCtrl::updateSpeaker);
+=======
+    sSpeakerAlarm.init();
+    sSpeakerAlarm.setPeriodic(NebulaKernel::time(), NebulaKernel::ticksFromNanoseconds(6666667), SpkSpeakerCtrl::updateSpeaker);
+>>>>>>> upstream/main
 }
 
 void SpkSpeakerCtrl::connect(s32 padChannel) {
@@ -188,7 +211,11 @@ void SpkSpeakerCtrl::continuousUsingProcess(s32 padChannel) {
     }
 }
 
+<<<<<<< HEAD
 void SpkSpeakerCtrl::updateSpeaker(OSAlarm*, OSContext*) {
+=======
+void SpkSpeakerCtrl::updateSpeaker(NebulaAlarm*) {
+>>>>>>> upstream/main
     for (s32 i = 0; i < WPAD_MAX_CONTROLLERS; i++) {
         if (sMixingBuffer == nullptr) {
             continue;
@@ -208,10 +235,17 @@ void SpkSpeakerCtrl::updateSpeaker(OSAlarm*, OSContext*) {
             u32 flags = WENC_FLAG_USER_INFO;
 
             if (inf.mIsPlaying && sMixingBuffer != nullptr) {
+<<<<<<< HEAD
                 BOOL en = OSDisableInterrupts();
 
                 if (!WPADCanSendStreamData(i)) {
                     OSRestoreInterrupts(en);
+=======
+                BOOL en = NebulaKernel::disableInterrupts();
+
+                if (!WPADCanSendStreamData(i)) {
+                    NebulaKernel::restoreInterrupts(en);
+>>>>>>> upstream/main
                     continue;
                 }
 
@@ -225,7 +259,11 @@ void SpkSpeakerCtrl::updateSpeaker(OSAlarm*, OSContext*) {
                 WENCGetEncodeData(&inf.mWENCInfo, flags, samples, 40, data);
                 WPADSendStreamData(i, data, 20);
 
+<<<<<<< HEAD
                 OSRestoreInterrupts(en);
+=======
+                NebulaKernel::restoreInterrupts(en);
+>>>>>>> upstream/main
             }
             continue;
         }

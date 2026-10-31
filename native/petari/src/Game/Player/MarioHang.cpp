@@ -516,7 +516,11 @@ void MarioHang::recordWallPolygon(const Triangle* pTriangle) {
     mWallSensor = pTriangle->mSensor;
     TPos3f matrix;
     MR::makeMtxWithoutScale(&matrix, *_20->getBaseInvMtx());
+<<<<<<< HEAD
     PSMTXMultVecSR(matrix.toMtxPtr(), _20->getNormal(0), &_28);
+=======
+    NebulaMtxMultVecSR(matrix.toMtxPtr(), _20->getNormal(0), &_28);
+>>>>>>> upstream/main
     _34 = *_20->getNormal(0);
 }
 
@@ -524,7 +528,11 @@ void MarioHang::recordHangNorm(const TVec3f& rNormal) {
     _34 = rNormal;
     TPos3f matrix;
     MR::makeMtxWithoutScale(&matrix, *_20->getBaseInvMtx());
+<<<<<<< HEAD
     PSMTXMultVecSR(matrix.toMtxPtr(), &rNormal, &_28);
+=======
+    NebulaMtxMultVecSR(matrix.toMtxPtr(), &rNormal, &_28);
+>>>>>>> upstream/main
 }
 
 void MarioHang::forceDrop() {
@@ -574,7 +582,11 @@ bool MarioHang::update() {
     matrix.identity();
     MR::makeMtxWithoutScale(&matrix, *_20->getBaseMtx());
     TVec3f normal;
+<<<<<<< HEAD
     PSMTXMultVecSR(matrix.toMtxPtr(), &_28, &normal);
+=======
+    NebulaMtxMultVecSR(matrix.toMtxPtr(), &_28, &normal);
+>>>>>>> upstream/main
     getPlayer()->setFrontVecKeepUp(-normal);
     _34 = normal;
     _14++;

@@ -1,4 +1,9 @@
 #include "nw4r/lyt/animation.h"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+>>>>>>> upstream/main
 #ifdef TARGET_PC
 #include "Game/Util/MotionSignal.hpp"
 #endif
@@ -201,6 +206,7 @@ namespace nw4r {
                 scale.y *= rInfo.GetLocationAdjustScale().y;
             }
 
+<<<<<<< HEAD
             PSMTXScale(mtx2, scale.x, scale.y, 1.0f);
 
             PSMTXRotRad(rotateMtx, 'x', NW4R_MATH_DEG_TO_RAD(mRotate.x));
@@ -213,6 +219,20 @@ namespace nw4r {
             PSMTXConcat(rotateMtx, mtx2, mtx1);
 
             PSMTXTransApply(mtx1, mMtx, mTranslate.x, mTranslate.y, mTranslate.z);
+=======
+            NebulaMtxScale(mtx2, scale.x, scale.y, 1.0f);
+
+            NebulaMtxRotRad(rotateMtx, 'x', NW4R_MATH_DEG_TO_RAD(mRotate.x));
+            NebulaMtxConcat(rotateMtx, mtx2, mtx1);
+
+            NebulaMtxRotRad(rotateMtx, 'y', NW4R_MATH_DEG_TO_RAD(mRotate.y));
+            NebulaMtxConcat(rotateMtx, mtx1, mtx2);
+
+            NebulaMtxRotRad(rotateMtx, 'z', NW4R_MATH_DEG_TO_RAD(mRotate.z));
+            NebulaMtxConcat(rotateMtx, mtx2, mtx1);
+
+            NebulaMtxTransApply(mtx1, mMtx, mTranslate.x, mTranslate.y, mTranslate.z);
+>>>>>>> upstream/main
 
             if (mpParent != NULL) {
                 math::MTX34Mult(&mGlbMtx, &mpParent->mGlbMtx, &mMtx);
@@ -368,8 +388,13 @@ namespace nw4r {
                 pMtx = &mGlbMtx;
             }
 
+<<<<<<< HEAD
             GXLoadPosMtxImm(*pMtx, GX_PNMTX0);
             GXSetCurrentMtx(GX_PNMTX0);
+=======
+            J3DNativeShape::sendPosition(*pMtx, GX_PNMTX0);
+            J3DNativeState::setCurrentMtx(GX_PNMTX0);
+>>>>>>> upstream/main
         }
 
         const math::VEC2 Pane::GetVtxPos() const {

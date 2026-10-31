@@ -25,9 +25,15 @@
 #include "Game/Util/SystemUtil.hpp"
 #include <JSystem/JKernel/JKRSolidHeap.hpp>
 #include <cstdio>
+<<<<<<< HEAD
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
 #include "Game/System/DrawSyncManager.hpp"
+=======
+#include "Game/System/NebulaHost.hpp"
+
+#if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+>>>>>>> upstream/main
 #endif
 
 namespace {
@@ -143,7 +149,10 @@ void GameSystemSceneController::destroyScene() {
     bool stopSound = isStopSound();
 
 #if (VERSION == RMGJ01 || VERSION == RMGE01 || VERSION == RMGP01)
+<<<<<<< HEAD
     DrawSyncManager::sInstance->clearSceneCallback();
+=======
+>>>>>>> upstream/main
     delete mScene;
     mScene = nullptr;
 #else
@@ -254,7 +263,11 @@ void GameSystemSceneController::drawScene() {
     if (pScene != nullptr) {
 #ifdef TARGET_PC
         // Black borders around a fitted picture unless the scene says otherwise (LogoScene's strap screen).
+<<<<<<< HEAD
         __NebulaSceneSurround(0.0f);
+=======
+        NebulaHost::sceneSurround(0.0f);
+>>>>>>> upstream/main
 #endif
         pScene->draw();
         mPlayTimerScene->draw();

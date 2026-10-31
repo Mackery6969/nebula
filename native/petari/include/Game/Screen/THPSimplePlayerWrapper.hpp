@@ -2,6 +2,10 @@
 
 #include "Game/System/NerveExecutor.hpp"
 #include <revolution/thp.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaDisc.hpp"
+>>>>>>> upstream/main
 
 class THPSimplePlayerWrapper;
 
@@ -31,11 +35,15 @@ public:
     bool getVideoInfo(THPVideoInfo*) const;
     f32 getFrameRate() const;
     s32 getTotalFrame() const;
+<<<<<<< HEAD
 #ifdef TARGET_PC
     bool videoDecode(u8*, u32);  // with the component's size (__NebulaTHPVideoDecode)
 #else
     bool videoDecode(u8*);
 #endif
+=======
+    bool videoDecode(u8*, u32);  // with the component's size: THP's entropy data is not byte-stuffed
+>>>>>>> upstream/main
     void readFrameAsync();
     void checkPrefetch();
     void dvdCallBack(s32);
@@ -73,7 +81,12 @@ public:
     /* 0x009 */ u8 _9;
     /* 0x00C */ u32 _C;
     /* 0x010 */ u32 _10;
+<<<<<<< HEAD
     /* 0x014 */ DVDFileInfo mFileInfo;
+=======
+    NebulaDisc::File mFile;
+    NebulaDisc::Request mRequest;
+>>>>>>> upstream/main
     /* 0x050 */ THPHeader mHeader;
     /* 0x080 */ THPFrameCompInfo mFrameComp;
     /* 0x094 */ THPVideoInfo mVideoInfo;
@@ -116,7 +129,12 @@ public:
     /* 0x009 */ u8 _9;
     /* 0x00C */ u32 _C;
     /* 0x010 */ u32 _10;
+<<<<<<< HEAD
     /* 0x014 */ DVDFileInfo mFileInfo;
+=======
+    NebulaDisc::File mFile;
+    NebulaDisc::Request mRequest;
+>>>>>>> upstream/main
     /* 0x050 */ THPHeader mHeader;
     /* 0x080 */ THPFrameCompInfo mFrameComp;
     /* 0x094 */ THPVideoInfo mVideoInfo;

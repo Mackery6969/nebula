@@ -1,5 +1,9 @@
 #ifdef TARGET_PC
 #include "Game/Util/GameLightSignal.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+>>>>>>> upstream/main
 #include "Game/LiveActor/ActorLightCtrl.hpp"
 #include "Game/LiveActor/LiveActor.hpp"
 #include "Game/Map/LightDataHolder.hpp"
@@ -10,6 +14,10 @@
 #include "Game/Util/LiveActorUtil.hpp"
 #include <nebula_game_api.h>
 #include <revolution/os.h>
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaHost.hpp"
+>>>>>>> upstream/main
 
 namespace {
     // An actor that asked for the point light, with its last request (NEBULA_LIGHT_POINT_REQUEST values).
@@ -54,7 +62,11 @@ namespace {
             v[5] = lights[i]->mPos.z;
             v[6] = lights[i]->mIsFollowCamera ? 1.0f : 0.0f;
         }
+<<<<<<< HEAD
         __NebulaGameLight(kind, 0, values);
+=======
+        NebulaHost::gameLight(kind, 0, values);
+>>>>>>> upstream/main
     }
 
     // A LightInfo that does not follow the camera and sits this far out (20000 units) lights its area as the sun does.
@@ -64,7 +76,11 @@ namespace {
             return;
         }
         const f32 values[6] = {p.x, p.y, p.z, channel(rInfo.mColor.r), channel(rInfo.mColor.g), channel(rInfo.mColor.b)};
+<<<<<<< HEAD
         __NebulaGameLight(NEBULA_LIGHT_WORLD, 0, values);
+=======
+        NebulaHost::gameLight(NEBULA_LIGHT_WORLD, 0, values);
+>>>>>>> upstream/main
     }
 };  // namespace
 
@@ -91,7 +107,11 @@ namespace GameLightSignal {
         if (sStarCore != nullptr && !MR::isDead(sStarCore)) {
             const TVec3f& p = sStarCore->mPosition;
             const f32 values[4] = {p.x, p.y, p.z, sStarCore->mScale.x};
+<<<<<<< HEAD
             __NebulaGameLight(NEBULA_LIGHT_STAR_CORE, 0, values);
+=======
+            NebulaHost::gameLight(NEBULA_LIGHT_STAR_CORE, 0, values);
+>>>>>>> upstream/main
         }
         for (u32 i = 0; i < sRequesterCount;) {
             Requester& r = sRequesters[i];
@@ -103,7 +123,11 @@ namespace GameLightSignal {
                 sRequesters[i] = sRequesters[--sRequesterCount];
                 continue;
             }
+<<<<<<< HEAD
             __NebulaGameLight(NEBULA_LIGHT_POINT_REQUEST, __NebulaObjectId(r.mActor), r.mValues);
+=======
+            NebulaHost::gameLight(NEBULA_LIGHT_POINT_REQUEST, NebulaHost::objectId(r.mActor), r.mValues);
+>>>>>>> upstream/main
             i++;
         }
     }
@@ -118,7 +142,11 @@ namespace GameLightSignal {
             return;
         }
         const f32 values[4] = {x / distance, y / distance, z / distance, distance};
+<<<<<<< HEAD
         __NebulaGameLight(NEBULA_LIGHT_SUN, 0, values);
+=======
+        NebulaHost::gameLight(NEBULA_LIGHT_SUN, 0, values);
+>>>>>>> upstream/main
     }
 
     void registerStarCore(const LiveActor* pCore) {
@@ -142,16 +170,27 @@ namespace GameLightSignal {
         const Vec& p = pInfo->mPos;
         const GXColor& c = pInfo->mColor;
         const f32 values[7] = {p.x, p.y, p.z, channel(c.r), channel(c.g), channel(c.b), half};
+<<<<<<< HEAD
         __NebulaGameLight(NEBULA_LIGHT_POINT, __NebulaObjectId(pInfo), values);
     }
 
     // LightPointCtrl blends its light with GXInitLightDistAttn(15, brightness, GX_DA_GENTLE): it halves at
+=======
+        NebulaHost::gameLight(NEBULA_LIGHT_POINT, NebulaHost::objectId(pInfo), values);
+    }
+
+    // LightPointCtrl blends its light with J3DNativeState::initLightDistAttn(15, brightness, GX_DA_GENTLE): it halves at
+>>>>>>> upstream/main
     // 15 sqrt(b / (1 - b)).
     void pointRequest(const LiveActor* pActor, const TVec3f& rPosition, Color8 color, f32 brightness) {
         const f32 b = brightness >= 0.95f ? (brightness <= 0.999999f ? brightness : 0.999999f) : 0.95f;
         const f32 values[7] = {rPosition.x, rPosition.y,  rPosition.z, channel(color.r), channel(color.g), channel(color.b),
                                15.0f * __builtin_sqrtf(b / (1.0f - b))};
+<<<<<<< HEAD
         __NebulaGameLight(NEBULA_LIGHT_POINT_REQUEST, __NebulaObjectId(pActor), values);
+=======
+        NebulaHost::gameLight(NEBULA_LIGHT_POINT_REQUEST, NebulaHost::objectId(pActor), values);
+>>>>>>> upstream/main
         Requester* slot = nullptr;
         for (u32 i = 0; i < sRequesterCount && slot == nullptr; i++) {
             if (sRequesters[i].mActor == pActor) {

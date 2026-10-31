@@ -62,8 +62,11 @@ void LuigiMailDirector::sendMail() {
             mFoundMessageNum--;
         }
     }
+<<<<<<< HEAD
 #elif (VERSION == RMGK01)
     sendMail(calcDelayHours());
+=======
+>>>>>>> upstream/main
 #endif
 }
 
@@ -151,6 +154,7 @@ void LuigiMailDirector::prepareMessage() {
     ReplaceTagFunction::ReplaceArgs(mFoundMessage, mFoundMessageLength, MR::getGameMessageDirect(::cFoundMessageID), GameDataFunction::getUserName());
 }
 
+<<<<<<< HEAD
 #if (VERSION == RMGK01)
 u8 LuigiMailDirector::calcDelayHours() const {
     OSCalendarTime td;
@@ -166,3 +170,5 @@ u8 LuigiMailDirector::calcDelayHours() const {
     }
 }
 #endif
+=======
+>>>>>>> upstream/main

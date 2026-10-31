@@ -10,11 +10,17 @@ namespace MR {
 
     /// @brief Checks if the progressive mode is enabled.
     /// @return `true` if progressive mode is enabled, `false` otherwise.
+<<<<<<< HEAD
     bool isProgressiveModeOn();
 
     /// @brief Checks if the EuRgb60 mode is enabled.
     /// @return `true` if EuRgb60 mode is enabled, `false` otherwise.
     bool isEuRgb60ModeOn();
+=======
+
+    /// @brief Checks if the EuRgb60 mode is enabled.
+    /// @return `true` if EuRgb60 mode is enabled, `false` otherwise.
+>>>>>>> upstream/main
 
     /// @brief Checks if the aspect ratio flag is set to 16:9.
     /// @return `true` if the aspect ratio flag is 16:9, `false` otherwise.
@@ -22,7 +28,10 @@ namespace MR {
 
     /// @brief Returns the required size for an external frame buffer.
     /// @return The size in bytes.
+<<<<<<< HEAD
     u32 getRequiredExternalFrameBufferSize();
+=======
+>>>>>>> upstream/main
 };  // namespace MR
 
 class RenderModeObj {

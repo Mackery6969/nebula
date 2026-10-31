@@ -223,7 +223,10 @@ u32 J3DModelLoader::calcSizeShape(const J3DShapeBlock* block, u32 flags) {
         size = 0x10;
     }
     size += count * sizeof(J3DShape*);
+<<<<<<< HEAD
     size += factory.calcSizeVcdVatCmdBuffer(count);
+=======
+>>>>>>> upstream/main
     for (J3DModelHierarchy* hierarchy = mpModelHierarchy; hierarchy->mType != 0; hierarchy++) {
         if (hierarchy->mType == 0x12) {
             size += factory.calcSize(hierarchy->mValue, flags);

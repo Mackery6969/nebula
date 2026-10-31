@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+<<<<<<< HEAD
 #include "revolution.h"
 #include <cstdlib>
 #include "revolution/nwc24/NWC24Config.h"
@@ -20,6 +21,17 @@ extern "C" {
 #include "revolution/nwc24/NWC24System.h"
 #include "revolution/nwc24/NWC24Types.h"
 #include "revolution/nwc24/NWC24Utils.h"
+=======
+#include "revolution/gx.h"
+#include "revolution/mtx.h"
+#include "revolution/os.h"
+#include <cstdlib>
+#include "revolution/nwc24/NWC24Config.h"
+#include "revolution/nwc24/NWC24Manage.h"
+#include "revolution/nwc24/NWC24MsgCommit.h"
+#include "revolution/nwc24/NWC24MsgObj.h"
+#include "revolution/nwc24/NWC24Types.h"
+>>>>>>> upstream/main
 
 #ifdef __cplusplus
 }

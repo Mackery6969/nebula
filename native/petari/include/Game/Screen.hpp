@@ -55,7 +55,10 @@
 #include "Game/Screen/ImageEffectSystemHolder.hpp"
 #include "Game/Screen/InformationMessage.hpp"
 #include "Game/Screen/InformationObserver.hpp"
+<<<<<<< HEAD
 #include "Game/Screen/IsbnManager.hpp"
+=======
+>>>>>>> upstream/main
 #include "Game/Screen/LayoutActor.hpp"
 #include "Game/Screen/LayoutActorFlag.hpp"
 #include "Game/Screen/LayoutManager.hpp"

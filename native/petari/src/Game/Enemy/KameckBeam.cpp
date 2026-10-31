@@ -87,7 +87,11 @@ void KameckBeam::kill() {
 
 void KameckBeam::calcAnim() {
     if (mFollowMtx != nullptr) {
+<<<<<<< HEAD
         PSMTXMultVec(mFollowMtx, mWandLocalPosition, mPosition);
+=======
+        NebulaMtxMultVec(mFollowMtx, mWandLocalPosition, mPosition);
+>>>>>>> upstream/main
     }
 }
 

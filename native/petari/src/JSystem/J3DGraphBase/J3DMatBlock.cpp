@@ -1,5 +1,8 @@
 #include "JSystem/J3DGraphBase/J3DMatBlock.hpp"
+<<<<<<< HEAD
 #include "JSystem/J3DGraphBase/J3DGD.hpp"
+=======
+>>>>>>> upstream/main
 #include "JSystem/J3DGraphBase/J3DPacket.hpp"
 #include "JSystem/J3DGraphBase/J3DStruct.hpp"
 #include "JSystem/J3DGraphBase/J3DSys.hpp"
@@ -8,6 +11,7 @@
 
 #ifdef TARGET_PC
 // The XF colour word, r in the top byte (the console read the four bytes as a u32).
+<<<<<<< HEAD
 static inline u32 colorWord(const GXColor& color) {
     return (u32)color.r << 24 | (u32)color.g << 16 | (u32)color.b << 8 | color.a;
 }
@@ -44,6 +48,15 @@ inline void loadTevColor(u32 reg, const J3DGXColorS10& color) {
 inline void loadTevKColor(u32 reg, const J3DGXColor& color) {
     J3DGDSetTevKColor(GXTevKColorID(reg), color);
 }
+=======
+
+
+#else
+
+#endif
+
+
+>>>>>>> upstream/main
 
 void J3DColorBlockLightOff::initialize() {
     mColorChanNum = 0;
@@ -263,6 +276,7 @@ void J3DPEBlockFull::initialize() {
     mFogOffset = 0;
 }
 
+<<<<<<< HEAD
 s32 J3DColorBlockLightOff::countDLSize() {
     return 34;
 }
@@ -330,6 +344,24 @@ s32 J3DPEBlockFogOff::countDLSize() {
 s32 J3DPEBlockFull::countDLSize() {
     return 85;
 }
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> upstream/main
 
 static u32 SizeOfLoadMatColors = 13;
 
@@ -339,6 +371,7 @@ static u32 SizeOfLoadColorChans = 21;
 
 static u32 SizeOfJ3DColorBlockLightOffLoad = SizeOfLoadMatColors + SizeOfLoadColorChans;
 
+<<<<<<< HEAD
 void J3DColorBlockLightOff::load() {
     GDOverflowCheck(SizeOfJ3DColorBlockLightOffLoad);
     mMatColorOffset = GDGetCurrOffset();
@@ -1446,6 +1479,96 @@ void J3DPEBlockFull::diff(u32 diffFlags) {
         diffBlend();
     }
 }
+=======
+
+static u32 SizeOfJ3DColorBlockAmbientOnLoad = SizeOfLoadMatColors + SizeOfLoadAmbColors + SizeOfLoadColorChans;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> upstream/main
 
 void J3DColorBlockLightOff::reset(J3DColorBlock* pBlock) {
     mColorChanNum = pBlock->getColorChanNum();
@@ -1506,7 +1629,10 @@ void J3DTexGenBlockPatched::reset(J3DTexGenBlock* pBlock) {
         if (pBlock->getTexMtx(i) != NULL) {
             if (mTexMtx[i] != NULL) {
                 memcpy(mTexMtx[i], pBlock->getTexMtx(i), sizeof(*mTexMtx[i]));
+<<<<<<< HEAD
                 DCStoreRange(mTexMtx[i], sizeof(*mTexMtx[i]));
+=======
+>>>>>>> upstream/main
             }
         }
     }
@@ -1523,7 +1649,10 @@ void J3DTexGenBlock4::reset(J3DTexGenBlock* pBlock) {
         if (pBlock->getTexMtx(i) != NULL) {
             if (mTexMtx[i] != NULL) {
                 memcpy(mTexMtx[i], pBlock->getTexMtx(i), sizeof(*mTexMtx[i]));
+<<<<<<< HEAD
                 DCStoreRange(mTexMtx[i], sizeof(*mTexMtx[i]));
+=======
+>>>>>>> upstream/main
             }
         }
     }
@@ -1542,7 +1671,10 @@ void J3DTexGenBlockBasic::reset(J3DTexGenBlock* pBlock) {
         if (pBlock->getTexMtx(i) != NULL) {
             if (mTexMtx[i] != NULL) {
                 memcpy(mTexMtx[i], pBlock->getTexMtx(i), sizeof(*mTexMtx[i]));
+<<<<<<< HEAD
                 DCStoreRange(mTexMtx[i], sizeof(*mTexMtx[i]));
+=======
+>>>>>>> upstream/main
             }
         }
     }
@@ -1746,9 +1878,15 @@ void J3DTexGenBlockPatched::calc(const Mtx modelMtx) {
             case J3DTexMtxMode_Envmap:
 
                 if (j3dSys.checkFlag(8) == 0) {
+<<<<<<< HEAD
                     PSMTXConcat(j3dSys.getViewMtx(), modelMtx, viewMtx);
                 } else {
                     PSMTXCopy(j3dSys.getViewMtx(), viewMtx);
+=======
+                    NebulaMtxConcat(j3dSys.getViewMtx(), modelMtx, viewMtx);
+                } else {
+                    NebulaMtxCopy(j3dSys.getViewMtx(), viewMtx);
+>>>>>>> upstream/main
                 }
                 viewMtx[0][3] = 0.0f;
                 viewMtx[1][3] = 0.0f;
@@ -1766,7 +1904,11 @@ void J3DTexGenBlockPatched::calc(const Mtx modelMtx) {
             case J3DTexMtxMode_ViewProjmapBasic:
             case J3DTexMtxMode_ViewProjmap:
                 if (j3dSys.checkFlag(4) == 0) {
+<<<<<<< HEAD
                     PSMTXConcat(j3dSys.getViewMtx(), modelMtx, viewMtx);
+=======
+                    NebulaMtxConcat(j3dSys.getViewMtx(), modelMtx, viewMtx);
+>>>>>>> upstream/main
                     mTexMtx[i]->calc(viewMtx);
                 } else {
                     mTexMtx[i]->calc(j3dSys.getViewMtx());
@@ -1776,7 +1918,11 @@ void J3DTexGenBlockPatched::calc(const Mtx modelMtx) {
             case J3DTexMtxMode_EnvmapOldEffectMtx:
             case J3DTexMtxMode_EnvmapEffectMtx:
                 if (j3dSys.checkFlag(8) == 0) {
+<<<<<<< HEAD
                     PSMTXCopy(modelMtx, viewMtx);
+=======
+                    NebulaMtxCopy(modelMtx, viewMtx);
+>>>>>>> upstream/main
                     viewMtx[0][3] = 0.0f;
                     viewMtx[1][3] = 0.0f;
                     viewMtx[2][3] = 0.0f;
@@ -1822,7 +1968,11 @@ void J3DTexGenBlockPatched::calcWithoutViewMtx(const Mtx modelMtx) {
             case J3DTexMtxMode_EnvmapOldEffectMtx:
             case J3DTexMtxMode_EnvmapEffectMtx:
                 if (j3dSys.checkFlag(8) == 0) {
+<<<<<<< HEAD
                     PSMTXCopy(modelMtx, mtx);
+=======
+                    NebulaMtxCopy(modelMtx, mtx);
+>>>>>>> upstream/main
                     mtx[0][3] = 0.0f;
                     mtx[1][3] = 0.0f;
                     mtx[2][3] = 0.0f;
@@ -1855,7 +2005,11 @@ void J3DTexGenBlockPatched::calcPostTexMtx(const Mtx modelMtx) {
                 break;
             case J3DTexMtxMode_ProjmapBasic:
             case J3DTexMtxMode_Projmap:
+<<<<<<< HEAD
                 PSMTXInverse(j3dSys.getViewMtx(), mtx1);
+=======
+                NebulaMtxInverse(j3dSys.getViewMtx(), mtx1);
+>>>>>>> upstream/main
                 mTexCoord[i].setTexMtxReg(0);
                 mTexMtx[i]->calcPostTexMtx(mtx1);
                 break;
@@ -1867,7 +2021,11 @@ void J3DTexGenBlockPatched::calcPostTexMtx(const Mtx modelMtx) {
             case J3DTexMtxMode_Unknown5:
             case J3DTexMtxMode_EnvmapOldEffectMtx:
             case J3DTexMtxMode_EnvmapEffectMtx:
+<<<<<<< HEAD
                 PSMTXInverse(j3dSys.getViewMtx(), mtx2);
+=======
+                NebulaMtxInverse(j3dSys.getViewMtx(), mtx2);
+>>>>>>> upstream/main
                 mtx2[0][3] = 0.0f;
                 mtx2[1][3] = 0.0f;
                 mtx2[2][3] = 0.0f;

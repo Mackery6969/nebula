@@ -1,4 +1,10 @@
 #include "Game/MapObj/ElectricRailHolder.hpp"
+<<<<<<< HEAD
+=======
+#include <JSystem/J3DGraphBase/J3DNativeState.hpp>
+#include <JSystem/J3DGraphBase/J3DNativeShape.hpp>
+#include "JSystem/J3DGraphBase/J3DNativeMaterial.hpp"
+>>>>>>> upstream/main
 #include "Game/LiveActor/HitSensor.hpp"
 #include "Game/LiveActor/ModelObj.hpp"
 #include "Game/MapObj/ElectricRailMoving.hpp"
@@ -78,10 +84,17 @@ void ElectricRailHolder::draw() const {
         }
 
         J3DMatPacket* pPacket = pItem->mMatPacket;
+<<<<<<< HEAD
         pItem->mMatPacket->callDL();
 
         if (pPacket->mpShapePacket->mpDisplayListObj != nullptr) {
             pPacket->mpShapePacket->mpDisplayListObj->callDL();
+=======
+        J3DNativeMaterial::send(pItem->mMatPacket->getMaterial(), pItem->mMatPacket->mpTexture, pItem->mMatPacket->getDisplayListObj());
+
+        if (pPacket->mpShapePacket->mpDisplayListObj != nullptr) {
+            J3DNativeMaterial::sendDiffered(pPacket->mpShapePacket->mpDisplayListObj);
+>>>>>>> upstream/main
         }
 
         pItem->mHost->draw();
@@ -136,6 +149,7 @@ void ElectricRailHolder::control() {
 }
 
 void ElectricRailHolder::initDraw() const {
+<<<<<<< HEAD
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_CLR_RGBA, GX_RGBA6, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_CLR_RGBA, GX_RGBA6, 0);
     GXClearVtxDesc();
@@ -144,6 +158,11 @@ void ElectricRailHolder::initDraw() const {
     GXLoadPosMtxImm(MR::getCameraViewMtx(), GX_PNMTX0);
     GXSetCurrentMtx(GX_PNMTX0);
     GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 30, GX_FALSE, 125);
+=======
+    J3DNativeShape::sendPosition(MR::getCameraViewMtx(), GX_PNMTX0);
+    J3DNativeState::setCurrentMtx(GX_PNMTX0);
+    J3DNativeState::setTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 30, GX_FALSE, 125);
+>>>>>>> upstream/main
 }
 
 void ElectricRailFunction::registerRail(const LiveActor* pActor, ElectricRailType railType) {

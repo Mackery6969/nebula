@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 #include <revolution.h>
+=======
+#include <revolution/gx.h>
+#include <revolution/mtx.h>
+#include <revolution/os.h>
+>>>>>>> upstream/main
 
 #include "nw4r/lyt/animation.h"
 #include "nw4r/lyt/common.h"
@@ -158,7 +164,11 @@ namespace nw4r {
                         const u16 fileIdx = GetStepCurveValue(frame, keys, pAnimTarget->keyNum);
 
                         if (tpls[fileIdx]) {
+<<<<<<< HEAD
                             pMaterial->GetTexturePtr(pAnimTarget->id)->ReplaceImage(static_cast< TPLPalettePtr >(tpls[fileIdx]));
+=======
+                            pMaterial->GetTexturePtr(pAnimTarget->id)->ReplaceImage(tpls[fileIdx]);
+>>>>>>> upstream/main
                         }
                     }
                 }

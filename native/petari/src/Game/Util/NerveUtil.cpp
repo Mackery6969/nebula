@@ -28,7 +28,11 @@ namespace MR {
     }
 
     bool isIntervalStep(const NerveExecutor* pExecutor, s32 step) {
+<<<<<<< HEAD
         return pExecutor->getNerveStep() % step == 0;
+=======
+        return (step != 0 ? pExecutor->getNerveStep() % step : pExecutor->getNerveStep()) == 0;
+>>>>>>> upstream/main
     }
 
     bool isNewNerve(const NerveExecutor* pExecutor) {

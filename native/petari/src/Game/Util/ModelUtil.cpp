@@ -1,4 +1,8 @@
 #include "Game/Util/ModelUtil.hpp"
+<<<<<<< HEAD
+=======
+#include "Game/System/NebulaKernel.hpp"
+>>>>>>> upstream/main
 #include "Game/Animation/XanimePlayer.hpp"
 #include "Game/Animation/XanimeResource.hpp"
 #include "Game/LiveActor/LiveActor.hpp"
@@ -12,6 +16,7 @@
 
 namespace {
     inline bool isUseLightChanNo(J3DMaterial* pMaterial, int channel, int index) {
+<<<<<<< HEAD
         u16 channelID = pMaterial->mColorBlock->getColorChan(channel)->mColorChanID;
         if (((channelID >> 1) & 0x1) == 0) {
             return false;
@@ -19,6 +24,14 @@ namespace {
 
         u8 useLightChan = (channelID >> 2 & 0xF | channelID >> 7 & 0xF0);
         return useLightChan & (1 << index);
+=======
+        const J3DColorChan* pChan = pMaterial->mColorBlock->getColorChan(channel);
+        if (pChan->getEnable() == 0) {
+            return false;
+        }
+
+        return pChan->getLightMask() & (1 << index);
+>>>>>>> upstream/main
     }
 };  // namespace
 
@@ -76,9 +89,15 @@ namespace MR {
     }
 
     void calcJ3DModel(LiveActor* pActor) {
+<<<<<<< HEAD
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
         getJ3DModel(pActor)->calc();
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).lock();
+        getJ3DModel(pActor)->calc();
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
     }
 
     J3DModelData* getJ3DModelData(const LiveActor* pActor) {
@@ -178,7 +197,11 @@ namespace MR {
 
     void calcFogStartEnd(TVec3f vec, f32 f1, f32* pFogStart, f32* pFogEnd) {
         Vec multVec;
+<<<<<<< HEAD
         PSMTXMultVec(j3dSys.mViewMtx, vec, &multVec);
+=======
+        NebulaMtxMultVec(j3dSys.mViewMtx, vec, &multVec);
+>>>>>>> upstream/main
 
         f32 flt = -multVec.z;
         if (f1 == 0.0f) {
@@ -296,6 +319,7 @@ namespace MR {
         return false;
     }
 
+<<<<<<< HEAD
     inline void setShapeVcdVatCmdSelf(J3DShape* pShape) {
         void* vcdVatCmd = pShape->getVcdVatCmd();
         u8* arr = new (0x20) u8[J3DShape::kVcdVatDLSize];
@@ -305,6 +329,10 @@ namespace MR {
 
     void initEnvelopeAndEnvMapOrProjMapModelData(J3DModelData* pModelData) {
         bool doSort = false;
+=======
+    void initEnvelopeAndEnvMapOrProjMapModelData(J3DModelData* pModelData) {
+
+>>>>>>> upstream/main
 
         for (int i = 0; i < pModelData->getMaterialNum(); i++) {
             J3DMaterial* material = pModelData->getMaterialNodePointer(i);
@@ -319,8 +347,11 @@ namespace MR {
             }
 
             J3DShape* shape = material->getShape();
+<<<<<<< HEAD
             setShapeVcdVatCmdSelf(shape);
             doSort = true;
+=======
+>>>>>>> upstream/main
             if (isUseEnvMap) {
                 shape->setTexMtxLoadType(0x2000);
             }
@@ -337,10 +368,13 @@ namespace MR {
                 }
             }
         }
+<<<<<<< HEAD
 
         if (doSort) {
             pModelData->mShapeTable.sortVcdVatCmd();
         }
+=======
+>>>>>>> upstream/main
     }
 
     ResTIMG* getResTIMG(const LiveActor* pActor, int idx) {
@@ -510,11 +544,14 @@ namespace MR {
             vertexPosArray[i] >>= 1;
         }
 
+<<<<<<< HEAD
         DCStoreRange(vertexPosArray, vtxNum * 6);
 
         for (u32 i = 0; i < pModelData->getShapeTable()->getShapeNum(); i++) {
             pModelData->getShapeTable()->getShapeNodePointer(i)->makeVcdVatCmd();
         }
+=======
+>>>>>>> upstream/main
     }
 
     void calcModelBoundingBox(TBox3f* pOut, const LiveActor* pActor) {
@@ -577,6 +614,7 @@ namespace MR {
             MR::isEqualString(pChar, "BoneMario") || MR::isEqualString(pChar, "BoneLuigi") || MR::isEqualString(pChar, "SearchLightCone") ||
             strstr(pChar, "FlexibleSphere") || strstr(pChar, "FlexibleSandPlanetParts") || MR::isEqualString(pChar, "ScaleDownRelayPlanet") ||
             MR::isEqualString(pChar, "GhostMario") || MR::isEqualString(pChar, "GhostLuigi") || MR::isEqualString(pChar, "Koura")) {
+<<<<<<< HEAD
             OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
             newModel = static_cast< J3DModel* >(new J3DModelX(modelData, mdlFlag, 1));
             OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
@@ -584,24 +622,49 @@ namespace MR {
             OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
             newModel = new J3DModel(modelData, mdlFlag, 1);
             OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+            (MR::MutexHolder< 0 >::sMutex).lock();
+            newModel = static_cast< J3DModel* >(new J3DModelX(modelData, mdlFlag, 1));
+            (MR::MutexHolder< 0 >::sMutex).unlock();
+        } else {
+            (MR::MutexHolder< 0 >::sMutex).lock();
+            newModel = new J3DModel(modelData, mdlFlag, 1);
+            (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
         }
 
         initJ3DShapePacketUserData(newModel);
         Mtx mtx;
+<<<<<<< HEAD
         PSMTXIdentity(mtx);
         newModel->unlock();
         OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
         PSMTXCopy(mtx, j3dSys.mViewMtx);
+=======
+        NebulaMtxIdentity(mtx);
+        newModel->unlock();
+        (MR::MutexHolder< 0 >::sMutex).lock();
+        NebulaMtxCopy(mtx, j3dSys.mViewMtx);
+>>>>>>> upstream/main
         newModel->calc();
         newModel->calcMaterial();
         newModel->viewCalc();
         newModel->viewCalc();
+<<<<<<< HEAD
         OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
         if (modelData->getModelDataType() == 0) {
             ProhibitSchedulerAndInterrupts prohibit(false);
             OSLockMutex(&MR::MutexHolder< 0 >::sMutex);
             newModel->makeDL();
             OSUnlockMutex(&MR::MutexHolder< 0 >::sMutex);
+=======
+        (MR::MutexHolder< 0 >::sMutex).unlock();
+        if (modelData->getModelDataType() == 0) {
+            ProhibitSchedulerAndInterrupts prohibit(false);
+            (MR::MutexHolder< 0 >::sMutex).lock();
+            newModel->makeDL();
+            (MR::MutexHolder< 0 >::sMutex).unlock();
+>>>>>>> upstream/main
         }
 
         newModel->lock();

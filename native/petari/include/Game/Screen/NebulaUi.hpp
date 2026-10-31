@@ -34,6 +34,12 @@ namespace NebulaUi {
     const f32 cCapTop = 0.19f;
     const f32 cBaseline = 0.71f;
     const f32 cGlyphDrop = 0.04f;
+<<<<<<< HEAD
+=======
+    // The keyboard's icons are drawn centred in their cells: one centred 0.07 of its size below the line's middle sits
+    // as the game's own icons do in its text, between the capitals' middle and the small letters' (measured at 1080p).
+    const f32 cKeyGlyphDrop = 0.07f;
+>>>>>>> upstream/main
 
     // The game's window with a ring (SysInfoWindowMini's): its corner texture is 24 across, so a window drawn at
     // scale k has corners of radius 24k.
@@ -133,7 +139,11 @@ namespace NebulaUi {
     void setInfluencedAlphaRecursive(Pane* pPane, s32 depth);
     // Nebula's screens with small text ask the host for the 2D layer at the window's resolution while they show (the
     // HUD otherwise follows the internal scale, and small letters lose strokes): one bit each.
+<<<<<<< HEAD
     enum { SharpBoard = 1, SharpSettings = 2, SharpPlayerList = 4 };
+=======
+    enum { SharpBoard = 1, SharpSettings = 2, SharpPrepare = 4 };
+>>>>>>> upstream/main
     void setSharp(u32 screen, bool shown);
     // The screen in screen units (LayoutAspect's canvas, its width made square) and the root's horizontal scale.
     void readScreen(f32* pScaleX, f32* pWidth, f32* pHeight);

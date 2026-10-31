@@ -13,8 +13,11 @@ namespace {
 namespace nw4r {
     namespace lyt {
         void LytInit() {
+<<<<<<< HEAD
             OSRegisterVersion(NW4R_LYT_Version_);
             OSInitFastCast();
+=======
+>>>>>>> upstream/main
         }
     };  // namespace lyt
 };  // namespace nw4r
